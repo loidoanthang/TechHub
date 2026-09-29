@@ -3,6 +3,7 @@ package com.techhub.security.oauth2;
 import com.techhub.model.entity.RefreshToken;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.Role;
+import com.techhub.model.enums.UserStatus;
 import com.techhub.repository.UserRepository;
 import com.techhub.service.JwtService;
 import com.techhub.service.RefreshTokenService;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -47,16 +50,25 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         User user = userRepository.findByEmail(email).orElseGet(() -> createGoogleUser(email, givenName, familyName, name));
 
+        if (user.getStatus() == UserStatus.BANNED) {
+            sendErrorRedirect(request, response, "ACCOUNT_BANNED");
+            return;
+        }
+        if (user.getStatus() == UserStatus.SUSPENDED) {
+            sendErrorRedirect(request, response, "ACCOUNT_SUSPENDED");
+            return;
+        }
+        if (user.getStatus() == UserStatus.DELETED) {
+            sendErrorRedirect(request, response, "ACCOUNT_DELETED");
+            return;
+        }
         if (!user.isAccountNonLocked()) {
-            String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
-                    .queryParam("error", "ACCOUNT_LOCKED")
-                    .build().toUriString();
-            getRedirectStrategy().sendRedirect(request, response, targetUrl);
+            sendErrorRedirect(request, response, "ACCOUNT_LOCKED");
             return;
         }
 
-        if (!user.isEnabled()) {
-            user.setEnabled(true);
+        if (!user.isEmailVerified()) {
+            user.setEmailVerified(true);
             userRepository.save(user);
         }
 
@@ -78,13 +90,20 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             newUser.setFirstName(givenName != null ? givenName : (name != null ? name : ""));
             newUser.setLastName(familyName != null ? familyName : "");
             newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
-            newUser.setEnabled(true);
-            newUser.setRole(Role.BUYER);
+            newUser.setEmailVerified(true);
+            newUser.setRoles(new HashSet<>(Set.of(Role.BUYER)));
             return userRepository.save(newUser);
         } catch (DataIntegrityViolationException ex) {
             log.warn("Concurrent Google registration detected for email: {}", email);
             return userRepository.findByEmail(email)
                     .orElseThrow(() -> new IllegalStateException("User could not be found after duplicate key violation: " + email));
         }
+    }
+
+    private void sendErrorRedirect(HttpServletRequest request, HttpServletResponse response, String errorCode) throws IOException {
+        String targetUrl = UriComponentsBuilder.fromUriString(redirectUri)
+                .queryParam("error", errorCode)
+                .build().toUriString();
+        getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }

@@ -1,5 +1,8 @@
 package com.techhub.config;
 
+import com.techhub.config.properties.CorsProperties;
+import com.techhub.config.properties.JwtProperties;
+import com.techhub.config.properties.TokenProperties;
 import com.techhub.security.JwtAccessDeniedHandler;
 import com.techhub.security.JwtAuthenticationEntryPoint;
 import com.techhub.security.JwtAuthenticationFilter;
@@ -15,8 +18,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -100,6 +101,8 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(List.of("*"));
 
         configuration.setAllowCredentials(true);
+
+        configuration.setMaxAge(3600L); // Trình duyệt cache kết quả pre-flight OPTIONS trong 1 giờ
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 

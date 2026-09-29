@@ -1,7 +1,8 @@
 package com.techhub.service.impl;
 
-import com.techhub.config.JwtProperties;
+import com.techhub.config.properties.JwtProperties;
 import com.techhub.model.entity.User;
+import com.techhub.model.enums.Role;
 import com.techhub.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
 
 @Service
@@ -20,8 +22,6 @@ import java.util.function.Function;
 public class JwtServiceImpl implements JwtService {
 
     private final JwtProperties jwtProperties;
-
-
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.getSecret()));
@@ -37,9 +37,13 @@ public class JwtServiceImpl implements JwtService {
         Date expiry = new Date(
                 now.getTime() + expiration
         );
+        List<String> roles = user.getRoles() != null
+                ? user.getRoles().stream().map(Role::name).toList()
+                : List.of();
+
         return Jwts.builder()
                 .subject(user.getEmail())
-                .claim("role", user.getRole().name())
+                .claim("roles", roles)
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(getSigningKey())

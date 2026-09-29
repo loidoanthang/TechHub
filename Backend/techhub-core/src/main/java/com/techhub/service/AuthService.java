@@ -8,7 +8,7 @@ public interface AuthService {
 
     void register(RegisterRequest request);
 
-    void verifyEmail(String email, String token);
+    void verifyEmail(VerifyEmailRequest request);
 
     LoginResponse login(LoginRequest request);
 
@@ -23,4 +23,6 @@ public interface AuthService {
     void changePassword(ChangePasswordRequest request);
 
     void resendVerificationEmail(ResendVerificationRequest request);
+
+    void deleteAccount(DeleteAccountRequest request);
 }

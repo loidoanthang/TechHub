@@ -1,6 +1,6 @@
 package com.techhub.service.impl;
 
-import com.techhub.config.JwtProperties;
+import com.techhub.config.properties.JwtProperties;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.model.entity.RefreshToken;
@@ -36,8 +36,8 @@ public class RefreshTokenServiceImpl
 
     @Override
     public RefreshToken getByToken(String token) {
-
-        return repository.findByToken(token).orElseThrow(() -> new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
+        String cleanToken = token != null ? token.trim() : null;
+        return repository.findByToken(cleanToken).orElseThrow(() -> new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_FOUND));
     }
 
     @Override
@@ -47,16 +47,13 @@ public class RefreshTokenServiceImpl
     }
 
     @Override
-    @Transactional
     public RefreshToken validate(String tokenValue) {
-        RefreshToken refreshToken =
-                getByToken(tokenValue);
+        RefreshToken refreshToken = getByToken(tokenValue);
         if (refreshToken.isRevoked()) {
             revokeAll(refreshToken.getUser());
             throw new BusinessException(ErrorCode.REFRESH_TOKEN_REVOKED);
         }
         if (refreshToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            repository.delete(refreshToken);
             throw new BusinessException(ErrorCode.REFRESH_TOKEN_EXPIRED);
         }
         return refreshToken;
@@ -73,7 +70,8 @@ public class RefreshTokenServiceImpl
     @Override
     @Transactional
     public void revokeByToken(String token) {
-        repository.findByToken(token)
+        String cleanToken = token != null ? token.trim() : null;
+        repository.findByToken(cleanToken)
                 .ifPresent(this::revoke);
     }
 

@@ -3,6 +3,7 @@ package com.techhub.security;
 import com.techhub.common.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,9 +15,10 @@ import java.io.IOException;
 
 
 @Component
+@AllArgsConstructor
 public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     @Override
     public void handle(

@@ -1,11 +1,13 @@
 package com.techhub.model.entity;
 
+import com.techhub.model.enums.VerificationTokenType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,11 +17,16 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "password_reset_token", indexes = {
-        @Index(name = "idx_password_reset_token_user_id", columnList = "user_id"),
-        @Index(name = "idx_password_reset_token_expires_at", columnList = "expires_at")
-})
-public class PasswordResetToken {
+@Table(name = "verification_tokens",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_verification_tokens_user_type", columnNames = {"user_id", "type"})
+        },
+        indexes = {
+                @Index(name = "idx_verification_token_expires_at", columnList = "expires_at"),
+                @Index(name = "idx_verification_token_user_id_type", columnList = "user_id, type")
+        }
+)
+public class VerificationTokens {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -27,6 +34,10 @@ public class PasswordResetToken {
 
     @Column(nullable = false)
     private String token;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private VerificationTokenType type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -41,4 +52,8 @@ public class PasswordResetToken {
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

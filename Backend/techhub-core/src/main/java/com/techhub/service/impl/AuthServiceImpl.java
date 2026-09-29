@@ -5,11 +5,12 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.model.dto.request.*;
 import com.techhub.model.dto.response.LoginResponse;
 import com.techhub.model.dto.response.TokenResponse;
-import com.techhub.model.entity.EmailVerificationToken;
-import com.techhub.model.entity.PasswordResetToken;
 import com.techhub.model.entity.RefreshToken;
 import com.techhub.model.entity.User;
+import com.techhub.model.entity.VerificationTokens;
 import com.techhub.model.enums.Role;
+import com.techhub.model.enums.UserStatus;
+import com.techhub.model.enums.VerificationTokenType;
 import com.techhub.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.security.SecurityUtils;
@@ -26,51 +27,56 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final VerificationTokenService verificationTokenService;
+    private final VerificationTokensService verificationTokensService;
     private final EmailService emailService;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
-    private final PasswordResetTokenService passwordResetTokenService;
-
 
     @Transactional
     @Override
     public void register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.email())) {
-            throw new BusinessException(ErrorCode.EMAIL_IS_EXISTED);
+        User existingUser = userRepository.findByEmail(request.email()).orElse(null);
+        if (existingUser != null) {
+            if (existingUser.isEmailVerified()) {
+                throw new BusinessException(ErrorCode.EMAIL_IS_EXISTED);
+            } else {
+                throw new BusinessException(ErrorCode.EMAIL_EXISTS_UNVERIFIED);
+            }
         }
         User user = new User();
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
-        user.setRole(Role.BUYER);
-        user.setEnabled(false);
+        user.setRoles(new HashSet<>(Set.of(Role.BUYER)));
+        user.setEmailVerified(false);
         userRepository.save(user);
-        EmailVerificationToken token = verificationTokenService.create(user);
+        VerificationTokens token = verificationTokensService.create(user, VerificationTokenType.EMAIL_VERIFICATION);
         emailService.sendVerificationEmail(user.getEmail(), token.getToken());
     }
 
     @Transactional(noRollbackFor = BusinessException.class)
     @Override
-    public void verifyEmail(String email, String tokenValue) {
-        User user = userRepository.findByEmail(email)
+    public void verifyEmail(VerifyEmailRequest request) {
+        User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        if (user.isEnabled()) {
+        validateUserStatus(user);
+        if (user.isEmailVerified()) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_VERIFIED);
         }
-        EmailVerificationToken token = verificationTokenService.validate(user, tokenValue);
-        user.setEnabled(true);
+        VerificationTokens token = verificationTokensService.validate(user, request.token(), VerificationTokenType.EMAIL_VERIFICATION);
+        user.setEmailVerified(true);
         userRepository.save(user);
-        verificationTokenService.delete(token);
+        verificationTokensService.delete(token);
     }
 
     @Override
@@ -93,8 +99,26 @@ public class AuthServiceImpl implements AuthService {
             RefreshToken refreshToken = refreshTokenService.create(authenticatedUser);
             return new LoginResponse(accessToken, refreshToken.getToken());
         } catch (LockedException ex) {
+            User user = userRepository.findByEmail(request.email()).orElse(null);
+            if (user != null) {
+                if (user.getStatus() == UserStatus.BANNED) {
+                    throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
+                }
+                if (user.getStatus() == UserStatus.SUSPENDED) {
+                    throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
+                }
+            }
             throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
         } catch (DisabledException ex) {
+            User user = userRepository.findByEmail(request.email()).orElse(null);
+            if (user != null) {
+                if (user.getStatus() == UserStatus.DELETED) {
+                    throw new BusinessException(ErrorCode.ACCOUNT_DELETED);
+                }
+                if (!user.isEmailVerified()) {
+                    throw new BusinessException(ErrorCode.ACCOUNT_NOT_VERIFIED);
+                }
+            }
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_VERIFIED);
         } catch (BadCredentialsException ex) {
             User user = userRepository.findByEmail(request.email()).orElse(null);
@@ -114,17 +138,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = BusinessException.class)
     public TokenResponse refreshToken(RefreshTokenRequest request) {
-        RefreshToken oldRefreshToken = refreshTokenService.validate(request.refreshToken());
+        String token = request.refreshToken().trim();
+        RefreshToken oldRefreshToken = refreshTokenService.validate(token);
         User user = oldRefreshToken.getUser();
 
-        if (!user.isEnabled()) {
-            throw new BusinessException(ErrorCode.ACCOUNT_NOT_VERIFIED);
-        }
-        if (!user.isAccountNonLocked()) {
-            throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
-        }
+        validateUserActiveAndNonLocked(user);
 
         refreshTokenService.revoke(oldRefreshToken);
 
@@ -137,7 +157,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void logout(LogoutRequest request) {
-        refreshTokenService.revokeByToken(request.refreshToken());
+        String token = request.refreshToken().trim();
+        refreshTokenService.revokeByToken(token);
     }
 
     @Override
@@ -146,11 +167,13 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        if (!user.isEnabled()) {
+        validateUserStatus(user);
+
+        if (!user.isEmailVerified()) {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_VERIFIED);
         }
 
-        PasswordResetToken token = passwordResetTokenService.create(user);
+        VerificationTokens token = verificationTokensService.create(user, VerificationTokenType.PASSWORD_RESET);
         emailService.sendPasswordResetEmail(
                 user.getEmail(),
                 token.getToken()
@@ -162,7 +185,14 @@ public class AuthServiceImpl implements AuthService {
     public void resetPassword(ResetPasswordRequest request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        PasswordResetToken token = passwordResetTokenService.validate(user, request.token());
+
+        validateUserStatus(user);
+
+        if (!user.isEmailVerified()) {
+            throw new BusinessException(ErrorCode.ACCOUNT_NOT_VERIFIED);
+        }
+
+        VerificationTokens token = verificationTokensService.validate(user, request.token(), VerificationTokenType.PASSWORD_RESET);
         if (passwordEncoder.matches(request.newPassword(), user.getPassword())) {
             throw new BusinessException(ErrorCode.PASSWORD_SAME_AS_OLD);
         }
@@ -171,7 +201,7 @@ public class AuthServiceImpl implements AuthService {
         user.setLockoutEndTime(null);
         userRepository.save(user);
         refreshTokenService.revokeAll(user);
-        passwordResetTokenService.delete(token);
+        verificationTokensService.delete(token);
     }
 
     @Override
@@ -180,6 +210,9 @@ public class AuthServiceImpl implements AuthService {
         CustomUserDetails currentUser = SecurityUtils.getCurrentUser();
         User user = userRepository.findById(currentUser.user().getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        validateUserActiveAndNonLocked(user);
+
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new BusinessException(ErrorCode.WRONG_CURRENT_PASSWORD);
         }
@@ -197,11 +230,54 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        if (user.isEnabled()) {
+        validateUserStatus(user);
+        if (user.isEmailVerified()) {
             throw new BusinessException(ErrorCode.EMAIL_ALREADY_VERIFIED);
         }
 
-        EmailVerificationToken token = verificationTokenService.create(user);
+        VerificationTokens token = verificationTokensService.create(user, VerificationTokenType.EMAIL_VERIFICATION);
         emailService.sendVerificationEmail(user.getEmail(), token.getToken());
+    }
+
+    @Override
+    @Transactional
+    public void deleteAccount(DeleteAccountRequest request) {
+        CustomUserDetails currentUser = SecurityUtils.getCurrentUser();
+        User user = userRepository.findById(currentUser.user().getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        validateUserActiveAndNonLocked(user);
+
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new BusinessException(ErrorCode.WRONG_CURRENT_PASSWORD);
+        }
+
+        user.setStatus(UserStatus.DELETED);
+        user.setDeletedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        refreshTokenService.revokeAll(user);
+    }
+
+    private void validateUserStatus(User user) {
+        if (user.getStatus() == UserStatus.BANNED) {
+            throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
+        }
+        if (user.getStatus() == UserStatus.SUSPENDED) {
+            throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
+        }
+        if (user.getStatus() == UserStatus.DELETED) {
+            throw new BusinessException(ErrorCode.ACCOUNT_DELETED);
+        }
+    }
+
+    private void validateUserActiveAndNonLocked(User user) {
+        validateUserStatus(user);
+        if (!user.isEmailVerified()) {
+            throw new BusinessException(ErrorCode.ACCOUNT_NOT_VERIFIED);
+        }
+        if (!user.isAccountNonLocked()) {
+            throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.techhub.config;
+package com.techhub.config.properties;
 
 import lombok.Getter;
 import lombok.Setter;

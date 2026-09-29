@@ -1,6 +1,7 @@
 package com.techhub.security;
 
 import com.techhub.model.entity.User;
+import com.techhub.model.enums.UserStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +13,12 @@ public record CustomUserDetails(User user) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        if (user.getRoles() == null) {
+            return List.of();
+        }
+        return user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                .toList();
     }
 
     @Override
@@ -27,7 +33,7 @@ public record CustomUserDetails(User user) implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.isEnabled();
+        return user.isEmailVerified() && user.getStatus() == UserStatus.ACTIVE;
     }
 
     @Override
@@ -37,7 +43,9 @@ public record CustomUserDetails(User user) implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return user.isAccountNonLocked();
+        return user.isAccountNonLocked()
+                && user.getStatus() != UserStatus.BANNED
+                && user.getStatus() != UserStatus.SUSPENDED;
     }
 
     @Override

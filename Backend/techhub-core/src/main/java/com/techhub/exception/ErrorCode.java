@@ -16,7 +16,6 @@ public enum ErrorCode {
     REFRESH_TOKEN_REVOKED(HttpStatus.BAD_REQUEST, "Refresh token is revoked"),
     REFRESH_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "Refresh token has expired"),
     PASSWORD_RESET_TOKEN_NOT_FOUND(HttpStatus.BAD_REQUEST, "Password reset token not found"),
-    PASSWORD_RESET_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "Password reset token has expired"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
     INVALID_GOOGLE_TOKEN(HttpStatus.UNAUTHORIZED, "Invalid Google ID token"),
     UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "Authentication is required"),
@@ -24,7 +23,12 @@ public enum ErrorCode {
     INVALID_PASSWORD_RESET_TOKEN(HttpStatus.BAD_REQUEST, "Invalid password reset token"),
     ACCOUNT_LOCKED(HttpStatus.FORBIDDEN, "Account is temporarily locked due to multiple failed login attempts. Please try again in 15 minutes"),
     ACCOUNT_NOT_VERIFIED(HttpStatus.FORBIDDEN, "Account is not verified. Please verify your email first"),
-    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+    ACCOUNT_DELETED(HttpStatus.FORBIDDEN, "Account has been deleted"),
+    ACCOUNT_BANNED(HttpStatus.FORBIDDEN, "Account has been banned"),
+    ACCOUNT_SUSPENDED(HttpStatus.FORBIDDEN, "Account has been suspended"),
+    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid email or password"),
+    EMAIL_EXISTS_UNVERIFIED(HttpStatus.BAD_REQUEST, "Email is already registered but not verified. Please verify your account"),
+    OTP_RESEND_COOLDOWN(HttpStatus.TOO_MANY_REQUESTS, "Please wait 60 seconds before requesting a new code");
 
     private final HttpStatus status;
     private final String message;

@@ -5,6 +5,8 @@ import com.techhub.exception.ErrorCode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.UUID;
+
 public class SecurityUtils {
 
     private SecurityUtils() {
@@ -17,5 +19,9 @@ public class SecurityUtils {
             throw new BusinessException(ErrorCode.UNAUTHENTICATED);
         }
         return (CustomUserDetails) authentication.getPrincipal();
+    }
+
+    public static UUID getCurrentUserId() {
+        return getCurrentUser().user().getId();
     }
 }

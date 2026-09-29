@@ -6,8 +6,6 @@ import com.techhub.model.dto.response.LoginResponse;
 import com.techhub.model.dto.response.TokenResponse;
 import com.techhub.service.AuthService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -27,12 +25,9 @@ public class AuthController {
         return ApiResponse.success(null, "Registration successful. Please check your email for verification instructions.", null);
     }
 
-    @GetMapping("/verify-email")
-    public ApiResponse<Void> verifyEmail(
-            @RequestParam @NotBlank @Email String email,
-            @RequestParam @NotBlank String token
-    ) {
-        authService.verifyEmail(email, token);
+    @PostMapping("/verify-email")
+    public ApiResponse<Void> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        authService.verifyEmail(request);
         return ApiResponse.success(null, "Email verified successfully.", null);
     }
 
@@ -78,5 +73,11 @@ public class AuthController {
     public ApiResponse<Void> resendVerificationEmail(@Valid @RequestBody ResendVerificationRequest request) {
         authService.resendVerificationEmail(request);
         return ApiResponse.success(null, "Verification email resent successfully.", null);
+    }
+
+    @PostMapping("/delete-account")
+    public ApiResponse<Void> deleteAccount(@Valid @RequestBody DeleteAccountRequest request) {
+        authService.deleteAccount(request);
+        return ApiResponse.success(null, "Account deleted successfully.", null);
     }
 }
