@@ -28,7 +28,14 @@ public enum ErrorCode {
     ACCOUNT_SUSPENDED(HttpStatus.FORBIDDEN, "Account has been suspended"),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid email or password"),
     EMAIL_EXISTS_UNVERIFIED(HttpStatus.BAD_REQUEST, "Email is already registered but not verified. Please verify your account"),
-    OTP_RESEND_COOLDOWN(HttpStatus.TOO_MANY_REQUESTS, "Please wait 60 seconds before requesting a new code");
+    OTP_RESEND_COOLDOWN(HttpStatus.TOO_MANY_REQUESTS, "Please wait 60 seconds before requesting a new code"),
+    ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "Address not found"),
+    CANNOT_UNSET_DEFAULT_ADDRESS(HttpStatus.BAD_REQUEST, "Cannot unset default address. Please set another address as default instead"),
+    CANNOT_DELETE_DEFAULT_ADDRESS(HttpStatus.BAD_REQUEST, "Cannot delete default address. Please set another address as default first"),
+    ADDRESS_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "Address limit reached. Maximum 10 addresses allowed per user"),
+    CANNOT_BAN_SELF(HttpStatus.BAD_REQUEST, "You cannot ban or suspend your own account"),
+    CANNOT_MODIFY_ADMIN_USER(HttpStatus.FORBIDDEN, "Cannot ban or suspend another administrator"),
+    INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "Invalid status transition");
 
     private final HttpStatus status;
     private final String message;
