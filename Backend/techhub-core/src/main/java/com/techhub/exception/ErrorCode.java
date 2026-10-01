@@ -35,7 +35,17 @@ public enum ErrorCode {
     ADDRESS_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "Address limit reached. Maximum 10 addresses allowed per user"),
     CANNOT_BAN_SELF(HttpStatus.BAD_REQUEST, "You cannot ban or suspend your own account"),
     CANNOT_MODIFY_ADMIN_USER(HttpStatus.FORBIDDEN, "Cannot ban or suspend another administrator"),
-    INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "Invalid status transition");
+    INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "Invalid status transition"),
+    SELLER_ALREADY_PENDING(HttpStatus.BAD_REQUEST, "Your seller registration is pending approval"),
+    ALREADY_A_SELLER(HttpStatus.BAD_REQUEST, "User is already a registered seller"),
+    SELLER_NAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "Seller name / slug is already taken"),
+    SELLER_NOT_FOUND(HttpStatus.NOT_FOUND, "Seller profile not found"),
+    SHOP_NOT_FOUND(HttpStatus.NOT_FOUND, "Shop not found"),
+    SHOP_UNAVAILABLE(HttpStatus.NOT_FOUND, "Shop is temporarily closed or suspended"),
+    REJECTION_REASON_REQUIRED(HttpStatus.BAD_REQUEST, "Rejection reason is required when rejecting a seller"),
+    INVALID_SHOP_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "Invalid shop status transition"),
+    NOT_A_SELLER(HttpStatus.FORBIDDEN, "Access denied: Account is not a registered seller"),
+    SHIPPING_OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "Shipping option not found");
 
     private final HttpStatus status;
     private final String message;
