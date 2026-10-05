@@ -12,8 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -49,15 +47,13 @@ class ShopControllerTest {
 
         when(shopService.getPublicShopProfile("apple-store-vn")).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<PublicShopResponse>> response = shopController.getPublicShopProfile("apple-store-vn");
+        ApiResponse<PublicShopResponse> response = shopController.getPublicShopProfile("apple-store-vn");
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Shop profile retrieved successfully", response.getBody().getMessage());
-        assertEquals(responseDto, response.getBody().getData());
-        assertNull(response.getBody().getMetadata());
+        assertTrue(response.isSuccess());
+        assertEquals("Shop profile retrieved successfully", response.getMessage());
+        assertEquals(responseDto, response.getData());
+        assertNull(response.getMetadata());
 
         verify(shopService, times(1)).getPublicShopProfile("apple-store-vn");
     }

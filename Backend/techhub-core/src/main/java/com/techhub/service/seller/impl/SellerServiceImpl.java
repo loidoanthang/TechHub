@@ -178,6 +178,11 @@ public class SellerServiceImpl implements SellerService {
             throw new BusinessException(ErrorCode.NOT_A_SELLER);
         }
 
+        Shop shop = shopRepository.findBySellerId(seller.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
+
+        validateShopAccessForRead(shop);
+
         return new SellerProfileResponse(
                 seller.getId(),
                 seller.getSellerName(),
@@ -205,6 +210,11 @@ public class SellerServiceImpl implements SellerService {
         if (seller.getVerificationStatus() != SellerVerificationStatus.APPROVED) {
             throw new BusinessException(ErrorCode.NOT_A_SELLER);
         }
+
+        Shop shop = shopRepository.findBySellerId(seller.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
+
+        validateShopAccessForWrite(shop);
 
         String newSellerName = request.sellerName().trim().toLowerCase();
         if (!seller.getSellerName().equalsIgnoreCase(newSellerName)) {
@@ -254,6 +264,8 @@ public class SellerServiceImpl implements SellerService {
         Shop shop = shopRepository.findBySellerId(seller.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
 
+        validateShopAccessForRead(shop);
+
         return new SellerShopResponse(
                 shop.getId(),
                 seller.getId(),
@@ -287,9 +299,7 @@ public class SellerServiceImpl implements SellerService {
         Shop shop = shopRepository.findBySellerId(seller.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
 
-        if (shop.getStatus() == ShopStatus.BANNED) {
-            throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
-        }
+        validateShopAccessForWrite(shop);
 
         shop.setName(request.name().trim());
         shop.setDescription(request.description() != null && !request.description().isBlank() ? request.description().trim() : null);
@@ -334,11 +344,9 @@ public class SellerServiceImpl implements SellerService {
         Shop shop = shopRepository.findBySellerId(seller.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
 
-        if (request.status() != ShopStatus.ACTIVE && request.status() != ShopStatus.PAUSED) {
-            throw new BusinessException(ErrorCode.INVALID_SHOP_STATUS_TRANSITION);
-        }
+        validateShopAccessForWrite(shop);
 
-        if (shop.getStatus() != ShopStatus.ACTIVE && shop.getStatus() != ShopStatus.PAUSED) {
+        if (request.status() != ShopStatus.ACTIVE && request.status() != ShopStatus.PAUSED) {
             throw new BusinessException(ErrorCode.INVALID_SHOP_STATUS_TRANSITION);
         }
 
@@ -396,6 +404,8 @@ public class SellerServiceImpl implements SellerService {
         Shop shop = shopRepository.findBySellerId(seller.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
 
+        validateShopAccessForRead(shop);
+
         Address address = addressRepository.findByShopId(shop.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
 
@@ -433,9 +443,7 @@ public class SellerServiceImpl implements SellerService {
         Shop shop = shopRepository.findBySellerId(seller.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
 
-        if (shop.getStatus() == ShopStatus.BANNED) {
-            throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
-        }
+        validateShopAccessForWrite(shop);
 
         Address address = addressRepository.findByShopId(shop.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
@@ -486,6 +494,8 @@ public class SellerServiceImpl implements SellerService {
         Shop shop = shopRepository.findBySellerId(seller.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
 
+        validateShopAccessForRead(shop);
+
         ShippingOption shippingOption = shippingOptionRepository.findByShopId(shop.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SHIPPING_OPTION_NOT_FOUND));
 
@@ -519,9 +529,7 @@ public class SellerServiceImpl implements SellerService {
         Shop shop = shopRepository.findBySellerId(seller.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
 
-        if (shop.getStatus() == ShopStatus.BANNED) {
-            throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
-        }
+        validateShopAccessForWrite(shop);
 
         ShippingOption shippingOption = shippingOptionRepository.findByShopId(shop.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SHIPPING_OPTION_NOT_FOUND));
@@ -634,6 +642,20 @@ public class SellerServiceImpl implements SellerService {
         }
         if (!user.isAccountNonLocked()) {
             throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
+        }
+    }
+
+    private void validateShopAccessForRead(Shop shop) {
+        if (shop.getStatus() == ShopStatus.BANNED) {
+            log.warn("Access denied (READ): Shop {} is BANNED.", shop.getId());
+            throw new BusinessException(ErrorCode.SHOP_NOT_ACTIVE);
+        }
+    }
+
+    private void validateShopAccessForWrite(Shop shop) {
+        if (shop.getStatus() == ShopStatus.BANNED || shop.getStatus() == ShopStatus.SUSPENDED) {
+            log.warn("Access denied (WRITE): Shop {} status is {}.", shop.getId(), shop.getStatus());
+            throw new BusinessException(ErrorCode.SHOP_NOT_ACTIVE);
         }
     }
 

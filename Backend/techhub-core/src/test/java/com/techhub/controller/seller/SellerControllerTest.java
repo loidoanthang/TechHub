@@ -25,7 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -46,7 +46,7 @@ class SellerControllerTest {
 
     @Test
     @DisplayName("registerSeller: Đăng ký mới thành công trả về HTTP 201 Created")
-    void registerSeller_NewApplication_ReturnsCreatedResponse() {
+    void registerSeller_NewApplication_ReturnsCreatedResponse() throws NoSuchMethodException {
         RegisterSellerRequest request = new RegisterSellerRequest(
                 "apple-store-vn",
                 "Apple Store VN",
@@ -83,15 +83,18 @@ class SellerControllerTest {
 
         when(sellerService.registerSeller(request)).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerRegistrationResponse>> response = sellerController.registerSeller(request);
+        ApiResponse<SellerRegistrationResponse> response = sellerController.registerSeller(request);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Seller registration submitted successfully. Please wait for administrator approval.", response.getBody().getMessage());
-        assertEquals(responseDto, response.getBody().getData());
+        assertTrue(response.isSuccess());
+        assertEquals("Seller registration submitted successfully. Please wait for administrator approval.", response.getMessage());
+        assertEquals(responseDto, response.getData());
         verify(sellerService, times(1)).registerSeller(request);
+
+        ResponseStatus responseStatus = SellerController.class.getMethod("registerSeller", RegisterSellerRequest.class)
+                .getAnnotation(ResponseStatus.class);
+        assertNotNull(responseStatus);
+        assertEquals(HttpStatus.CREATED, responseStatus.value());
     }
 
     @Test
@@ -133,14 +136,12 @@ class SellerControllerTest {
 
         when(sellerService.registerSeller(request)).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerRegistrationResponse>> response = sellerController.registerSeller(request);
+        ApiResponse<SellerRegistrationResponse> response = sellerController.registerSeller(request);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Seller application re-submitted successfully. Status reset to PENDING.", response.getBody().getMessage());
-        assertEquals(responseDto, response.getBody().getData());
+        assertTrue(response.isSuccess());
+        assertEquals("Seller application re-submitted successfully. Status reset to PENDING.", response.getMessage());
+        assertEquals(responseDto, response.getData());
         verify(sellerService, times(1)).registerSeller(request);
     }
 
@@ -150,14 +151,12 @@ class SellerControllerTest {
         SellerVerificationStatusResponse responseDto = SellerVerificationStatusResponse.notApplied();
         when(sellerService.getVerificationStatus()).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerVerificationStatusResponse>> response = sellerController.getVerificationStatus();
+        ApiResponse<SellerVerificationStatusResponse> response = sellerController.getVerificationStatus();
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("User has not submitted a seller registration", response.getBody().getMessage());
-        assertFalse(response.getBody().getData().hasApplied());
+        assertTrue(response.isSuccess());
+        assertEquals("User has not submitted a seller registration", response.getMessage());
+        assertFalse(response.getData().hasApplied());
         verify(sellerService, times(1)).getVerificationStatus();
     }
 
@@ -178,15 +177,13 @@ class SellerControllerTest {
         );
         when(sellerService.getVerificationStatus()).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerVerificationStatusResponse>> response = sellerController.getVerificationStatus();
+        ApiResponse<SellerVerificationStatusResponse> response = sellerController.getVerificationStatus();
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Seller application is pending review", response.getBody().getMessage());
-        assertTrue(response.getBody().getData().hasApplied());
-        assertEquals(SellerVerificationStatus.PENDING, response.getBody().getData().verificationStatus());
+        assertTrue(response.isSuccess());
+        assertEquals("Seller application is pending review", response.getMessage());
+        assertTrue(response.getData().hasApplied());
+        assertEquals(SellerVerificationStatus.PENDING, response.getData().verificationStatus());
     }
 
     @Test
@@ -206,14 +203,12 @@ class SellerControllerTest {
         );
         when(sellerService.getVerificationStatus()).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerVerificationStatusResponse>> response = sellerController.getVerificationStatus();
+        ApiResponse<SellerVerificationStatusResponse> response = sellerController.getVerificationStatus();
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Seller application was rejected", response.getBody().getMessage());
-        assertEquals("Sai số tài khoản", response.getBody().getData().rejectionReason());
+        assertTrue(response.isSuccess());
+        assertEquals("Seller application was rejected", response.getMessage());
+        assertEquals("Sai số tài khoản", response.getData().rejectionReason());
     }
 
     @Test
@@ -233,14 +228,12 @@ class SellerControllerTest {
         );
         when(sellerService.getVerificationStatus()).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerVerificationStatusResponse>> response = sellerController.getVerificationStatus();
+        ApiResponse<SellerVerificationStatusResponse> response = sellerController.getVerificationStatus();
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Seller application is approved", response.getBody().getMessage());
-        assertEquals(ShopStatus.ACTIVE, response.getBody().getData().shopStatus());
+        assertTrue(response.isSuccess());
+        assertEquals("Seller application is approved", response.getMessage());
+        assertEquals(ShopStatus.ACTIVE, response.getData().shopStatus());
     }
 
     // =========================================================================
@@ -262,15 +255,13 @@ class SellerControllerTest {
         );
         when(sellerService.getSellerProfile()).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerProfileResponse>> response = sellerController.getSellerProfile();
+        ApiResponse<SellerProfileResponse> response = sellerController.getSellerProfile();
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Seller profile retrieved successfully", response.getBody().getMessage());
-        assertEquals(responseDto, response.getBody().getData());
-        assertNull(response.getBody().getMetadata());
+        assertTrue(response.isSuccess());
+        assertEquals("Seller profile retrieved successfully", response.getMessage());
+        assertEquals(responseDto, response.getData());
+        assertNull(response.getMetadata());
 
         verify(sellerService, times(1)).getSellerProfile();
     }
@@ -325,15 +316,13 @@ class SellerControllerTest {
 
         when(sellerService.updateSellerProfile(request)).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerProfileResponse>> response = sellerController.updateSellerProfile(request);
+        ApiResponse<SellerProfileResponse> response = sellerController.updateSellerProfile(request);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Seller profile updated successfully", response.getBody().getMessage());
-        assertEquals(responseDto, response.getBody().getData());
-        assertNull(response.getBody().getMetadata());
+        assertTrue(response.isSuccess());
+        assertEquals("Seller profile updated successfully", response.getMessage());
+        assertEquals(responseDto, response.getData());
+        assertNull(response.getMetadata());
 
         verify(sellerService, times(1)).updateSellerProfile(request);
     }
@@ -390,15 +379,13 @@ class SellerControllerTest {
 
         when(sellerService.getShopInfo()).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerShopResponse>> response = sellerController.getShopInfo();
+        ApiResponse<SellerShopResponse> response = sellerController.getShopInfo();
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Shop details retrieved successfully", response.getBody().getMessage());
-        assertEquals(responseDto, response.getBody().getData());
-        assertNull(response.getBody().getMetadata());
+        assertTrue(response.isSuccess());
+        assertEquals("Shop details retrieved successfully", response.getMessage());
+        assertEquals(responseDto, response.getData());
+        assertNull(response.getMetadata());
 
         verify(sellerService, times(1)).getShopInfo();
     }
@@ -454,15 +441,13 @@ class SellerControllerTest {
 
         when(sellerService.updateShopInfo(request)).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerShopResponse>> response = sellerController.updateShopInfo(request);
+        ApiResponse<SellerShopResponse> response = sellerController.updateShopInfo(request);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Shop details updated successfully", response.getBody().getMessage());
-        assertEquals(responseDto, response.getBody().getData());
-        assertNull(response.getBody().getMetadata());
+        assertTrue(response.isSuccess());
+        assertEquals("Shop details updated successfully", response.getMessage());
+        assertEquals(responseDto, response.getData());
+        assertNull(response.getMetadata());
 
         verify(sellerService, times(1)).updateShopInfo(request);
     }
@@ -513,15 +498,13 @@ class SellerControllerTest {
 
         when(sellerService.updateShopStatus(request)).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerShopResponse>> response = sellerController.updateShopStatus(request);
+        ApiResponse<SellerShopResponse> response = sellerController.updateShopStatus(request);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Shop status updated successfully", response.getBody().getMessage());
-        assertEquals(responseDto, response.getBody().getData());
-        assertNull(response.getBody().getMetadata());
+        assertTrue(response.isSuccess());
+        assertEquals("Shop status updated successfully", response.getMessage());
+        assertEquals(responseDto, response.getData());
+        assertNull(response.getMetadata());
 
         verify(sellerService, times(1)).updateShopStatus(request);
     }
@@ -569,15 +552,13 @@ class SellerControllerTest {
 
         when(sellerService.getWarehouseAddress()).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerWarehouseAddressResponse>> response = sellerController.getWarehouseAddress();
+        ApiResponse<SellerWarehouseAddressResponse> response = sellerController.getWarehouseAddress();
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Warehouse address retrieved successfully", response.getBody().getMessage());
-        assertEquals(responseDto, response.getBody().getData());
-        assertNull(response.getBody().getMetadata());
+        assertTrue(response.isSuccess());
+        assertEquals("Warehouse address retrieved successfully", response.getMessage());
+        assertEquals(responseDto, response.getData());
+        assertNull(response.getMetadata());
 
         verify(sellerService, times(1)).getWarehouseAddress();
     }
@@ -636,15 +617,13 @@ class SellerControllerTest {
 
         when(sellerService.updateWarehouseAddress(request)).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerWarehouseAddressResponse>> response = sellerController.updateWarehouseAddress(request);
+        ApiResponse<SellerWarehouseAddressResponse> response = sellerController.updateWarehouseAddress(request);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Warehouse address updated successfully", response.getBody().getMessage());
-        assertEquals(responseDto, response.getBody().getData());
-        assertNull(response.getBody().getMetadata());
+        assertTrue(response.isSuccess());
+        assertEquals("Warehouse address updated successfully", response.getMessage());
+        assertEquals(responseDto, response.getData());
+        assertNull(response.getMetadata());
 
         verify(sellerService, times(1)).updateWarehouseAddress(request);
     }
@@ -699,15 +678,13 @@ class SellerControllerTest {
 
         when(sellerService.getShippingOption()).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerShippingOptionResponse>> response = sellerController.getShippingOption();
+        ApiResponse<SellerShippingOptionResponse> response = sellerController.getShippingOption();
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Shipping option retrieved successfully", response.getBody().getMessage());
-        assertEquals(responseDto, response.getBody().getData());
-        assertNull(response.getBody().getMetadata());
+        assertTrue(response.isSuccess());
+        assertEquals("Shipping option retrieved successfully", response.getMessage());
+        assertEquals(responseDto, response.getData());
+        assertNull(response.getMetadata());
 
         verify(sellerService, times(1)).getShippingOption();
     }
@@ -750,15 +727,13 @@ class SellerControllerTest {
 
         when(sellerService.updateShippingOption(request)).thenReturn(responseDto);
 
-        ResponseEntity<ApiResponse<SellerShippingOptionResponse>> response = sellerController.updateShippingOption(request);
+        ApiResponse<SellerShippingOptionResponse> response = sellerController.updateShippingOption(request);
 
         assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isSuccess());
-        assertEquals("Shipping fee updated successfully", response.getBody().getMessage());
-        assertEquals(responseDto, response.getBody().getData());
-        assertNull(response.getBody().getMetadata());
+        assertTrue(response.isSuccess());
+        assertEquals("Shipping fee updated successfully", response.getMessage());
+        assertEquals(responseDto, response.getData());
+        assertNull(response.getMetadata());
 
         verify(sellerService, times(1)).updateShippingOption(request);
     }

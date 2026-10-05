@@ -45,7 +45,30 @@ public enum ErrorCode {
     REJECTION_REASON_REQUIRED(HttpStatus.BAD_REQUEST, "Rejection reason is required when rejecting a seller"),
     INVALID_SHOP_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "Invalid shop status transition"),
     NOT_A_SELLER(HttpStatus.FORBIDDEN, "Access denied: Account is not a registered seller"),
-    SHIPPING_OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "Shipping option not found");
+    SHIPPING_OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "Shipping option not found"),
+    CATEGORY_NAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "Category name already exists"),
+    DUPLICATE_ATTRIBUTE_NAME(HttpStatus.BAD_REQUEST, "Attribute names within category must be unique"),
+    INVALID_ATTRIBUTE_OPTIONS(HttpStatus.BAD_REQUEST, "Attribute of type SELECT must have at least one non-empty option"),
+    ATTRIBUTE_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "Category must have between 1 and 50 attributes"),
+    ATTRIBUTE_NOT_FOUND(HttpStatus.NOT_FOUND, "Category attribute not found"),
+    CANNOT_DELETE_LAST_CATEGORY_ATTRIBUTE(HttpStatus.BAD_REQUEST, "Cannot delete the last category attribute"),
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "Category not found"),
+    SHOP_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "Shop is suspended or banned"),
+    CATEGORY_INACTIVE(HttpStatus.BAD_REQUEST, "Category is inactive"),
+    MISSING_CATEGORY_ATTRIBUTE(HttpStatus.BAD_REQUEST, "Missing required category attribute"),
+    INVALID_ATTRIBUTE_VALUE(HttpStatus.BAD_REQUEST, "Invalid attribute value format or option"),
+    ATTRIBUTE_KEY_OVERLAP(HttpStatus.BAD_REQUEST, "Variant attribute key cannot overlap with product specifications"),
+    DUPLICATE_VARIANT_SKU(HttpStatus.BAD_REQUEST, "SKU must be unique across all variants of the product"),
+    INVALID_PRODUCT_IMAGES(HttpStatus.BAD_REQUEST, "Product must have 1-6 images with exactly one cover image (displayOrder 0)"),
+    INVALID_VARIANT_COUNT(HttpStatus.BAD_REQUEST, "Product must have between 1 and 50 variants"),
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "Product not found"),
+    VARIANT_NOT_FOUND(HttpStatus.NOT_FOUND, "Product variant not found"),
+    CANNOT_DELETE_LAST_VARIANT(HttpStatus.BAD_REQUEST, "Cannot delete the only remaining variant of a product"),
+    PRODUCT_NOT_APPROVED(HttpStatus.BAD_REQUEST, "Product must be approved before publishing"),
+    PRODUCT_SUSPENDED(HttpStatus.BAD_REQUEST, "Product is suspended and cannot be published"),
+    SHOP_IS_PAUSED(HttpStatus.BAD_REQUEST, "Shop is paused. Cannot publish products while shop is paused"),
+    NO_ACTIVE_VARIANT(HttpStatus.BAD_REQUEST, "Product must have at least one active variant to be published"),
+    INVALID_PRICE_RANGE(HttpStatus.BAD_REQUEST, "Minimum price cannot be greater than maximum price or negative");
 
     private final HttpStatus status;
     private final String message;
