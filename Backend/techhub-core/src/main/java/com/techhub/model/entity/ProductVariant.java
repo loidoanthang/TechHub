@@ -69,6 +69,10 @@ public class ProductVariant {
     @Builder.Default
     private ProductVariantStatus status = ProductVariantStatus.ACTIVE;
 
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private boolean isDeleted = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

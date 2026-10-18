@@ -20,4 +20,10 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, UUID
 
     @Query("SELECT pi.product.id, pi.imageUrl FROM ProductImage pi WHERE pi.product.id IN :productIds AND pi.displayOrder = 0")
     List<Object[]> findCoverImagesByProductIds(@Param("productIds") List<UUID> productIds);
+
+    @Query("SELECT pi FROM ProductImage pi WHERE pi.product.id IN :productIds AND pi.displayOrder = :displayOrder")
+    List<ProductImage> findByProductIdInAndDisplayOrder(
+            @Param("productIds") java.util.Collection<UUID> productIds,
+            @Param("displayOrder") int displayOrder
+    );
 }

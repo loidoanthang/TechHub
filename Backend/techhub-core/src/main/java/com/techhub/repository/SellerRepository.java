@@ -38,5 +38,9 @@ public interface SellerRepository extends JpaRepository<Seller, UUID>, JpaSpecif
     @EntityGraph(attributePaths = {"user"})
     @Query("SELECT s FROM Seller s WHERE s.id = :id")
     Optional<Seller> findWithUserForUpdateById(@Param("id") UUID id);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("UPDATE Seller s SET s.balance = s.balance + :amount, s.updatedAt = CURRENT_TIMESTAMP WHERE s.id = :sellerId")
+    int incrementBalance(@Param("sellerId") UUID sellerId, @Param("amount") java.math.BigDecimal amount);
 }
 

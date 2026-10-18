@@ -1,6 +1,6 @@
 package com.techhub.security;
 
-import com.techhub.service.JwtService;
+import com.techhub.service.auth.JwtService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -27,6 +27,9 @@ public interface AddressRepository extends JpaRepository<Address, UUID> {
 
     Optional<Address> findByIdAndUserIdAndShopIdIsNull(UUID id, UUID userId);
 
+    @Query("SELECT a FROM Address a WHERE a.user.id = :userId AND a.isDefault = true AND a.shopId IS NULL")
+    Optional<Address> findDefaultAddressByUserId(@Param("userId") UUID userId);
+
     @Query("SELECT a FROM Address a WHERE a.user.id IN :userIds AND a.isDefault = true AND a.shopId IS NULL")
     List<Address> findDefaultAddressesByUserIds(@Param("userIds") Collection<UUID> userIds);
 
