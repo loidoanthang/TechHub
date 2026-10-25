@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+:root {
+  /* Stitch Design Tokens - Kinetic Silicon */
+  --surface: #f8f9ff;
+  --surface-dim: #cbdbf5;
+  --surface-bright: #f8f9ff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #eff4ff;
+  --surface-container: #e5eeff;
+  --surface-container-high: #dce9ff;
+  --surface-container-highest: #d3e4fe;
+  --on-surface: #0b1c30;
+  --on-surface-variant: #434656;
+  --inverse-surface: #213145;
+  --inverse-on-surface: #eaf1ff;
+  --outline: #737688;
+  --outline-variant: #c3c5d9;
+  --surface-tint: #004fe5;
+  --primary: #0045cc;
+  --on-primary: #ffffff;
+  --primary-container: #0d5bff;
+  --on-primary-container: #ebecff;
+  --inverse-primary: #b6c4ff;
+  --secondary: #006b5b;
+  --on-secondary: #ffffff;
+  --secondary-container: #53f8d9;
+  --on-secondary-container: #00705f;
+  --tertiary: #a90900;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #ce2917;
+  --on-tertiary-container: #ffe9e5;
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+  --primary-fixed: #dce1ff;
+  --primary-fixed-dim: #b6c4ff;
+  --on-primary-fixed: #00164f;
+  --on-primary-fixed-variant: #003bb0;
+  --secondary-fixed: #57fbdb;
+  --secondary-fixed-dim: #2adec0;
+  --on-secondary-fixed: #00201a;
+  --on-secondary-fixed-variant: #005144;
+  --tertiary-fixed: #ffdad4;
+  --tertiary-fixed-dim: #ffb4a7;
+  --on-tertiary-fixed: #400100;
+  --on-tertiary-fixed-variant: #920700;
+  --background: #f8f9ff;
+  --on-background: #0b1c30;
+  --surface-variant: #d3e4fe;
+}
+
+@theme {
+  --color-surface: var(--surface);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-inverse-surface: var(--inverse-surface);
+  --color-inverse-on-surface: var(--inverse-on-surface);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-inverse-primary: var(--inverse-primary);
+  --color-secondary: var(--secondary);
+  --color-on-secondary: var(--on-secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-tertiary: var(--tertiary);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-primary-fixed: var(--primary-fixed);
+  --color-primary-fixed-dim: var(--primary-fixed-dim);
+  --color-secondary-fixed: var(--secondary-fixed);
+  --color-secondary-fixed-dim: var(--secondary-fixed-dim);
+  --color-tertiary-fixed: var(--tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--tertiary-fixed-dim);
+  --color-background: var(--background);
+  --color-on-background: var(--on-background);
+  --color-surface-variant: var(--surface-variant);
+
+  --spacing-gutter: 1.5rem;
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 1rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-space-xl: 2.5rem;
+
+  /* Nâng toàn bộ scale font chữ của Tailwind lên 2px */
+  --font-size-xs: 0.875rem; /* 12px -> 14px */
+  --font-size-sm: 1rem;     /* 14px -> 16px */
+  --font-size-base: 1.125rem; /* 16px -> 18px */
+  --font-size-lg: 1.25rem;  /* 18px -> 20px */
+  --font-size-xl: 1.375rem; /* 20px -> 22px */
+  --font-size-2xl: 1.625rem; /* 24px -> 26px */
+  --font-size-3xl: 2rem;    /* 30px -> 32px */
+  --font-size-4xl: 2.375rem; /* 36px -> 38px */
+}
+
+html {
+  font-size: 18px !important;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--on-surface);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  font-size: 1.125rem;
+  margin: 0;
+  padding: 0;
+}
+
+/* Custom Double Range Slider styling */
+.range-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  outline: none;
+}
+
+.range-slider-thumb::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 6px;
+}
+
+.range-slider-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px; /* Căn giữa hoàn hảo núm 16px với track 6px: (6 - 16)/2 = -5px */
+  border-radius: 9999px;
+  background-color: #ffffff;
+  border: 2.5px solid #0045cc;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.range-slider-thumb::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  border-color: #0d5bff;
+}
+
+.range-slider-thumb::-moz-range-track {
+  background: transparent;
+  height: 6px;
+}
+
+.range-slider-thumb::-moz-range-thumb {
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background-color: #ffffff;
+  border: 2.5px solid #0045cc;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
