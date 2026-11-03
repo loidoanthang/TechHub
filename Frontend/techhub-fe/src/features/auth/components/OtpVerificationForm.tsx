@@ -2,24 +2,61 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Clock, ArrowRight, ArrowLeft, RefreshCw, Loader2, CheckCircle2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Clock, ArrowRight, ArrowLeft, RefreshCw, Loader2, CheckCircle2, AlertCircle, KeyRound } from "lucide-react";
+import {
+  useVerifyEmailMutation,
+  useResendVerificationMutation,
+  useForgotPasswordMutation,
+} from "@/features/auth/api/useAuthMutations";
+import { getPendingAuth, setPendingAuth, clearPendingAuth } from "@/lib/api/token";
+import { ROUTES } from "@/lib/constants";
+import { otpSchema } from "@/features/auth/schemas/authSchemas";
+import type { AxiosError } from "axios";
+import type { ApiResponse } from "@/types/api";
 
 export function OtpVerificationForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const emailParam = searchParams.get("email") || "alex.morgan@example.com";
+
+  // Prefer email and flow from Cookie, fallback to URL search params if present
+  const [email, setEmail] = useState("");
+  const [flow, setFlow] = useState<"verify-email" | "reset-password">("verify-email");
 
   const [digits, setDigits] = useState(["", "", "", "", "", ""]);
-  const [timeLeft, setTimeLeft] = useState(58);
+  const [timeLeft, setTimeLeft] = useState(60);
   const [canResend, setCanResend] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const verifyMutation = useVerifyEmailMutation();
+  const resendMutation = useResendVerificationMutation();
+  const forgotMutation = useForgotPasswordMutation();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    const pending = getPendingAuth();
+    const resolvedEmail = pending.email || searchParams.get("email") || "";
+    const resolvedFlow =
+      pending.flow ||
+      (searchParams.get("type") === "reset-password" || searchParams.get("type") === "forgot-password"
+        ? "reset-password"
+        : "verify-email");
+
+    if (!resolvedEmail) {
+      // If user directly opened /verify-otp with no pending session or params, redirect to login
+      router.replace(ROUTES.LOGIN);
+      return;
+    }
+
+    setEmail(resolvedEmail);
+    setFlow(resolvedFlow);
+  }, [searchParams, router]);
+
+  const isResetPassword = flow === "reset-password";
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -84,29 +121,103 @@ export function OtpVerificationForm() {
     inputRefs.current[focusTarget]?.focus();
   };
 
-  const handleResend = () => {
-    if (!canResend) return;
-    setTimeLeft(60);
-    setCanResend(false);
-    setDigits(["", "", "", "", "", ""]);
-    inputRefs.current[0]?.focus();
+  const handleResend = async () => {
+    if (!canResend || !email || resendMutation.isPending || forgotMutation.isPending) return;
+    setErrorMessage(null);
+    setInfoMessage(null);
+
+    try {
+      if (isResetPassword) {
+        await forgotMutation.mutateAsync({ email });
+        setInfoMessage("Mã đặt lại mật khẩu mới đã được gửi tới email của bạn.");
+      } else {
+        await resendMutation.mutateAsync({ email });
+        setInfoMessage("Mã kích hoạt mới đã được gửi tới email của bạn.");
+      }
+      setTimeLeft(60);
+      setCanResend(false);
+      setDigits(["", "", "", "", "", ""]);
+      inputRefs.current[0]?.focus();
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiResponse<unknown>>;
+      setErrorMessage(
+        axiosError.response?.data?.message || "Không thể gửi lại mã xác thực. Vui lòng thử lại sau."
+      );
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (digits.some((d) => !d)) return;
+    setErrorMessage(null);
+    setInfoMessage(null);
 
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsSuccess(true);
+    const code = digits.join("");
+    const validation = otpSchema.safeParse({ token: code });
+    if (!validation.success) {
+      setErrorMessage(validation.error.issues[0]?.message || "Mã OTP phải có đúng 6 chữ số.");
+      return;
+    }
+
+    if (!email) {
+      setErrorMessage("Không tìm thấy thông tin email. Vui lòng đăng nhập lại.");
+      return;
+    }
+
+    if (isResetPassword) {
+      // Flow 1: Forgot/Reset Password -> lưu code vào Cookie & chuyển sang màn Reset Password không lộ url
+      setIsRedirecting(true);
+      setPendingAuth(email, "reset-password", code);
       setTimeout(() => {
-        window.location.href = "/";
-      }, 1200);
-    }, 1200);
+        router.push(ROUTES.RESET_PASSWORD);
+      }, 600);
+      return;
+    }
+
+    // Flow 2: Verify Email kích hoạt tài khoản
+    try {
+      const response = await verifyMutation.mutateAsync({
+        email,
+        token: code,
+      });
+
+      if (response && response.success) {
+        clearPendingAuth();
+        setTimeout(() => {
+          router.push(`${ROUTES.LOGIN}?verified=true`);
+        }, 1200);
+      }
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiResponse<unknown>>;
+      const errorData = axiosError.response?.data;
+      const rawMessage = (errorData?.message || "").toLowerCase();
+
+      let message =
+        errorData?.message || "Mã OTP không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra lại.";
+
+      if (rawMessage.includes("expired")) {
+        message = "Mã xác thực đã hết hạn. Vui lòng nhấn 'Gửi lại' để nhận mã mới.";
+      } else if (rawMessage.includes("invalid") || rawMessage.includes("not found")) {
+        message = "Mã OTP không chính xác. Vui lòng kiểm tra lại 6 chữ số.";
+      } else if (rawMessage.includes("too many")) {
+        message = "Bạn đã nhập sai quá nhiều lần. Vui lòng gửi lại mã mới.";
+      }
+
+      if (errorData?.data && typeof errorData.data === "object") {
+        const fieldErrors = Object.values(errorData.data as Record<string, string>).join(", ");
+        if (fieldErrors) message = fieldErrors;
+      }
+
+      setErrorMessage(message);
+    }
   };
 
-  const maskedEmail = emailParam.replace(/(^.{2})(.*)(@.*$)/, "$1***$3");
+  const maskedEmail = email
+    ? email.replace(/(^.{2})(.*)(@.*$)/, "$1***$3")
+    : "your registered email";
+
+  const isResending = resendMutation.isPending || forgotMutation.isPending;
+  const isLoading = verifyMutation.isPending || isRedirecting;
+  const isSuccess = verifyMutation.isSuccess || isRedirecting;
 
   return (
     <div className="relative w-full max-w-[460px]">
@@ -117,11 +228,16 @@ export function OtpVerificationForm() {
       <div className="relative w-full bg-white rounded-2xl shadow-[0_12px_40px_-10px_rgba(11,28,48,0.08)] p-6 sm:p-9 flex flex-col items-center">
         {/* Title */}
         <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#eff4ff] text-[#0045cc] mb-3">
+            {isResetPassword ? <KeyRound className="w-6 h-6" /> : <CheckCircle2 className="w-6 h-6" />}
+          </div>
           <h1 className="font-heading text-2xl sm:text-[28px] font-bold text-[#0b1c30] tracking-tight mb-2">
-            Verify OTP
+            {isResetPassword ? "Verify Reset Code" : "Verify Email"}
           </h1>
           <p className="text-sm text-[#434656] max-w-[280px] mx-auto">
-            Please enter the 6-digit verification code sent to your email
+            {isResetPassword
+              ? "Please enter the 6-digit verification code sent to your email to reset your password"
+              : "Please enter the 6-digit verification code sent to your email to activate account"}
           </p>
           <div className="mt-2 inline-flex items-center justify-center">
             <span className="font-mono text-xs font-semibold text-[#0b1c30] bg-[#eff4ff] px-2.5 py-1 rounded-md">
@@ -129,6 +245,20 @@ export function OtpVerificationForm() {
             </span>
           </div>
         </div>
+
+        {errorMessage && (
+          <div className="w-full flex items-start gap-2.5 p-3.5 mb-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs leading-relaxed animate-in fade-in duration-200">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {infoMessage && (
+          <div className="w-full flex items-start gap-2.5 p-3.5 mb-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-xs leading-relaxed animate-in fade-in duration-200">
+            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{infoMessage}</span>
+          </div>
+        )}
 
         {/* 6 Digit Input Grid */}
         <form onSubmit={handleSubmit} className="w-full flex flex-col items-center">
@@ -161,7 +291,7 @@ export function OtpVerificationForm() {
             <span>
               Resend code in{" "}
               <span className="font-mono font-semibold text-[#0045cc]">
-                {mounted ? (timeLeft > 0 ? `${timeLeft}s` : "0s") : "58s"}
+                {mounted ? (timeLeft > 0 ? `${timeLeft}s` : "0s") : "60s"}
               </span>
             </span>
           </div>
@@ -175,16 +305,16 @@ export function OtpVerificationForm() {
             {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Verifying...</span>
+                <span>{isResetPassword ? "Verifying & Proceeding..." : "Verifying..."}</span>
               </>
             ) : isSuccess ? (
               <>
                 <CheckCircle2 className="w-5 h-5 text-emerald-300" />
-                <span>Verified!</span>
+                <span>{isResetPassword ? "Code Verified!" : "Verified Successfully!"}</span>
               </>
             ) : (
               <>
-                <span>Verify Code</span>
+                <span>{isResetPassword ? "Continue to Reset Password" : "Verify Code"}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -196,22 +326,31 @@ export function OtpVerificationForm() {
             <button
               type="button"
               onClick={handleResend}
-              disabled={!canResend}
+              disabled={!canResend || isResending}
               className={`font-semibold inline-flex items-center gap-1 ml-1 ${
-                !canResend
+                !canResend || isResending
                   ? "text-[#737688] opacity-50 cursor-not-allowed"
                   : "text-[#0045cc] hover:underline cursor-pointer"
               }`}
             >
-              <span>Resend</span>
-              <RefreshCw className="w-3.5 h-3.5" />
+              {isResending ? (
+                <>
+                  <span>Sending...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                </>
+              ) : (
+                <>
+                  <span>Resend</span>
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </>
+              )}
             </button>
           </div>
 
           {/* Back to login */}
           <div className="w-full mt-6 pt-4 border-t border-[#eff4ff] flex items-center justify-center">
             <Link
-              href="/login"
+              href={ROUTES.LOGIN}
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#434656] hover:text-[#0b1c30] transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />

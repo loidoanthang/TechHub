@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { LoginForm } from "@/features/auth/components/LoginForm";
 import { Metadata } from "next";
 
@@ -7,5 +8,13 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
-  return <LoginForm />;
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full max-w-[440px] h-[480px] bg-white rounded-2xl animate-pulse" />
+      }
+    >
+      <LoginForm />
+    </Suspense>
+  );
 }

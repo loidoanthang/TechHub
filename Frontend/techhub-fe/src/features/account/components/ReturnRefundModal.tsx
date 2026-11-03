@@ -1,65 +1,91 @@
 "use client";
 
 import { useState } from "react";
-import { X, RotateCcw, Upload, Image as ImageIcon, AlertCircle } from "lucide-react";
-import { OrderDTO } from "@/mocks/orders.mock";
-import { formatPrice } from "@/lib/utils";
+import { X, RotateCcw, Upload, AlertCircle, Loader2 } from "lucide-react";
+import { useCreateReturnRequestMutation } from "@/features/orders/hooks/useOrderQueries";
 
 interface ReturnRefundModalProps {
-  order: OrderDTO | null;
+  orderId: string;
+  orderNumber: string;
+  shopName: string;
+  totalAmount: number;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (orderId: string, reason: string, description: string, mediaCount: number) => void;
+  onSuccess: () => void;
 }
 
 const RETURN_REASONS = [
-  "Item defective / Does not power on or function properly",
-  "Item physically damaged or broken in transit",
-  "Received wrong item / Incorrect variant delivered",
-  "Item missing accessories or components",
-  "Item noticeably does not match description or specifications",
+  { code: "DEFECTIVE", label: "Item defective / Does not power on or function properly" },
+  { code: "DAMAGED", label: "Item physically damaged or broken in transit" },
+  { code: "WRONG_ITEM", label: "Received wrong item / Incorrect variant delivered" },
+  { code: "MISSING_PARTS", label: "Item missing accessories or components" },
+  { code: "NOT_AS_DESCRIBED", label: "Item noticeably does not match description or specifications" },
 ];
 
 export function ReturnRefundModal({
-  order,
+  orderId,
+  orderNumber,
+  shopName,
+  totalAmount,
   isOpen,
   onClose,
   onSuccess,
 }: ReturnRefundModalProps) {
-  const [selectedReason, setSelectedReason] = useState(RETURN_REASONS[0]);
+  const [selectedReasonCode, setSelectedReasonCode] = useState(RETURN_REASONS[0].code);
   const [description, setDescription] = useState("");
-  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [evidenceImages, setEvidenceImages] = useState<string[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  if (!isOpen || !order) return null;
+  const createReturnRequestMutation = useCreateReturnRequestMutation();
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const remainingSlots = 5 - uploadedFiles.length;
-      const filesToAdd = Array.from(e.target.files).slice(0, remainingSlots);
-      const newUrls = filesToAdd.map((file) => URL.createObjectURL(file));
-      setUploadedFiles((prev) => [...prev, ...newUrls]);
-    }
+  if (!isOpen) return null;
+
+  const formatPrice = (val: number) => {
+    return new Intl.NumberFormat("vi-VN").format(val) + "₫";
   };
 
-  const removeFile = (idx: number) => {
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== idx));
+  const handleAddSampleImage = () => {
+    if (evidenceImages.length >= 3) return;
+    setEvidenceImages((prev) => [
+      ...prev,
+      "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=600&q=80",
+    ]);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const removeImage = (idx: number) => {
+    setEvidenceImages((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setErrorMessage(null);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      onSuccess(order.id, selectedReason, description, uploadedFiles.length);
+    const reasonItem = RETURN_REASONS.find((r) => r.code === selectedReasonCode);
+    const reasonText = `${reasonItem?.label || selectedReasonCode}: ${description.trim()}`;
+
+    try {
+      await createReturnRequestMutation.mutateAsync({
+        orderId,
+        data: {
+          reason: reasonText,
+          proofImages: evidenceImages.length > 0 ? evidenceImages.join(",") : undefined,
+        },
+      });
+      onSuccess();
       onClose();
-    }, 600);
+    } catch (err: unknown) {
+      const errObj = err as { response?: { data?: { message?: string } }; message?: string };
+      setErrorMessage(
+        errObj?.response?.data?.message ||
+        errObj?.message ||
+        "Failed to submit return request. Please try again."
+      );
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-[#c3c5d9]/30 relative flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-[#c3c5d9]/30 relative flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -68,13 +94,10 @@ export function ReturnRefundModal({
             </div>
             <div>
               <h3 className="font-heading text-lg font-bold text-[#0b1c30]">
-                Request Return &amp; Refund
+                Return &amp; Refund Request
               </h3>
               <p className="text-xs text-[#737688] font-mono">
-                Entire Order #{order.orderNumber} • Refund Value:{" "}
-                <strong className="text-[#0045cc] font-sans">
-                  {formatPrice(order.totalAmount)}
-                </strong>
+                Order #{orderNumber} • {shopName}
               </p>
             </div>
           </div>
@@ -87,125 +110,121 @@ export function ReturnRefundModal({
           </button>
         </div>
 
-        {/* Return & Refund Policy Banner */}
-        <div className="p-3.5 rounded-2xl bg-[#eff4ff] text-xs text-[#434656] flex items-start gap-2.5">
-          <AlertCircle className="w-4 h-4 text-[#0045cc] shrink-0 mt-0.5" />
-          <div className="leading-relaxed">
-            Return requests apply to the entire order within 7 days of delivery. Once submitted, TechHub Escrow pauses merchant payout until the claim is resolved.
-          </div>
+        {/* Refund Estimated Banner */}
+        <div className="p-3.5 rounded-2xl bg-[#0045cc]/5 border border-[#0045cc]/15 flex items-center justify-between">
+          <span className="text-xs text-[#0b1c30] font-medium">Estimated Refund:</span>
+          <span className="text-sm font-bold text-[#0045cc]">{formatPrice(totalAmount)}</span>
         </div>
+
+        {errorMessage && (
+          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {/* Reason */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold text-[#0b1c30]">
               Reason for Return <span className="text-[#ba1a1a]">*</span>
             </label>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2">
               {RETURN_REASONS.map((r) => (
                 <label
-                  key={r}
-                  className={`flex items-center gap-3 p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
-                    selectedReason === r
-                      ? "border-[#0045cc] bg-[#eff4ff] text-[#0045cc] font-medium"
-                      : "border-[#c3c5d9]/40 hover:bg-[#eff4ff]/40 text-[#434656]"
+                  key={r.code}
+                  className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
+                    selectedReasonCode === r.code
+                      ? "border-[#0045cc] bg-[#eff4ff]/60 font-semibold text-[#0045cc]"
+                      : "border-[#c3c5d9]/30 hover:bg-[#eff4ff]/30 text-[#434656]"
                   }`}
                 >
                   <input
                     type="radio"
                     name="return_reason"
-                    checked={selectedReason === r}
-                    onChange={() => setSelectedReason(r)}
-                    className="accent-[#0045cc]"
+                    value={r.code}
+                    checked={selectedReasonCode === r.code}
+                    onChange={() => setSelectedReasonCode(r.code)}
+                    className="accent-[#0045cc] mt-0.5 cursor-pointer"
                   />
-                  <span>{r}</span>
+                  <span>{r.label}</span>
                 </label>
               ))}
             </div>
           </div>
 
-          {/* Description */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold text-[#0b1c30]">
               Detailed Description <span className="text-[#ba1a1a]">*</span>
             </label>
             <textarea
-              rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Please provide specific details about the issue with serial numbers, package conditions, etc."
-              className="w-full text-xs p-3 rounded-xl border border-[#c3c5d9]/60 focus:outline-none focus:border-[#0045cc] focus:ring-1 focus:ring-[#0045cc]"
+              rows={3}
+              placeholder="Please provide details about the issue with photos/video timestamps..."
               required
+              className="w-full p-3 rounded-2xl border border-[#c3c5d9]/40 bg-[#eff4ff]/30 text-xs text-[#0b1c30] placeholder:text-[#737688] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 transition-all resize-none"
             />
           </div>
 
-          {/* Media Evidence Upload (Max 5 items) */}
+          {/* Evidence Attachments */}
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#0b1c30]">
-                Photo / Video Evidence (Max 5)
-              </span>
-              <span className="text-[#737688]">{uploadedFiles.length}/5 files</span>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-[#0b1c30]">
+                Evidence Media (Max 3)
+              </label>
+              <button
+                type="button"
+                onClick={handleAddSampleImage}
+                disabled={evidenceImages.length >= 3}
+                className="text-[11px] font-semibold text-[#0045cc] hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-40"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>+ Add Sample Photo</span>
+              </button>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              {uploadedFiles.map((url, idx) => (
-                <div
-                  key={idx}
-                  className="w-16 h-16 rounded-xl border border-[#c3c5d9]/60 relative overflow-hidden group shrink-0"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={url}
-                    alt="Proof"
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeFile(idx)}
-                    className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-
-              {uploadedFiles.length < 5 && (
-                <label className="w-16 h-16 rounded-xl border-2 border-dashed border-[#c3c5d9] hover:border-[#0045cc] bg-[#eff4ff]/40 hover:bg-[#eff4ff] flex flex-col items-center justify-center gap-1 text-[#737688] hover:text-[#0045cc] cursor-pointer transition-colors shrink-0">
-                  <Upload className="w-4 h-4" />
-                  <span className="text-[9px] font-semibold">Upload</span>
-                  <input
-                    type="file"
-                    accept="image/*,video/*"
-                    multiple
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </label>
-              )}
-            </div>
-            <p className="text-[10px] text-[#737688]">
-              Formats: PNG, JPG, MP4 under 25MB. Clear unboxing photos or videos speed up review.
-            </p>
+            {evidenceImages.length > 0 && (
+              <div className="flex gap-2">
+                {evidenceImages.map((img, i) => (
+                  <div key={i} className="relative w-16 h-16 rounded-xl overflow-hidden border border-[#c3c5d9]/40 group">
+                    <img src={img} alt="Evidence" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Action Buttons */}
+          {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#eff4ff]">
             <button
               type="button"
               onClick={onClose}
-              disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl text-xs font-semibold text-[#434656] hover:bg-[#eff4ff] transition-colors cursor-pointer"
+              disabled={createReturnRequestMutation.isPending}
+              className="px-5 py-2.5 rounded-xl border border-[#c3c5d9]/40 hover:bg-[#eff4ff] text-xs font-semibold text-[#434656] transition-colors cursor-pointer disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#0045cc] hover:bg-[#0d5bff] text-white shadow-sm transition-all active:scale-[0.99] flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              disabled={createReturnRequestMutation.isPending}
+              className="px-6 py-2.5 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              {isSubmitting ? "Submitting Request..." : "Submit Return Request"}
+              {createReturnRequestMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                "Submit Return Request"
+              )}
             </button>
           </div>
         </form>

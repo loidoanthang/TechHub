@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -19,9 +20,20 @@ import {
   ThumbsUp,
   MessageSquare,
   AlertTriangle,
+  Loader2,
+  X,
+  Ticket,
+  MapPin,
 } from "lucide-react";
 import { ProductCard } from "@/components/shared";
 import { useCart } from "@/features/cart/context/CartContext";
+import {
+  useShopProfileQuery,
+  useShopVouchersQuery,
+  useShopProductsQuery,
+  resolveSellerSlug,
+} from "@/features/shops";
+import { ROUTES } from "@/lib/constants";
 import type { ProductDetailData, ProductVariant } from "@/types/productDetail";
 
 interface ProductDetailViewProps {
@@ -32,7 +44,53 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
   const [selectedImg, setSelectedImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedStarFilter, setSelectedStarFilter] = useState<number | null>(null);
-  const { openCart } = useCart();
+  const router = useRouter();
+  const { openCart, addToCart, isAddingToCart } = useCart();
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [isBuyNowPending, setIsBuyNowPending] = useState(false);
+  const [toast, setToast] = useState<{
+    message: string;
+    itemInfo?: string;
+  } | null>(null);
+  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Real Shop Data Integration
+  const shopSellerName = useMemo(() => {
+    return resolveSellerSlug(product.merchant.sellerName || product.merchant.name);
+  }, [product.merchant.sellerName, product.merchant.name]);
+
+  const { data: realShop } = useShopProfileQuery(shopSellerName);
+  const { data: shopVouchers } = useShopVouchersQuery(shopSellerName);
+  const displayShopName = realShop?.name || product.merchant.name;
+  const { data: shopProductsData } = useShopProductsQuery(
+    product.merchant.id || realShop?.id || "",
+    displayShopName
+  );
+  const displayAvatarUrl = realShop?.avatarUrl || product.merchant.avatarUrl;
+  const displayWarehouse = realShop?.warehouseProvince
+    ? `${realShop.warehouseDistrict ? realShop.warehouseDistrict + ", " : ""}${realShop.warehouseProvince}`
+    : null;
+  const displayJoined = useMemo(() => {
+    if (realShop?.createdAt) {
+      const d = new Date(realShop.createdAt);
+      return `Tham gia từ ${d.toLocaleDateString("vi-VN", { month: "2-digit", year: "numeric" })}`;
+    }
+    return product.merchant.joinedText || "Đối tác TechHub";
+  }, [realShop?.createdAt, product.merchant.joinedText]);
+
+  const totalShopProducts = shopProductsData?.totalElements ?? product.merchant.totalProducts;
+  const isShopPaused = realShop
+    ? realShop.status === "PAUSED"
+    : product.merchant.status === "PAUSED";
 
   // Multi-Attribute Selection State
   // Extract initial attributes from default variant or first variant
@@ -115,12 +173,93 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
     }
   };
 
-  const handleAddToCart = () => {
-    if (isShopPaused || activeVariant.stock === 0) return;
-    openCart();
+  const handleAddToCart = async () => {
+    if (isShopPaused || isOutOfStock || isAddingToCart || isBuyNowPending) return;
+    setActionError(null);
+    setActionSuccess(null);
+    if (!activeVariant) {
+      setActionError("Vui lòng chọn phân loại sản phẩm.");
+      return;
+    }
+    try {
+      await addToCart({
+        variantId: activeVariant.id,
+        quantity,
+        title: product.title,
+        price: activeVariant.price,
+        imageUrl: activeVariant.imageUrl || product.images[0] || "/images/placeholder.png",
+        specs:
+          activeVariant.name ||
+          Object.entries(selectedAttributes)
+            .map(([k, v]) => `${k}: ${v}`)
+            .join(" • ") ||
+          "Tiêu chuẩn",
+        storeName: product.merchant.name,
+        storeId: product.merchant.id,
+      });
+
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current);
+      }
+
+      const variantDesc = activeVariant.name || Object.values(selectedAttributes).join(", ");
+      setToast({
+        message: "Đã thêm vào giỏ hàng thành công!",
+        itemInfo: `${product.title}${variantDesc ? ` • ${variantDesc}` : ""} (x${quantity})`,
+      });
+
+      // Tự động đóng thông báo sau đúng 5 giây
+      toastTimeoutRef.current = setTimeout(() => {
+        setToast(null);
+      }, 5000);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      const msg =
+        axiosErr?.response?.data?.message ||
+        "Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.";
+      setActionError(msg);
+      setTimeout(() => setActionError(null), 4000);
+    }
   };
 
-  const discountPercent = activeVariant.originalPrice
+  const handleBuyNow = async () => {
+    if (isShopPaused || isOutOfStock || isAddingToCart || isBuyNowPending) return;
+    setActionError(null);
+    setActionSuccess(null);
+    if (!activeVariant) {
+      setActionError("Vui lòng chọn phân loại sản phẩm.");
+      return;
+    }
+    setIsBuyNowPending(true);
+    try {
+      await addToCart({
+        variantId: activeVariant.id,
+        quantity,
+        title: product.title,
+        price: activeVariant.price,
+        imageUrl: activeVariant.imageUrl || product.images[0] || "/images/placeholder.png",
+        specs:
+          activeVariant.name ||
+          Object.entries(selectedAttributes)
+            .map(([k, v]) => `${k}: ${v}`)
+            .join(" • ") ||
+          "Tiêu chuẩn",
+        storeName: product.merchant.name,
+        storeId: product.merchant.id,
+      });
+      router.push(ROUTES.CHECKOUT);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      const msg =
+        axiosErr?.response?.data?.message ||
+        "Không thể tiến hành mua ngay. Vui lòng thử lại.";
+      setActionError(msg);
+      setTimeout(() => setActionError(null), 4000);
+      setIsBuyNowPending(false);
+    }
+  };
+
+  const discountPercent = activeVariant?.originalPrice
     ? Math.round(
         ((activeVariant.originalPrice - activeVariant.price) /
           activeVariant.originalPrice) *
@@ -128,8 +267,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
       )
     : 0;
 
-  const isShopPaused = product.merchant.status === "PAUSED";
-  const isOutOfStock = activeVariant.stock === 0;
+  const isOutOfStock = !activeVariant || activeVariant.stock === 0;
 
   // Review Filter
   const filteredReviews = selectedStarFilter
@@ -308,16 +446,26 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
               <div className="flex items-center gap-4 mt-3 pb-4 border-b border-slate-100 text-xs">
                 <div className="flex items-center gap-1 text-amber-500 font-bold">
                   <Star className="w-4 h-4 fill-current" />
-                  <span>{product.rating.toFixed(1)}</span>
+                  <span>{product.rating ? product.rating.toFixed(1) : "5.0"}</span>
                 </div>
                 <span className="text-slate-300">|</span>
                 <span className="text-slate-500">
-                  <strong className="text-slate-800">{product.reviewsCount}</strong> Verified Ratings
+                  {product.reviewsCount > 0 ? (
+                    <>
+                      <strong className="text-slate-800">{product.reviewsCount}</strong> Đánh giá
+                    </>
+                  ) : (
+                    <span className="text-slate-400">Chưa có đánh giá</span>
+                  )}
                 </span>
-                <span className="text-slate-300">|</span>
-                <span className="text-slate-500">
-                  <strong className="text-slate-800">{product.soldCount}+</strong> Units Shipped
-                </span>
+                {product.soldCount > 0 && (
+                  <>
+                    <span className="text-slate-300">|</span>
+                    <span className="text-slate-500">
+                      <strong className="text-slate-800">{product.soldCount}</strong> Đã bán
+                    </span>
+                  </>
+                )}
                 <span className="text-slate-300">|</span>
                 <span className="font-mono text-slate-500">
                   SKU: <strong className="text-[#0b1c30]">{activeVariant.sku}</strong>
@@ -404,13 +552,14 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
               {/* Quantity & Stock Indicator */}
               <div className="mt-6 flex items-center gap-6">
                 <span className="text-xs font-bold text-[#0b1c30] uppercase tracking-wider">
-                  Quantity:
+                  Số lượng:
                 </span>
                 <div className="flex items-center bg-[#eff4ff] rounded-lg p-1 border border-slate-200">
                   <button
-                    disabled={isOutOfStock || isShopPaused}
+                    disabled={isOutOfStock || isShopPaused || quantity <= 1}
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="w-7 h-7 flex items-center justify-center rounded text-slate-600 hover:bg-white transition-colors disabled:opacity-40"
+                    className="w-7 h-7 flex items-center justify-center rounded text-slate-600 hover:bg-white transition-colors disabled:opacity-40 cursor-pointer"
+                    aria-label="Giảm số lượng"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
@@ -418,9 +567,10 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                     {isOutOfStock ? 0 : quantity}
                   </span>
                   <button
-                    disabled={isOutOfStock || isShopPaused}
-                    onClick={() => setQuantity((q) => Math.min(activeVariant.stock, q + 1))}
-                    className="w-7 h-7 flex items-center justify-center rounded text-slate-600 hover:bg-white transition-colors disabled:opacity-40"
+                    disabled={isOutOfStock || isShopPaused || quantity >= (activeVariant?.stock || 0)}
+                    onClick={() => setQuantity((q) => Math.min(activeVariant?.stock || 1, q + 1))}
+                    className="w-7 h-7 flex items-center justify-center rounded text-slate-600 hover:bg-white transition-colors disabled:opacity-40 cursor-pointer"
+                    aria-label="Tăng số lượng"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -433,29 +583,53 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                     }`}
                   >
                     {isOutOfStock
-                      ? "Temporarily Out of Stock"
-                      : `${activeVariant.stock} items available in warehouse`}
+                      ? "Tạm thời hết hàng"
+                      : `${activeVariant?.stock || 0} sản phẩm có sẵn`}
                   </span>
                 </div>
               </div>
             </div>
 
+            {/* Action Feedback */}
+            {actionError && (
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>{actionError}</span>
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
-                disabled={isOutOfStock || isShopPaused}
+                disabled={isOutOfStock || isShopPaused || isAddingToCart || isBuyNowPending}
                 onClick={handleAddToCart}
                 className="py-3.5 px-6 rounded-xl bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0045cc] font-bold text-sm transition-colors flex items-center justify-center gap-2 border border-[#0045cc]/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ShoppingCart className="w-4 h-4" />
-                <span>Add to Cart</span>
+                {isAddingToCart ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-[#0045cc]" />
+                ) : (
+                  <ShoppingCart className="w-4 h-4" />
+                )}
+                <span>
+                  {isAddingToCart
+                    ? "Đang thêm..."
+                    : isShopPaused
+                    ? "Cửa hàng tạm nghỉ"
+                    : isOutOfStock
+                    ? "Hết hàng"
+                    : "Thêm vào giỏ hàng"}
+                </span>
               </button>
               <button
-                disabled={isOutOfStock || isShopPaused}
-                onClick={handleAddToCart}
+                disabled={isOutOfStock || isShopPaused || isAddingToCart || isBuyNowPending}
+                onClick={handleBuyNow}
                 className="py-3.5 px-6 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white font-bold text-sm transition-colors flex items-center justify-center gap-2 shadow-md cursor-pointer active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>Buy Now</span>
+                {isBuyNowPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                ) : (
+                  <span>Mua ngay</span>
+                )}
               </button>
             </div>
           </div>
@@ -464,66 +638,124 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
 
       {/* 3. Merchant Profile Card */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 w-full">
-        <div className="p-6 rounded-2xl bg-white shadow-sm border border-[#eff4ff] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-          {/* Left: Avatar + Name + Chat / Visit Buttons */}
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-[#0045cc] flex items-center justify-center text-white font-bold text-xl shadow-md shrink-0">
-              {product.merchant.avatarText}
-            </div>
-            <div className="flex flex-col gap-2">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-lg text-[#0b1c30] font-heading">
-                    {product.merchant.name}
-                  </h3>
-                  {product.merchant.verified && (
-                    <span className="px-2 py-0.5 rounded bg-blue-50 text-[#0045cc] text-[10px] font-bold">
-                      VERIFIED STORE
-                    </span>
-                  )}
+        <div className="p-6 rounded-2xl bg-white shadow-sm border border-[#eff4ff] flex flex-col gap-5">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            {/* Left: Avatar + Name + Chat / Visit Buttons */}
+            <div className="flex items-start gap-4">
+              {displayAvatarUrl ? (
+                <img
+                  src={displayAvatarUrl}
+                  alt={displayShopName}
+                  className="w-16 h-16 rounded-2xl object-cover shadow-md shrink-0 border border-slate-200"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-2xl bg-[#0045cc] flex items-center justify-center text-white font-bold text-xl shadow-md shrink-0">
+                  {(displayShopName || "TH").substring(0, 2).toUpperCase()}
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">{product.merchant.joinedText}</p>
-              </div>
+              )}
+              <div className="flex flex-col gap-2">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Link
+                      href={`/shops/${shopSellerName || product.merchant.id}`}
+                      className="font-bold text-lg text-[#0b1c30] hover:text-[#0045cc] transition-colors font-heading"
+                    >
+                      {displayShopName}
+                    </Link>
+                    {product.merchant.verified && (
+                      <span className="px-2 py-0.5 rounded bg-blue-50 text-[#0045cc] text-[10px] font-bold">
+                        VERIFIED STORE
+                      </span>
+                    )}
+                    {isShopPaused && (
+                      <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-600 text-[10px] font-bold">
+                        TẠM NGHỈ
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2.5 text-xs text-slate-500 mt-1 flex-wrap">
+                    <span>{displayJoined}</span>
+                    {displayWarehouse && (
+                      <>
+                        <span>•</span>
+                        <span className="flex items-center gap-1 text-slate-600 font-medium">
+                          <MapPin className="w-3.5 h-3.5 text-[#0045cc]" />
+                          {displayWarehouse}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
 
-              {/* Action Buttons: Chat Now & Visit Shop directly under shop name */}
-              <div className="flex items-center gap-2.5 pt-0.5">
-                <button className="px-3.5 py-1.5 bg-[#eff4ff] hover:bg-[#0045cc] text-[#0045cc] hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-[#0045cc]/20">
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  <span>Chat Now</span>
-                </button>
+                {/* Action Buttons: Chat Now & Visit Shop directly under shop name */}
+                <div className="flex items-center gap-2.5 pt-0.5">
+                  <button className="px-3.5 py-1.5 bg-[#eff4ff] hover:bg-[#0045cc] text-[#0045cc] hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-[#0045cc]/20">
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>Chat Now</span>
+                  </button>
+                  <Link
+                    href={`/shops/${shopSellerName || product.merchant.id}`}
+                    className="px-3.5 py-1.5 bg-white hover:bg-slate-900 text-[#434656] hover:text-white border border-[#c3c5d9]/40 hover:border-slate-900 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                  >
+                    <Building2 className="w-3.5 h-3.5" />
+                    <span>Visit Shop</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Stats Matrix */}
+            <div className="grid grid-cols-3 gap-6 w-full lg:w-auto text-left lg:text-center text-xs border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-100">
+              <div>
+                <p className="text-slate-400">Đánh giá Shop</p>
+                <p className="font-bold text-amber-500 text-sm mt-0.5 flex items-center justify-start lg:justify-center gap-1">
+                  <span>{product.merchant.rating.toFixed(1)}</span>
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                </p>
+              </div>
+              <div>
+                <p className="text-slate-400">Phản hồi</p>
+                <p className="font-bold text-[#006b5b] text-sm mt-0.5">
+                  {product.merchant.positiveFeedback}
+                </p>
+              </div>
+              <div>
+                <p className="text-slate-400">Tổng sản phẩm</p>
+                <p className="font-bold text-[#0045cc] text-sm mt-0.5">
+                  {totalShopProducts} sản phẩm
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Shop Vouchers highlight strip */}
+          {shopVouchers && shopVouchers.length > 0 && (
+            <div className="pt-3 border-t border-slate-100 flex items-center gap-2.5 flex-wrap">
+              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5 mr-1">
+                <Ticket className="w-3.5 h-3.5 text-[#0045cc]" />
+                Voucher Cửa hàng:
+              </span>
+              {shopVouchers.slice(0, 3).map((v) => (
                 <Link
-                  href={`/shop/${product.merchant.sellerName || "keychron-official"}`}
-                  className="px-3.5 py-1.5 bg-white hover:bg-slate-900 text-[#434656] hover:text-white border border-[#c3c5d9]/40 hover:border-slate-900 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                  key={v.id}
+                  href={`/shops/${shopSellerName}`}
+                  className="px-2.5 py-1 rounded-lg bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0045cc] border border-[#0045cc]/20 text-xs font-mono font-bold transition-colors flex items-center gap-1"
+                  title={v.name}
                 >
-                  <Building2 className="w-3.5 h-3.5" />
-                  <span>Visit Shop</span>
+                  <span>{v.code}</span>
+                  <span className="text-[10px] font-sans font-medium text-slate-500">
+                    ({v.discountType === "PERCENTAGE" ? `-${v.discountValue}%` : `-${new Intl.NumberFormat("vi-VN").format(v.discountValue)}₫`})
+                  </span>
                 </Link>
-              </div>
+              ))}
+              <Link
+                href={`/shops/${shopSellerName}`}
+                className="text-xs text-[#0045cc] font-semibold hover:underline ml-auto"
+              >
+                Xem tất cả ({shopVouchers.length}) &rarr;
+              </Link>
             </div>
-          </div>
-
-          {/* Right: Stats Matrix */}
-          <div className="grid grid-cols-3 gap-6 w-full lg:w-auto text-left lg:text-center text-xs border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-100">
-            <div>
-              <p className="text-slate-400">Shop Rating</p>
-              <p className="font-bold text-amber-500 text-sm mt-0.5 flex items-center justify-start lg:justify-center gap-1">
-                <span>{product.merchant.rating.toFixed(1)}</span>
-                <Star className="w-3.5 h-3.5 fill-current" />
-              </p>
-            </div>
-            <div>
-              <p className="text-slate-400">Positive Feedback</p>
-              <p className="font-bold text-[#006b5b] text-sm mt-0.5">
-                {product.merchant.positiveFeedback}
-              </p>
-            </div>
-            <div>
-              <p className="text-slate-400">Total Products</p>
-              <p className="font-bold text-[#0045cc] text-sm mt-0.5">
-                {product.merchant.totalProducts} Items
-              </p>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -709,9 +941,15 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           {/* Individual Review Cards */}
           <div className="space-y-4 pt-6">
             {filteredReviews.length === 0 ? (
-              <p className="text-xs text-slate-500 text-center py-6">
-                No reviews found for {selectedStarFilter} stars.
-              </p>
+              <div className="p-8 text-center bg-slate-50/70 rounded-2xl border border-dashed border-slate-200 my-2">
+                <MessageSquare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-slate-700">
+                  Chưa có đánh giá nào cho sản phẩm này
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  Đánh giá sẽ hiển thị tại đây khi người mua để lại nhận xét sau khi nhận hàng.
+                </p>
+              </div>
             ) : (
               filteredReviews.map((rev) => (
                 <div key={rev.id} className="p-5 rounded-2xl bg-[#eff4ff]/50 flex flex-col gap-3 border border-slate-100">
@@ -777,6 +1015,38 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           ))}
         </div>
       </section>
+
+      {/* Floating 5-Second Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[#0b1c30] text-white px-4 py-3.5 rounded-2xl shadow-2xl border border-slate-700/60 animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+            <Check className="w-4 h-4 stroke-[2.5]" />
+          </div>
+          <div className="text-xs">
+            <p className="font-bold text-white">{toast.message}</p>
+            {toast.itemInfo && (
+              <p className="text-slate-300 text-[11px] truncate max-w-[240px] mt-0.5">
+                {toast.itemInfo}
+              </p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => openCart()}
+            className="ml-2 px-2.5 py-1 rounded-lg bg-[#0045cc] hover:bg-[#0d5bff] text-white text-[11px] font-bold shrink-0 transition-colors cursor-pointer"
+          >
+            Xem giỏ
+          </button>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-slate-400 hover:text-white p-1 rounded cursor-pointer"
+            aria-label="Đóng thông báo"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

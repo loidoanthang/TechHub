@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Star, ShieldCheck, ShoppingCart } from "lucide-react";
+import { Star, ShieldCheck, ChevronRight } from "lucide-react";
 import type { Product } from "@/types/product";
 
 interface ProductCardProps {
@@ -8,23 +8,19 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const formattedPrice = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(product.price);
+  const formattedPrice = new Intl.NumberFormat("vi-VN").format(product.price) + "₫";
 
   const formattedOriginalPrice = product.originalPrice
-    ? new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(product.originalPrice)
+    ? new Intl.NumberFormat("vi-VN").format(product.originalPrice) + "₫"
     : null;
+
+  const productUrl = `/products/${product.slug || product.id}`;
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group relative border border-[#eff4ff]">
       {/* Product Image viewport */}
       <Link
-        href={`/products/${product.id}`}
+        href={productUrl}
         className="relative w-full aspect-square rounded-lg bg-[#eff4ff] overflow-hidden mb-3 p-4 flex items-center justify-center"
       >
         <Image
@@ -47,8 +43,18 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Product Details */}
       <div className="flex flex-col flex-1">
         {/* Vendor tag */}
-        <div className="flex items-center gap-1.5 text-[11px] text-[#434656] mb-1">
-          <span className="font-semibold truncate">{product.vendorName}</span>
+        <div className="flex items-center gap-1.5 text-[11px] text-[#434656] mb-1 z-10">
+          {product.vendorSlug ? (
+            <Link
+              href={`/shops/${product.vendorSlug}`}
+              className="font-semibold truncate hover:text-[#0045cc] transition-colors hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {product.vendorName}
+            </Link>
+          ) : (
+            <span className="font-semibold truncate">{product.vendorName}</span>
+          )}
           {product.isVerifiedVendor && (
             <ShieldCheck className="w-3.5 h-3.5 text-[#0045cc] flex-shrink-0" />
           )}
@@ -56,7 +62,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Title */}
         <Link
-          href={`/products/${product.id}`}
+          href={productUrl}
           className="text-sm font-semibold text-[#0b1c30] line-clamp-2 hover:text-[#0045cc] transition-colors mb-2 leading-snug"
           title={product.title}
         >
@@ -97,12 +103,10 @@ export function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
 
-          <button
-            aria-label="Add to Cart"
-            className="w-9 h-9 rounded-lg bg-[#eff4ff] hover:bg-[#0045cc] text-[#0045cc] hover:text-white flex items-center justify-center transition-colors shadow-sm"
-          >
-            <ShoppingCart className="w-4 h-4" />
-          </button>
+          <span className="text-xs font-semibold text-[#0045cc] group-hover:underline flex items-center gap-0.5">
+            Chi tiết
+            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </span>
         </div>
       </div>
     </div>

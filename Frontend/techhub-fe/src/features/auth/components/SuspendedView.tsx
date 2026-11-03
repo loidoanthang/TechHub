@@ -1,11 +1,23 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { Lock, ShieldAlert, Headphones, ArrowLeft } from "lucide-react";
-import { mockSuspendedInfo } from "@/mocks";
+import { clearTokens } from "@/lib/api/token";
+import { ROUTES } from "@/lib/constants";
 
 export function SuspendedView() {
-  const info = mockSuspendedInfo;
+  useEffect(() => {
+    clearTokens();
+  }, []);
+
+  const info = {
+    accountEmail: "support@techhub.market",
+    detectionFlag: "Security Policy Flag / Admin Lock",
+    status: "Suspended",
+    supportEmail: "support@techhub.market",
+    referenceCode: "TH-SECURITY",
+  };
 
   return (
     <div className="relative w-full max-w-[480px] flex flex-col items-center">
@@ -34,7 +46,7 @@ export function SuspendedView() {
 
         {/* Description */}
         <p className="text-sm text-[#434656] max-w-[380px] mx-auto mb-6 leading-relaxed">
-          Your account has been temporarily locked due to a security policy violation or unusual activity. Please contact our support team for assistance.
+          Your account has been temporarily locked or suspended due to security policy violations or administrative action. Please contact our support team for assistance.
         </p>
 
         {/* Technical Status Strip */}
@@ -70,7 +82,7 @@ export function SuspendedView() {
           </a>
 
           <Link
-            href="/login"
+            href={ROUTES.LOGIN}
             className="w-full h-10 rounded-xl bg-transparent hover:bg-[#eff4ff] text-[#434656] hover:text-[#0b1c30] text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />

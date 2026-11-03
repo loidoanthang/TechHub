@@ -1,54 +1,84 @@
 "use client";
 
 import { useState } from "react";
-import { X, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { OrderDTO } from "@/mocks/orders.mock";
+import { X, AlertTriangle, Loader2 } from "lucide-react";
+import { useCancelOrderMutation, useRequestCancellationMutation } from "@/features/orders/hooks/useOrderQueries";
+import type { CancellationReasonCode, OrderStatus } from "@/types/enums";
 
 interface CancelOrderModalProps {
-  order: OrderDTO | null;
+  orderId: string;
+  orderNumber: string;
+  shopName: string;
+  status: OrderStatus;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (orderId: string, isDirect: boolean, reason: string) => void;
+  onSuccess: (isDirect: boolean) => void;
 }
 
-const CANCEL_REASONS = [
-  "Changed my mind / Need to update delivery address",
-  "Found a cheaper price elsewhere",
-  "Ordered by mistake / Duplicate order",
-  "Payment method issue / Want to change payment",
-  "Seller is taking too long to prepare package",
-  "Other reason",
+const REASON_OPTIONS: { code: CancellationReasonCode; label: string }[] = [
+  { code: "THAY_DOI_Y_DINH", label: "Changed my mind / Need to update delivery address" },
+  { code: "TIM_THAY_GIA_TOT_HON", label: "Found a cheaper price elsewhere" },
+  { code: "CHANGE_PAYMENT_METHOD", label: "Payment method issue / Want to change payment" },
+  { code: "CHANGE_SHIPPING_ADDRESS", label: "Need to change shipping address" },
+  { code: "KHAC", label: "Other reason" },
 ];
 
 export function CancelOrderModal({
-  order,
+  orderId,
+  orderNumber,
+  shopName,
+  status,
   isOpen,
   onClose,
   onSuccess,
 }: CancelOrderModalProps) {
-  const [selectedReason, setSelectedReason] = useState(CANCEL_REASONS[0]);
+  const [selectedReasonCode, setSelectedReasonCode] = useState<CancellationReasonCode>("THAY_DOI_Y_DINH");
   const [customReason, setCustomReason] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  if (!isOpen || !order) return null;
+  const cancelOrderMutation = useCancelOrderMutation();
+  const requestCancellationMutation = useRequestCancellationMutation();
 
-  // Direct cancel if PENDING_PAYMENT, otherwise Request Cancellation if CONFIRMED/PROCESSING
-  const isDirectCancel = order.status === "PENDING_PAYMENT";
+  if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Direct cancel if PENDING_PAYMENT, otherwise Request Cancellation if PROCESSING/CONFIRMED
+  const isDirectCancel = status === "PENDING_PAYMENT";
+  const isPending = cancelOrderMutation.isPending || requestCancellationMutation.isPending;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setErrorMessage(null);
 
-    const finalReason =
-      selectedReason === "Other reason" && customReason.trim()
-        ? customReason.trim()
-        : selectedReason;
+    const reasonNote = selectedReasonCode === "KHAC" ? customReason.trim() : undefined;
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      onSuccess(order.id, isDirectCancel, finalReason);
+    try {
+      if (isDirectCancel) {
+        await cancelOrderMutation.mutateAsync({
+          orderId,
+          data: {
+            reasonCode: selectedReasonCode,
+            reasonNote,
+          },
+        });
+      } else {
+        await requestCancellationMutation.mutateAsync({
+          orderId,
+          data: {
+            reasonCode: selectedReasonCode,
+            reasonNote,
+          },
+        });
+      }
+      onSuccess(isDirectCancel);
       onClose();
-    }, 600);
+    } catch (err: unknown) {
+      const errObj = err as { response?: { data?: { message?: string } }; message?: string };
+      setErrorMessage(
+        errObj?.response?.data?.message ||
+        errObj?.message ||
+        "Failed to submit cancellation. Please try again."
+      );
+    }
   };
 
   return (
@@ -65,7 +95,7 @@ export function CancelOrderModal({
                 {isDirectCancel ? "Cancel Order" : "Request Order Cancellation"}
               </h3>
               <p className="text-xs text-[#737688] font-mono">
-                Order #{order.orderNumber} • {order.shopName}
+                Order #{orderNumber} • {shopName}
               </p>
             </div>
           </div>
@@ -91,6 +121,12 @@ export function CancelOrderModal({
           )}
         </div>
 
+        {errorMessage && (
+          <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+            {errorMessage}
+          </div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
@@ -98,66 +134,69 @@ export function CancelOrderModal({
               Reason for Cancellation <span className="text-[#ba1a1a]">*</span>
             </label>
             <div className="flex flex-col gap-2">
-              {CANCEL_REASONS.map((r) => (
+              {REASON_OPTIONS.map((opt) => (
                 <label
-                  key={r}
-                  className={`flex items-center gap-3 p-3 rounded-xl border text-xs cursor-pointer transition-all ${
-                    selectedReason === r
-                      ? "border-[#0045cc] bg-[#eff4ff] text-[#0045cc] font-medium"
-                      : "border-[#c3c5d9]/40 hover:bg-[#eff4ff]/40 text-[#434656]"
+                  key={opt.code}
+                  className={`flex items-center gap-3 p-3 rounded-2xl border text-xs cursor-pointer transition-all ${
+                    selectedReasonCode === opt.code
+                      ? "border-[#0045cc] bg-[#eff4ff]/60 font-semibold text-[#0045cc]"
+                      : "border-[#c3c5d9]/30 hover:bg-[#eff4ff]/30 text-[#434656]"
                   }`}
                 >
                   <input
                     type="radio"
                     name="cancel_reason"
-                    checked={selectedReason === r}
-                    onChange={() => setSelectedReason(r)}
-                    className="accent-[#0045cc]"
+                    value={opt.code}
+                    checked={selectedReasonCode === opt.code}
+                    onChange={() => setSelectedReasonCode(opt.code)}
+                    className="accent-[#0045cc] cursor-pointer"
                   />
-                  <span>{r}</span>
+                  <span>{opt.label}</span>
                 </label>
               ))}
             </div>
           </div>
 
-          {selectedReason === "Other reason" && (
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-[#434656]">
-                Provide details
+          {selectedReasonCode === "KHAC" && (
+            <div className="flex flex-col gap-1.5 animate-in fade-in duration-150">
+              <label className="text-xs font-semibold text-[#0b1c30]">
+                Please describe the specific reason:
               </label>
               <textarea
-                rows={3}
                 value={customReason}
                 onChange={(e) => setCustomReason(e.target.value)}
-                placeholder="Explain why you wish to cancel this order..."
-                className="w-full text-xs p-3 rounded-xl border border-[#c3c5d9]/60 focus:outline-none focus:border-[#0045cc] focus:ring-1 focus:ring-[#0045cc]"
+                rows={3}
+                placeholder="Details help us process cancellations and resolve inquiries faster..."
                 required
+                className="w-full p-3 rounded-2xl border border-[#c3c5d9]/40 bg-[#eff4ff]/30 text-xs text-[#0b1c30] placeholder:text-[#737688] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 transition-all resize-none"
               />
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#eff4ff]">
+          {/* Action buttons */}
+          <div className="flex items-center justify-end gap-3 pt-2">
             <button
               type="button"
               onClick={onClose}
-              disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl text-xs font-semibold text-[#434656] hover:bg-[#eff4ff] transition-colors cursor-pointer"
+              disabled={isPending}
+              className="px-5 py-2.5 rounded-xl border border-[#c3c5d9]/40 hover:bg-[#eff4ff] text-xs font-semibold text-[#434656] transition-colors cursor-pointer disabled:opacity-50"
             >
-              Keep Order
+              Nevermind
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="px-5 py-2.5 rounded-xl text-xs font-bold bg-[#ba1a1a] hover:bg-[#93000a] text-white shadow-sm transition-all active:scale-[0.99] flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              disabled={isPending}
+              className="px-5 py-2.5 rounded-xl bg-[#ba1a1a] hover:bg-[#93000a] text-white text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer disabled:opacity-60"
             >
-              {isSubmitting ? (
-                <span>Processing...</span>
-              ) : (
+              {isPending ? (
                 <>
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{isDirectCancel ? "Confirm Cancellation" : "Submit Request"}</span>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Processing...</span>
                 </>
+              ) : isDirectCancel ? (
+                "Confirm Immediate Cancellation"
+              ) : (
+                "Submit Request to Merchant"
               )}
             </button>
           </div>

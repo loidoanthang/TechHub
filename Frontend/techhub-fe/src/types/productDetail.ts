@@ -24,6 +24,7 @@ export interface MerchantInfo {
   id: string;
   name: string;
   sellerName?: string;
+  avatarUrl?: string;
   avatarText: string;
   joinedText: string;
   rating: number; // e.g. 4.9 (Average rating across shop reviews in DB)

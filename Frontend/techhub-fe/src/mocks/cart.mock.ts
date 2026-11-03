@@ -7,6 +7,12 @@ export interface CartItem {
   price: number;
   quantity: number;
   imageUrl: string;
+  stockQuantity?: number;
+  isOutOfStock?: boolean;
+  isAvailable?: boolean;
+  unavailableReason?: string | null;
+  variantId?: string;
+  productId?: string;
 }
 
 export interface Voucher {
