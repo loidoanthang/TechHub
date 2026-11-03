@@ -13,11 +13,21 @@ import {
   LogOut,
   ChevronRight,
 } from "lucide-react";
-import { mockUserProfile } from "@/mocks";
+import { useProfileQuery } from "../hooks/useAccountQueries";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function AccountSidebar() {
   const pathname = usePathname();
-  const profile = mockUserProfile;
+  const { data: profile } = useProfileQuery();
+  const { logout } = useAuth();
+
+  const fullName = profile
+    ? `${profile.firstName || ""} ${profile.lastName || ""}`.trim() || profile.email
+    : "My Account";
+
+  const avatarUrl =
+    profile?.avatarUrl ||
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80";
 
   const navItems = [
     {
@@ -30,7 +40,7 @@ export function AccountSidebar() {
       label: "My Purchases & Orders",
       href: "/account/orders",
       icon: Receipt,
-      badge: profile.ordersCount,
+      badge: null,
     },
     {
       label: "Shipping Addresses",
@@ -45,10 +55,10 @@ export function AccountSidebar() {
       badge: null,
     },
     {
-      label: "Security & Password",
-      href: "#",
+      label: "Bảo mật & Mật khẩu",
+      href: "/account/security",
       icon: Lock,
-      hasDot: true,
+      hasDot: false,
       badge: null,
     },
     {
@@ -68,14 +78,14 @@ export function AccountSidebar() {
           <div className="relative flex-shrink-0">
             <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-[#0045cc]/20 relative shadow-sm">
               <Image
-                src={profile.avatarUrl}
-                alt={`${profile.firstName} ${profile.lastName}`}
+                src={avatarUrl}
+                alt={fullName}
                 fill
                 className="object-cover"
                 unoptimized
               />
             </div>
-            {profile.emailVerified && (
+            {profile?.emailVerified && (
               <div
                 className="absolute -bottom-1 -right-1 bg-[#0045cc] text-white w-5 h-5 rounded-full flex items-center justify-center shadow-sm"
                 title="Identity Verified"
@@ -86,87 +96,73 @@ export function AccountSidebar() {
           </div>
           <div className="flex flex-col min-w-0">
             <h3 className="font-heading text-lg font-bold text-[#0b1c30] truncate">
-              {profile.firstName} {profile.lastName}
+              {fullName}
             </h3>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="text-[11px] font-bold text-[#006b5b] bg-[#eff4ff] px-2 py-0.5 rounded-full">
-                {profile.tier}
+                {profile?.roles?.[0] || "BUYER"}
               </span>
               <span className="text-xs text-[#737688] font-mono">
-                {profile.status}
+                {profile?.status || "ACTIVE"}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation Rail Container */}
-      <nav className="bg-white rounded-2xl p-2 shadow-sm border border-[#c3c5d9]/25 flex flex-col gap-1">
+      {/* Navigation Stack Bento Card */}
+      <nav className="bg-white rounded-2xl p-3 shadow-sm border border-[#c3c5d9]/25 flex flex-col gap-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
-
           return (
             <Link
               key={item.label}
               href={item.href}
-              className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all font-medium text-sm group ${
+              className={`flex items-center justify-between px-3.5 py-3 rounded-xl transition-all duration-150 text-xs font-semibold ${
                 isActive
-                  ? "bg-[#0045cc] text-white font-semibold shadow-sm"
-                  : "text-[#434656] hover:bg-[#eff4ff] hover:text-[#0b1c30]"
+                  ? "bg-[#0045cc] text-white shadow-sm shadow-[#0045cc]/20"
+                  : "text-[#0b1c30] hover:bg-[#eff4ff] hover:text-[#0045cc]"
               }`}
             >
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-3">
                 <Icon
-                  className={`w-5 h-5 shrink-0 transition-colors ${
-                    isActive
-                      ? "text-white"
-                      : "text-[#737688] group-hover:text-[#0045cc]"
+                  className={`w-4 h-4 ${
+                    isActive ? "text-white" : "text-[#737688]"
                   }`}
                 />
-                <span className="truncate">{item.label}</span>
+                <span>{item.label}</span>
               </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                {item.hasDot && (
-                  <span
-                    className="w-2 h-2 rounded-full bg-emerald-500"
-                    title="2FA Active"
-                  ></span>
+              <div className="flex items-center gap-2">
+                {item.hasDot && !isActive && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 )}
-                {item.badge !== null && (
+                {item.badge !== null && item.badge !== undefined && (
                   <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                       isActive
-                        ? "bg-white/20 text-white"
+                        ? "bg-white text-[#0045cc]"
                         : "bg-[#eff4ff] text-[#0045cc]"
                     }`}
                   >
                     {item.badge}
                   </span>
                 )}
-                <ChevronRight
-                  className={`w-4 h-4 transition-transform ${
-                    isActive
-                      ? "text-white"
-                      : "text-[#737688] opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5"
-                  }`}
-                />
               </div>
             </Link>
           );
         })}
 
-        <div className="my-1.5 bg-[#eff4ff] h-[1px]"></div>
-
-        {/* Sign Out Button */}
-        <Link
-          href="/login"
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-[#ba1a1a] hover:bg-[#ffdad6]/40 transition-colors font-medium text-sm"
-        >
-          <LogOut className="w-5 h-5 shrink-0" />
-          <span>Sign Out</span>
-        </Link>
+        {/* Sign Out Action */}
+        <div className="pt-2 mt-1 border-t border-[#eff4ff]">
+          <button
+            onClick={() => logout()}
+            className="w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+          >
+            <LogOut className="w-4 h-4 text-rose-500" />
+            <span>Sign Out</span>
+          </button>
+        </div>
       </nav>
     </aside>
   );

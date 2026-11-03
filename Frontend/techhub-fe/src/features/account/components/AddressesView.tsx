@@ -10,97 +10,177 @@ import {
   Home,
   Building2,
   CheckCircle2,
+  Loader2,
+  AlertCircle,
+  AlertTriangle,
+  X,
 } from "lucide-react";
-import { MOCK_ADDRESSES, type AddressDTO } from "@/mocks";
+import {
+  useAddressesQuery,
+  useCreateAddressMutation,
+  useUpdateAddressMutation,
+  useDeleteAddressMutation,
+  useSetDefaultAddressMutation,
+} from "../hooks/useAccountQueries";
+import type { AddressResponse } from "@/types/address";
+import type { AddressLabel } from "@/types/enums";
 import { AddressModal } from "./AddressModal";
 
-export function AddressesView() {
-  const [addresses, setAddresses] = useState<AddressDTO[]>(MOCK_ADDRESSES);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingAddress, setEditingAddress] = useState<AddressDTO | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+function formatBackendErrorMessage(rawMessage?: string): string {
+  if (!rawMessage) return "Đã xảy ra lỗi. Vui lòng thử lại.";
+  const lower = rawMessage.toLowerCase();
+  if (lower.includes("invalid vietnamese phone number")) {
+    return "Số điện thoại không hợp lệ (Bắt đầu bằng 03, 05, 07, 08, 09 hoặc +84 và gồm 10 chữ số).";
+  }
+  if (lower.includes("limit") || lower.includes("maximum 10")) {
+    return "Đã đạt giới hạn tối đa: Bạn chỉ có thể lưu tối đa 10 địa chỉ nhận hàng.";
+  }
+  if (lower.includes("cannot delete default")) {
+    return "Không thể xóa địa chỉ mặc định. Vui lòng đặt một địa chỉ khác làm mặc định trước.";
+  }
+  if (lower.includes("cannot unset default")) {
+    return "Không thể hủy mặc định. Vui lòng thiết lập một địa chỉ khác làm mặc định.";
+  }
+  if (lower.includes("recipient name")) {
+    return "Họ và tên người nhận không được để trống hoặc vượt quá 150 ký tự.";
+  }
+  if (lower.includes("street address")) {
+    return "Địa chỉ cụ thể không được để trống hoặc vượt quá 500 ký tự.";
+  }
+  return rawMessage;
+}
 
-  const triggerToast = (msg: string) => {
-    setToastMessage(msg);
+export function AddressesView() {
+  const { data: addresses = [], isLoading, error, refetch } = useAddressesQuery();
+  const createAddressMutation = useCreateAddressMutation();
+  const updateAddressMutation = useUpdateAddressMutation();
+  const deleteAddressMutation = useDeleteAddressMutation();
+  const setDefaultAddressMutation = useSetDefaultAddressMutation();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<AddressResponse | null>(null);
+  const [modalServerError, setModalServerError] = useState<string | null>(null);
+  const [addressToDelete, setAddressToDelete] = useState<AddressResponse | null>(null);
+  const [toast, setToast] = useState<{ message: string; type?: "success" | "error" } | null>(null);
+
+  const triggerToast = (msg: string, type: "success" | "error" = "success") => {
+    setToast({ message: msg, type });
     setTimeout(() => {
-      setToastMessage(null);
-    }, 3000);
+      setToast(null);
+    }, 4000);
   };
 
   const handleOpenAdd = () => {
     if (addresses.length >= 10) {
-      triggerToast("Maximum limit reached: You can store up to 10 shipping addresses.");
+      triggerToast(
+        "Đã đạt giới hạn tối đa: Bạn chỉ có thể lưu tối đa 10 địa chỉ nhận hàng.",
+        "error"
+      );
       return;
     }
     setEditingAddress(null);
+    setModalServerError(null);
     setIsModalOpen(true);
   };
 
-  const handleOpenEdit = (addr: AddressDTO) => {
+  const handleOpenEdit = (addr: AddressResponse) => {
     setEditingAddress(addr);
+    setModalServerError(null);
     setIsModalOpen(true);
   };
 
-  const handleSetDefault = (id: string) => {
-    setAddresses((prev) =>
-      prev.map((a) => ({
-        ...a,
-        isDefault: a.id === id,
-      }))
-    );
-    triggerToast("Default shipping address updated.");
+  const handleSetDefault = async (id: string) => {
+    try {
+      await setDefaultAddressMutation.mutateAsync(id);
+      triggerToast("Đã cập nhật địa chỉ giao hàng mặc định.");
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      triggerToast(
+        formatBackendErrorMessage(axiosErr?.response?.data?.message) || "Không thể đặt địa chỉ mặc định.",
+        "error"
+      );
+    }
   };
 
-  const handleDelete = (id: string) => {
-    const target = addresses.find((a) => a.id === id);
-    if (target?.isDefault) {
-      triggerToast("Cannot delete default address. Please assign another address as default first.");
+  const confirmDelete = async () => {
+    if (!addressToDelete) return;
+    if (addressToDelete.isDefault) {
+      triggerToast(
+        "Không thể xóa địa chỉ mặc định. Vui lòng chỉ định một địa chỉ khác làm mặc định trước.",
+        "error"
+      );
+      setAddressToDelete(null);
       return;
     }
-    setAddresses((prev) => prev.filter((a) => a.id !== id));
-    triggerToast("Shipping address removed.");
-  };
-
-  const handleSaveModal = (data: Partial<AddressDTO>) => {
-    if (editingAddress) {
-      // Update existing
-      setAddresses((prev) =>
-        prev.map((item) => {
-          if (item.id === editingAddress.id) {
-            const updated = { ...item, ...data } as AddressDTO;
-            return updated;
-          }
-          if (data.isDefault) {
-            return { ...item, isDefault: false };
-          }
-          return item;
-        })
+    try {
+      await deleteAddressMutation.mutateAsync(addressToDelete.id);
+      triggerToast("Đã xóa địa chỉ nhận hàng thành công.");
+      setAddressToDelete(null);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      triggerToast(
+        formatBackendErrorMessage(axiosErr?.response?.data?.message) || "Không thể xóa địa chỉ.",
+        "error"
       );
-      triggerToast("Address updated successfully.");
-    } else {
-      // Add new
-      const newAddress: AddressDTO = {
-        id: `addr-${Date.now()}`,
-        recipientName: data.recipientName || "Alex Morgan",
-        phone: data.phone || "(+84) 912 345 678",
-        province: data.province || "",
-        district: data.district || "",
-        ward: data.ward || "",
-        streetAddress: data.streetAddress || "",
-        label: data.label || "HOME",
-        isDefault: addresses.length === 0 ? true : !!data.isDefault,
-        phoneTag: data.phoneTag || "Direct Mobile",
-      };
-
-      setAddresses((prev) => {
-        if (newAddress.isDefault) {
-          return [newAddress, ...prev.map((a) => ({ ...a, isDefault: false }))];
-        }
-        return [...prev, newAddress];
-      });
-      triggerToast("New address added successfully.");
     }
   };
+
+  const handleSaveModal = async (data: {
+    recipientName: string;
+    phone: string;
+    province: string;
+    district: string;
+    ward: string;
+    streetAddress: string;
+    label: AddressLabel;
+    isDefault?: boolean;
+  }) => {
+    setModalServerError(null);
+    try {
+      if (editingAddress) {
+        await updateAddressMutation.mutateAsync({
+          id: editingAddress.id,
+          data: {
+            recipientName: data.recipientName,
+            phone: data.phone,
+            province: data.province,
+            district: data.district,
+            ward: data.ward,
+            streetAddress: data.streetAddress,
+            label: data.label,
+            isDefault: data.isDefault,
+          },
+        });
+        triggerToast("Cập nhật địa chỉ nhận hàng thành công.");
+      } else {
+        await createAddressMutation.mutateAsync({
+          recipientName: data.recipientName,
+          phone: data.phone,
+          province: data.province,
+          district: data.district,
+          ward: data.ward,
+          streetAddress: data.streetAddress,
+          label: data.label,
+          isDefault: addresses.length === 0 ? true : data.isDefault,
+        });
+        triggerToast("Thêm địa chỉ nhận hàng mới thành công.");
+      }
+      setIsModalOpen(false);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      const friendlyMessage = formatBackendErrorMessage(axiosErr?.response?.data?.message);
+      setModalServerError(friendlyMessage);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-80 flex flex-col items-center justify-center gap-3 bg-white rounded-2xl border border-[#c3c5d9]/25">
+        <Loader2 className="w-8 h-8 animate-spin text-[#0045cc]" />
+        <span className="text-xs text-slate-500 font-medium">Đang tải danh sách địa chỉ...</span>
+      </div>
+    );
+  }
 
   return (
     <main className="w-full flex flex-col gap-6">
@@ -109,136 +189,296 @@ export function AddressesView() {
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center gap-2.5">
             <h1 className="font-heading text-xl font-bold text-[#0b1c30]">
-              Shipping Addresses
+              Sổ địa chỉ nhận hàng
             </h1>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#eff4ff] text-[#0045cc]">
-              {addresses.length}/10 stored
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#eff4ff] text-[#0045cc] border border-[#0045cc]/20">
+              {addresses.length}/10 đã lưu
             </span>
           </div>
           <p className="text-xs text-[#737688]">
-            Manage delivery locations for hardware components &amp; certified shipments.
+            Quản lý các địa chỉ giao nhận cho các đơn mua thiết bị công nghệ &amp; linh kiện phần cứng.
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleOpenAdd}
-          className="px-4 py-2.5 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold transition-all shadow-sm flex items-center gap-2 self-start sm:self-center shrink-0 active:scale-[0.99] cursor-pointer"
+          disabled={addresses.length >= 10}
+          className="px-4 py-2.5 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-2 self-start sm:self-center shrink-0 active:scale-[0.99] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Plus className="w-4 h-4" />
-          <span>Add New Address</span>
+          <span>Thêm địa chỉ mới</span>
         </button>
       </div>
 
+      {error && (
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
+            <span>Không thể kết nối để tải danh sách địa chỉ từ máy chủ.</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="px-3 py-1 bg-amber-200/60 hover:bg-amber-200 text-amber-900 rounded-lg font-semibold text-xs transition-colors cursor-pointer"
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
+
       {/* Address Cards List */}
       <div className="flex flex-col gap-4">
-        {addresses.map((addr) => {
-          const fullAddressString = `${addr.streetAddress}, ${addr.ward}, ${addr.district}, ${addr.province}, Vietnam`;
-          const LabelIcon = addr.label === "OFFICE" ? Building2 : addr.label === "HOME" ? Home : MapPin;
-
-          return (
-            <div
-              key={addr.id}
-              className={`bg-white rounded-2xl p-6 shadow-sm relative overflow-hidden flex flex-col gap-4 border transition-all ${
-                addr.isDefault
-                  ? "border-t-4 border-t-[#0045cc] border-[#c3c5d9]/30"
-                  : "border-[#c3c5d9]/25 hover:border-[#0045cc]/30"
-              }`}
+        {addresses.length === 0 ? (
+          <div className="bg-white rounded-2xl p-10 text-center border border-[#c3c5d9]/25 flex flex-col items-center justify-center gap-3">
+            <div className="w-14 h-14 rounded-full bg-[#eff4ff] text-[#0045cc] flex items-center justify-center mb-1">
+              <MapPin className="w-7 h-7" />
+            </div>
+            <div className="text-base font-bold text-[#0b1c30]">Bạn chưa có địa chỉ nhận hàng nào</div>
+            <p className="text-xs text-[#737688] max-w-sm">
+              Lưu địa chỉ nhận hàng giúp quá trình đặt hàng và giao nhận linh kiện công nghệ nhanh chóng hơn.
+            </p>
+            <button
+              onClick={handleOpenAdd}
+              className="mt-2 px-5 py-2.5 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-bold transition-all shadow-sm flex items-center gap-2 cursor-pointer"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  <h3 className="font-heading text-lg font-bold text-[#0b1c30]">
-                    {addr.recipientName}
-                  </h3>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[#eff4ff] text-[#0045cc]">
-                    <LabelIcon className="w-3 h-3" />
-                    <span>{addr.label}</span>
-                  </span>
-                  {addr.isDefault && (
-                    <span className="bg-[#0045cc]/10 text-[#0045cc] text-[11px] font-bold px-2.5 py-0.5 rounded-full">
-                      DEFAULT ADDRESS
+              <Plus className="w-4 h-4" />
+              <span>Thêm địa chỉ đầu tiên</span>
+            </button>
+          </div>
+        ) : (
+          addresses.map((addr) => {
+            const fullAddressString =
+              addr.fullAddress ||
+              `${addr.streetAddress}, ${addr.ward}, ${addr.district}, ${addr.province}`;
+            const LabelIcon =
+              addr.label === "OFFICE" ? Building2 : addr.label === "HOME" ? Home : MapPin;
+            const labelText =
+              addr.label === "OFFICE"
+                ? "Văn phòng"
+                : addr.label === "HOME"
+                ? "Nhà riêng"
+                : "Khác";
+
+            return (
+              <div
+                key={addr.id}
+                className={`bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden flex flex-col gap-4 border transition-all ${
+                  addr.isDefault
+                    ? "border-l-4 border-l-[#0045cc] border-[#0045cc]/30 bg-gradient-to-r from-blue-50/20 via-white to-white"
+                    : "border-[#c3c5d9]/25 hover:border-[#0045cc]/30"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h3 className="font-heading text-base sm:text-lg font-bold text-[#0b1c30]">
+                      {addr.recipientName}
+                    </h3>
+
+                    {/* Tag Label */}
+                    <span
+                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide ${
+                        addr.label === "HOME"
+                          ? "bg-blue-50 text-[#0045cc] border border-blue-100"
+                          : addr.label === "OFFICE"
+                          ? "bg-purple-50 text-purple-700 border border-purple-100"
+                          : "bg-slate-100 text-slate-700 border border-slate-200"
+                      }`}
+                    >
+                      <LabelIcon className="w-3 h-3" />
+                      {labelText}
                     </span>
-                  )}
+
+                    {/* Default Badge */}
+                    {addr.isDefault && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#eff4ff] text-[#0045cc] border border-[#0045cc]/20">
+                        <CheckCircle2 className="w-3 h-3 text-[#0045cc]" />
+                        Mặc định
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(addr)}
+                      className="p-2 rounded-xl text-slate-500 hover:text-[#0045cc] hover:bg-[#eff4ff] transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
+                      title="Chỉnh sửa địa chỉ"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Sửa</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAddressToDelete(addr)}
+                      className={`p-2 rounded-xl transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold ${
+                        addr.isDefault
+                          ? "text-slate-300 cursor-not-allowed"
+                          : "text-slate-500 hover:text-rose-600 hover:bg-rose-50"
+                      }`}
+                      title={
+                        addr.isDefault
+                          ? "Địa chỉ mặc định không thể xóa"
+                          : "Xóa địa chỉ này"
+                      }
+                      disabled={addr.isDefault || deleteAddressMutation.isPending}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Xóa</span>
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-end sm:self-auto">
-                  {!addr.isDefault && (
+                {/* Details Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-2 border-t border-slate-100">
+                  <div className="flex items-start gap-2.5 text-[#0b1c30]">
+                    <Phone className="w-4 h-4 text-[#0045cc] mt-0.5 shrink-0" />
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-bold text-sm tracking-wide">{addr.phone}</span>
+                      <span className="text-[#737688] text-[11px]">Số điện thoại liên hệ</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 text-[#0b1c30]">
+                    <MapPin className="w-4 h-4 text-[#0045cc] mt-0.5 shrink-0" />
+                    <div className="flex flex-col gap-0.5">
+                      <span className="leading-relaxed font-medium text-slate-800">
+                        {fullAddressString}
+                      </span>
+                      <span className="text-[#737688] text-[11px]">Địa chỉ giao nhận hàng</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Footer: Set Default Action */}
+                {!addr.isDefault && (
+                  <div className="pt-2 flex justify-end border-t border-slate-50">
                     <button
                       type="button"
                       onClick={() => handleSetDefault(addr.id)}
-                      className="px-3 py-1.5 rounded-lg border border-[#c3c5d9]/40 hover:bg-[#eff4ff] text-[#0b1c30] text-xs font-semibold transition-colors cursor-pointer"
+                      disabled={setDefaultAddressMutation.isPending}
+                      className="text-xs font-bold text-[#0045cc] hover:underline cursor-pointer disabled:opacity-50"
                     >
-                      Set as Default
+                      Thiết lập làm địa chỉ mặc định
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => handleOpenEdit(addr)}
-                    className="px-3 py-1.5 rounded-lg hover:bg-[#eff4ff] text-[#434656] hover:text-[#0045cc] text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                    <span>Edit</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(addr.id)}
-                    disabled={addr.isDefault}
-                    title={addr.isDefault ? "Cannot delete default address" : "Delete Address"}
-                    className={`p-1.5 rounded-lg transition-colors ${
-                      addr.isDefault
-                        ? "text-neutral-300 cursor-not-allowed"
-                        : "text-[#737688] hover:text-[#ba1a1a] hover:bg-[#ffdad6]/40 cursor-pointer"
-                    }`}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                  </div>
+                )}
               </div>
-
-              {/* Address details */}
-              <div className="flex flex-col gap-2 pt-1 text-xs">
-                <div className="flex items-center gap-2 text-[#434656]">
-                  <Phone className="w-3.5 h-3.5 text-[#737688] shrink-0" />
-                  <span className="font-semibold text-[#0b1c30]">{addr.phone}</span>
-                  {addr.phoneTag && (
-                    <>
-                      <span className="text-[#c3c5d9]">•</span>
-                      <span className="text-[#737688]">{addr.phoneTag}</span>
-                    </>
-                  )}
-                </div>
-
-                <div className="flex items-start gap-2 text-[#0b1c30] text-sm">
-                  <MapPin className="w-4 h-4 text-[#737688] mt-0.5 shrink-0" />
-                  <span className="leading-relaxed text-xs sm:text-sm text-[#434656]">
-                    {fullAddressString}
-                  </span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
-      {/* Add / Edit Address Modal */}
+      {/* Address Create/Edit Modal */}
       <AddressModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setModalServerError(null);
+        }}
         onSave={handleSaveModal}
         editingAddress={editingAddress}
+        isLoading={createAddressMutation.isPending || updateAddressMutation.isPending}
+        serverError={modalServerError}
+        isFirstAddress={addresses.length === 0}
       />
 
-      {/* Toast Notification */}
-      <div
-        className={`fixed bottom-8 right-8 z-50 bg-[#0b1c30] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 transform transition-all duration-300 ${
-          toastMessage
-            ? "translate-y-0 opacity-100 pointer-events-auto"
-            : "translate-y-12 opacity-0 pointer-events-none"
-        }`}
-      >
-        <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-        <span className="text-xs font-semibold">{toastMessage}</span>
-      </div>
+      {/* Delete Confirmation Modal */}
+      {addressToDelete && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200"
+        >
+          <div
+            className="fixed inset-0"
+            onClick={() => !deleteAddressMutation.isPending && setAddressToDelete(null)}
+            aria-hidden="true"
+          />
+          <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200/80 p-6 flex flex-col gap-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+                <h3 className="font-heading text-base font-bold text-slate-900">
+                  Xác nhận xóa địa chỉ
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAddressToDelete(null)}
+                disabled={deleteAddressMutation.isPending}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                aria-label="Đóng"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Bạn có chắc chắn muốn xóa địa chỉ của người nhận{" "}
+              <strong className="text-slate-900">{addressToDelete.recipientName}</strong> (
+              <span className="text-slate-700">
+                {addressToDelete.streetAddress}, {addressToDelete.ward}, {addressToDelete.district},{" "}
+                {addressToDelete.province}
+              </span>
+              )? Thao tác này không thể hoàn tác.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setAddressToDelete(null)}
+                disabled={deleteAddressMutation.isPending}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={deleteAddressMutation.isPending}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer flex items-center gap-2 disabled:opacity-50"
+              >
+                {deleteAddressMutation.isPending && (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                )}
+                <span>{deleteAddressMutation.isPending ? "Đang xóa..." : "Xóa vĩnh viễn"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed bottom-8 right-8 z-50 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300 ${
+            toast.type === "error"
+              ? "bg-rose-900 border border-rose-700"
+              : "bg-[#0b1c30] border border-slate-700"
+          }`}
+        >
+          {toast.type === "error" ? (
+            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          )}
+          <span className="text-xs font-semibold max-w-sm leading-snug">
+            {toast.message}
+          </span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-slate-400 hover:text-white ml-1 p-0.5"
+            aria-label="Đóng thông báo"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
     </main>
   );
 }

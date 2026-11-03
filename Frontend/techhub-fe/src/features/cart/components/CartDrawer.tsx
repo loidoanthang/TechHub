@@ -2,11 +2,31 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { X, Trash2, Plus, Minus, ArrowRight, ShoppingBag } from "lucide-react";
+import {
+  X,
+  Trash2,
+  Plus,
+  Minus,
+  ArrowRight,
+  ShoppingBag,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 import { useCart } from "../context/CartContext";
 
 export function CartDrawer() {
-  const { isOpen, closeCart, items, updateQuantity, removeItem, subtotal, totalCount } = useCart();
+  const {
+    isOpen,
+    closeCart,
+    items,
+    updateQuantity,
+    removeItem,
+    subtotal,
+    totalCount,
+    isLoading,
+    error,
+    clearError,
+  } = useCart();
 
   const formattedSubtotal = new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -40,19 +60,42 @@ export function CartDrawer() {
           <button
             onClick={closeCart}
             aria-label="Close cart drawer"
-            className="p-2 rounded-lg text-[#434656] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors"
+            className="p-2 rounded-lg text-[#434656] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
+        {/* Error notification banner */}
+        {error && (
+          <div className="mx-6 mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+            <button
+              onClick={clearError}
+              className="p-1 hover:bg-red-100 rounded text-red-700 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
         {/* Drawer Content: Cart Items */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-          {items.length === 0 ? (
+          {isLoading && items.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-center text-[#434656] py-16 gap-3">
+              <Loader2 className="w-8 h-8 text-[#0045cc] animate-spin" />
+              <p className="text-xs text-[#737688]">Loading cart items...</p>
+            </div>
+          ) : items.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center text-[#434656] py-16">
               <ShoppingBag className="w-12 h-12 text-[#737688] mb-3 stroke-1" />
               <p className="font-semibold text-sm text-[#0b1c30]">Your cart is empty</p>
-              <p className="text-xs text-[#737688] mt-1">Explore our marketplace to add items</p>
+              <p className="text-xs text-[#737688] mt-1">
+                Explore our marketplace to add items
+              </p>
             </div>
           ) : (
             items.map((item) => (
@@ -61,7 +104,7 @@ export function CartDrawer() {
                 className="p-3.5 rounded-xl bg-[#eff4ff] flex gap-3.5 items-start group transition-colors hover:bg-[#dce9ff]/50"
               >
                 {/* Product Thumbnail */}
-                <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-white flex items-center justify-center p-1.5 border border-slate-100">
+                <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-white flex items-center justify-center p-1.5 border border-slate-100 relative">
                   <Image
                     src={item.imageUrl}
                     alt={item.title}
@@ -79,8 +122,9 @@ export function CartDrawer() {
                       {item.title}
                     </h3>
                     <button
+                      disabled={isLoading}
                       onClick={() => removeItem(item.id)}
-                      className="text-[#737688] hover:text-[#a90900] transition-colors p-1 -mr-1"
+                      className="text-[#737688] hover:text-[#a90900] transition-colors p-1 -mr-1 cursor-pointer disabled:opacity-40"
                       title="Remove item"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -100,8 +144,9 @@ export function CartDrawer() {
                     {/* Quantity Selector */}
                     <div className="flex items-center bg-white rounded-lg p-0.5 shadow-sm border border-slate-200">
                       <button
+                        disabled={isLoading}
                         onClick={() => updateQuantity(item.id, -1)}
-                        className="w-6 h-6 flex items-center justify-center rounded text-[#434656] hover:bg-[#eff4ff] transition-colors"
+                        className="w-6 h-6 flex items-center justify-center rounded text-[#434656] hover:bg-[#eff4ff] transition-colors cursor-pointer disabled:opacity-40"
                         aria-label="Decrease quantity"
                       >
                         <Minus className="w-3.5 h-3.5" />
@@ -110,8 +155,9 @@ export function CartDrawer() {
                         {item.quantity}
                       </span>
                       <button
+                        disabled={isLoading}
                         onClick={() => updateQuantity(item.id, 1)}
-                        className="w-6 h-6 flex items-center justify-center rounded text-[#434656] hover:bg-[#eff4ff] transition-colors"
+                        className="w-6 h-6 flex items-center justify-center rounded text-[#434656] hover:bg-[#eff4ff] transition-colors cursor-pointer disabled:opacity-40"
                         aria-label="Increase quantity"
                       >
                         <Plus className="w-3.5 h-3.5" />

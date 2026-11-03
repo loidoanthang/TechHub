@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -14,13 +14,27 @@ import {
   Check,
 } from "lucide-react";
 import { useCart } from "@/features/cart/context/CartContext";
-import { MOCK_AVAILABLE_VOUCHERS, type Voucher } from "@/mocks";
+import { resolveSellerSlug } from "@/features/shops";
+interface Voucher {
+  id: string;
+  code: string;
+  title: string;
+  description: string;
+  discountAmount: number;
+  minOrderValue: number;
+}
 
 export function CartView() {
   const { items, updateQuantity, removeItem, subtotal, totalCount } = useCart();
-  const [selectedIds, setSelectedIds] = useState<string[]>(
-    items.map((item) => item.id)
-  );
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [hasInitializedSelection, setHasInitializedSelection] = useState(false);
+
+  useEffect(() => {
+    if (!hasInitializedSelection && items.length > 0) {
+      setSelectedIds(items.map((item) => item.id));
+      setHasInitializedSelection(true);
+    }
+  }, [items, hasInitializedSelection]);
   const [voucherCode, setVoucherCode] = useState("");
   const [appliedVouchers, setAppliedVouchers] = useState<Voucher[]>([]);
   const [voucherError, setVoucherError] = useState("");
@@ -76,17 +90,23 @@ export function CartView() {
 
   const handleManualRedeem = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!voucherCode.trim()) return;
-    const found = MOCK_AVAILABLE_VOUCHERS.find(
-      (v) => v.code.toUpperCase() === voucherCode.trim().toUpperCase()
-    );
-    if (!found) {
-      setVoucherError("Invalid voucher code.");
+    const code = voucherCode.trim().toUpperCase();
+    if (!code) return;
+    if (code === "TECH50K" || code === "TECHHUB50") {
+      const v: Voucher = {
+        id: "voucher-tech50k",
+        code,
+        title: "Ưu đãi công nghệ TechHub",
+        description: "Giảm 50.000₫ cho đơn hàng",
+        discountAmount: 50000,
+        minOrderValue: 200000,
+      };
+      handleApplyVoucher(v);
+      setVoucherCode("");
+    } else {
+      setVoucherError("Mã voucher không hợp lệ hoặc đã hết hạn.");
       setTimeout(() => setVoucherError(""), 3000);
-      return;
     }
-    handleApplyVoucher(found);
-    setVoucherCode("");
   };
 
   // Group items by storeName
@@ -203,9 +223,12 @@ export function CartView() {
                         />
                         <div className="flex items-center gap-2">
                           <Store className="w-4 h-4 text-[#0045cc]" />
-                          <span className="text-sm font-bold text-[#0b1c30]">
+                          <Link
+                            href={`/shops/${resolveSellerSlug(storeName)}`}
+                            className="text-sm font-bold text-[#0b1c30] hover:text-[#0045cc] transition-colors hover:underline"
+                          >
                             {storeName}
-                          </span>
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -321,42 +344,29 @@ export function CartView() {
                   <p className="text-[11px] text-[#ba1a1a] font-medium">{voucherError}</p>
                 )}
 
-                {/* Available Coupons list */}
-                <div className="flex flex-col gap-2.5">
-                  {MOCK_AVAILABLE_VOUCHERS.map((v) => {
-                    const isApplied = appliedVouchers.some((item) => item.id === v.id);
-                    return (
+                {/* Applied Coupons list */}
+                {appliedVouchers.length > 0 && (
+                  <div className="flex flex-col gap-2">
+                    {appliedVouchers.map((v) => (
                       <div
                         key={v.id}
-                        className={`border rounded-xl p-3 flex items-center justify-between gap-3 transition-colors ${
-                          isApplied
-                            ? "border-[#0045cc] bg-[#eff4ff]"
-                            : "border-[#c3c5d9]/30 bg-white"
-                        }`}
+                        className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between"
                       >
-                        <div className="flex flex-col min-w-0">
-                          <div className="font-mono font-bold text-[#0b1c30] text-xs">
-                            {v.code}
-                          </div>
-                          <div className="text-xs text-[#434656] line-clamp-1 leading-tight mt-0.5">
-                            {v.description}
-                          </div>
+                        <div>
+                          <span className="font-mono font-bold">{v.code}</span>: Giảm{" "}
+                          {formatPrice(v.discountAmount)}
                         </div>
                         <button
                           type="button"
                           onClick={() => handleApplyVoucher(v)}
-                          className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition-colors flex-shrink-0 cursor-pointer ${
-                            isApplied
-                              ? "bg-[#0045cc] text-white border-[#0045cc]"
-                              : "bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0b1c30] border-[#c3c5d9]/30"
-                          }`}
+                          className="text-xs text-red-600 hover:underline cursor-pointer"
                         >
-                          {isApplied ? "Applied" : "Apply"}
+                          Bỏ chọn
                         </button>
                       </div>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Order Summary */}

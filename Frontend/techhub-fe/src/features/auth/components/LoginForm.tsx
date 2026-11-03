@@ -2,29 +2,116 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, ArrowRight, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { useLoginMutation } from "@/features/auth/api/useAuthMutations";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { setPendingAuth } from "@/lib/api/token";
+import { API_BASE_URL, ROUTES } from "@/lib/constants";
+import { isSafeRelativeUrl } from "@/lib/security";
+import { loginSchema, type LoginFormData } from "@/features/auth/schemas/authSchemas";
+import type { AxiosError } from "axios";
+import type { ApiResponse } from "@/types/api";
 
 export function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const rawReturnUrl = searchParams.get("returnUrl");
+  // Prevent Open Redirect (CWE-601): Strictly validate relative path
+  const returnUrl = isSafeRelativeUrl(rawReturnUrl)
+    ? (rawReturnUrl as string)
+    : ROUTES.HOME;
+
   const [showPassword, setShowPassword] = useState(false);
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const isResetSuccess = searchParams.get("reset") === "true";
+  const isChangedSuccess = searchParams.get("changed") === "true";
 
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsSuccess(true);
-      setTimeout(() => {
-        setIsSuccess(false);
-        window.location.href = "/";
-      }, 1000);
-    }, 1200);
+  const { login } = useAuth();
+  const loginMutation = useLoginMutation();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      rememberMe: false,
+    },
+    mode: "onTouched",
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    setServerError(null);
+
+    try {
+      const response = await loginMutation.mutateAsync({
+        email: data.email.trim(),
+        password: data.password,
+      });
+
+      if (response && response.success && response.data) {
+        await login(response.data, returnUrl);
+      }
+    } catch (err) {
+      const axiosError = err as AxiosError<ApiResponse<unknown>>;
+      const errorData = axiosError.response?.data;
+      const metadata = errorData?.metadata as { errorCode?: string } | undefined;
+      const errorCode = metadata?.errorCode;
+      const rawMessage = errorData?.message?.toLowerCase() || "";
+
+      const isUnverified =
+        errorCode === "ACCOUNT_NOT_VERIFIED" ||
+        rawMessage.includes("not verified") ||
+        rawMessage.includes("verify your email");
+
+      const isLocked =
+        errorCode === "ACCOUNT_LOCKED" ||
+        rawMessage.includes("locked") ||
+        rawMessage.includes("15 minutes");
+
+      const isSuspended =
+        errorCode === "ACCOUNT_SUSPENDED" ||
+        errorCode === "ACCOUNT_BANNED" ||
+        rawMessage.includes("suspended") ||
+        rawMessage.includes("banned");
+
+      const isInvalidCredentials =
+        errorCode === "INVALID_CREDENTIALS" ||
+        rawMessage.includes("invalid email or password") ||
+        rawMessage.includes("bad credentials");
+
+      if (isUnverified) {
+        setPendingAuth(data.email.trim(), "verify-email");
+        router.push(ROUTES.VERIFY_OTP);
+      } else if (isLocked) {
+        setServerError(
+          "Tài khoản của bạn đã bị khóa tạm thời 15 phút do nhập sai mật khẩu nhiều lần."
+        );
+      } else if (isSuspended) {
+        router.push(ROUTES.SUSPENDED);
+      } else if (isInvalidCredentials) {
+        setServerError("Email hoặc mật khẩu không chính xác.");
+      } else {
+        setServerError(
+          errorData?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin."
+        );
+      }
+    }
   };
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
+  };
+
+  const isLoading = loginMutation.isPending || isSubmitting;
+  const isSuccess = loginMutation.isSuccess;
 
   return (
     <div className="relative w-full max-w-[440px]">
@@ -43,25 +130,50 @@ export function LoginForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {(isResetSuccess || isChangedSuccess) && (
+          <div className="flex items-center gap-2.5 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs leading-relaxed animate-in fade-in duration-200">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+            <span>
+              {isChangedSuccess
+                ? "Mật khẩu của bạn đã được thay đổi thành công. Vui lòng đăng nhập lại."
+                : "Mật khẩu đã được đặt lại thành công. Vui lòng đăng nhập bằng mật khẩu mới."}
+            </span>
+          </div>
+        )}
+
+        {serverError && (
+          <div className="flex items-start gap-2.5 p-3.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs leading-relaxed animate-in fade-in duration-200">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{serverError}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+          {/* Email */}
           <div className="flex flex-col gap-1.5">
             <label
-              htmlFor="identifier"
+              htmlFor="email"
               className="text-xs font-semibold text-[#0b1c30]"
             >
-              Email or phone number
+              Email address
             </label>
             <input
-              id="identifier"
-              type="text"
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
+              id="email"
+              type="email"
+              {...register("email")}
               placeholder="name@example.com"
-              required
-              className="w-full h-12 px-4 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-[#0d5bff]/25 transition-all placeholder:text-[#737688]/60"
+              className={`w-full h-12 px-4 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
+                errors.email
+                  ? "border border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+                  : "focus:bg-white focus:ring-2 focus:ring-[#0d5bff]/25"
+              }`}
             />
+            {errors.email && (
+              <p className="text-xs text-rose-500 font-medium">{errors.email.message}</p>
+            )}
           </div>
 
+          {/* Password */}
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="password"
@@ -73,11 +185,13 @@ export function LoginForm() {
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password")}
                 placeholder="••••••••••••"
-                required
-                className="w-full h-12 pl-4 pr-11 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none focus:bg-white focus:ring-2 focus:ring-[#0d5bff]/25 transition-all placeholder:text-[#737688]/60"
+                className={`w-full h-12 pl-4 pr-11 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
+                  errors.password
+                    ? "border border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
+                    : "focus:bg-white focus:ring-2 focus:ring-[#0d5bff]/25"
+                }`}
               />
               <button
                 type="button"
@@ -92,26 +206,30 @@ export function LoginForm() {
                 )}
               </button>
             </div>
+            {errors.password && (
+              <p className="text-xs text-rose-500 font-medium">{errors.password.message}</p>
+            )}
           </div>
 
+          {/* Remember me & Forgot Password */}
           <div className="flex items-center justify-between pt-1">
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
+                {...register("rememberMe")}
                 className="w-4 h-4 rounded text-[#0d5bff] focus:ring-0 accent-[#0d5bff] cursor-pointer"
               />
               <span className="text-xs text-[#434656]">Remember me</span>
             </label>
             <Link
-              href="/forgot-password"
+              href={ROUTES.FORGOT_PASSWORD}
               className="text-xs font-semibold text-[#0045cc] hover:underline"
             >
               Forgot password?
             </Link>
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={isLoading || isSuccess}
@@ -146,7 +264,7 @@ export function LoginForm() {
 
         <button
           type="button"
-          onClick={() => {}}
+          onClick={handleGoogleLogin}
           className="w-full h-12 bg-[#eff4ff]/70 hover:bg-[#e5eeff] text-[#0b1c30] text-sm font-semibold rounded-xl flex items-center justify-center gap-3 transition-all active:scale-[0.99] cursor-pointer"
         >
           <svg aria-hidden="true" className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
@@ -174,7 +292,7 @@ export function LoginForm() {
           <p className="text-sm text-[#434656]">
             Don&apos;t have an account?{" "}
             <Link
-              href="/register"
+              href={ROUTES.REGISTER}
               className="text-sm font-semibold text-[#0045cc] hover:underline ml-1"
             >
               Sign up now

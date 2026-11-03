@@ -2,8 +2,8 @@ import { AddressesView } from "@/features/account/components/AddressesView";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Shipping Addresses | TechHub Marketplace",
-  description: "Manage your delivery addresses and set your default destination for tech gear.",
+  title: "Sổ địa chỉ nhận hàng | TechHub Marketplace",
+  description: "Quản lý danh sách địa chỉ nhận hàng của bạn trên TechHub Marketplace.",
 };
 
 export default function AddressesPage() {

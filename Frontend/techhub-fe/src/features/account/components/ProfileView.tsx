@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   Camera,
@@ -10,52 +10,107 @@ import {
   Loader2,
   CheckCircle2,
   Upload,
+  AlertCircle,
 } from "lucide-react";
-import { mockUserProfile, type UserProfileDTO } from "@/mocks";
+import { useProfileQuery, useUpdateProfileMutation } from "../hooks/useAccountQueries";
 
 export function ProfileView() {
-  const [profile, setProfile] = useState<UserProfileDTO>(mockUserProfile);
-  const [firstName, setFirstName] = useState(profile.firstName);
-  const [lastName, setLastName] = useState(profile.lastName);
-  const [phone, setPhone] = useState(profile.phone);
-  const [avatarPreview, setAvatarPreview] = useState(profile.avatarUrl);
+  const { data: profile, isLoading, error } = useProfileQuery();
+  const updateProfileMutation = useUpdateProfileMutation();
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState(
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
+  );
 
-  // Handle avatar upload simulation
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const tempUrl = URL.createObjectURL(file);
-      setAvatarPreview(tempUrl);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [createdBlobUrl, setCreatedBlobUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (createdBlobUrl) {
+        URL.revokeObjectURL(createdBlobUrl);
+      }
+    };
+  }, [createdBlobUrl]);
+
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.firstName || "");
+      setLastName(profile.lastName || "");
+      setPhone(profile.phone || "");
+      if (profile.avatarUrl) {
+        setAvatarPreview(profile.avatarUrl);
+      }
     }
+  }, [profile]);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setTimeout(() => {
-      setProfile((prev) => ({
-        ...prev,
+    // Security check: validate MIME type (disallow SVG/scripts)
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      showToast("Invalid file type. Only JPEG, PNG, and WEBP images are supported.");
+      return;
+    }
+
+    // Security check: validate file size (max 1 MB)
+    if (file.size > 1024 * 1024) {
+      showToast("File size exceeds 1 MB limit.");
+      return;
+    }
+
+    if (createdBlobUrl) {
+      URL.revokeObjectURL(createdBlobUrl);
+    }
+
+    const tempUrl = URL.createObjectURL(file);
+    setCreatedBlobUrl(tempUrl);
+    setAvatarPreview(tempUrl);
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await updateProfileMutation.mutateAsync({
         firstName,
         lastName,
         phone,
         avatarUrl: avatarPreview,
-      }));
-      setIsSaving(false);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
-    }, 600);
+      });
+      showToast("Profile credentials saved successfully.");
+    } catch {
+      showToast("Failed to update profile. Please try again.");
+    }
   };
 
   const handleCancel = () => {
-    setFirstName(profile.firstName);
-    setLastName(profile.lastName);
-    setPhone(profile.phone);
-    setAvatarPreview(profile.avatarUrl);
+    if (profile) {
+      setFirstName(profile.firstName || "");
+      setLastName(profile.lastName || "");
+      setPhone(profile.phone || "");
+      if (profile.avatarUrl) {
+        setAvatarPreview(profile.avatarUrl);
+      }
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-96 flex items-center justify-center bg-white rounded-2xl border border-[#c3c5d9]/25">
+        <Loader2 className="w-8 h-8 animate-spin text-[#0045cc]" />
+      </div>
+    );
+  }
 
   return (
     <main className="w-full h-full flex flex-col gap-6">
@@ -73,6 +128,13 @@ export function ProfileView() {
             Manage your personal profile details, verified phone, and primary email credentials.
           </p>
         </div>
+
+        {error && (
+          <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>Could not load server profile. Displaying local cache.</span>
+          </div>
+        )}
 
         {/* 2-Column Responsive Body: Left Form Inputs + Right Avatar Module */}
         <div className="flex flex-col-reverse md:flex-row items-stretch gap-8 lg:gap-10 flex-1">
@@ -146,7 +208,7 @@ export function ProfileView() {
                 >
                   Registered Email
                 </label>
-                {profile.emailVerified && (
+                {profile?.emailVerified && (
                   <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5" />
                     Verified
@@ -157,7 +219,7 @@ export function ProfileView() {
                 <input
                   id="email-address"
                   type="email"
-                  value={profile.email}
+                  value={profile?.email || ""}
                   disabled
                   className="w-full h-11 pl-4 pr-10 rounded-xl bg-neutral-100 text-[#737688] text-sm outline-none cursor-not-allowed select-none border border-[#c3c5d9]/30"
                 />
@@ -176,10 +238,10 @@ export function ProfileView() {
               </button>
               <button
                 type="submit"
-                disabled={isSaving}
+                disabled={updateProfileMutation.isPending}
                 className="px-6 py-2.5 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-70 cursor-pointer"
               >
-                {isSaving ? (
+                {updateProfileMutation.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     <span>Saving...</span>
@@ -245,17 +307,15 @@ export function ProfileView() {
       {/* Floating Save Toast Notification */}
       <div
         className={`fixed bottom-8 right-8 z-50 bg-[#0b1c30] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 transform transition-all duration-300 ${
-          showToast
+          toastMessage
             ? "translate-y-0 opacity-100 pointer-events-auto"
             : "translate-y-12 opacity-0 pointer-events-none"
         }`}
       >
         <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
         <div className="flex flex-col text-left">
-          <span className="text-xs font-bold">Profile Credentials Saved</span>
-          <span className="text-[11px] text-neutral-300">
-            Account information updated across TechHub nodes.
-          </span>
+          <span className="text-xs font-bold">Profile Update</span>
+          <span className="text-[11px] text-neutral-300">{toastMessage}</span>
         </div>
       </div>
     </main>
