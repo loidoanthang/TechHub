@@ -50,4 +50,5 @@ export interface ResendVerificationRequest {
 
 export interface DeleteAccountRequest {
   password: string;
+  reason?: string;
 }

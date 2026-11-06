@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   Loader2,
   ArrowRight,
+  Trash2,
 } from "lucide-react";
 import { useChangePasswordMutation } from "@/features/auth/api/useAuthMutations";
 import { clearTokens } from "@/lib/api/token";
@@ -23,6 +24,7 @@ import {
   changePasswordSchema,
   type ChangePasswordFormData,
 } from "../schemas/securitySchema";
+import { DeleteAccountModal } from "./DeleteAccountModal";
 import type { AxiosError } from "axios";
 import type { ApiResponse } from "@/types/api";
 
@@ -34,6 +36,7 @@ export function SecurityView() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const changePasswordMutation = useChangePasswordMutation();
 
@@ -489,6 +492,49 @@ export function SecurityView() {
           </div>
         </form>
       </div>
+
+      {/* Section: Danger Zone (Xóa tài khoản) */}
+      <div className="bg-white rounded-2xl border border-rose-200 shadow-sm p-6 sm:p-7 flex flex-col gap-5">
+        <div className="flex items-center gap-3 pb-4 border-b border-rose-100">
+          <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+            <Trash2 className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="font-heading text-base font-bold text-slate-900">
+              Vùng nguy hiểm (Danger Zone)
+            </h2>
+            <p className="text-xs text-rose-600 font-medium">
+              Các thao tác tại đây có thể dẫn tới mất quyền truy cập vĩnh viễn
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-rose-50/50 border border-rose-200/60">
+          <div className="flex flex-col gap-1 max-w-xl">
+            <h3 className="text-xs font-bold text-slate-900">
+              Xóa tài khoản TechHub của bạn
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Một khi đã xóa tài khoản, bạn sẽ không thể đăng nhập lại. Toàn bộ lịch sử đơn hàng, địa chỉ giao hàng và quyền lợi thành viên sẽ bị vô hiệu hóa vĩnh viễn.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsDeleteModalOpen(true)}
+            className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-[0.99] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer shrink-0"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Xóa tài khoản</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+      />
 
       {/* Success Modal */}
       {isSuccessModalOpen && (

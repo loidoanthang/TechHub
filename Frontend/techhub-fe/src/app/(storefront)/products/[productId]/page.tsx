@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
+import { notFound } from "next/navigation";
 import { ProductDetailView } from "@/features/products/components";
 import { productApi } from "@/features/products/api/productApi";
 import { mapPublicDetailToProductDetailData } from "@/features/products/utils/productMapper";
-import { getMockProductDetail } from "@/mocks";
 import type { Metadata } from "next";
 
 interface ProductPageProps {
@@ -43,12 +43,11 @@ async function ProductDetailLoader({ params }: ProductPageProps) {
       return <ProductDetailView product={realProductData} />;
     }
   } catch (err) {
-    // If not found in DB, fallback to mock details for seamless developer testing
-    console.warn(`Product slug "${productId}" not found on backend DB, falling back to mock:`, err);
+    console.warn(`Product slug "${productId}" not found on backend DB:`, err);
   }
 
-  const mockProductData = getMockProductDetail(productId);
-  return <ProductDetailView product={mockProductData} />;
+  // Trigger 404 if product is not found in DB
+  notFound();
 }
 
 export default function ProductDetailPage(props: ProductPageProps) {

@@ -17,3 +17,13 @@ export const changePasswordSchema = z
   });
 
 export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
+
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, "Vui lòng nhập mật khẩu để xác nhận"),
+  reason: z.string().max(500, "Lý do không được vượt quá 500 ký tự").optional(),
+  confirmConsent: z.boolean().refine((val) => val === true, {
+    message: "Bạn cần đồng ý với các điều khoản trước khi xóa tài khoản",
+  }),
+});
+
+export type DeleteAccountFormData = z.infer<typeof deleteAccountSchema>;

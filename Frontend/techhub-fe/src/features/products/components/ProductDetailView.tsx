@@ -27,6 +27,8 @@ import {
 } from "lucide-react";
 import { ProductCard } from "@/components/shared";
 import { useCart } from "@/features/cart/context/CartContext";
+import { useProductsQuery } from "@/features/products/hooks/useProductQueries";
+import { mapProductSummaryToProduct } from "@/features/products/utils/productMapper";
 import {
   useShopProfileQuery,
   useShopVouchersQuery,
@@ -53,6 +55,20 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
     message: string;
     itemInfo?: string;
   } | null>(null);
+
+  // Query real related products from catalog
+  const { data: relatedPage } = useProductsQuery({
+    size: 4,
+    sortBy: "createdAt",
+  });
+
+  const realRelatedProducts = useMemo(() => {
+    if (!relatedPage?.content) return [];
+    return relatedPage.content
+      .filter((p) => p.id !== product.id)
+      .slice(0, 3)
+      .map(mapProductSummaryToProduct);
+  }, [relatedPage, product.id]);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -992,29 +1008,35 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
       </section>
 
       {/* 7. Recommendations Section */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 w-full">
-        <h2 className="text-xl font-bold text-[#0b1c30] font-heading mb-4">
-          Recommended Hardware &amp; Accessories
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-          {product.recommendations.map((item) => (
-            <ProductCard
-              key={item.id}
-              product={{
-                id: item.id,
-                title: item.title,
-                vendorName: item.brand,
-                price: item.price,
-                rating: item.rating,
-                reviewsCount: item.reviewsCount,
-                imageUrl: item.imageUrl,
-                inStock: true,
-                tags: item.specs,
-              }}
-            />
-          ))}
-        </div>
-      </section>
+      {(realRelatedProducts.length > 0 || product.recommendations.length > 0) && (
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 w-full">
+          <h2 className="text-xl font-bold text-[#0b1c30] font-heading mb-4">
+            Recommended Hardware &amp; Accessories
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            {realRelatedProducts.length > 0
+              ? realRelatedProducts.map((p) => (
+                  <ProductCard key={p.id} product={p} />
+                ))
+              : product.recommendations.map((item) => (
+                  <ProductCard
+                    key={item.id}
+                    product={{
+                      id: item.id,
+                      title: item.title,
+                      vendorName: item.brand,
+                      price: item.price,
+                      rating: item.rating,
+                      reviewsCount: item.reviewsCount,
+                      imageUrl: item.imageUrl,
+                      inStock: true,
+                      tags: item.specs,
+                    }}
+                  />
+                ))}
+          </div>
+        </section>
+      )}
 
       {/* Floating 5-Second Toast Notification */}
       {toast && (
