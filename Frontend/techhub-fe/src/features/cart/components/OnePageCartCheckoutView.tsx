@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -24,6 +24,7 @@ import {
 import { useCart } from "@/features/cart/context/CartContext";
 import { useAddressesQuery } from "@/features/account/hooks/useAccountQueries";
 import { usePlatformVouchersQuery } from "@/features/checkout/hooks/useVouchers";
+import { useCheckoutPreview } from "@/features/checkout/hooks/useCheckoutPreview";
 import { VoucherSelectModal } from "@/features/checkout/components/VoucherSelectModal";
 import { checkoutApi } from "@/features/checkout/api/checkoutApi";
 import { resolveSellerSlug } from "@/features/shops";
@@ -50,8 +51,7 @@ export function OnePageCartCheckoutView() {
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState<CartPlatformVoucherResponse | null>(null);
 
-  // Shipping & Payment state
-  const [shippingMethod, setShippingMethod] = useState<"express" | "standard">("express");
+  // Payment state
   const [paymentMethod, setPaymentMethod] = useState<"vnpay" | "cod">("vnpay");
 
   // Submission state
@@ -106,12 +106,57 @@ export function OnePageCartCheckoutView() {
     0
   );
 
-  const shippingFee = selectedItems.length > 0 ? (shippingMethod === "express" ? 50000 : 25000) : 0;
+  const isShippingVoucher = selectedVoucher?.appliesTo === "SHIPPING_FEE";
+  const validCartItemIds = selectedItems.map((i) => i.id).filter(isUuid);
+
+  // Group items by store for selected items only
+  const selectedGroupedStores = selectedItems.reduce<Record<string, typeof selectedItems>>((acc, item) => {
+    const store = item.storeName || "TechHub Verified Store";
+    if (!acc[store]) acc[store] = [];
+    acc[store].push(item);
+    return acc;
+  }, {});
+
+  // Group all items by store for cart items list
+  const groupedStores = items.reduce<Record<string, typeof items>>((acc, item) => {
+    const store = item.storeName || "TechHub Verified Store";
+    if (!acc[store]) acc[store] = [];
+    acc[store].push(item);
+    return acc;
+  }, {});
+
+  // Dynamic preview calculation from Backend API (BR-17)
+  const previewParams = useMemo(() => ({
+    selectedCartItemIds: validCartItemIds,
+    addressId: selectedAddressId && isUuid(selectedAddressId) ? selectedAddressId : undefined,
+    platformVoucherId: selectedVoucher && !isShippingVoucher ? selectedVoucher.id : undefined,
+    platformShippingVoucherId: selectedVoucher && isShippingVoucher ? selectedVoucher.id : undefined,
+    shopVoucherIds: [],
+  }), [validCartItemIds, selectedAddressId, selectedVoucher, isShippingVoucher]);
+
+  const { data: previewData, isLoading: isLoadingPreview } = useCheckoutPreview(
+    previewParams,
+    validCartItemIds.length > 0
+  );
+
+  // Multi-shop shipping fallback (30.000₫ per shop)
+  const selectedShopsCount = Object.keys(selectedGroupedStores).length || 1;
+  const fallbackShippingFee = selectedItems.length > 0 ? selectedShopsCount * 30000 : 0;
+
+  const totalShippingFee = previewData?.totalShippingFee !== undefined
+    ? previewData.totalShippingFee
+    : fallbackShippingFee;
+
+  const finalShippingFee = previewData?.finalShippingFee !== undefined
+    ? previewData.finalShippingFee
+    : totalShippingFee;
+
+  const shippingDiscount = Math.max(0, totalShippingFee - finalShippingFee);
 
   // Query platform vouchers from Backend
   const { data: platformVouchers = [], isLoading: isLoadingVouchers } = usePlatformVouchersQuery({
     orderAmount: selectedSubtotal,
-    shippingFee,
+    shippingFee: totalShippingFee,
   });
 
   // Tự động kiểm tra tính hợp lệ khi giỏ hàng thay đổi số lượng / tổng tiền
@@ -128,16 +173,26 @@ export function OnePageCartCheckoutView() {
     }
   }, [platformVouchers, selectedVoucher]);
 
-  const discountAmount = selectedVoucher ? selectedVoucher.estimatedDiscount : 0;
-  const grandTotal = Math.max(0, selectedSubtotal + shippingFee - discountAmount);
+  const productDiscount = (previewData?.totalPlatformDiscountAmount ?? 0) + (previewData?.totalShopDiscountAmount ?? 0);
+  const discountAmount = selectedVoucher
+    ? (selectedVoucher.appliesTo === "SHIPPING_FEE" ? shippingDiscount : selectedVoucher.estimatedDiscount)
+    : productDiscount;
 
-  // Group items by storeName
-  const groupedStores = items.reduce<Record<string, typeof items>>((acc, item) => {
-    const store = item.storeName || "TechHub Verified Store";
-    if (!acc[store]) acc[store] = [];
-    acc[store].push(item);
-    return acc;
-  }, {});
+  const grandTotal = previewData?.finalTotalAmount !== undefined
+    ? previewData.finalTotalAmount
+    : Math.max(0, selectedSubtotal + finalShippingFee - discountAmount);
+
+  // Build shop delivery packages to render
+  const shopsToRender = previewData?.shops && previewData.shops.length > 0
+    ? previewData.shops
+    : Object.entries(selectedGroupedStores).map(([storeName, storeItems]) => ({
+        shopId: storeItems[0]?.storeId || storeName,
+        shopName: storeName,
+        shippingFee: 30000,
+        finalShippingFee: 30000,
+        shopShippingDiscount: 0,
+        allocatedPlatformShippingDiscount: 0,
+      }));
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,11 +212,10 @@ export function OnePageCartCheckoutView() {
     setIsSubmitting(true);
 
     try {
-      const validCartItemIds = selectedItems.map((i) => i.id).filter(isUuid);
       const mappedPaymentMethod: PaymentMethod = paymentMethod === "cod" ? "COD" : "VNPAY";
 
-      // Group shop orders
-      const shopOrders: ShopOrderRequest[] = Object.entries(groupedStores).map(([_, storeItems]) => ({
+      // Group shop orders strictly from selected items
+      const shopOrders: ShopOrderRequest[] = Object.entries(selectedGroupedStores).map(([_, storeItems]) => ({
         shopId:
           storeItems[0]?.storeId && isUuid(storeItems[0].storeId)
             ? storeItems[0].storeId
@@ -171,7 +225,6 @@ export function OnePageCartCheckoutView() {
 
       // Call Backend Checkout API
       if (validCartItemIds.length > 0 && selectedAddressId) {
-        const isShippingVoucher = selectedVoucher?.appliesTo === "SHIPPING_FEE";
         const res = await checkoutApi.placeOrder({
           addressId: selectedAddressId,
           paymentMethod: mappedPaymentMethod,
@@ -243,7 +296,7 @@ export function OnePageCartCheckoutView() {
             <div className="flex justify-between">
               <span className="text-[#737688]">Dự kiến giao hàng:</span>
               <span className="font-semibold text-[#0b1c30]">
-                {shippingMethod === "express" ? "Trong ngày mai (Hỏa tốc)" : "2-3 ngày làm việc"}
+                2-3 ngày làm việc (Giao tiêu chuẩn)
               </span>
             </div>
           </div>
@@ -538,73 +591,101 @@ export function OnePageCartCheckoutView() {
 
               {/* Shipping Method Section */}
               <div className="bg-white rounded-xl border border-[#c3c5d9]/30 shadow-sm p-6 flex flex-col gap-4">
-                <div className="flex items-center gap-2 text-sm font-bold text-[#0b1c30] border-b border-[#c3c5d9]/20 pb-3">
-                  <Truck className="w-4 h-4 text-[#0045cc]" />
-                  <span>Phương thức vận chuyển</span>
+                <div className="flex items-center justify-between border-b border-[#c3c5d9]/20 pb-3">
+                  <div className="flex items-center gap-2 text-sm font-bold text-[#0b1c30]">
+                    <Truck className="w-4 h-4 text-[#0045cc]" />
+                    <span>Phương thức vận chuyển ({shopsToRender.length} kiện hàng)</span>
+                  </div>
+                  {isLoadingPreview && (
+                    <div className="flex items-center gap-1.5 text-xs text-[#0045cc]">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Đang cập nhật cước...</span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <label
-                    onClick={() => setShippingMethod("express")}
-                    className={`border rounded-xl p-4 flex items-start gap-3 cursor-pointer transition-all ${
-                      shippingMethod === "express"
-                        ? "border-[#0045cc] bg-[#eff4ff]/60 ring-2 ring-[#0045cc]/15"
-                        : "border-[#c3c5d9]/30 bg-white hover:bg-neutral-50"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="shipping"
-                      checked={shippingMethod === "express"}
-                      onChange={() => setShippingMethod("express")}
-                      className="mt-1 accent-[#0045cc]"
-                    />
+                {/* Backend warnings banner */}
+                {previewData?.warnings && previewData.warnings.length > 0 && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
                     <div className="flex flex-col gap-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-[#0b1c30]">
-                          TechHub Hỏa Tốc
-                        </span>
-                        <span className="text-[10px] font-bold bg-[#ce2917] text-white px-1.5 py-0.2 rounded">
-                          FAST
-                        </span>
+                      {previewData.warnings.map((warn, idx) => (
+                        <p key={idx}>{warn}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Per-Shop Shipping Packages */}
+                <div className="flex flex-col gap-3">
+                  {shopsToRender.map((shop, idx) => {
+                    const shopOrigFee = shop.shippingFee ?? 30000;
+                    const shopDiscount =
+                      (shop.shopShippingDiscount ?? 0) +
+                      (shop.allocatedPlatformShippingDiscount ?? 0);
+                    const shopFinalFee =
+                      shop.finalShippingFee ?? Math.max(0, shopOrigFee - shopDiscount);
+
+                    return (
+                      <div
+                        key={shop.shopId || idx}
+                        className="p-4 rounded-xl border border-[#0045cc]/20 bg-[#eff4ff]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-white border border-[#c3c5d9]/40 flex items-center justify-center text-[#0045cc] shrink-0 mt-0.5 shadow-xs">
+                            <Store className="w-4 h-4" />
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-[#0b1c30]">
+                                Kiện {idx + 1}: {shop.shopName || "Gian hàng TechHub"}
+                              </span>
+                              <span className="text-[10px] font-semibold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">
+                                Giao tiêu chuẩn
+                              </span>
+                            </div>
+                            <span className="text-[11px] text-[#737688]">
+                              Giao từ 2 - 3 ngày làm việc • Đóng gói niêm phong chống sốc phần cứng
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex sm:flex-col items-end justify-between sm:justify-center border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200/60">
+                          {shopDiscount > 0 ? (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[11px] line-through text-[#737688]">
+                                {formatPrice(shopOrigFee)}
+                              </span>
+                              <span className="text-xs font-mono font-bold text-emerald-600">
+                                {shopFinalFee === 0 ? "Miễn phí" : formatPrice(shopFinalFee)}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs font-mono font-bold text-[#0045cc]">
+                              {formatPrice(shopOrigFee)}
+                            </span>
+                          )}
+                          <span className="text-[10px] text-[#737688]">
+                            {shopDiscount > 0 ? "Đã giảm phí ship sàn" : "Phí vận chuyển kiện"}
+                          </span>
+                        </div>
                       </div>
-                      <span className="text-[11px] text-[#737688]">
-                        Giao trong vòng 24h • Niêm phong an toàn phần cứng
-                      </span>
-                      <span className="text-xs font-mono font-bold text-[#0045cc] mt-1">
-                        {formatPrice(50000)}
-                      </span>
-                    </div>
-                  </label>
-
-                  <label
-                    onClick={() => setShippingMethod("standard")}
-                    className={`border rounded-xl p-4 flex items-start gap-3 cursor-pointer transition-all ${
-                      shippingMethod === "standard"
-                        ? "border-[#0045cc] bg-[#eff4ff]/60 ring-2 ring-[#0045cc]/15"
-                        : "border-[#c3c5d9]/30 bg-white hover:bg-neutral-50"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="shipping"
-                      checked={shippingMethod === "standard"}
-                      onChange={() => setShippingMethod("standard")}
-                      className="mt-1 accent-[#0045cc]"
-                    />
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-xs font-bold text-[#0b1c30]">
-                        Giao hàng tiêu chuẩn
-                      </span>
-                      <span className="text-[11px] text-[#737688]">
-                        Giao từ 2-3 ngày làm việc
-                      </span>
-                      <span className="text-xs font-mono font-bold text-[#0045cc] mt-1">
-                        {formatPrice(25000)}
-                      </span>
-                    </div>
-                  </label>
+                    );
+                  })}
                 </div>
+
+                {/* Shipping Voucher Savings Highlight */}
+                {shippingDiscount > 0 && (
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800">
+                    <span className="font-medium flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                      Ưu đãi Voucher Freeship Sàn đã áp dụng
+                    </span>
+                    <span className="font-bold font-mono text-emerald-700">
+                      -{formatPrice(shippingDiscount)}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Payment Methods Section */}
@@ -759,11 +840,19 @@ export function OnePageCartCheckoutView() {
                   </div>
 
                   <div className="flex items-center justify-between text-[#434656]">
-                    <span>Phí vận chuyển:</span>
+                    <span>Phí vận chuyển ({shopsToRender.length} kiện):</span>
                     <span className="font-mono font-bold text-[#0b1c30]">
-                      {selectedItems.length > 0 ? formatPrice(shippingFee) : "0₫"}
+                      {selectedItems.length > 0 ? formatPrice(totalShippingFee) : "0₫"}
                     </span>
                   </div>
+                  {shippingDiscount > 0 && (
+                    <div className="flex items-center justify-between text-emerald-600">
+                      <span>Giảm giá Freeship:</span>
+                      <span className="font-mono font-bold">
+                        -{formatPrice(shippingDiscount)}
+                      </span>
+                    </div>
+                  )}
                   {discountAmount > 0 && (
                     <div className="flex items-center justify-between text-[#006b5b]">
                       <span>Giảm giá Voucher:</span>
@@ -785,8 +874,11 @@ export function OnePageCartCheckoutView() {
                       (Đã gồm VAT)
                     </span>
                   </div>
-                  <div className="font-heading text-2xl sm:text-3xl font-bold text-[#0045cc] tracking-tight">
-                    {formatPrice(grandTotal)}
+                  <div className="flex items-center gap-2 font-heading text-2xl sm:text-3xl font-bold text-[#0045cc] tracking-tight">
+                    <span>{formatPrice(grandTotal)}</span>
+                    {isLoadingPreview && (
+                      <Loader2 className="w-4 h-4 animate-spin text-[#0045cc]" />
+                    )}
                   </div>
                 </div>
 

@@ -17,10 +17,17 @@ export interface CheckoutPreviewRequest {
 export interface ShopCheckoutPreviewResponse {
   shopId: string;
   shopName: string;
-  totalProductAmount: number;
+  shopSubtotal?: number;
+  totalProductAmount?: number;
   shippingFee: number;
+  shopProductDiscount?: number;
+  shopShippingDiscount?: number;
+  allocatedPlatformProductDiscount?: number;
+  allocatedPlatformShippingDiscount?: number;
+  finalShippingFee?: number;
   shopDiscountAmount: number;
-  finalShopAmount: number;
+  shopFinalAmount?: number;
+  finalShopAmount?: number;
   items: Array<{
     cartItemId: string;
     variantId: string;
@@ -34,13 +41,22 @@ export interface ShopCheckoutPreviewResponse {
 }
 
 export interface CheckoutPreviewResponse {
+  deliveryAddress?: unknown;
   totalProductAmount: number;
   totalShippingFee: number;
-  totalShopDiscount: number;
-  platformDiscountAmount: number;
-  platformShippingDiscountAmount: number;
+  totalShopDiscountAmount?: number;
+  totalShopDiscount?: number;
+  totalPlatformDiscountAmount?: number;
+  platformDiscountAmount?: number;
+  platformShippingDiscountAmount?: number;
+  totalSavedAmount?: number;
+  finalProductAmount?: number;
+  finalShippingFee: number;
   finalTotalAmount: number;
+  totalSelectedItems?: number;
   shops: ShopCheckoutPreviewResponse[];
+  availablePaymentMethods?: string[];
+  warnings?: string[];
 }
 
 export interface PlaceOrderRequest {
