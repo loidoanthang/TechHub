@@ -4,11 +4,16 @@ import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
+import com.techhub.model.dto.request.CancelOrderRequest;
 import com.techhub.model.dto.response.*;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.*;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.service.order.AdminOrderService;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +26,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -240,5 +246,78 @@ class AdminOrderControllerTest {
         BusinessException ex = assertThrows(BusinessException.class, () ->
                 adminOrderController.getAdminOrderDetail(orderId));
         assertEquals(ErrorCode.ACCOUNT_BANNED, ex.getErrorCode());
+    }
+
+    // =========================================================================================
+    // POST /api/admin/orders/{id}/cancel Controller Tests (Phase 11 - Row 10)
+    // =========================================================================================
+
+    @Test
+    @DisplayName("TC-17: cancelAdminOrder gọi Service và trả về ApiResponse success thành công")
+    void cancelAdminOrder_Success_ReturnsApiResponse() {
+        UUID orderId = UUID.randomUUID();
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.SELLER_OUT_OF_STOCK, "Shop hết hàng");
+
+        AdminOrderDetailResponse detailResponse = new AdminOrderDetailResponse(
+                orderId, "ORD-20261015-01", OrderStatus.CANCELLED, "Đã hủy",
+                null, null, null, Collections.emptyList(), 0,
+                "[Admin Cancel - admin@techhub.vn]: SELLER_OUT_OF_STOCK - Shop hết hàng",
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                null, LocalDateTime.now(), LocalDateTime.now(), null, null, LocalDateTime.now(),
+                Collections.emptyList(), List.of("VIEW_DETAILS")
+        );
+
+        when(adminOrderService.cancelAdminOrder(eq(userId), eq(orderId), eq(request))).thenReturn(detailResponse);
+
+        ApiResponse<AdminOrderDetailResponse> response = adminOrderController.cancelAdminOrder(orderId, request);
+
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+        assertEquals("Order cancelled successfully by administrator", response.getMessage());
+        assertEquals(orderId, response.getData().orderId());
+        assertEquals(OrderStatus.CANCELLED, response.getData().status());
+        verify(adminOrderService).cancelAdminOrder(eq(userId), eq(orderId), eq(request));
+    }
+
+    @Test
+    @DisplayName("TC-18: Bean Validation bắt lỗi khi reasonCode bị null")
+    void cancelAdminOrder_Validation_FailsWhenReasonCodeIsNull() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+
+        CancelOrderRequest invalidRequest = new CancelOrderRequest(null, "Lý do huỷ");
+        Set<ConstraintViolation<CancelOrderRequest>> violations = validator.validate(invalidRequest);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("reasonCode")));
+    }
+
+    @Test
+    @DisplayName("TC-19: Bean Validation bắt lỗi khi reasonNote vượt quá 500 ký tự")
+    void cancelAdminOrder_Validation_FailsWhenReasonNoteExceeds500Chars() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+
+        String longNote = "A".repeat(501);
+        CancelOrderRequest invalidRequest = new CancelOrderRequest(CancellationReasonCode.OTHER, longNote);
+        Set<ConstraintViolation<CancelOrderRequest>> violations = validator.validate(invalidRequest);
+
+        assertFalse(violations.isEmpty());
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("reasonNote")));
+    }
+
+    @Test
+    @DisplayName("TC-20: Kiểm tra metadata bảo mật @PreAuthorize('hasRole(\\'ADMIN\\')') và @PostMapping('/{id}/cancel')")
+    void cancelAdminOrder_SecurityAnnotation_HasAdminPreAuthorize() throws NoSuchMethodException {
+        Method method = AdminOrderController.class.getMethod("cancelAdminOrder", UUID.class, CancelOrderRequest.class);
+
+        PreAuthorize preAuthorize = method.getAnnotation(PreAuthorize.class);
+        assertNotNull(preAuthorize, "Method cancelAdminOrder must be annotated with @PreAuthorize");
+        assertEquals("hasRole('ADMIN')", preAuthorize.value());
+
+        PostMapping postMapping = method.getAnnotation(PostMapping.class);
+        assertNotNull(postMapping, "Method cancelAdminOrder must be annotated with @PostMapping");
+        assertArrayEquals(new String[]{"/{id}/cancel"}, postMapping.value());
     }
 }

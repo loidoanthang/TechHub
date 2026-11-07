@@ -5,6 +5,7 @@ import com.techhub.exception.ErrorCode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class SecurityUtils {
@@ -23,5 +24,14 @@ public class SecurityUtils {
 
     public static UUID getCurrentUserId() {
         return getCurrentUser().user().getId();
+    }
+
+    public static Optional<UUID> getCurrentUserIdOptional() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(userDetails.user() != null ? userDetails.user().getId() : null);
     }
 }

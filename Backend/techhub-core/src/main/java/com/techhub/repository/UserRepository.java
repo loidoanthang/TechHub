@@ -26,4 +26,7 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM User u WHERE u.emailVerified = false AND u.createdAt < :cutoff")
     int deleteUnverifiedUsersOlderThan(@Param("cutoff") LocalDateTime cutoff);
+
+    @Query("SELECT COUNT(u.id) FROM User u WHERE u.createdAt >= :startDate AND u.createdAt <= :endDate")
+    long countNewUsersByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

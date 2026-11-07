@@ -4,12 +4,11 @@ import com.techhub.common.PageResponse;
 import com.techhub.common.SlugUtils;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
+import com.techhub.model.dto.request.CancelOrderRequest;
 import com.techhub.model.dto.response.*;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.*;
-import com.techhub.repository.OrderItemRepository;
-import com.techhub.repository.OrderRepository;
-import com.techhub.repository.UserRepository;
+import com.techhub.repository.*;
 import com.techhub.service.order.AdminOrderService;
 import com.techhub.specification.OrderSpecification;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +39,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final ProductVariantRepository productVariantRepository;
+    private final PaymentRepository paymentRepository;
+    private final RefundTransactionRepository refundTransactionRepository;
+    private final VoucherRedemptionRepository voucherRedemptionRepository;
+    private final VoucherRepository voucherRepository;
 
     private static final BigDecimal COMMISSION_RATE = BigDecimal.valueOf(0.05);
     private static final Set<String> SORT_BY_WHITELIST = Set.of(
@@ -617,5 +621,199 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         ));
 
         return steps;
+    }
+
+    @Override
+    @Transactional
+    public AdminOrderDetailResponse cancelAdminOrder(UUID currentUserId, UUID orderId, CancelOrderRequest request) {
+        log.info("Processing cancelAdminOrder for adminUserId={}, orderId={}, reasonCode={}",
+                currentUserId, orderId, request != null ? request.reasonCode() : null);
+
+        // 1. Fail-fast input validation (avoid unnecessary DB queries/locks)
+        if (orderId == null || request == null || request.reasonCode() == null) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_DATA);
+        }
+
+        // 2. Gatekeeper: Validate Admin user account (BR-11D)
+        User adminUser = validateAdminUser(currentUserId);
+
+        // 3. Acquire pessimistic lock on the Order
+        Order order = orderRepository.findByIdForUpdate(orderId)
+                .orElseThrow(() -> {
+                    log.warn("Order {} not found for cancellation", orderId);
+                    return new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+                });
+
+        // 4. Idempotency Check (BR-18.C)
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            log.info("Order {} is already CANCELLED. Returning existing details idempotently.", orderId);
+            return getAdminOrderDetail(currentUserId, orderId);
+        }
+
+        // 5. State Machine Validation (BR-18.A & BR-18.B)
+        Set<OrderStatus> allowedStates = Set.of(
+                OrderStatus.PENDING_PAYMENT,
+                OrderStatus.PENDING_CONFIRMATION,
+                OrderStatus.CONFIRMED,
+                OrderStatus.PREPARING,
+                OrderStatus.WAITING_FOR_PICKUP
+        );
+        if (!allowedStates.contains(order.getStatus())) {
+            log.warn("Order {} status is {} which cannot be cancelled by admin", orderId, order.getStatus());
+            throw new BusinessException(ErrorCode.CANCELLATION_NOT_ALLOWED);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // 6. Step A: Restore inventory with deadlock prevention (BR-18.D.1)
+        restoreOrderInventory(order);
+
+        // 7. Step B: Process Payment compensation & refunds (BR-18.D.2)
+        processCancellationPayment(order, now);
+
+        // 8. Step C: Release and roll back vouchers (BR-18.D.3)
+        releaseOrderVouchers(order, now);
+
+        // 9. Step D: Update Order status, cancelledAt, and audit note
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setCancelledAt(now);
+        order.setUpdatedAt(now);
+
+        String adminIdentifier = (adminUser.getEmail() != null && !adminUser.getEmail().isBlank())
+                ? adminUser.getEmail() : adminUser.getId().toString();
+        String cancelAudit = String.format("[Admin Cancel - %s]: %s%s",
+                adminIdentifier,
+                request.reasonCode().name(),
+                (request.reasonNote() != null && !request.reasonNote().isBlank()) ? " - " + request.reasonNote().trim() : ""
+        );
+        String existingNote = order.getNote();
+        if (existingNote != null && !existingNote.isBlank()) {
+            String combined = existingNote + " | " + cancelAudit;
+            order.setNote(combined.length() > 500 ? combined.substring(0, 500) : combined);
+        } else {
+            order.setNote(cancelAudit.length() > 500 ? cancelAudit.substring(0, 500) : cancelAudit);
+        }
+        orderRepository.save(order);
+
+        log.info("Order {} successfully cancelled by admin {}", orderId, adminUser.getEmail());
+        return getAdminOrderDetail(currentUserId, orderId);
+    }
+
+    private void restoreOrderInventory(Order order) {
+        List<OrderItem> items = orderItemRepository.findByOrderId(order.getId());
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        // Sort variant IDs in ascending order to prevent deadlocks (TC-11)
+        List<UUID> sortedVariantIds = items.stream()
+                .map(OrderItem::getProductVariant)
+                .filter(Objects::nonNull)
+                .map(ProductVariant::getId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted()
+                .toList();
+
+        if (sortedVariantIds.isEmpty()) {
+            return;
+        }
+
+        List<ProductVariant> variants = productVariantRepository.findAllByIdInForUpdate(sortedVariantIds);
+        Map<UUID, ProductVariant> variantMap = variants.stream()
+                .collect(Collectors.toMap(ProductVariant::getId, v -> v));
+
+        for (OrderItem item : items) {
+            if (item.getProductVariant() != null && item.getProductVariant().getId() != null) {
+                ProductVariant variant = variantMap.get(item.getProductVariant().getId());
+                if (variant != null) {
+                    variant.setStockQuantity(variant.getStockQuantity() + item.getQuantity());
+                }
+            }
+        }
+        productVariantRepository.saveAll(variants);
+    }
+
+    private void processCancellationPayment(Order order, LocalDateTime now) {
+        if (order.getPayment() == null || order.getPayment().getId() == null) {
+            return;
+        }
+
+        // Lock payment row to prevent race conditions on shared multi-order payments
+        Payment payment = paymentRepository.findByIdForUpdate(order.getPayment().getId())
+                .orElse(order.getPayment());
+
+        BigDecimal orderAmount = Objects.requireNonNullElse(order.getTotalAmount(), BigDecimal.ZERO);
+
+        if (payment.getStatus() == PaymentStatus.PAID) {
+            BigDecimal currentRefunded = Objects.requireNonNullElse(payment.getRefundedAmount(), BigDecimal.ZERO);
+            payment.setRefundedAmount(currentRefunded.add(orderAmount));
+            payment.setUpdatedAt(now);
+            paymentRepository.save(payment);
+
+            RefundMethod refundMethod = payment.getPaymentMethod() == PaymentMethod.VNPAY
+                    ? RefundMethod.GATEWAY_REFUND
+                    : RefundMethod.BANK_TRANSFER_MANUAL;
+
+            RefundTransaction refundTx = RefundTransaction.builder()
+                    .payment(payment)
+                    .order(order)
+                    .amount(orderAmount)
+                    .refundMethod(refundMethod)
+                    .status(RefundStatus.SUCCESS)
+                    .gatewayRefundId("ADMIN_REFUND_" + order.getOrderNumber() + "_" + System.currentTimeMillis())
+                    .createdAt(now)
+                    .build();
+            refundTransactionRepository.save(refundTx);
+        } else if (payment.getStatus() == PaymentStatus.PENDING) {
+            if (payment.getPaymentMethod() == PaymentMethod.COD) {
+                BigDecimal currentAmount = Objects.requireNonNullElse(payment.getAmount(), BigDecimal.ZERO);
+                payment.setAmount(currentAmount.subtract(orderAmount).max(BigDecimal.ZERO));
+            }
+            payment.setUpdatedAt(now);
+
+            List<Order> siblingOrders = orderRepository.findByPaymentId(payment.getId());
+            boolean allCancelled = siblingOrders != null && siblingOrders.stream()
+                    .allMatch(o -> Objects.equals(o.getId(), order.getId()) || o.getStatus() == OrderStatus.CANCELLED);
+            if (allCancelled) {
+                payment.setStatus(PaymentStatus.CANCELLED);
+            }
+            paymentRepository.save(payment);
+        }
+    }
+
+    private void releaseOrderVouchers(Order order, LocalDateTime now) {
+        List<VoucherRedemption> redemptions = voucherRedemptionRepository.findByOrderId(order.getId());
+        if (redemptions == null || redemptions.isEmpty()) {
+            return;
+        }
+
+        for (VoucherRedemption redemption : redemptions) {
+            if (redemption.getStatus() == VoucherRedemptionStatus.REDEEMED) {
+                Voucher voucher = redemption.getVoucher();
+                if (voucher != null) {
+                    int usedCount = voucher.getUsedCount() != null ? voucher.getUsedCount() : 0;
+                    voucher.setUsedCount(Math.max(0, usedCount - 1));
+                    voucher.setUpdatedAt(now);
+                    voucherRepository.save(voucher);
+                }
+                redemption.setStatus(VoucherRedemptionStatus.RELEASED);
+                redemption.setReleasedAt(now);
+                redemption.setUpdatedAt(now);
+                voucherRedemptionRepository.save(redemption);
+            } else if (redemption.getStatus() == VoucherRedemptionStatus.RESERVED) {
+                Voucher voucher = redemption.getVoucher();
+                if (voucher != null) {
+                    int reservedCount = voucher.getReservedCount() != null ? voucher.getReservedCount() : 0;
+                    voucher.setReservedCount(Math.max(0, reservedCount - 1));
+                    voucher.setUpdatedAt(now);
+                    voucherRepository.save(voucher);
+                }
+                redemption.setStatus(VoucherRedemptionStatus.RELEASED);
+                redemption.setReleasedAt(now);
+                redemption.setUpdatedAt(now);
+                voucherRedemptionRepository.save(redemption);
+            }
+        }
     }
 }

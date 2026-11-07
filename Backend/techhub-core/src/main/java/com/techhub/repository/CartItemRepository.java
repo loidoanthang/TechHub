@@ -46,6 +46,9 @@ public interface CartItemRepository extends JpaRepository<CartItem, UUID> {
 
     Optional<CartItem> findByCartIdAndProductVariantId(UUID cartId, UUID productVariantId);
 
+    @EntityGraph(attributePaths = {"productVariant"})
+    List<CartItem> findByCartId(UUID cartId);
+
     int countByCartId(UUID cartId);
 
     @Query("SELECT COUNT(ci) FROM CartItem ci WHERE ci.cart.user.id = :userId")

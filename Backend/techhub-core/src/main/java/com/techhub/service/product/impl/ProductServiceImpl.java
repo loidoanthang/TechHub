@@ -277,4 +277,83 @@ public class ProductServiceImpl implements ProductService {
                 product.getCreatedAt()
         );
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductSummaryResponse> getSimilarProducts(UUID productId) {
+        if (productId == null || new UUID(0L, 0L).equals(productId)) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_DATA);
+        }
+
+        log.info("Fetching similar products for productId={}", productId);
+
+        // 1. Nạp sản phẩm gốc và kiểm tra Gatekeeper
+        Product targetProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (targetProduct.isDeleted() || targetProduct.getVisibilityStatus() != ProductVisibilityStatus.PUBLISHED) {
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+
+        // 2. Query tối đa 6 sản phẩm tương tự cùng category, ưu tiên cùng brand, createdAt DESC
+        List<Product> similarProducts = productRepository.findSimilarProducts(
+                targetProduct.getCategory().getId(),
+                targetProduct.getId(),
+                targetProduct.getBrandName(),
+                PageRequest.of(0, 6)
+        );
+
+        if (similarProducts.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<UUID> productIds = similarProducts.stream()
+                .map(Product::getId)
+                .toList();
+
+        // 3. Batch fetch cover images (1 Query O(1))
+        Map<UUID, String> coverImageMap = new HashMap<>();
+        List<Object[]> coverImageRows = productImageRepository.findCoverImagesByProductIds(productIds);
+        for (Object[] row : coverImageRows) {
+            coverImageMap.put((UUID) row[0], (String) row[1]);
+        }
+
+        // 4. Batch fetch active variant metrics (1 Query O(1))
+        Map<UUID, ProductVariantMetrics> metricsMap = new HashMap<>();
+        List<Object[]> metricRows = productVariantRepository.aggregateActiveVariantMetricsByProductIds(productIds);
+        for (Object[] row : metricRows) {
+            UUID pId = (UUID) row[0];
+            long count = ((Number) row[1]).longValue();
+            BigDecimal variantMinPrice = row[2] instanceof BigDecimal bd ? bd : (row[2] != null ? new BigDecimal(row[2].toString()) : BigDecimal.ZERO);
+            BigDecimal variantMaxPrice = row[3] instanceof BigDecimal bd ? bd : (row[3] != null ? new BigDecimal(row[3].toString()) : BigDecimal.ZERO);
+            long totalStock = ((Number) row[4]).longValue();
+            metricsMap.put(pId, new ProductVariantMetrics(pId, count, variantMinPrice, variantMaxPrice, totalStock));
+        }
+
+        // 5. In-Memory Assembly to ProductSummaryResponse
+        return similarProducts.stream()
+                .map(product -> {
+                    ProductVariantMetrics metrics = metricsMap.get(product.getId());
+                    BigDecimal displayPrice = metrics != null ? metrics.minPrice() : BigDecimal.ZERO;
+                    boolean inStock = metrics != null && metrics.totalStock() > 0;
+                    boolean isShopPaused = product.getShop() != null && product.getShop().getStatus() == ShopStatus.PAUSED;
+
+                    return new ProductSummaryResponse(
+                            product.getId(),
+                            product.getName(),
+                            product.getSlug(),
+                            product.getBrandName(),
+                            product.getCategory().getId(),
+                            product.getCategory().getName(),
+                            product.getShop().getId(),
+                            product.getShop().getName(),
+                            isShopPaused,
+                            coverImageMap.get(product.getId()),
+                            displayPrice,
+                            inStock,
+                            product.getCreatedAt()
+                    );
+                })
+                .toList();
+    }
 }

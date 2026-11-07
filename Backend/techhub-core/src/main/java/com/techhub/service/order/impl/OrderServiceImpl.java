@@ -9,6 +9,9 @@ import com.techhub.model.dto.response.BuyerOrderDetailResponse;
 import com.techhub.model.dto.response.BuyerOrderItemResponse;
 import com.techhub.model.dto.response.BuyerOrderResponse;
 import com.techhub.model.dto.response.OrderTimelineStepResponse;
+import com.techhub.model.dto.response.ReorderItemDto;
+import com.techhub.model.dto.response.ReorderResponse;
+import com.techhub.model.dto.response.ReorderUnavailableItemDto;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.*;
 import com.techhub.model.dto.request.CreateCancellationRequest;
@@ -65,6 +68,8 @@ public class OrderServiceImpl implements OrderService {
     private final com.techhub.repository.VoucherRedemptionRepository voucherRedemptionRepository;
     private final com.techhub.repository.VoucherRepository voucherRepository;
     private final com.techhub.repository.RefundTransactionRepository refundTransactionRepository;
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -837,5 +842,268 @@ public class OrderServiceImpl implements OrderService {
             case RETURN_REQUESTED -> "Yêu cầu trả hàng / hoàn tiền";
             case REFUNDED -> "Đã hoàn tiền";
         };
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public ReorderResponse reorder(UUID userId, UUID orderId) {
+        log.info("Processing reorder request: userId={}, orderId={}", userId, orderId);
+
+        // 1. Fail-fast validation
+        if (userId == null || orderId == null) {
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+        }
+
+        // 2. Gatekeeper: Validate Buyer Security & Account Status (BR-11D)
+        User buyerUser = validateBuyerAccount(userId);
+
+        // 3. Query Order & IDOR ownership check
+        Order order = orderRepository.findByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 4. Retrieve order items
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
+        if (orderItems == null || orderItems.isEmpty()) {
+            log.warn("Reorder failed: order {} contains no items", orderId);
+            return new ReorderResponse(orderId, 0, 0, List.of(), List.of(), 0, 0);
+        }
+
+        // 5. Pessimistic Write Lock on user's Cart (BR-12)
+        Cart cart = cartRepository.findByUserIdWithLock(userId)
+                .orElseGet(() -> {
+                    log.info("Lazy initializing new cart for user {} during reorder", userId);
+                    Cart newCart = Cart.builder()
+                            .user(buyerUser)
+                            .build();
+                    try {
+                        return cartRepository.save(newCart);
+                    } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+                        return cartRepository.findByUserIdWithLock(userId)
+                                .orElseThrow(() -> ex);
+                    }
+                });
+
+        // 6. Pre-fetch existing Cart Items for user
+        List<CartItem> existingCartItems = cartItemRepository.findByCartId(cart.getId());
+        Map<UUID, CartItem> existingCartItemMap = new HashMap<>();
+        if (existingCartItems != null) {
+            for (CartItem ci : existingCartItems) {
+                if (ci.getProductVariant() != null && ci.getProductVariant().getId() != null) {
+                    existingCartItemMap.put(ci.getProductVariant().getId(), ci);
+                }
+            }
+        }
+        int currentItemTypesCount = existingCartItemMap.size();
+
+        // 7. Batch fetch Variants with details (Zero N+1 Query)
+        List<UUID> variantIds = orderItems.stream()
+                .map(OrderItem::getProductVariant)
+                .filter(Objects::nonNull)
+                .map(ProductVariant::getId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        Map<UUID, ProductVariant> variantMap = new HashMap<>();
+        if (!variantIds.isEmpty()) {
+            List<ProductVariant> variants = productVariantRepository.findAllByIdInWithDetails(variantIds);
+            if (variants != null) {
+                for (ProductVariant pv : variants) {
+                    variantMap.put(pv.getId(), pv);
+                }
+            }
+        }
+
+        // 8. Iterate over OrderItems and evaluate 5-Tier Gatekeeper & Live Stock
+        List<ReorderItemDto> addedItems = new ArrayList<>();
+        List<ReorderUnavailableItemDto> unavailableItems = new ArrayList<>();
+        List<CartItem> itemsToSave = new ArrayList<>();
+
+        for (OrderItem item : orderItems) {
+            UUID variantId = item.getProductVariant() != null ? item.getProductVariant().getId() : null;
+            String productName = item.getProductNameSnapshot();
+            String variantName = item.getVariantNameSnapshot();
+            String sku = item.getSkuSnapshot();
+            int requestedQty = item.getQuantity();
+
+            if (variantId == null || !variantMap.containsKey(variantId)) {
+                unavailableItems.add(new ReorderUnavailableItemDto(
+                        variantId, productName, variantName, sku, requestedQty,
+                        "VARIANT_UNAVAILABLE", "Biến thể sản phẩm không tồn tại hoặc đã ngừng kinh doanh"
+                ));
+                continue;
+            }
+
+            ProductVariant variant = variantMap.get(variantId);
+            Product product = variant.getProduct();
+            Category category = product != null ? product.getCategory() : null;
+            Shop shop = product != null ? product.getShop() : null;
+            Seller seller = shop != null ? shop.getSeller() : null;
+            User sellerUser = seller != null ? seller.getUser() : null;
+
+            // 8.1 Variant Check
+            if (variant.isDeleted() || variant.getStatus() != ProductVariantStatus.ACTIVE) {
+                unavailableItems.add(new ReorderUnavailableItemDto(
+                        variantId, productName, variantName, sku, requestedQty,
+                        "VARIANT_UNAVAILABLE", "Biến thể sản phẩm đã bị xóa hoặc tạm ngưng bán"
+                ));
+                continue;
+            }
+
+            // 8.2 Product Check
+            if (product == null || product.isDeleted() || product.isSuspended()
+                    || product.getVisibilityStatus() != ProductVisibilityStatus.PUBLISHED
+                    || product.getApprovalStatus() != ProductApprovalStatus.APPROVED) {
+                unavailableItems.add(new ReorderUnavailableItemDto(
+                        variantId, productName, variantName, sku, requestedQty,
+                        "PRODUCT_UNAVAILABLE", "Sản phẩm hiện không khả dụng để đặt mua"
+                ));
+                continue;
+            }
+
+            // 8.3 Category Check
+            if (category == null || category.isDeleted() || category.getStatus() != CategoryStatus.ACTIVE) {
+                unavailableItems.add(new ReorderUnavailableItemDto(
+                        variantId, productName, variantName, sku, requestedQty,
+                        "CATEGORY_INACTIVE", "Ngành hàng của sản phẩm hiện đang tạm khóa"
+                ));
+                continue;
+            }
+
+            // 8.4 Shop Check (BR-07)
+            if (shop == null || shop.getStatus() == ShopStatus.BANNED || shop.getStatus() == ShopStatus.SUSPENDED
+                    || (sellerUser != null && (sellerUser.getStatus() == UserStatus.BANNED || sellerUser.getStatus() == UserStatus.DELETED))) {
+                unavailableItems.add(new ReorderUnavailableItemDto(
+                        variantId, productName, variantName, sku, requestedQty,
+                        "SHOP_NOT_ACTIVE", "Gian hàng hiện đang tạm ngưng hoạt động hoặc bị cấm"
+                ));
+                continue;
+            }
+
+            if (shop.getStatus() == ShopStatus.PAUSED) {
+                unavailableItems.add(new ReorderUnavailableItemDto(
+                        variantId, productName, variantName, sku, requestedQty,
+                        "SHOP_IS_PAUSED", "Gian hàng hiện đang tạm nghỉ"
+                ));
+                continue;
+            }
+
+            // 8.5 Anti-Self-Buying Guard (BR-11B)
+            if (sellerUser != null && userId.equals(sellerUser.getId())) {
+                unavailableItems.add(new ReorderUnavailableItemDto(
+                        variantId, productName, variantName, sku, requestedQty,
+                        "CANNOT_ADD_OWN_PRODUCT", "Không thể mua lại sản phẩm từ chính gian hàng của bạn"
+                ));
+                continue;
+            }
+
+            // 8.6 Stock Check
+            int stock = variant.getStockQuantity();
+            if (stock <= 0) {
+                unavailableItems.add(new ReorderUnavailableItemDto(
+                        variantId, productName, variantName, sku, requestedQty,
+                        "OUT_OF_STOCK", "Sản phẩm hiện đã hết hàng trong kho"
+                ));
+                continue;
+            }
+
+            // 8.7 Quantity & Cart Capacity Resolution
+            CartItem existingItem = existingCartItemMap.get(variantId);
+            if (existingItem != null) {
+                int existingQty = existingItem.getQuantity();
+                if (existingQty >= stock) {
+                    unavailableItems.add(new ReorderUnavailableItemDto(
+                            variantId, productName, variantName, sku, requestedQty,
+                            "INSUFFICIENT_STOCK", "Số lượng trong giỏ hàng đã đạt giới hạn tồn kho hiện có"
+                    ));
+                    continue;
+                }
+
+                int addableQty = Math.min(requestedQty, stock - existingQty);
+                if (existingQty + addableQty > 999) {
+                    addableQty = 999 - existingQty;
+                }
+
+                if (addableQty <= 0) {
+                    unavailableItems.add(new ReorderUnavailableItemDto(
+                            variantId, productName, variantName, sku, requestedQty,
+                            "INVALID_QUANTITY", "Số lượng sản phẩm trong giỏ hàng đạt giới hạn tối đa (999)"
+                    ));
+                    continue;
+                }
+
+                existingItem.setQuantity(existingQty + addableQty);
+                itemsToSave.add(existingItem);
+
+                BigDecimal price = variant.getPrice() != null ? variant.getPrice() : item.getDiscountedUnitPrice();
+                String imgUrl = (variant.getImageUrl() != null && !variant.getImageUrl().isBlank())
+                        ? variant.getImageUrl()
+                        : item.getImageUrlSnapshot();
+
+                addedItems.add(new ReorderItemDto(
+                        variantId, product.getId(), product.getName(), variant.getVariantName(),
+                        variant.getSku(), imgUrl, addableQty, price
+                ));
+            } else {
+                // New SKU check capacity (max 50 distinct items)
+                if (currentItemTypesCount >= 50) {
+                    unavailableItems.add(new ReorderUnavailableItemDto(
+                            variantId, productName, variantName, sku, requestedQty,
+                            "CART_CAPACITY_EXCEEDED", "Giỏ hàng đã đạt giới hạn tối đa 50 loại mặt hàng"
+                    ));
+                    continue;
+                }
+
+                int addableQty = Math.min(requestedQty, stock);
+                if (addableQty > 999) {
+                    addableQty = 999;
+                }
+
+                CartItem newItem = CartItem.builder()
+                        .cart(cart)
+                        .product(product)
+                        .productVariant(variant)
+                        .quantity(addableQty)
+                        .build();
+
+                itemsToSave.add(newItem);
+                existingCartItemMap.put(variantId, newItem);
+                currentItemTypesCount++;
+
+                BigDecimal price = variant.getPrice() != null ? variant.getPrice() : item.getDiscountedUnitPrice();
+                String imgUrl = (variant.getImageUrl() != null && !variant.getImageUrl().isBlank())
+                        ? variant.getImageUrl()
+                        : item.getImageUrlSnapshot();
+
+                addedItems.add(new ReorderItemDto(
+                        variantId, product.getId(), product.getName(), variant.getVariantName(),
+                        variant.getSku(), imgUrl, addableQty, price
+                ));
+            }
+        }
+
+        // 9. Batch save cart items (deduplicated to guarantee safety)
+        if (!itemsToSave.isEmpty()) {
+            List<CartItem> distinctItemsToSave = new ArrayList<>(new LinkedHashSet<>(itemsToSave));
+            cartItemRepository.saveAll(distinctItemsToSave);
+            log.info("Reorder saved {} cart items for user {}", distinctItemsToSave.size(), userId);
+        }
+
+        // 10. Compute updated cart metrics in-memory
+        int updatedItemTypes = existingCartItemMap.size();
+        int updatedTotalQty = existingCartItemMap.values().stream().mapToInt(CartItem::getQuantity).sum();
+
+        log.info("Reorder completed for user {}, order {}: requested={}, added={}, unavailable={}",
+                userId, orderId, orderItems.size(), addedItems.size(), unavailableItems.size());
+
+        return new ReorderResponse(
+                orderId,
+                orderItems.size(),
+                addedItems.size(),
+                addedItems,
+                unavailableItems,
+                updatedItemTypes,
+                updatedTotalQty
+        );
     }
 }

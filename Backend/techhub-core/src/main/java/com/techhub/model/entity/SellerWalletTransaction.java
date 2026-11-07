@@ -23,7 +23,8 @@ import java.util.UUID;
         indexes = {
                 @Index(name = "idx_seller_wallet_seller_id", columnList = "seller_id"),
                 @Index(name = "idx_seller_wallet_reference_id", columnList = "reference_id"),
-                @Index(name = "idx_seller_wallet_created_at", columnList = "created_at")
+                @Index(name = "idx_seller_wallet_created_at", columnList = "created_at"),
+                @Index(name = "idx_seller_wallet_seller_created", columnList = "seller_id, created_at DESC")
         }
 )
 public class SellerWalletTransaction {

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -26,6 +27,16 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     })
     @Query("SELECT pv FROM ProductVariant pv WHERE pv.id = :id AND pv.isDeleted = false")
     Optional<ProductVariant> findByIdWithDetails(@Param("id") UUID id);
+
+    @EntityGraph(attributePaths = {
+            "product",
+            "product.shop",
+            "product.shop.seller",
+            "product.shop.seller.user",
+            "product.category"
+    })
+    @Query("SELECT pv FROM ProductVariant pv WHERE pv.id IN :ids AND pv.isDeleted = false")
+    List<ProductVariant> findAllByIdInWithDetails(@Param("ids") Collection<UUID> ids);
 
     List<ProductVariant> findByProductId(UUID productId);
     @Query("SELECT pv FROM ProductVariant pv WHERE pv.product.id = :productId AND pv.isDeleted = false ORDER BY pv.createdAt ASC")
@@ -71,4 +82,23 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT pv FROM ProductVariant pv WHERE pv.id IN :ids ORDER BY pv.id ASC")
     List<ProductVariant> findAllByIdInForUpdate(@Param("ids") List<UUID> ids);
+
+    @EntityGraph(attributePaths = {"product"})
+    @Query("""
+        SELECT pv
+        FROM ProductVariant pv
+        JOIN pv.product p
+        WHERE p.shop.id = :shopId
+          AND pv.isDeleted = false
+          AND pv.status = com.techhub.model.enums.ProductVariantStatus.ACTIVE
+          AND p.isDeleted = false
+          AND p.visibilityStatus = com.techhub.model.enums.ProductVisibilityStatus.PUBLISHED
+          AND pv.stockQuantity <= :threshold
+        ORDER BY pv.stockQuantity ASC, pv.updatedAt DESC
+    """)
+    List<ProductVariant> findLowStockVariantsByShopId(
+            @Param("shopId") UUID shopId,
+            @Param("threshold") int threshold,
+            org.springframework.data.domain.Pageable pageable
+    );
 }

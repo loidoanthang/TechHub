@@ -11,7 +11,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,25 +24,36 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.model.dto.response.PublicProductDetailResponse;
 import com.techhub.model.dto.response.ProductVariantResponse;
 import com.techhub.model.dto.response.ProductImageResponse;
+import com.techhub.model.dto.response.RecentlyViewedResponse;
+import com.techhub.model.entity.User;
 import com.techhub.model.enums.ProductVariantStatus;
+import com.techhub.model.enums.Role;
+import com.techhub.model.enums.UserStatus;
+import com.techhub.security.CustomUserDetails;
+import com.techhub.service.recentlyviewed.RecentlyViewedService;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Unit Tests cho ProductController (GET /api/products, GET /api/products/{slug})")
+@DisplayName("Unit Tests cho ProductController (GET /api/products, GET /api/products/{slug}, POST /api/products/{id}/view)")
 class ProductControllerTest {
 
     @Mock
     private ProductService productService;
+
+    @Mock
+    private RecentlyViewedService recentlyViewedService;
 
     @InjectMocks
     private ProductController productController;
@@ -277,5 +292,241 @@ class ProductControllerTest {
         assertNotNull(res);
         assertTrue(res.isSuccess());
         verify(productService).getPublicProductBySlug("dell-xps-13-9340");
+    }
+
+    // =========================================================================
+    // TESTS FOR POST /api/products/{id}/view (ProductController)
+    // =========================================================================
+
+    @Test
+    @DisplayName("TC-27: testController_RecordProductView_SecurityAndMethodAnnotations - Kiểm tra @PostMapping và @PreAuthorize")
+    void testController_RecordProductView_SecurityAndMethodAnnotations() throws NoSuchMethodException {
+        Method method = ProductController.class.getMethod("recordProductView", UUID.class);
+
+        assertTrue(method.isAnnotationPresent(PostMapping.class),
+                "Method recordProductView phải có annotation @PostMapping");
+
+        PostMapping postMapping = method.getAnnotation(PostMapping.class);
+        assertArrayEquals(new String[]{"/{id}/view"}, postMapping.value(),
+                "PostMapping path phải là /{id}/view");
+
+        assertTrue(method.isAnnotationPresent(PreAuthorize.class),
+                "Method recordProductView phải có annotation @PreAuthorize");
+
+        PreAuthorize preAuthorize = method.getAnnotation(PreAuthorize.class);
+        assertEquals("hasRole('BUYER')", preAuthorize.value(),
+                "Quyền truy cập phải là hasRole('BUYER')");
+
+        Parameter[] parameters = method.getParameters();
+        assertEquals(1, parameters.length);
+        assertTrue(parameters[0].isAnnotationPresent(PathVariable.class),
+                "Tham số id phải có annotation @PathVariable");
+    }
+
+    @Test
+    @DisplayName("TC-28: testController_RecordProductView_Success_Returns200 - Ghi nhận lượt xem thành công trả về 200 OK")
+    void testController_RecordProductView_Success_Returns200() {
+        UUID userId = UUID.randomUUID();
+        UUID productId = UUID.randomUUID();
+
+        User mockUser = new User();
+        mockUser.setId(userId);
+        mockUser.setEmail("buyer@techhub.vn");
+        mockUser.setStatus(UserStatus.ACTIVE);
+        mockUser.setRoles(Set.of(Role.BUYER));
+
+        CustomUserDetails userDetails = new CustomUserDetails(mockUser);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        try {
+            doNothing().when(recentlyViewedService).recordProductView(userId, productId);
+
+            ApiResponse<Void> response = productController.recordProductView(productId);
+
+            assertNotNull(response);
+            assertTrue(response.isSuccess());
+            assertEquals("Ghi nhận lượt xem sản phẩm thành công", response.getMessage());
+            assertNull(response.getData());
+
+            verify(recentlyViewedService, times(1)).recordProductView(userId, productId);
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    @DisplayName("TC-29: testController_RecordProductView_ServiceException_Propagates - Ngoại lệ từ service được truyền đạt chính xác")
+    void testController_RecordProductView_ServiceException_Propagates() {
+        UUID userId = UUID.randomUUID();
+        UUID productId = UUID.randomUUID();
+
+        User mockUser = new User();
+        mockUser.setId(userId);
+        mockUser.setEmail("buyer@techhub.vn");
+        mockUser.setStatus(UserStatus.ACTIVE);
+        mockUser.setRoles(Set.of(Role.BUYER));
+
+        CustomUserDetails userDetails = new CustomUserDetails(mockUser);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        try {
+            doThrow(new BusinessException(ErrorCode.PRODUCT_NOT_FOUND))
+                    .when(recentlyViewedService).recordProductView(userId, productId);
+
+            BusinessException ex = assertThrows(BusinessException.class,
+                    () -> productController.recordProductView(productId));
+
+            assertEquals(ErrorCode.PRODUCT_NOT_FOUND, ex.getErrorCode());
+            verify(recentlyViewedService, times(1)).recordProductView(userId, productId);
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    // =========================================================================
+    // TESTS FOR GET /api/products/recently-viewed (ProductController)
+    // =========================================================================
+
+    @Test
+    @DisplayName("TC-30: controller_getRecentlyViewed_SecurityAndAnnotations - Kiểm tra @GetMapping và @PreAuthorize")
+    void controller_getRecentlyViewed_SecurityAndAnnotations() throws NoSuchMethodException {
+        Method method = ProductController.class.getMethod("getRecentlyViewedProducts");
+
+        assertTrue(method.isAnnotationPresent(GetMapping.class),
+                "Method getRecentlyViewedProducts phải có annotation @GetMapping");
+
+        GetMapping getMapping = method.getAnnotation(GetMapping.class);
+        assertArrayEquals(new String[]{"/recently-viewed"}, getMapping.value(),
+                "GetMapping path phải là /recently-viewed");
+
+        assertTrue(method.isAnnotationPresent(PreAuthorize.class),
+                "Method getRecentlyViewedProducts phải có annotation @PreAuthorize");
+
+        PreAuthorize preAuthorize = method.getAnnotation(PreAuthorize.class);
+        assertEquals("hasRole('BUYER')", preAuthorize.value(),
+                "Quyền truy cập phải là hasRole('BUYER')");
+    }
+
+    @Test
+    @DisplayName("TC-31: controller_getRecentlyViewed_Success_Returns200 - Trả về 200 OK kèm danh sách gần đây")
+    void controller_getRecentlyViewed_Success_Returns200() {
+        UUID userId = UUID.randomUUID();
+        User mockUser = new User();
+        mockUser.setId(userId);
+        mockUser.setEmail("buyer@techhub.vn");
+        mockUser.setStatus(UserStatus.ACTIVE);
+        mockUser.setRoles(Set.of(Role.BUYER));
+
+        CustomUserDetails userDetails = new CustomUserDetails(mockUser);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        try {
+            RecentlyViewedResponse item = RecentlyViewedResponse.builder()
+                    .id(UUID.randomUUID())
+                    .productId(UUID.randomUUID())
+                    .productName("MacBook Air M3")
+                    .slug("macbook-air-m3")
+                    .coverImageUrl("https://cdn.techhub.com/cover.jpg")
+                    .minPrice(new BigDecimal("32990000.00"))
+                    .inStock(true)
+                    .isShopPaused(false)
+                    .viewedAt(LocalDateTime.now())
+                    .build();
+
+            when(recentlyViewedService.getRecentlyViewedProducts(userId))
+                    .thenReturn(List.of(item));
+
+            ApiResponse<List<RecentlyViewedResponse>> response = productController.getRecentlyViewedProducts();
+
+            assertNotNull(response);
+            assertTrue(response.isSuccess());
+            assertEquals("Lấy danh sách sản phẩm đã xem gần đây thành công", response.getMessage());
+            assertNotNull(response.getData());
+            assertEquals(1, response.getData().size());
+            assertEquals("MacBook Air M3", response.getData().get(0).getProductName());
+
+            verify(recentlyViewedService, times(1)).getRecentlyViewedProducts(userId);
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    @DisplayName("TC-32: controller_getRecentlyViewed_LiteralRoute_DoesNotConflictWithSlug - Literal match ưu tiên phân biệt")
+    void controller_getRecentlyViewed_LiteralRoute_DoesNotConflictWithSlug() throws NoSuchMethodException {
+        Method recentlyViewedMethod = ProductController.class.getMethod("getRecentlyViewedProducts");
+        Method slugMethod = ProductController.class.getMethod("getProductBySlug", String.class);
+
+        assertNotNull(recentlyViewedMethod);
+        assertNotNull(slugMethod);
+
+        GetMapping rvMapping = recentlyViewedMethod.getAnnotation(GetMapping.class);
+        GetMapping slugMapping = slugMethod.getAnnotation(GetMapping.class);
+
+        assertArrayEquals(new String[]{"/recently-viewed"}, rvMapping.value());
+        assertArrayEquals(new String[]{"/{slug}"}, slugMapping.value());
+    }
+
+    // =========================================================================
+    // TESTS FOR GET /api/products/{id}/similar (ProductController)
+    // =========================================================================
+
+    @Test
+    @DisplayName("TC-33: controller_getSimilarProducts_PublicAccess_NoPreAuthorize - Endpoint công khai không có @PreAuthorize")
+    void controller_getSimilarProducts_PublicAccess_NoPreAuthorize() throws NoSuchMethodException {
+        Method method = ProductController.class.getMethod("getSimilarProducts", UUID.class);
+
+        assertTrue(method.isAnnotationPresent(GetMapping.class),
+                "Method getSimilarProducts phải có annotation @GetMapping");
+
+        GetMapping getMapping = method.getAnnotation(GetMapping.class);
+        assertArrayEquals(new String[]{"/{id}/similar"}, getMapping.value(),
+                "GetMapping path phải là /{id}/similar");
+
+        assertFalse(method.isAnnotationPresent(PreAuthorize.class),
+                "Method getSimilarProducts là public access, không được có @PreAuthorize");
+    }
+
+    @Test
+    @DisplayName("TC-34: controller_getSimilarProducts_Success_Returns200 - Trả về 200 OK kèm danh sách 6 sản phẩm tương tự")
+    void controller_getSimilarProducts_Success_Returns200() {
+        UUID productId = UUID.randomUUID();
+        ProductSummaryResponse sim = new ProductSummaryResponse(
+                UUID.randomUUID(),
+                "MacBook Pro M3",
+                "macbook-pro-m3",
+                "Apple",
+                UUID.randomUUID(),
+                "Laptop",
+                UUID.randomUUID(),
+                "Apple Store",
+                false,
+                "https://cdn.techhub.com/mbp.jpg",
+                new BigDecimal("49990000.00"),
+                true,
+                LocalDateTime.now()
+        );
+
+        when(productService.getSimilarProducts(productId)).thenReturn(List.of(sim));
+
+        ApiResponse<List<ProductSummaryResponse>> response = productController.getSimilarProducts(productId);
+
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+        assertEquals("Fetched similar products successfully", response.getMessage());
+        assertNotNull(response.getData());
+        assertEquals(1, response.getData().size());
+        assertEquals("MacBook Pro M3", response.getData().get(0).name());
+
+        verify(productService, times(1)).getSimilarProducts(productId);
     }
 }

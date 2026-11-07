@@ -2,11 +2,13 @@ package com.techhub.controller.order;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
+import com.techhub.model.dto.request.CancelOrderRequest;
 import com.techhub.model.dto.response.AdminOrderDetailResponse;
 import com.techhub.model.dto.response.AdminOrderResponse;
 import com.techhub.model.enums.OrderStatus;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.order.AdminOrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,5 +51,16 @@ public class AdminOrderController {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         AdminOrderDetailResponse response = adminOrderService.getAdminOrderDetail(currentUserId, id);
         return ApiResponse.success(response, "Fetched platform order details successfully", null);
+    }
+
+    @PostMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<AdminOrderDetailResponse> cancelAdminOrder(
+            @PathVariable UUID id,
+            @Valid @RequestBody CancelOrderRequest request
+    ) {
+        UUID currentUserId = SecurityUtils.getCurrentUserId();
+        AdminOrderDetailResponse response = adminOrderService.cancelAdminOrder(currentUserId, id, request);
+        return ApiResponse.success(response, "Order cancelled successfully by administrator", null);
     }
 }
