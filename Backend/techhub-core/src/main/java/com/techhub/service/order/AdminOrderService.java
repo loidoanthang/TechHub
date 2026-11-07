@@ -1,6 +1,7 @@
 package com.techhub.service.order;
 
 import com.techhub.common.PageResponse;
+import com.techhub.model.dto.request.CancelOrderRequest;
 import com.techhub.model.dto.response.AdminOrderDetailResponse;
 import com.techhub.model.dto.response.AdminOrderResponse;
 import com.techhub.model.enums.OrderStatus;
@@ -25,4 +26,6 @@ public interface AdminOrderService {
     );
 
     AdminOrderDetailResponse getAdminOrderDetail(UUID currentUserId, UUID orderId);
+
+    AdminOrderDetailResponse cancelAdminOrder(UUID currentUserId, UUID orderId, CancelOrderRequest request);
 }

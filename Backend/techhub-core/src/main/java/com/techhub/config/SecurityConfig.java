@@ -68,7 +68,8 @@ public class SecurityConfig {
                                 "/api/auth/resend-verification",
                                 "/api/auth/logout",
                                 "/oauth2/**",
-                                "/login/oauth2/**"
+                                "/login/oauth2/**",
+                                "/ws-chat/**"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,

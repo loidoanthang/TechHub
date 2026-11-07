@@ -8,6 +8,7 @@ import com.techhub.model.dto.response.AddressSnapshotResponse;
 import com.techhub.model.dto.response.BuyerOrderDetailResponse;
 import com.techhub.model.dto.response.BuyerOrderItemResponse;
 import com.techhub.model.dto.response.BuyerOrderResponse;
+import com.techhub.model.dto.response.ReorderResponse;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.OrderStatus;
 import com.techhub.model.enums.PaymentMethod;
@@ -428,6 +429,56 @@ class BuyerOrderControllerTest {
         ResponseStatus responseStatus = method.getAnnotation(ResponseStatus.class);
         assertEquals(HttpStatus.CREATED, responseStatus.value());
 
+        assertTrue(method.isAnnotationPresent(PreAuthorize.class), "Endpoint phải có @PreAuthorize");
+        PreAuthorize preAuthorize = method.getAnnotation(PreAuthorize.class);
+        assertEquals("hasRole('BUYER')", preAuthorize.value());
+    }
+
+    // ==========================================
+    // POST /api/buyer/orders/{id}/reorder (API 12)
+    // ==========================================
+
+    @Test
+    @DisplayName("TC-16: controller_reorder_Success - Gọi service mua lại thành công trả về HTTP 200 OK")
+    void controller_reorder_Success() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        ReorderResponse mockResponse = new ReorderResponse(
+                orderId, 2, 2, List.of(), List.of(), 2, 3
+        );
+
+        when(orderService.reorder(eq(userId), eq(orderId))).thenReturn(mockResponse);
+
+        // Act
+        ApiResponse<ReorderResponse> response = buyerOrderController.reorder(orderId);
+
+        // Assert
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+        assertEquals(orderId, response.getData().orderId());
+        assertEquals("Xử lý mua lại đơn hàng thành công", response.getMessage());
+        verify(orderService, times(1)).reorder(eq(userId), eq(orderId));
+    }
+
+    @Test
+    @DisplayName("TC-17: controller_reorder_HasPostMappingAnnotation - Xác nhận endpoint có @PostMapping(\"/{id}/reorder\")")
+    void controller_reorder_HasPostMappingAnnotation() throws NoSuchMethodException {
+        // Act
+        Method method = BuyerOrderController.class.getMethod("reorder", UUID.class);
+
+        // Assert
+        assertTrue(method.isAnnotationPresent(PostMapping.class), "Endpoint phải có @PostMapping");
+        PostMapping postMapping = method.getAnnotation(PostMapping.class);
+        assertArrayEquals(new String[]{"/{id}/reorder"}, postMapping.value());
+    }
+
+    @Test
+    @DisplayName("TC-18: controller_reorder_ProtectedByPreAuthorizeBuyer - Xác nhận phân quyền @PreAuthorize(\"hasRole('BUYER')\")")
+    void controller_reorder_ProtectedByPreAuthorizeBuyer() throws NoSuchMethodException {
+        // Act
+        Method method = BuyerOrderController.class.getMethod("reorder", UUID.class);
+
+        // Assert
         assertTrue(method.isAnnotationPresent(PreAuthorize.class), "Endpoint phải có @PreAuthorize");
         PreAuthorize preAuthorize = method.getAnnotation(PreAuthorize.class);
         assertEquals("hasRole('BUYER')", preAuthorize.value());

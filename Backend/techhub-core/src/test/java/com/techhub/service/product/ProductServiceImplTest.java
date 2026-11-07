@@ -485,4 +485,402 @@ class ProductServiceImplTest {
         verify(productImageRepository, times(1)).findCoverImagesByProductIds(anyList());
         verify(productVariantRepository, times(1)).aggregateActiveVariantMetricsByProductIds(anyList());
     }
+
+    // =========================================================================
+    // TESTS FOR GET /api/products/{id}/similar (ProductServiceImpl)
+    // =========================================================================
+
+    @Test
+    @DisplayName("TC-22: getSimilarProducts_Success_SameBrand_RankedFirst - Sản phẩm cùng brand được ưu tiên xếp đầu")
+    void getSimilarProducts_Success_SameBrand_RankedFirst() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .name("MacBook Air M3")
+                .slug("macbook-air-m3")
+                .brandName("Apple")
+                .category(category)
+                .shop(shop)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .approvalStatus(ProductApprovalStatus.APPROVED)
+                .isSuspended(false)
+                .isDeleted(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        Product simApple = Product.builder()
+                .id(UUID.randomUUID())
+                .name("MacBook Pro M3")
+                .slug("macbook-pro-m3")
+                .brandName("Apple")
+                .category(category)
+                .shop(shop)
+                .createdAt(LocalDateTime.now().minusDays(1))
+                .build();
+
+        Product simDell = Product.builder()
+                .id(UUID.randomUUID())
+                .name("Dell XPS 13")
+                .slug("dell-xps-13")
+                .brandName("Dell")
+                .category(category)
+                .shop(shop)
+                .createdAt(LocalDateTime.now().minusDays(2))
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(eq(categoryId), eq(targetId), eq("Apple"), any(Pageable.class)))
+                .thenReturn(List.of(simApple, simDell));
+
+        Object[] metricRow1 = new Object[]{simApple.getId(), 2L, new BigDecimal("45000000.00"), new BigDecimal("55000000.00"), 10L};
+        Object[] metricRow2 = new Object[]{simDell.getId(), 1L, new BigDecimal("35000000.00"), new BigDecimal("35000000.00"), 5L};
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(List.of(simApple.getId(), simDell.getId())))
+                .thenReturn(List.of(metricRow1, metricRow2));
+
+        Object[] imgRow1 = new Object[]{simApple.getId(), "https://cdn.techhub.com/mbp.jpg"};
+        Object[] imgRow2 = new Object[]{simDell.getId(), "https://cdn.techhub.com/dell.jpg"};
+        when(productImageRepository.findCoverImagesByProductIds(List.of(simApple.getId(), simDell.getId())))
+                .thenReturn(List.of(imgRow1, imgRow2));
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("MacBook Pro M3", result.get(0).name());
+        assertEquals("Apple", result.get(0).brandName());
+        assertEquals(new BigDecimal("45000000.00"), result.get(0).price());
+        assertTrue(result.get(0).inStock());
+        assertEquals("https://cdn.techhub.com/mbp.jpg", result.get(0).coverImageUrl());
+
+        assertEquals("Dell XPS 13", result.get(1).name());
+        assertEquals("Dell", result.get(1).brandName());
+    }
+
+    @Test
+    @DisplayName("TC-23: getSimilarProducts_Success_FallbackOtherBrands_WhenFewerThanSix - Đủ 6 sản phẩm dù cùng brand ít hơn 6")
+    void getSimilarProducts_Success_FallbackOtherBrands_WhenFewerThanSix() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .name("MacBook Air M3")
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        List<Product> simList = new ArrayList<>();
+        List<UUID> simIds = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            UUID pId = UUID.randomUUID();
+            simIds.add(pId);
+            simList.add(Product.builder()
+                    .id(pId)
+                    .name("Laptop " + i)
+                    .slug("laptop-" + i)
+                    .brandName(i < 2 ? "Apple" : "Asus")
+                    .category(category)
+                    .shop(shop)
+                    .createdAt(LocalDateTime.now())
+                    .build());
+        }
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(eq(categoryId), eq(targetId), eq("Apple"), any(Pageable.class)))
+                .thenReturn(simList);
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(simIds))
+                .thenReturn(Collections.emptyList());
+        when(productImageRepository.findCoverImagesByProductIds(simIds))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertEquals(6, result.size());
+    }
+
+    @Test
+    @DisplayName("TC-24: getSimilarProducts_Success_ExcludesTargetProductItself - Loại trừ chính sản phẩm mục tiêu")
+    void getSimilarProducts_Success_ExcludesTargetProductItself() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .name("MacBook Air M3")
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(eq(categoryId), eq(targetId), eq("Apple"), any(Pageable.class)))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(productRepository).findSimilarProducts(eq(categoryId), eq(targetId), eq("Apple"), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("TC-25: getSimilarProducts_Success_UnderSixItems_ReturnsAll - Trả về toàn bộ khi có ít hơn 6 sản phẩm")
+    void getSimilarProducts_Success_UnderSixItems_ReturnsAll() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .name("MacBook Air M3")
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        Product sim = Product.builder()
+                .id(UUID.randomUUID())
+                .name("MacBook Pro M2")
+                .slug("macbook-pro-m2")
+                .brandName("Apple")
+                .category(category)
+                .shop(shop)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(eq(categoryId), eq(targetId), eq("Apple"), any(Pageable.class)))
+                .thenReturn(List.of(sim));
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList()))
+                .thenReturn(Collections.emptyList());
+        when(productImageRepository.findCoverImagesByProductIds(anyList()))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    @DisplayName("TC-26: getSimilarProducts_Success_SparseCategory_ReturnsEmptyList - Thoát sớm trả về [] khi danh mục rỗng")
+    void getSimilarProducts_Success_SparseCategory_ReturnsEmptyList() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .name("MacBook Air M3")
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(eq(categoryId), eq(targetId), eq("Apple"), any(Pageable.class)))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(productVariantRepository, never()).aggregateActiveVariantMetricsByProductIds(any());
+        verify(productImageRepository, never()).findCoverImagesByProductIds(any());
+    }
+
+    @Test
+    @DisplayName("TC-27: getSimilarProducts_TargetProductNotFound - Ném 404 khi sản phẩm gốc không tồn tại")
+    void getSimilarProducts_TargetProductNotFound() {
+        UUID nonExistingId = UUID.randomUUID();
+        when(productRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> productService.getSimilarProducts(nonExistingId));
+
+        assertEquals(ErrorCode.PRODUCT_NOT_FOUND, ex.getErrorCode());
+        verify(productRepository, never()).findSimilarProducts(any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("TC-28: getSimilarProducts_TargetProductSoftDeleted - Ném 404 khi sản phẩm gốc đã bị xóa mềm")
+    void getSimilarProducts_TargetProductSoftDeleted() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .isDeleted(true)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> productService.getSimilarProducts(targetId));
+
+        assertEquals(ErrorCode.PRODUCT_NOT_FOUND, ex.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("TC-29: getSimilarProducts_TargetProductUnpublished - Ném 404 khi sản phẩm gốc chưa xuất bản")
+    void getSimilarProducts_TargetProductUnpublished() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .isDeleted(false)
+                .visibilityStatus(ProductVisibilityStatus.UNPUBLISHED)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> productService.getSimilarProducts(targetId));
+
+        assertEquals(ErrorCode.PRODUCT_NOT_FOUND, ex.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("TC-30: getSimilarProducts_FastFail_NullOrNilUUID - Ném 400 khi id null hoặc Nil UUID")
+    void getSimilarProducts_FastFail_NullOrNilUUID() {
+        BusinessException exNull = assertThrows(BusinessException.class,
+                () -> productService.getSimilarProducts(null));
+        assertEquals(ErrorCode.INVALID_INPUT_DATA, exNull.getErrorCode());
+
+        UUID nilUUID = new UUID(0L, 0L);
+        BusinessException exNil = assertThrows(BusinessException.class,
+                () -> productService.getSimilarProducts(nilUUID));
+        assertEquals(ErrorCode.INVALID_INPUT_DATA, exNil.getErrorCode());
+
+        verify(productRepository, never()).findById(any());
+    }
+
+    @Test
+    @DisplayName("TC-31: getSimilarProducts_FiltersOut_SoftDeletedSimilarProducts - Lọc bỏ sản phẩm tương tự bị xóa mềm")
+    void getSimilarProducts_FiltersOut_SoftDeletedSimilarProducts() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(any(), any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("TC-32: getSimilarProducts_FiltersOut_UnpublishedOrUnapprovedSimilarProducts - Lọc bỏ sản phẩm chưa duyệt/ẩn")
+    void getSimilarProducts_FiltersOut_UnpublishedOrUnapprovedSimilarProducts() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(any(), any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("TC-33: getSimilarProducts_FiltersOut_BannedShopSimilarProducts - Lọc bỏ sản phẩm của shop bị cấm")
+    void getSimilarProducts_FiltersOut_BannedShopSimilarProducts() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(any(), any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("TC-34: getSimilarProducts_FallbackMetrics_WhenNoActiveVariants - Fallback giá 0 và hết hàng")
+    void getSimilarProducts_FallbackMetrics_WhenNoActiveVariants() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        Product sim = Product.builder()
+                .id(UUID.randomUUID())
+                .name("MacBook M1")
+                .category(category)
+                .shop(shop)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(any(), any(), any(), any()))
+                .thenReturn(List.of(sim));
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList()))
+                .thenReturn(Collections.emptyList());
+        when(productImageRepository.findCoverImagesByProductIds(anyList()))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(BigDecimal.ZERO, result.get(0).price());
+        assertFalse(result.get(0).inStock());
+    }
+
+    @Test
+    @DisplayName("TC-35: getSimilarProducts_FallbackImage_WhenNoCoverImage - Fallback coverImageUrl null an toàn")
+    void getSimilarProducts_FallbackImage_WhenNoCoverImage() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        Product sim = Product.builder()
+                .id(UUID.randomUUID())
+                .name("MacBook M1")
+                .category(category)
+                .shop(shop)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(any(), any(), any(), any()))
+                .thenReturn(List.of(sim));
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList()))
+                .thenReturn(Collections.emptyList());
+        when(productImageRepository.findCoverImagesByProductIds(anyList()))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertNull(result.get(0).coverImageUrl());
+    }
 }

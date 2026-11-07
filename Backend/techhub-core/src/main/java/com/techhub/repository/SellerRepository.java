@@ -39,8 +39,16 @@ public interface SellerRepository extends JpaRepository<Seller, UUID>, JpaSpecif
     @Query("SELECT s FROM Seller s WHERE s.id = :id")
     Optional<Seller> findWithUserForUpdateById(@Param("id") UUID id);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @EntityGraph(attributePaths = {"user"})
+    @Query("SELECT s FROM Seller s WHERE s.user.id = :userId")
+    Optional<Seller> findWithUserForUpdateByUserId(@Param("userId") UUID userId);
+
     @org.springframework.data.jpa.repository.Modifying
     @Query("UPDATE Seller s SET s.balance = s.balance + :amount, s.updatedAt = CURRENT_TIMESTAMP WHERE s.id = :sellerId")
     int incrementBalance(@Param("sellerId") UUID sellerId, @Param("amount") java.math.BigDecimal amount);
+
+    @Query("SELECT COALESCE(SUM(s.balance), 0) FROM Seller s")
+    java.math.BigDecimal sumTotalWalletBalance();
 }
 

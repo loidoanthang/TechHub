@@ -15,6 +15,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -64,4 +65,67 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
     @org.springframework.data.jpa.repository.Modifying
     @Query("UPDATE Order o SET o.status = com.techhub.model.enums.OrderStatus.COMPLETED, o.completedAt = :now, o.updatedAt = :now WHERE o.id = :id AND o.status = com.techhub.model.enums.OrderStatus.DELIVERED")
     int completeDeliveredOrderAtomic(@Param("id") UUID id, @Param("now") java.time.LocalDateTime now);
+
+    @Query("""
+        SELECT COUNT(o.id) FROM Order o 
+        WHERE o.shop.id = :shopId 
+          AND o.status = com.techhub.model.enums.OrderStatus.COMPLETED
+    """)
+    long countCompletedOrdersByShopId(@Param("shopId") UUID shopId);
+
+    @Query("""
+        SELECT COALESCE(SUM(o.totalSellerEarnings), 0) FROM Order o 
+        WHERE o.shop.id = :shopId 
+          AND o.status = com.techhub.model.enums.OrderStatus.COMPLETED
+    """)
+    java.math.BigDecimal calculateCumulativeRevenueByShopId(@Param("shopId") UUID shopId);
+
+    @Query("""
+        SELECT o.status AS status,
+               COUNT(o.id) AS orderCount,
+               COALESCE(SUM(o.totalSellerEarnings), 0) AS totalEarnings
+        FROM Order o
+        WHERE o.shop.id = :shopId
+          AND o.createdAt >= :startDate AND o.createdAt <= :endDate
+        GROUP BY o.status
+    """)
+    List<com.techhub.model.projection.OrderStatusSummaryProjection> aggregateOrdersByShopIdAndDateRange(
+            @Param("shopId") UUID shopId,
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate
+    );
+
+    @Query("""
+        SELECT o.status AS status,
+               COUNT(o.id) AS orderCount,
+               COALESCE(SUM(o.totalAmount), 0) AS totalAmount,
+               COALESCE(SUM(o.totalCommission), 0) AS totalCommission
+        FROM Order o
+        WHERE o.createdAt >= :startDate AND o.createdAt <= :endDate
+        GROUP BY o.status
+    """)
+    List<com.techhub.model.projection.PlatformOrderStatusSummaryProjection> aggregatePlatformOrdersByDateRange(
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate
+    );
+
+    @Query("""
+        SELECT o.shop.id AS shopId,
+               o.shop.name AS shopName,
+               o.shop.avatarUrl AS logoUrl,
+               COUNT(o.id) AS totalOrders,
+               COALESCE(SUM(o.totalAmount), 0) AS totalGmv,
+               COALESCE(SUM(o.totalCommission), 0) AS commissionContributed
+        FROM Order o
+        WHERE o.status IN :statuses
+          AND o.createdAt >= :startDate AND o.createdAt <= :endDate
+        GROUP BY o.shop.id, o.shop.name, o.shop.avatarUrl
+        ORDER BY SUM(o.totalAmount) DESC
+    """)
+    List<com.techhub.model.projection.TopPerformingShopProjection> findTopPerformingShopsByDateRange(
+            @Param("statuses") Collection<com.techhub.model.enums.OrderStatus> statuses,
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate,
+            org.springframework.data.domain.Pageable pageable
+    );
 }
