@@ -79,4 +79,12 @@ public class BuyerOrderController {
         BuyerOrderDetailResponse response = orderService.cancelBuyerOrder(currentUserId, id, request);
         return ApiResponse.success(response, "Hủy đơn hàng thành công", null);
     }
+
+    @PostMapping("/{id}/reorder")
+    @PreAuthorize("hasRole('BUYER')")
+    public ApiResponse<com.techhub.model.dto.response.ReorderResponse> reorder(@PathVariable UUID id) {
+        UUID currentUserId = SecurityUtils.getCurrentUserId();
+        com.techhub.model.dto.response.ReorderResponse response = orderService.reorder(currentUserId, id);
+        return ApiResponse.success(response, "Xử lý mua lại đơn hàng thành công", null);
+    }
 }

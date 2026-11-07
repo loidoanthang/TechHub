@@ -32,6 +32,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -519,5 +520,40 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
         categoryAttributeRepository.delete(attribute);
 
         log.info("Admin deleted attribute id={} from category id={}", attributeId, categoryId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteCategory(UUID categoryId) {
+        if (categoryId == null) {
+            throw new BusinessException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+
+        log.info("Processing soft-delete for category id={}", categoryId);
+
+        // 1. Khóa bi quan Aggregate Root chống race condition (Pessimistic Write Lock)
+        Category category = categoryRepository.findByIdForUpdate(categoryId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        // 2. Kiểm tra tính lũy thừa (Idempotency): Nếu danh mục đã bị xóa mềm, trả về thành công ngay lập tức
+        if (category.isDeleted()) {
+            log.info("Category id={} is already soft-deleted. Returning idempotent success.", categoryId);
+            return;
+        }
+
+        // 3. Ràng buộc an toàn sản phẩm (Active Products Guard - BR-11A): Chặn nếu còn sản phẩm chưa bị xóa mềm
+        boolean hasActiveProducts = productRepository.existsByCategoryIdAndIsDeletedFalse(categoryId);
+        if (hasActiveProducts) {
+            log.warn("Cannot delete category id={} because it contains active products", categoryId);
+            throw new BusinessException(ErrorCode.CATEGORY_HAS_ACTIVE_PRODUCTS);
+        }
+
+        // 4. Thực hiện xóa mềm danh mục: cập nhật cờ is_deleted = true, chuyển status = INACTIVE
+        category.setDeleted(true);
+        category.setStatus(CategoryStatus.INACTIVE);
+        category.setUpdatedAt(LocalDateTime.now());
+        categoryRepository.save(category);
+
+        log.info("Category id={} soft-deleted successfully (status=INACTIVE, isDeleted=true)", categoryId);
     }
 }

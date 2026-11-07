@@ -80,6 +80,12 @@ public class AdminCategoryController {
         return ApiResponse.success(data, "Category status updated successfully", null);
     }
 
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteCategory(@PathVariable UUID id) {
+        adminCategoryService.deleteCategory(id);
+        return ApiResponse.success(null, "Category deleted successfully", null);
+    }
+
     @PostMapping("/{id}/attributes")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<CategoryAttributeResponse> createCategoryAttribute(

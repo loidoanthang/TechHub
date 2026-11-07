@@ -15,7 +15,21 @@ import com.techhub.model.enums.PaymentStatus;
 import com.techhub.model.enums.UserStatus;
 import com.techhub.model.dto.request.CreateCancellationRequest;
 import com.techhub.model.dto.response.CancellationRequestResponse;
+import com.techhub.model.dto.response.ReorderItemDto;
+import com.techhub.model.dto.response.ReorderResponse;
+import com.techhub.model.dto.response.ReorderUnavailableItemDto;
 import com.techhub.model.entity.CancellationRequest;
+import com.techhub.model.entity.Cart;
+import com.techhub.model.entity.CartItem;
+import com.techhub.model.entity.Category;
+import com.techhub.model.entity.Product;
+import com.techhub.model.entity.ProductVariant;
+import com.techhub.model.entity.Seller;
+import com.techhub.model.enums.CategoryStatus;
+import com.techhub.model.enums.ProductApprovalStatus;
+import com.techhub.model.enums.ProductVariantStatus;
+import com.techhub.model.enums.ProductVisibilityStatus;
+import com.techhub.model.enums.ShopStatus;
 import com.techhub.model.enums.CancellationRequestStatus;
 import com.techhub.repository.CancellationRequestRepository;
 import com.techhub.repository.OrderItemRepository;
@@ -83,6 +97,12 @@ class OrderServiceImplTest {
 
     @Mock
     private com.techhub.repository.RefundTransactionRepository refundTransactionRepository;
+
+    @Mock
+    private com.techhub.repository.CartRepository cartRepository;
+
+    @Mock
+    private com.techhub.repository.CartItemRepository cartItemRepository;
 
     @InjectMocks
     private OrderServiceImpl orderService;
@@ -1507,5 +1527,550 @@ class OrderServiceImplTest {
         );
 
         verifyNoInteractions(orderRepository);
+    }
+
+    // ==========================================
+    // POST /api/buyer/orders/{id}/reorder (API 12)
+    // ==========================================
+
+    @Test
+    @DisplayName("TC-01: reorder_Success_AllItemsAvailable - Mua lại toàn bộ sản phẩm thành công")
+    void reorder_Success_AllItemsAvailable() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+
+        Shop shop = createTestShop(UUID.randomUUID(), UUID.randomUUID(), ShopStatus.ACTIVE);
+        Category category = createTestCategory(UUID.randomUUID(), CategoryStatus.ACTIVE);
+        Product product = createTestProduct(UUID.randomUUID(), shop, category, ProductVisibilityStatus.PUBLISHED, ProductApprovalStatus.APPROVED, false);
+
+        UUID v1Id = UUID.randomUUID();
+        ProductVariant v1 = createTestVariant(v1Id, product, 10, new BigDecimal("100000"), ProductVariantStatus.ACTIVE);
+
+        UUID v2Id = UUID.randomUUID();
+        ProductVariant v2 = createTestVariant(v2Id, product, 5, new BigDecimal("200000"), ProductVariantStatus.ACTIVE);
+
+        Order order = Order.builder().id(orderId).user(activeUser).shop(shop).status(OrderStatus.COMPLETED).build();
+        OrderItem item1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v1).productNameSnapshot("SP 1").variantNameSnapshot("V1").skuSnapshot("SKU1").quantity(2).discountedUnitPrice(new BigDecimal("100000")).build();
+        OrderItem item2 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v2).productNameSnapshot("SP 2").variantNameSnapshot("V2").skuSnapshot("SKU2").quantity(1).discountedUnitPrice(new BigDecimal("200000")).build();
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1, item2));
+
+        Cart cart = Cart.builder().id(UUID.randomUUID()).user(activeUser).build();
+        when(cartRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cart.getId())).thenReturn(new ArrayList<>());
+        when(productVariantRepository.findAllByIdInWithDetails(anyCollection())).thenReturn(List.of(v1, v2));
+
+        // Act
+        ReorderResponse response = orderService.reorder(userId, orderId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(orderId, response.orderId());
+        assertEquals(2, response.totalItemsRequested());
+        assertEquals(2, response.itemsAddedSuccessfully());
+        assertEquals(2, response.addedItems().size());
+        assertTrue(response.unavailableItems().isEmpty());
+        assertEquals(2, response.cartTotalItemTypes());
+        assertEquals(3, response.cartTotalQuantity());
+
+        verify(cartItemRepository).saveAll(anyList());
+    }
+
+    @Test
+    @DisplayName("TC-02: reorder_Success_PartialItemsAvailable_OutOfStock - Mua lại thành công 1 phần khi có sản phẩm hết hàng")
+    void reorder_Success_PartialItemsAvailable_OutOfStock() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+
+        Shop shop = createTestShop(UUID.randomUUID(), UUID.randomUUID(), ShopStatus.ACTIVE);
+        Category category = createTestCategory(UUID.randomUUID(), CategoryStatus.ACTIVE);
+        Product product = createTestProduct(UUID.randomUUID(), shop, category, ProductVisibilityStatus.PUBLISHED, ProductApprovalStatus.APPROVED, false);
+
+        UUID v1Id = UUID.randomUUID();
+        ProductVariant v1 = createTestVariant(v1Id, product, 10, new BigDecimal("100000"), ProductVariantStatus.ACTIVE);
+        UUID v2Id = UUID.randomUUID();
+        ProductVariant v2 = createTestVariant(v2Id, product, 0, new BigDecimal("200000"), ProductVariantStatus.ACTIVE); // Hết hàng
+
+        Order order = Order.builder().id(orderId).user(activeUser).shop(shop).status(OrderStatus.COMPLETED).build();
+        OrderItem item1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v1).productNameSnapshot("SP 1").variantNameSnapshot("V1").skuSnapshot("SKU1").quantity(1).build();
+        OrderItem item2 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v2).productNameSnapshot("SP 2").variantNameSnapshot("V2").skuSnapshot("SKU2").quantity(2).build();
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1, item2));
+
+        Cart cart = Cart.builder().id(UUID.randomUUID()).user(activeUser).build();
+        when(cartRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cart.getId())).thenReturn(new ArrayList<>());
+        when(productVariantRepository.findAllByIdInWithDetails(anyCollection())).thenReturn(List.of(v1, v2));
+
+        // Act
+        ReorderResponse response = orderService.reorder(userId, orderId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(2, response.totalItemsRequested());
+        assertEquals(1, response.itemsAddedSuccessfully());
+        assertEquals(1, response.addedItems().size());
+        assertEquals(1, response.unavailableItems().size());
+        assertEquals("OUT_OF_STOCK", response.unavailableItems().get(0).reason());
+        assertEquals(v2Id, response.unavailableItems().get(0).productVariantId());
+    }
+
+    @Test
+    @DisplayName("TC-03: reorder_Success_PartialItemsAvailable_InactiveShop - Chặn mặt hàng khi Shop tạm nghỉ hoặc tạm khóa")
+    void reorder_Success_PartialItemsAvailable_InactiveShop() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+
+        Shop activeShop = createTestShop(UUID.randomUUID(), UUID.randomUUID(), ShopStatus.ACTIVE);
+        Shop pausedShop = createTestShop(UUID.randomUUID(), UUID.randomUUID(), ShopStatus.PAUSED);
+
+        Category category = createTestCategory(UUID.randomUUID(), CategoryStatus.ACTIVE);
+        Product p1 = createTestProduct(UUID.randomUUID(), activeShop, category, ProductVisibilityStatus.PUBLISHED, ProductApprovalStatus.APPROVED, false);
+        Product p2 = createTestProduct(UUID.randomUUID(), pausedShop, category, ProductVisibilityStatus.PUBLISHED, ProductApprovalStatus.APPROVED, false);
+
+        UUID v1Id = UUID.randomUUID();
+        ProductVariant v1 = createTestVariant(v1Id, p1, 10, new BigDecimal("100000"), ProductVariantStatus.ACTIVE);
+        UUID v2Id = UUID.randomUUID();
+        ProductVariant v2 = createTestVariant(v2Id, p2, 10, new BigDecimal("200000"), ProductVariantStatus.ACTIVE);
+
+        Order order = Order.builder().id(orderId).user(activeUser).shop(activeShop).status(OrderStatus.COMPLETED).build();
+        OrderItem item1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v1).productNameSnapshot("SP 1").variantNameSnapshot("V1").skuSnapshot("SKU1").quantity(1).build();
+        OrderItem item2 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v2).productNameSnapshot("SP 2").variantNameSnapshot("V2").skuSnapshot("SKU2").quantity(1).build();
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1, item2));
+
+        Cart cart = Cart.builder().id(UUID.randomUUID()).user(activeUser).build();
+        when(cartRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cart.getId())).thenReturn(new ArrayList<>());
+        when(productVariantRepository.findAllByIdInWithDetails(anyCollection())).thenReturn(List.of(v1, v2));
+
+        // Act
+        ReorderResponse response = orderService.reorder(userId, orderId);
+
+        // Assert
+        assertEquals(2, response.totalItemsRequested());
+        assertEquals(1, response.itemsAddedSuccessfully());
+        assertEquals(1, response.unavailableItems().size());
+        assertEquals("SHOP_IS_PAUSED", response.unavailableItems().get(0).reason());
+    }
+
+    @Test
+    @DisplayName("TC-04: reorder_Success_AllItemsUnavailable - Tất cả sản phẩm không khả dụng trả về HTTP 200 OK với added=0")
+    void reorder_Success_AllItemsUnavailable() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+
+        Shop shop = createTestShop(UUID.randomUUID(), UUID.randomUUID(), ShopStatus.ACTIVE);
+        Category category = createTestCategory(UUID.randomUUID(), CategoryStatus.ACTIVE);
+        Product product = createTestProduct(UUID.randomUUID(), shop, category, ProductVisibilityStatus.PUBLISHED, ProductApprovalStatus.APPROVED, false);
+
+        UUID v1Id = UUID.randomUUID();
+        ProductVariant v1 = createTestVariant(v1Id, product, 0, new BigDecimal("100000"), ProductVariantStatus.ACTIVE);
+
+        Order order = Order.builder().id(orderId).user(activeUser).shop(shop).status(OrderStatus.COMPLETED).build();
+        OrderItem item1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v1).productNameSnapshot("SP 1").variantNameSnapshot("V1").skuSnapshot("SKU1").quantity(1).build();
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1));
+
+        Cart cart = Cart.builder().id(UUID.randomUUID()).user(activeUser).build();
+        when(cartRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cart.getId())).thenReturn(new ArrayList<>());
+        when(productVariantRepository.findAllByIdInWithDetails(anyCollection())).thenReturn(List.of(v1));
+
+        // Act
+        ReorderResponse response = orderService.reorder(userId, orderId);
+
+        // Assert
+        assertEquals(1, response.totalItemsRequested());
+        assertEquals(0, response.itemsAddedSuccessfully());
+        assertTrue(response.addedItems().isEmpty());
+        assertEquals(1, response.unavailableItems().size());
+        verify(cartItemRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    @DisplayName("TC-05: reorder_Success_ExistingCartItem_AccumulatesQuantity - Cộng dồn số lượng khi SKU đã có sẵn trong giỏ")
+    void reorder_Success_ExistingCartItem_AccumulatesQuantity() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+
+        Shop shop = createTestShop(UUID.randomUUID(), UUID.randomUUID(), ShopStatus.ACTIVE);
+        Category category = createTestCategory(UUID.randomUUID(), CategoryStatus.ACTIVE);
+        Product product = createTestProduct(UUID.randomUUID(), shop, category, ProductVisibilityStatus.PUBLISHED, ProductApprovalStatus.APPROVED, false);
+
+        UUID v1Id = UUID.randomUUID();
+        ProductVariant v1 = createTestVariant(v1Id, product, 20, new BigDecimal("100000"), ProductVariantStatus.ACTIVE);
+
+        Order order = Order.builder().id(orderId).user(activeUser).shop(shop).status(OrderStatus.COMPLETED).build();
+        OrderItem item1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v1).productNameSnapshot("SP 1").variantNameSnapshot("V1").skuSnapshot("SKU1").quantity(2).build();
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1));
+
+        Cart cart = Cart.builder().id(UUID.randomUUID()).user(activeUser).build();
+        CartItem existingCartItem = CartItem.builder().id(UUID.randomUUID()).cart(cart).product(product).productVariant(v1).quantity(3).build();
+
+        when(cartRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cart.getId())).thenReturn(new ArrayList<>(List.of(existingCartItem)));
+        when(productVariantRepository.findAllByIdInWithDetails(anyCollection())).thenReturn(List.of(v1));
+
+        // Act
+        ReorderResponse response = orderService.reorder(userId, orderId);
+
+        // Assert
+        assertEquals(1, response.itemsAddedSuccessfully());
+        assertEquals(5, existingCartItem.getQuantity()); // 3 + 2 = 5
+        assertEquals(1, response.cartTotalItemTypes());
+        assertEquals(5, response.cartTotalQuantity());
+        verify(cartItemRepository).saveAll(anyList());
+    }
+
+    @Test
+    @DisplayName("TC-06: reorder_Success_ExistingCartItem_StockCap - Cộng dồn tối đa đến mức tồn kho còn lại")
+    void reorder_Success_ExistingCartItem_StockCap() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+
+        Shop shop = createTestShop(UUID.randomUUID(), UUID.randomUUID(), ShopStatus.ACTIVE);
+        Category category = createTestCategory(UUID.randomUUID(), CategoryStatus.ACTIVE);
+        Product product = createTestProduct(UUID.randomUUID(), shop, category, ProductVisibilityStatus.PUBLISHED, ProductApprovalStatus.APPROVED, false);
+
+        UUID v1Id = UUID.randomUUID();
+        ProductVariant v1 = createTestVariant(v1Id, product, 5, new BigDecimal("100000"), ProductVariantStatus.ACTIVE); // Tồn kho chỉ còn 5
+
+        Order order = Order.builder().id(orderId).user(activeUser).shop(shop).status(OrderStatus.COMPLETED).build();
+        OrderItem item1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v1).productNameSnapshot("SP 1").variantNameSnapshot("V1").skuSnapshot("SKU1").quantity(3).build();
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1));
+
+        Cart cart = Cart.builder().id(UUID.randomUUID()).user(activeUser).build();
+        CartItem existingCartItem = CartItem.builder().id(UUID.randomUUID()).cart(cart).product(product).productVariant(v1).quantity(4).build(); // Giỏ đã có 4
+
+        when(cartRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cart.getId())).thenReturn(new ArrayList<>(List.of(existingCartItem)));
+        when(productVariantRepository.findAllByIdInWithDetails(anyCollection())).thenReturn(List.of(v1));
+
+        // Act
+        ReorderResponse response = orderService.reorder(userId, orderId);
+
+        // Assert
+        assertEquals(1, response.itemsAddedSuccessfully());
+        assertEquals(1, response.addedItems().get(0).quantityAdded()); // Chỉ thêm được 5 - 4 = 1
+        assertEquals(5, existingCartItem.getQuantity()); // Đạt mức tối đa tồn kho 5
+    }
+
+    @Test
+    @DisplayName("TC-07: reorder_Success_ExistingCartItem_AlreadyAtStockLimit - Chặn cộng dồn khi giỏ hàng đã bằng tồn kho")
+    void reorder_Success_ExistingCartItem_AlreadyAtStockLimit() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+
+        Shop shop = createTestShop(UUID.randomUUID(), UUID.randomUUID(), ShopStatus.ACTIVE);
+        Category category = createTestCategory(UUID.randomUUID(), CategoryStatus.ACTIVE);
+        Product product = createTestProduct(UUID.randomUUID(), shop, category, ProductVisibilityStatus.PUBLISHED, ProductApprovalStatus.APPROVED, false);
+
+        UUID v1Id = UUID.randomUUID();
+        ProductVariant v1 = createTestVariant(v1Id, product, 5, new BigDecimal("100000"), ProductVariantStatus.ACTIVE);
+
+        Order order = Order.builder().id(orderId).user(activeUser).shop(shop).status(OrderStatus.COMPLETED).build();
+        OrderItem item1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v1).productNameSnapshot("SP 1").variantNameSnapshot("V1").skuSnapshot("SKU1").quantity(1).build();
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1));
+
+        Cart cart = Cart.builder().id(UUID.randomUUID()).user(activeUser).build();
+        CartItem existingCartItem = CartItem.builder().id(UUID.randomUUID()).cart(cart).product(product).productVariant(v1).quantity(5).build(); // Đã đủ 5 cái
+
+        when(cartRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cart.getId())).thenReturn(new ArrayList<>(List.of(existingCartItem)));
+        when(productVariantRepository.findAllByIdInWithDetails(anyCollection())).thenReturn(List.of(v1));
+
+        // Act
+        ReorderResponse response = orderService.reorder(userId, orderId);
+
+        // Assert
+        assertEquals(0, response.itemsAddedSuccessfully());
+        assertEquals(1, response.unavailableItems().size());
+        assertEquals("INSUFFICIENT_STOCK", response.unavailableItems().get(0).reason());
+    }
+
+    @Test
+    @DisplayName("TC-08: reorder_Success_CartCapacityLimitEnforced - Chặn thêm SKU mới khi giỏ hàng đã đạt 50 loại mặt hàng")
+    void reorder_Success_CartCapacityLimitEnforced() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+
+        Shop shop = createTestShop(UUID.randomUUID(), UUID.randomUUID(), ShopStatus.ACTIVE);
+        Category category = createTestCategory(UUID.randomUUID(), CategoryStatus.ACTIVE);
+        Product product = createTestProduct(UUID.randomUUID(), shop, category, ProductVisibilityStatus.PUBLISHED, ProductApprovalStatus.APPROVED, false);
+
+        UUID v1Id = UUID.randomUUID();
+        ProductVariant v1 = createTestVariant(v1Id, product, 10, new BigDecimal("100000"), ProductVariantStatus.ACTIVE);
+
+        Order order = Order.builder().id(orderId).user(activeUser).shop(shop).status(OrderStatus.COMPLETED).build();
+        OrderItem item1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v1).productNameSnapshot("SP 1").variantNameSnapshot("V1").skuSnapshot("SKU1").quantity(1).build();
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1));
+
+        Cart cart = Cart.builder().id(UUID.randomUUID()).user(activeUser).build();
+        List<CartItem> fullCartItems = new ArrayList<>();
+        for (int i = 0; i < 50; i++) {
+            UUID dummyVarId = UUID.randomUUID();
+            ProductVariant dummyVar = ProductVariant.builder().id(dummyVarId).build();
+            fullCartItems.add(CartItem.builder().id(UUID.randomUUID()).cart(cart).productVariant(dummyVar).quantity(1).build());
+        }
+
+        when(cartRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cart.getId())).thenReturn(fullCartItems);
+        when(productVariantRepository.findAllByIdInWithDetails(anyCollection())).thenReturn(List.of(v1));
+
+        // Act
+        ReorderResponse response = orderService.reorder(userId, orderId);
+
+        // Assert
+        assertEquals(0, response.itemsAddedSuccessfully());
+        assertEquals(1, response.unavailableItems().size());
+        assertEquals("CART_CAPACITY_EXCEEDED", response.unavailableItems().get(0).reason());
+    }
+
+    @Test
+    @DisplayName("TC-09: reorder_Success_ProductUnpublishedOrSuspended_Blocked - Chặn mặt hàng khi sản phẩm bị gỡ hoặc khóa")
+    void reorder_Success_ProductUnpublishedOrSuspended_Blocked() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+
+        Shop shop = createTestShop(UUID.randomUUID(), UUID.randomUUID(), ShopStatus.ACTIVE);
+        Category category = createTestCategory(UUID.randomUUID(), CategoryStatus.ACTIVE);
+        Product suspendedProduct = createTestProduct(UUID.randomUUID(), shop, category, ProductVisibilityStatus.UNPUBLISHED, ProductApprovalStatus.APPROVED, true);
+
+        UUID v1Id = UUID.randomUUID();
+        ProductVariant v1 = createTestVariant(v1Id, suspendedProduct, 10, new BigDecimal("100000"), ProductVariantStatus.ACTIVE);
+
+        Order order = Order.builder().id(orderId).user(activeUser).shop(shop).status(OrderStatus.COMPLETED).build();
+        OrderItem item1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v1).productNameSnapshot("SP 1").variantNameSnapshot("V1").skuSnapshot("SKU1").quantity(1).build();
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1));
+
+        Cart cart = Cart.builder().id(UUID.randomUUID()).user(activeUser).build();
+        when(cartRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cart.getId())).thenReturn(new ArrayList<>());
+        when(productVariantRepository.findAllByIdInWithDetails(anyCollection())).thenReturn(List.of(v1));
+
+        // Act
+        ReorderResponse response = orderService.reorder(userId, orderId);
+
+        // Assert
+        assertEquals(0, response.itemsAddedSuccessfully());
+        assertEquals(1, response.unavailableItems().size());
+        assertEquals("PRODUCT_UNAVAILABLE", response.unavailableItems().get(0).reason());
+    }
+
+    @Test
+    @DisplayName("TC-10: reorder_Success_CategoryInactiveOrDeleted_Blocked - Chặn mặt hàng khi ngành hàng bị khóa hoặc xóa mềm")
+    void reorder_Success_CategoryInactiveOrDeleted_Blocked() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+
+        Shop shop = createTestShop(UUID.randomUUID(), UUID.randomUUID(), ShopStatus.ACTIVE);
+        Category inactiveCategory = createTestCategory(UUID.randomUUID(), CategoryStatus.INACTIVE);
+        Product product = createTestProduct(UUID.randomUUID(), shop, inactiveCategory, ProductVisibilityStatus.PUBLISHED, ProductApprovalStatus.APPROVED, false);
+
+        UUID v1Id = UUID.randomUUID();
+        ProductVariant v1 = createTestVariant(v1Id, product, 10, new BigDecimal("100000"), ProductVariantStatus.ACTIVE);
+
+        Order order = Order.builder().id(orderId).user(activeUser).shop(shop).status(OrderStatus.COMPLETED).build();
+        OrderItem item1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v1).productNameSnapshot("SP 1").variantNameSnapshot("V1").skuSnapshot("SKU1").quantity(1).build();
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1));
+
+        Cart cart = Cart.builder().id(UUID.randomUUID()).user(activeUser).build();
+        when(cartRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cart.getId())).thenReturn(new ArrayList<>());
+        when(productVariantRepository.findAllByIdInWithDetails(anyCollection())).thenReturn(List.of(v1));
+
+        // Act
+        ReorderResponse response = orderService.reorder(userId, orderId);
+
+        // Assert
+        assertEquals(0, response.itemsAddedSuccessfully());
+        assertEquals(1, response.unavailableItems().size());
+        assertEquals("CATEGORY_INACTIVE", response.unavailableItems().get(0).reason());
+    }
+
+    @Test
+    @DisplayName("TC-11: reorder_Success_AntiSelfBuying_Blocked - Chặn mua lại sản phẩm từ gian hàng của chính mình")
+    void reorder_Success_AntiSelfBuying_Blocked() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+
+        // Shop belongs to userId
+        Shop selfShop = createTestShop(UUID.randomUUID(), userId, ShopStatus.ACTIVE);
+        Category category = createTestCategory(UUID.randomUUID(), CategoryStatus.ACTIVE);
+        Product product = createTestProduct(UUID.randomUUID(), selfShop, category, ProductVisibilityStatus.PUBLISHED, ProductApprovalStatus.APPROVED, false);
+
+        UUID v1Id = UUID.randomUUID();
+        ProductVariant v1 = createTestVariant(v1Id, product, 10, new BigDecimal("100000"), ProductVariantStatus.ACTIVE);
+
+        Order order = Order.builder().id(orderId).user(activeUser).shop(selfShop).status(OrderStatus.COMPLETED).build();
+        OrderItem item1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v1).productNameSnapshot("SP 1").variantNameSnapshot("V1").skuSnapshot("SKU1").quantity(1).build();
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1));
+
+        Cart cart = Cart.builder().id(UUID.randomUUID()).user(activeUser).build();
+        when(cartRepository.findByUserIdWithLock(userId)).thenReturn(Optional.of(cart));
+        when(cartItemRepository.findByCartId(cart.getId())).thenReturn(new ArrayList<>());
+        when(productVariantRepository.findAllByIdInWithDetails(anyCollection())).thenReturn(List.of(v1));
+
+        // Act
+        ReorderResponse response = orderService.reorder(userId, orderId);
+
+        // Assert
+        assertEquals(0, response.itemsAddedSuccessfully());
+        assertEquals(1, response.unavailableItems().size());
+        assertEquals("CANNOT_ADD_OWN_PRODUCT", response.unavailableItems().get(0).reason());
+    }
+
+    @Test
+    @DisplayName("TC-12: reorder_Success_LazyCreateCartWhenNotExists - Tự động tạo giỏ hàng mới khi người dùng chưa có giỏ")
+    void reorder_Success_LazyCreateCartWhenNotExists() {
+        // Arrange
+        UUID orderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+
+        Shop shop = createTestShop(UUID.randomUUID(), UUID.randomUUID(), ShopStatus.ACTIVE);
+        Category category = createTestCategory(UUID.randomUUID(), CategoryStatus.ACTIVE);
+        Product product = createTestProduct(UUID.randomUUID(), shop, category, ProductVisibilityStatus.PUBLISHED, ProductApprovalStatus.APPROVED, false);
+
+        UUID v1Id = UUID.randomUUID();
+        ProductVariant v1 = createTestVariant(v1Id, product, 10, new BigDecimal("100000"), ProductVariantStatus.ACTIVE);
+
+        Order order = Order.builder().id(orderId).user(activeUser).shop(shop).status(OrderStatus.COMPLETED).build();
+        OrderItem item1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(v1).productNameSnapshot("SP 1").variantNameSnapshot("V1").skuSnapshot("SKU1").quantity(1).build();
+
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1));
+
+        Cart newlyCreatedCart = Cart.builder().id(UUID.randomUUID()).user(activeUser).build();
+        when(cartRepository.findByUserIdWithLock(userId))
+                .thenReturn(Optional.empty()) // Lúc đầu chưa có
+                .thenReturn(Optional.of(newlyCreatedCart)); // Sau khi save
+        when(cartRepository.save(any(Cart.class))).thenReturn(newlyCreatedCart);
+        when(cartItemRepository.findByCartId(newlyCreatedCart.getId())).thenReturn(new ArrayList<>());
+        when(productVariantRepository.findAllByIdInWithDetails(anyCollection())).thenReturn(List.of(v1));
+
+        // Act
+        ReorderResponse response = orderService.reorder(userId, orderId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(1, response.itemsAddedSuccessfully());
+        verify(cartRepository).save(any(Cart.class));
+        verify(cartItemRepository).saveAll(anyList());
+    }
+
+    @Test
+    @DisplayName("TC-13: reorder_Throws_OrderNotFound_WhenIdNotExists - Đơn hàng không tồn tại ném ORDER_NOT_FOUND (HTTP 404)")
+    void reorder_Throws_OrderNotFound_WhenIdNotExists() {
+        // Arrange
+        UUID nonExistentOrderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+        when(orderRepository.findByIdAndUserId(nonExistentOrderId, userId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                orderService.reorder(userId, nonExistentOrderId));
+
+        assertEquals(ErrorCode.ORDER_NOT_FOUND, ex.getErrorCode());
+        verifyNoInteractions(cartRepository);
+    }
+
+    @Test
+    @DisplayName("TC-14: reorder_Throws_OrderNotFound_WhenBelongsToAnotherUser - Chặn IDOR khi truy cập đơn của người khác")
+    void reorder_Throws_OrderNotFound_WhenBelongsToAnotherUser() {
+        // Arrange
+        UUID otherUserOrderId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+        when(orderRepository.findByIdAndUserId(otherUserOrderId, userId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                orderService.reorder(userId, otherUserOrderId));
+
+        assertEquals(ErrorCode.ORDER_NOT_FOUND, ex.getErrorCode());
+        verifyNoInteractions(cartRepository);
+    }
+
+    @Test
+    @DisplayName("TC-15: reorder_Throws_WhenUserIdOrOrderIdNull - Đầu vào null ném ORDER_NOT_FOUND fail-fast")
+    void reorder_Throws_WhenUserIdOrOrderIdNull() {
+        // Case 1: userId null
+        assertThrows(BusinessException.class, () -> orderService.reorder(null, UUID.randomUUID()));
+
+        // Case 2: orderId null
+        assertThrows(BusinessException.class, () -> orderService.reorder(userId, null));
+
+        verifyNoInteractions(orderRepository);
+    }
+
+    // ==========================================
+    // Helper Test Methods
+    // ==========================================
+
+    private Shop createTestShop(UUID shopId, UUID sellerUserId, ShopStatus status) {
+        User sellerUser = new User();
+        sellerUser.setId(sellerUserId);
+        sellerUser.setStatus(UserStatus.ACTIVE);
+        Seller seller = Seller.builder().id(UUID.randomUUID()).user(sellerUser).sellerName("Seller Test").build();
+        return Shop.builder().id(shopId).name("Shop Test").seller(seller).status(status).build();
+    }
+
+    private Category createTestCategory(UUID categoryId, CategoryStatus status) {
+        return Category.builder().id(categoryId).name("Category Test").status(status).isDeleted(false).build();
+    }
+
+    private Product createTestProduct(UUID productId, Shop shop, Category category, ProductVisibilityStatus visStatus, ProductApprovalStatus appStatus, boolean isSuspended) {
+        return Product.builder()
+                .id(productId)
+                .name("Product Test")
+                .shop(shop)
+                .category(category)
+                .visibilityStatus(visStatus)
+                .approvalStatus(appStatus)
+                .isSuspended(isSuspended)
+                .isDeleted(false)
+                .build();
+    }
+
+    private ProductVariant createTestVariant(UUID variantId, Product product, int stock, BigDecimal price, ProductVariantStatus status) {
+        return ProductVariant.builder()
+                .id(variantId)
+                .product(product)
+                .variantName("Variant Test")
+                .sku("SKU-" + variantId.toString().substring(0, 8))
+                .stockQuantity(stock)
+                .price(price)
+                .status(status)
+                .isDeleted(false)
+                .build();
     }
 }

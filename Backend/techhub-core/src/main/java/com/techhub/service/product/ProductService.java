@@ -6,6 +6,7 @@ import com.techhub.model.dto.response.ProductSummaryResponse;
 import com.techhub.model.dto.response.PublicProductDetailResponse;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 public interface ProductService {
@@ -22,4 +23,6 @@ public interface ProductService {
     );
 
     PublicProductDetailResponse getPublicProductBySlug(String slug);
+
+    List<ProductSummaryResponse> getSimilarProducts(UUID productId);
 }

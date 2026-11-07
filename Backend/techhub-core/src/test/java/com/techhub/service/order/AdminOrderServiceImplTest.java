@@ -3,12 +3,11 @@ package com.techhub.service.order;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
+import com.techhub.model.dto.request.CancelOrderRequest;
 import com.techhub.model.dto.response.*;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.*;
-import com.techhub.repository.OrderItemRepository;
-import com.techhub.repository.OrderRepository;
-import com.techhub.repository.UserRepository;
+import com.techhub.repository.*;
 import com.techhub.service.order.impl.AdminOrderServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,7 +33,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Unit Tests cho AdminOrderService (GET /api/admin/orders)")
+@DisplayName("Unit Tests cho AdminOrderService")
 class AdminOrderServiceImplTest {
 
     @Mock
@@ -45,6 +44,21 @@ class AdminOrderServiceImplTest {
 
     @Mock
     private OrderItemRepository orderItemRepository;
+
+    @Mock
+    private ProductVariantRepository productVariantRepository;
+
+    @Mock
+    private PaymentRepository paymentRepository;
+
+    @Mock
+    private RefundTransactionRepository refundTransactionRepository;
+
+    @Mock
+    private VoucherRedemptionRepository voucherRedemptionRepository;
+
+    @Mock
+    private VoucherRepository voucherRepository;
 
     @InjectMocks
     private AdminOrderServiceImpl adminOrderService;
@@ -856,5 +870,460 @@ class AdminOrderServiceImplTest {
         assertEquals("ORDER_PLACED", response.timeline().get(0).step());
         assertEquals("CANCELLED", response.timeline().get(1).step());
         assertTrue(response.timeline().get(1).current());
+    }
+
+    // =========================================================================================
+    // POST /api/admin/orders/{id}/cancel Tests (Phase 11 - Row 10)
+    // =========================================================================================
+
+    @Test
+    @DisplayName("TC-38 (TC-01): cancelAdminOrder thành công từ trạng thái PENDING_CONFIRMATION, hoàn tồn kho, cập nhật COD")
+    void tc38_cancelAdminOrder_fromPendingConfirmation_success() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-CANCEL-01", OrderStatus.PENDING_CONFIRMATION,
+                BigDecimal.valueOf(500000), BigDecimal.valueOf(30000), BigDecimal.ZERO, BigDecimal.ZERO);
+
+        OrderItem item = createMockOrderItem(UUID.randomUUID(), order, "Sạc nhanh 20W", BigDecimal.valueOf(500000), 2);
+        ProductVariant variant = item.getProductVariant();
+        variant.setStockQuantity(10);
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item));
+        when(productVariantRepository.findAllByIdInForUpdate(List.of(variant.getId()))).thenReturn(List.of(variant));
+        when(orderRepository.findByPaymentId(order.getPayment().getId())).thenReturn(List.of(order));
+        when(orderRepository.findWithDetailsById(orderId)).thenReturn(Optional.of(order));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.SELLER_OUT_OF_STOCK, "Shop out of stock");
+        AdminOrderDetailResponse response = adminOrderService.cancelAdminOrder(adminUserId, orderId, request);
+
+        assertNotNull(response);
+        assertEquals(OrderStatus.CANCELLED, order.getStatus());
+        assertNotNull(order.getCancelledAt());
+        assertTrue(order.getNote().contains("[Admin Cancel - admin@techhub.vn]: SELLER_OUT_OF_STOCK - Shop out of stock"));
+        assertEquals(12, variant.getStockQuantity());
+        assertEquals(PaymentStatus.CANCELLED, order.getPayment().getStatus());
+        verify(productVariantRepository).saveAll(anyList());
+        verify(paymentRepository).save(order.getPayment());
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    @DisplayName("TC-39 (TC-02): cancelAdminOrder thành công từ trạng thái CONFIRMED")
+    void tc39_cancelAdminOrder_fromConfirmed_success() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-CANCEL-02", OrderStatus.CONFIRMED,
+                BigDecimal.valueOf(300000), BigDecimal.valueOf(20000), BigDecimal.ZERO, BigDecimal.ZERO);
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findByPaymentId(order.getPayment().getId())).thenReturn(List.of(order));
+        when(voucherRedemptionRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findWithDetailsById(orderId)).thenReturn(Optional.of(order));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.BUYER_CHANGED_MIND, "Khách đổi ý");
+        AdminOrderDetailResponse response = adminOrderService.cancelAdminOrder(adminUserId, orderId, request);
+
+        assertNotNull(response);
+        assertEquals(OrderStatus.CANCELLED, order.getStatus());
+        assertNotNull(order.getCancelledAt());
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    @DisplayName("TC-40 (TC-03): cancelAdminOrder thành công từ trạng thái PREPARING")
+    void tc40_cancelAdminOrder_fromPreparing_success() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-CANCEL-03", OrderStatus.PREPARING,
+                BigDecimal.valueOf(400000), BigDecimal.valueOf(20000), BigDecimal.ZERO, BigDecimal.ZERO);
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findByPaymentId(order.getPayment().getId())).thenReturn(List.of(order));
+        when(voucherRedemptionRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findWithDetailsById(orderId)).thenReturn(Optional.of(order));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.SELLER_FORCE_MAJEURE, "Sự cố bất khả kháng");
+        AdminOrderDetailResponse response = adminOrderService.cancelAdminOrder(adminUserId, orderId, request);
+
+        assertNotNull(response);
+        assertEquals(OrderStatus.CANCELLED, order.getStatus());
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    @DisplayName("TC-41 (TC-04): cancelAdminOrder thành công từ trạng thái WAITING_FOR_PICKUP")
+    void tc41_cancelAdminOrder_fromWaitingForPickup_success() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-CANCEL-04", OrderStatus.WAITING_FOR_PICKUP,
+                BigDecimal.valueOf(250000), BigDecimal.valueOf(15000), BigDecimal.ZERO, BigDecimal.ZERO);
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findByPaymentId(order.getPayment().getId())).thenReturn(List.of(order));
+        when(voucherRedemptionRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findWithDetailsById(orderId)).thenReturn(Optional.of(order));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.BUYER_INCORRECT_ADDRESS, "Sai địa chỉ nhận hàng");
+        AdminOrderDetailResponse response = adminOrderService.cancelAdminOrder(adminUserId, orderId, request);
+
+        assertNotNull(response);
+        assertEquals(OrderStatus.CANCELLED, order.getStatus());
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    @DisplayName("TC-42 (TC-05): cancelAdminOrder thành công từ trạng thái PENDING_PAYMENT")
+    void tc42_cancelAdminOrder_fromPendingPayment_success() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-CANCEL-05", OrderStatus.PENDING_PAYMENT,
+                BigDecimal.valueOf(600000), BigDecimal.valueOf(30000), BigDecimal.ZERO, BigDecimal.ZERO);
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findByPaymentId(order.getPayment().getId())).thenReturn(List.of(order));
+        when(voucherRedemptionRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findWithDetailsById(orderId)).thenReturn(Optional.of(order));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.BUYER_PAYMENT_ISSUE, "Quá hạn thanh toán");
+        AdminOrderDetailResponse response = adminOrderService.cancelAdminOrder(adminUserId, orderId, request);
+
+        assertNotNull(response);
+        assertEquals(OrderStatus.CANCELLED, order.getStatus());
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    @DisplayName("TC-43 (TC-06): cancelAdminOrder với VNPAY PAID ghi nhận RefundTransaction thành công")
+    void tc43_cancelAdminOrder_withVnPayPaid_recordsRefundTransaction() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-CANCEL-VNPAY", OrderStatus.CONFIRMED,
+                BigDecimal.valueOf(500000), BigDecimal.valueOf(30000), BigDecimal.ZERO, BigDecimal.ZERO);
+        Payment payment = order.getPayment();
+        payment.setPaymentMethod(PaymentMethod.VNPAY);
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setRefundedAmount(BigDecimal.ZERO);
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(voucherRedemptionRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findWithDetailsById(orderId)).thenReturn(Optional.of(order));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.BUYER_CHANGED_MIND, "Khách đổi ý");
+        AdminOrderDetailResponse response = adminOrderService.cancelAdminOrder(adminUserId, orderId, request);
+
+        assertNotNull(response);
+        assertEquals(BigDecimal.valueOf(530000), payment.getRefundedAmount());
+        verify(paymentRepository).save(payment);
+
+        ArgumentCaptor<RefundTransaction> txCaptor = ArgumentCaptor.forClass(RefundTransaction.class);
+        verify(refundTransactionRepository).save(txCaptor.capture());
+        RefundTransaction tx = txCaptor.getValue();
+        assertEquals(BigDecimal.valueOf(530000), tx.getAmount());
+        assertEquals(RefundMethod.GATEWAY_REFUND, tx.getRefundMethod());
+        assertEquals(RefundStatus.SUCCESS, tx.getStatus());
+        assertTrue(tx.getGatewayRefundId().startsWith("ADMIN_REFUND_ORD-CANCEL-VNPAY_"));
+    }
+
+    @Test
+    @DisplayName("TC-44 (TC-07): cancelAdminOrder với COD trừ tiền thanh toán, giữ status PENDING khi còn đơn active")
+    void tc44_cancelAdminOrder_withCod_decrementsPaymentAmount_keepsStatusPendingWhenSiblingActive() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-CANCEL-COD-1", OrderStatus.CONFIRMED,
+                BigDecimal.valueOf(400000), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        Payment payment = order.getPayment();
+        payment.setAmount(BigDecimal.valueOf(1000000));
+        payment.setStatus(PaymentStatus.PENDING);
+
+        Order siblingOrder = createMockOrder(UUID.randomUUID(), "ORD-COD-2", OrderStatus.CONFIRMED,
+                BigDecimal.valueOf(600000), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findByPaymentId(payment.getId())).thenReturn(List.of(order, siblingOrder));
+        when(voucherRedemptionRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findWithDetailsById(orderId)).thenReturn(Optional.of(order));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.OTHER, "Admin huỷ đơn 1");
+        AdminOrderDetailResponse response = adminOrderService.cancelAdminOrder(adminUserId, orderId, request);
+
+        assertNotNull(response);
+        assertEquals(BigDecimal.valueOf(600000), payment.getAmount());
+        assertEquals(PaymentStatus.PENDING, payment.getStatus());
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    @DisplayName("TC-45 (TC-08): cancelAdminOrder với COD huỷ thanh toán khi tất cả đơn trong Payment đều bị huỷ")
+    void tc45_cancelAdminOrder_withCod_cancelsPaymentWhenAllSiblingOrdersCancelled() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-CANCEL-COD-ALL", OrderStatus.PREPARING,
+                BigDecimal.valueOf(400000), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        Payment payment = order.getPayment();
+        payment.setAmount(BigDecimal.valueOf(400000));
+        payment.setStatus(PaymentStatus.PENDING);
+
+        Order cancelledSibling = createMockOrder(UUID.randomUUID(), "ORD-COD-ALREADY-CANCELLED", OrderStatus.CANCELLED,
+                BigDecimal.valueOf(300000), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findByPaymentId(payment.getId())).thenReturn(List.of(order, cancelledSibling));
+        when(voucherRedemptionRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findWithDetailsById(orderId)).thenReturn(Optional.of(order));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.OTHER, "Huỷ đơn cuối");
+        AdminOrderDetailResponse response = adminOrderService.cancelAdminOrder(adminUserId, orderId, request);
+
+        assertNotNull(response);
+        assertEquals(BigDecimal.ZERO, payment.getAmount());
+        assertEquals(PaymentStatus.CANCELLED, payment.getStatus());
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    @DisplayName("TC-46 (TC-09): cancelAdminOrder hoàn voucher REDEEMED và cập nhật usedCount")
+    void tc46_cancelAdminOrder_withRedeemedVoucher_releasesVoucherAndRedemption() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-VOUCHER-REDEEMED", OrderStatus.CONFIRMED,
+                BigDecimal.valueOf(500000), BigDecimal.ZERO, BigDecimal.valueOf(50000), BigDecimal.ZERO);
+
+        Voucher voucher = Voucher.builder()
+                .id(UUID.randomUUID())
+                .code("DISCOUNT50K")
+                .usedCount(5)
+                .build();
+
+        VoucherRedemption redemption = VoucherRedemption.builder()
+                .id(UUID.randomUUID())
+                .voucher(voucher)
+                .orderId(orderId)
+                .voucherCode("DISCOUNT50K")
+                .status(VoucherRedemptionStatus.REDEEMED)
+                .discountAmount(BigDecimal.valueOf(50000))
+                .build();
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findByPaymentId(order.getPayment().getId())).thenReturn(List.of(order));
+        when(voucherRedemptionRepository.findByOrderId(orderId)).thenReturn(List.of(redemption));
+        when(orderRepository.findWithDetailsById(orderId)).thenReturn(Optional.of(order));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.BUYER_CHANGED_MIND, "Hoàn trả voucher");
+        AdminOrderDetailResponse response = adminOrderService.cancelAdminOrder(adminUserId, orderId, request);
+
+        assertNotNull(response);
+        assertEquals(4, voucher.getUsedCount());
+        assertEquals(VoucherRedemptionStatus.RELEASED, redemption.getStatus());
+        assertNotNull(redemption.getReleasedAt());
+        verify(voucherRepository).save(voucher);
+        verify(voucherRedemptionRepository).save(redemption);
+    }
+
+    @Test
+    @DisplayName("TC-47 (TC-10): cancelAdminOrder hoàn voucher RESERVED và cập nhật reservedCount")
+    void tc47_cancelAdminOrder_withReservedVoucher_releasesVoucherAndRedemption() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-VOUCHER-RESERVED", OrderStatus.PENDING_PAYMENT,
+                BigDecimal.valueOf(500000), BigDecimal.ZERO, BigDecimal.valueOf(50000), BigDecimal.ZERO);
+
+        Voucher voucher = Voucher.builder()
+                .id(UUID.randomUUID())
+                .code("RESERVE50K")
+                .reservedCount(3)
+                .build();
+
+        VoucherRedemption redemption = VoucherRedemption.builder()
+                .id(UUID.randomUUID())
+                .voucher(voucher)
+                .orderId(orderId)
+                .voucherCode("RESERVE50K")
+                .status(VoucherRedemptionStatus.RESERVED)
+                .discountAmount(BigDecimal.valueOf(50000))
+                .build();
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+        when(orderRepository.findByPaymentId(order.getPayment().getId())).thenReturn(List.of(order));
+        when(voucherRedemptionRepository.findByOrderId(orderId)).thenReturn(List.of(redemption));
+        when(orderRepository.findWithDetailsById(orderId)).thenReturn(Optional.of(order));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.BUYER_PAYMENT_ISSUE, "Lỗi thanh toán");
+        AdminOrderDetailResponse response = adminOrderService.cancelAdminOrder(adminUserId, orderId, request);
+
+        assertNotNull(response);
+        assertEquals(2, voucher.getReservedCount());
+        assertEquals(VoucherRedemptionStatus.RELEASED, redemption.getStatus());
+        assertNotNull(redemption.getReleasedAt());
+        verify(voucherRepository).save(voucher);
+        verify(voucherRedemptionRepository).save(redemption);
+    }
+
+    @Test
+    @DisplayName("TC-48 (TC-11): Phòng chống Deadlock - variant IDs luôn được sort tăng dần khi lock")
+    void tc48_cancelAdminOrder_deadlockPrevention_sortsVariantIdsAscending() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-DEADLOCK", OrderStatus.CONFIRMED,
+                BigDecimal.valueOf(600000), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+
+        UUID var1 = UUID.fromString("ffffffff-ffff-ffff-ffff-ffffffffffff");
+        UUID var2 = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID var3 = UUID.fromString("88888888-8888-8888-8888-888888888888");
+
+        ProductVariant pv1 = new ProductVariant(); pv1.setId(var1); pv1.setStockQuantity(5);
+        ProductVariant pv2 = new ProductVariant(); pv2.setId(var2); pv2.setStockQuantity(5);
+        ProductVariant pv3 = new ProductVariant(); pv3.setId(var3); pv3.setStockQuantity(5);
+
+        OrderItem i1 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(pv1).quantity(1).build();
+        OrderItem i2 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(pv2).quantity(2).build();
+        OrderItem i3 = OrderItem.builder().id(UUID.randomUUID()).order(order).productVariant(pv3).quantity(3).build();
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(i1, i2, i3));
+        when(productVariantRepository.findAllByIdInForUpdate(anyList())).thenReturn(List.of(pv2, pv3, pv1));
+        when(orderRepository.findByPaymentId(order.getPayment().getId())).thenReturn(List.of(order));
+        when(orderRepository.findWithDetailsById(orderId)).thenReturn(Optional.of(order));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.OTHER, "Kiểm tra deadlock order");
+        adminOrderService.cancelAdminOrder(adminUserId, orderId, request);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<UUID>> listCaptor = ArgumentCaptor.forClass(List.class);
+        verify(productVariantRepository).findAllByIdInForUpdate(listCaptor.capture());
+        List<UUID> capturedIds = listCaptor.getValue();
+
+        assertEquals(List.of(var1, var2, var3).stream().sorted().toList(), capturedIds);
+    }
+
+    @Test
+    @DisplayName("TC-49 (TC-12): Tính Idempotent - Đơn hàng đã CANCELLED trả về chi tiết ngay mà không chạy lại rollback")
+    void tc49_cancelAdminOrder_idempotency_whenAlreadyCancelled_returnsDetailWithoutRedo() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-ALREADY-CANCELLED", OrderStatus.CANCELLED,
+                BigDecimal.valueOf(500000), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findWithDetailsById(orderId)).thenReturn(Optional.of(order));
+        when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.OTHER, "Huỷ lại");
+        AdminOrderDetailResponse response = adminOrderService.cancelAdminOrder(adminUserId, orderId, request);
+
+        assertNotNull(response);
+        assertEquals(OrderStatus.CANCELLED, response.status());
+        verify(productVariantRepository, never()).saveAll(anyList());
+        verify(paymentRepository, never()).save(any());
+        verify(refundTransactionRepository, never()).save(any());
+        verify(voucherRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("TC-50 (TC-13): Đơn hàng trạng thái SHIPPING ném lỗi CANCELLATION_NOT_ALLOWED")
+    void tc50_cancelAdminOrder_forbiddenStatus_shipping_throwsCancellationNotAllowed() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order order = createMockOrder(orderId, "ORD-SHIPPING", OrderStatus.SHIPPING,
+                BigDecimal.valueOf(500000), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.OTHER, "Huỷ khi đang giao");
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> adminOrderService.cancelAdminOrder(adminUserId, orderId, request));
+
+        assertEquals(ErrorCode.CANCELLATION_NOT_ALLOWED, ex.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("TC-51 (TC-14): Đơn hàng trạng thái DELIVERED hoặc COMPLETED ném lỗi CANCELLATION_NOT_ALLOWED")
+    void tc51_cancelAdminOrder_forbiddenStatus_deliveredAndCompleted_throwsCancellationNotAllowed() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        Order deliveredOrder = createMockOrder(orderId, "ORD-DELIVERED", OrderStatus.DELIVERED,
+                BigDecimal.valueOf(500000), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(deliveredOrder));
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.OTHER, "Huỷ khi đã giao");
+        BusinessException ex1 = assertThrows(BusinessException.class,
+                () -> adminOrderService.cancelAdminOrder(adminUserId, orderId, request));
+        assertEquals(ErrorCode.CANCELLATION_NOT_ALLOWED, ex1.getErrorCode());
+
+        Order completedOrder = createMockOrder(orderId, "ORD-COMPLETED", OrderStatus.COMPLETED,
+                BigDecimal.valueOf(500000), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(completedOrder));
+
+        BusinessException ex2 = assertThrows(BusinessException.class,
+                () -> adminOrderService.cancelAdminOrder(adminUserId, orderId, request));
+        assertEquals(ErrorCode.CANCELLATION_NOT_ALLOWED, ex2.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("TC-52 (TC-15): Đơn hàng không tồn tại ném lỗi ORDER_NOT_FOUND")
+    void tc52_cancelAdminOrder_orderNotFound_throwsOrderNotFound() {
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(mockAdminUser));
+
+        UUID orderId = UUID.randomUUID();
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.empty());
+
+        CancelOrderRequest request = new CancelOrderRequest(CancellationReasonCode.OTHER, "Không tồn tại");
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> adminOrderService.cancelAdminOrder(adminUserId, orderId, request));
+
+        assertEquals(ErrorCode.ORDER_NOT_FOUND, ex.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("TC-53 (TC-16): Input không hợp lệ và tài khoản Admin vi phạm ném lỗi thích hợp")
+    void tc53_cancelAdminOrder_invalidInputAndAdminValidationFailures() {
+        // Null orderId
+        assertThrows(BusinessException.class, () ->
+                adminOrderService.cancelAdminOrder(adminUserId, null, new CancelOrderRequest(CancellationReasonCode.OTHER, "")));
+
+        // Null request
+        assertThrows(BusinessException.class, () ->
+                adminOrderService.cancelAdminOrder(adminUserId, UUID.randomUUID(), null));
+
+        // Null reasonCode
+        assertThrows(BusinessException.class, () ->
+                adminOrderService.cancelAdminOrder(adminUserId, UUID.randomUUID(), new CancelOrderRequest(null, "")));
+
+        // Unauthenticated
+        assertThrows(BusinessException.class, () ->
+                adminOrderService.cancelAdminOrder(null, UUID.randomUUID(), new CancelOrderRequest(CancellationReasonCode.OTHER, "")));
+
+        // Banned Admin
+        User bannedAdmin = new User();
+        bannedAdmin.setId(adminUserId);
+        bannedAdmin.setStatus(UserStatus.BANNED);
+        when(userRepository.findById(adminUserId)).thenReturn(Optional.of(bannedAdmin));
+        BusinessException exBanned = assertThrows(BusinessException.class, () ->
+                adminOrderService.cancelAdminOrder(adminUserId, UUID.randomUUID(), new CancelOrderRequest(CancellationReasonCode.OTHER, "")));
+        assertEquals(ErrorCode.ACCOUNT_BANNED, exBanned.getErrorCode());
     }
 }

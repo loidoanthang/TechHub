@@ -891,4 +891,94 @@ class AdminCategoryControllerTest {
         assertNotNull(classAnnotation, "AdminCategoryController must have @PreAuthorize");
         assertEquals("hasRole('ADMIN')", classAnnotation.value());
     }
+
+    // ==========================================
+    // DELETE /api/admin/categories/{id} (BR-11A)
+    // ==========================================
+
+    @Test
+    @DisplayName("TC-54: controller_deleteCategory_Success - Gọi service xóa mềm danh mục và trả về HTTP 200 OK")
+    void controller_deleteCategory_Success() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        doNothing().when(adminCategoryService).deleteCategory(categoryId);
+
+        // Act
+        ApiResponse<Void> response = adminCategoryController.deleteCategory(categoryId);
+
+        // Assert
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+        assertEquals("Category deleted successfully", response.getMessage());
+        assertNull(response.getData());
+        verify(adminCategoryService).deleteCategory(categoryId);
+    }
+
+    @Test
+    @DisplayName("TC-55: controller_deleteCategory_CallsService - Service được gọi chính xác với ID truyền vào")
+    void controller_deleteCategory_CallsService() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+
+        // Act
+        adminCategoryController.deleteCategory(categoryId);
+
+        // Assert
+        verify(adminCategoryService, times(1)).deleteCategory(categoryId);
+    }
+
+    @Test
+    @DisplayName("TC-56: controller_deleteCategory_HasDeleteMappingAnnotation - Xác nhận method có @DeleteMapping(\"/{id}\")")
+    void controller_deleteCategory_HasDeleteMappingAnnotation() throws NoSuchMethodException {
+        // Act
+        var method = AdminCategoryController.class.getMethod("deleteCategory", UUID.class);
+        var mapping = method.getAnnotation(org.springframework.web.bind.annotation.DeleteMapping.class);
+
+        // Assert
+        assertNotNull(mapping, "Method must have @DeleteMapping");
+        assertArrayEquals(new String[]{"/{id}"}, mapping.value());
+    }
+
+    @Test
+    @DisplayName("TC-57: controller_deleteCategory_ProtectedByPreAuthorizeAdmin - Xác nhận controller được bảo vệ bởi @PreAuthorize(\"hasRole('ADMIN')\")")
+    void controller_deleteCategory_ProtectedByPreAuthorizeAdmin() {
+        // Assert: Class AdminCategoryController được bảo vệ bởi @PreAuthorize("hasRole('ADMIN')")
+        PreAuthorize classAnnotation = AdminCategoryController.class.getAnnotation(PreAuthorize.class);
+        assertNotNull(classAnnotation, "AdminCategoryController must have @PreAuthorize");
+        assertEquals("hasRole('ADMIN')", classAnnotation.value());
+    }
+
+    @Test
+    @DisplayName("TC-58: controller_deleteCategory_Throws_CategoryNotFound - Danh mục không tồn tại ném CATEGORY_NOT_FOUND (HTTP 404)")
+    void controller_deleteCategory_Throws_CategoryNotFound() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        doThrow(new BusinessException(ErrorCode.CATEGORY_NOT_FOUND))
+                .when(adminCategoryService).deleteCategory(categoryId);
+
+        // Act & Assert
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                adminCategoryController.deleteCategory(categoryId));
+
+        assertEquals(ErrorCode.CATEGORY_NOT_FOUND, ex.getErrorCode());
+        assertEquals(HttpStatus.NOT_FOUND, ex.getErrorCode().getStatus());
+        verify(adminCategoryService).deleteCategory(categoryId);
+    }
+
+    @Test
+    @DisplayName("TC-59: controller_deleteCategory_Throws_CategoryHasActiveProducts - Còn SP active ném CATEGORY_HAS_ACTIVE_PRODUCTS (HTTP 400)")
+    void controller_deleteCategory_Throws_CategoryHasActiveProducts() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        doThrow(new BusinessException(ErrorCode.CATEGORY_HAS_ACTIVE_PRODUCTS))
+                .when(adminCategoryService).deleteCategory(categoryId);
+
+        // Act & Assert
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                adminCategoryController.deleteCategory(categoryId));
+
+        assertEquals(ErrorCode.CATEGORY_HAS_ACTIVE_PRODUCTS, ex.getErrorCode());
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getErrorCode().getStatus());
+        verify(adminCategoryService).deleteCategory(categoryId);
+    }
 }

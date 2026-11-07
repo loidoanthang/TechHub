@@ -2055,4 +2055,282 @@ class AdminCategoryServiceImplTest {
         verify(categoryRepository, never()).save(any());
         verify(productRepository, never()).hibernateProductsByCategoryId(any(), any(), any());
     }
+
+    // ==========================================
+    // DELETE /api/admin/categories/{id} (BR-11A)
+    // ==========================================
+
+    @Test
+    @DisplayName("TC-70: deleteCategory_Success_CategoryWithoutProducts - Xóa mềm danh mục rỗng thành công")
+    void deleteCategory_Success_CategoryWithoutProducts() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        Category category = Category.builder()
+                .id(categoryId)
+                .name("Tai nghe & Loa")
+                .status(CategoryStatus.ACTIVE)
+                .isDeleted(false)
+                .createdAt(LocalDateTime.now().minusDays(10))
+                .updatedAt(LocalDateTime.now().minusDays(5))
+                .build();
+
+        when(categoryRepository.findByIdForUpdate(categoryId)).thenReturn(java.util.Optional.of(category));
+        when(productRepository.existsByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(false);
+
+        // Act
+        adminCategoryService.deleteCategory(categoryId);
+
+        // Assert
+        assertTrue(category.isDeleted());
+        assertEquals(CategoryStatus.INACTIVE, category.getStatus());
+        assertNotNull(category.getUpdatedAt());
+
+        verify(categoryRepository).findByIdForUpdate(categoryId);
+        verify(productRepository).existsByCategoryIdAndIsDeletedFalse(categoryId);
+        verify(categoryRepository).save(category);
+        verifyNoInteractions(categoryAttributeRepository);
+    }
+
+    @Test
+    @DisplayName("TC-71: deleteCategory_Success_CategoryWithOnlySoftDeletedProducts - Xóa mềm danh mục khi toàn bộ SP đã bị xóa mềm")
+    void deleteCategory_Success_CategoryWithOnlySoftDeletedProducts() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        Category category = Category.builder()
+                .id(categoryId)
+                .name("Đồng hồ thông minh")
+                .status(CategoryStatus.ACTIVE)
+                .isDeleted(false)
+                .build();
+
+        when(categoryRepository.findByIdForUpdate(categoryId)).thenReturn(java.util.Optional.of(category));
+        when(productRepository.existsByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(false);
+
+        // Act
+        adminCategoryService.deleteCategory(categoryId);
+
+        // Assert
+        assertTrue(category.isDeleted());
+        assertEquals(CategoryStatus.INACTIVE, category.getStatus());
+        verify(categoryRepository).save(category);
+    }
+
+    @Test
+    @DisplayName("TC-72: deleteCategory_Throws_WhenCategoryHasActiveProducts - Chặn xóa danh mục nếu còn sản phẩm active (BR-11A)")
+    void deleteCategory_Throws_WhenCategoryHasActiveProducts() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        Category category = Category.builder()
+                .id(categoryId)
+                .name("Điện thoại")
+                .status(CategoryStatus.ACTIVE)
+                .isDeleted(false)
+                .build();
+
+        when(categoryRepository.findByIdForUpdate(categoryId)).thenReturn(java.util.Optional.of(category));
+        when(productRepository.existsByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(true);
+
+        // Act & Assert
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                adminCategoryService.deleteCategory(categoryId));
+
+        assertEquals(ErrorCode.CATEGORY_HAS_ACTIVE_PRODUCTS, ex.getErrorCode());
+        assertFalse(category.isDeleted());
+        assertEquals(CategoryStatus.ACTIVE, category.getStatus());
+        verify(categoryRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("TC-73: deleteCategory_Idempotent_WhenAlreadySoftDeleted - Danh mục đã xóa mềm từ trước trả về thành công lũy thừa")
+    void deleteCategory_Idempotent_WhenAlreadySoftDeleted() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        Category category = Category.builder()
+                .id(categoryId)
+                .name("Phụ kiện đã xóa")
+                .status(CategoryStatus.INACTIVE)
+                .isDeleted(true)
+                .build();
+
+        when(categoryRepository.findByIdForUpdate(categoryId)).thenReturn(java.util.Optional.of(category));
+
+        // Act
+        assertDoesNotThrow(() -> adminCategoryService.deleteCategory(categoryId));
+
+        // Assert
+        verify(categoryRepository).findByIdForUpdate(categoryId);
+        verify(productRepository, never()).existsByCategoryIdAndIsDeletedFalse(any());
+        verify(categoryRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("TC-74: deleteCategory_Throws_CategoryNotFound - Danh mục không tồn tại ném CATEGORY_NOT_FOUND (HTTP 404)")
+    void deleteCategory_Throws_CategoryNotFound() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        when(categoryRepository.findByIdForUpdate(categoryId)).thenReturn(java.util.Optional.empty());
+
+        // Act & Assert
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                adminCategoryService.deleteCategory(categoryId));
+
+        assertEquals(ErrorCode.CATEGORY_NOT_FOUND, ex.getErrorCode());
+        verify(productRepository, never()).existsByCategoryIdAndIsDeletedFalse(any());
+        verify(categoryRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("TC-75: deleteCategory_Throws_NullCategoryId - CategoryId null ném CATEGORY_NOT_FOUND")
+    void deleteCategory_Throws_NullCategoryId() {
+        // Act & Assert
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                adminCategoryService.deleteCategory(null));
+
+        assertEquals(ErrorCode.CATEGORY_NOT_FOUND, ex.getErrorCode());
+        verifyNoInteractions(categoryRepository);
+        verifyNoInteractions(productRepository);
+    }
+
+    @Test
+    @DisplayName("TC-76: deleteCategory_VerifiesPessimisticLockAcquired - Khóa bi quan findByIdForUpdate được gọi")
+    void deleteCategory_VerifiesPessimisticLockAcquired() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        Category category = Category.builder()
+                .id(categoryId)
+                .name("Máy ảnh")
+                .status(CategoryStatus.ACTIVE)
+                .isDeleted(false)
+                .build();
+
+        when(categoryRepository.findByIdForUpdate(categoryId)).thenReturn(java.util.Optional.of(category));
+        when(productRepository.existsByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(false);
+
+        // Act
+        adminCategoryService.deleteCategory(categoryId);
+
+        // Assert
+        verify(categoryRepository).findByIdForUpdate(categoryId);
+        verify(categoryRepository, never()).findById(any());
+    }
+
+    @Test
+    @DisplayName("TC-77: deleteCategory_PreservesCategoryAttributes - Bảo toàn danh mục thuộc tính khi xóa mềm danh mục")
+    void deleteCategory_PreservesCategoryAttributes() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        Category category = Category.builder()
+                .id(categoryId)
+                .name("Chuột máy tính")
+                .status(CategoryStatus.ACTIVE)
+                .isDeleted(false)
+                .build();
+
+        when(categoryRepository.findByIdForUpdate(categoryId)).thenReturn(java.util.Optional.of(category));
+        when(productRepository.existsByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(false);
+
+        // Act
+        adminCategoryService.deleteCategory(categoryId);
+
+        // Assert
+        verify(categoryAttributeRepository, never()).delete(any());
+        verify(categoryAttributeRepository, never()).deleteAll(any());
+    }
+
+    @Test
+    @DisplayName("TC-78: deleteCategory_Success_StatusChangesToInactive - Danh mục ACTIVE đổi thành INACTIVE sau xóa")
+    void deleteCategory_Success_StatusChangesToInactive() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        Category category = Category.builder()
+                .id(categoryId)
+                .name("Bàn phím cơ")
+                .status(CategoryStatus.ACTIVE)
+                .isDeleted(false)
+                .build();
+
+        when(categoryRepository.findByIdForUpdate(categoryId)).thenReturn(java.util.Optional.of(category));
+        when(productRepository.existsByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(false);
+
+        // Act
+        adminCategoryService.deleteCategory(categoryId);
+
+        // Assert
+        assertEquals(CategoryStatus.INACTIVE, category.getStatus());
+        assertTrue(category.isDeleted());
+        verify(categoryRepository).save(category);
+    }
+
+    @Test
+    @DisplayName("TC-79: deleteCategory_Success_AlreadyInactiveCategory - Danh mục đang INACTIVE vẫn xóa mềm thành công")
+    void deleteCategory_Success_AlreadyInactiveCategory() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        Category category = Category.builder()
+                .id(categoryId)
+                .name("Màn hình máy tính")
+                .status(CategoryStatus.INACTIVE)
+                .isDeleted(false)
+                .build();
+
+        when(categoryRepository.findByIdForUpdate(categoryId)).thenReturn(java.util.Optional.of(category));
+        when(productRepository.existsByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(false);
+
+        // Act
+        adminCategoryService.deleteCategory(categoryId);
+
+        // Assert
+        assertTrue(category.isDeleted());
+        assertEquals(CategoryStatus.INACTIVE, category.getStatus());
+        verify(categoryRepository).save(category);
+    }
+
+    @Test
+    @DisplayName("TC-80: deleteCategory_UpdatesTimestamp - Cập nhật updatedAt khi thực hiện xóa mềm")
+    void deleteCategory_UpdatesTimestamp() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        LocalDateTime beforeTime = LocalDateTime.now().minusHours(2);
+        Category category = Category.builder()
+                .id(categoryId)
+                .name("Thiết bị mạng")
+                .status(CategoryStatus.ACTIVE)
+                .isDeleted(false)
+                .createdAt(beforeTime.minusDays(1))
+                .updatedAt(beforeTime)
+                .build();
+
+        when(categoryRepository.findByIdForUpdate(categoryId)).thenReturn(java.util.Optional.of(category));
+        when(productRepository.existsByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(false);
+
+        // Act
+        adminCategoryService.deleteCategory(categoryId);
+
+        // Assert
+        assertTrue(category.getUpdatedAt().isAfter(beforeTime));
+        verify(categoryRepository).save(category);
+    }
+
+    @Test
+    @DisplayName("TC-81: deleteCategory_RollbackOnError_WhenRepositorySaveFails - Lan truyền ngoại lệ khi DB lưu thất bại")
+    void deleteCategory_RollbackOnError_WhenRepositorySaveFails() {
+        // Arrange
+        UUID categoryId = UUID.randomUUID();
+        Category category = Category.builder()
+                .id(categoryId)
+                .name("Dây cáp sạc")
+                .status(CategoryStatus.ACTIVE)
+                .isDeleted(false)
+                .build();
+
+        when(categoryRepository.findByIdForUpdate(categoryId)).thenReturn(java.util.Optional.of(category));
+        when(productRepository.existsByCategoryIdAndIsDeletedFalse(categoryId)).thenReturn(false);
+        when(categoryRepository.save(any())).thenThrow(new RuntimeException("Database connection dropped"));
+
+        // Act & Assert
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                adminCategoryService.deleteCategory(categoryId));
+
+        assertEquals("Database connection dropped", ex.getMessage());
+    }
 }

@@ -38,4 +38,6 @@ public interface AdminCategoryService {
     CategoryAttributeResponse updateCategoryAttribute(UUID categoryId, UUID attributeId, UpdateCategoryAttributeRequest request);
 
     void deleteCategoryAttribute(UUID categoryId, UUID attributeId);
+
+    void deleteCategory(UUID categoryId);
 }

@@ -55,6 +55,7 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "Category not found"),
     SHOP_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "Shop is suspended or banned"),
     CATEGORY_INACTIVE(HttpStatus.BAD_REQUEST, "Category is inactive"),
+    CATEGORY_HAS_ACTIVE_PRODUCTS(HttpStatus.BAD_REQUEST, "Cannot delete category because it contains active products"),
     MISSING_CATEGORY_ATTRIBUTE(HttpStatus.BAD_REQUEST, "Missing required category attribute"),
     INVALID_ATTRIBUTE_VALUE(HttpStatus.BAD_REQUEST, "Invalid attribute value format or option"),
     ATTRIBUTE_KEY_OVERLAP(HttpStatus.BAD_REQUEST, "Variant attribute key cannot overlap with product specifications"),
@@ -111,7 +112,41 @@ public enum ErrorCode {
     INVALID_PAYMENT_AMOUNT(HttpStatus.BAD_REQUEST, "Payment amount mismatch with system record"),
     INVALID_BANK_CODE(HttpStatus.BAD_REQUEST, "Invalid VNPAY bank code or payment channel"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "Access denied"),
-    ORDER_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "Order has already been cancelled");
+    ORDER_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "Order has already been cancelled"),
+    WISHLIST_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "Wishlist capacity limit reached. Maximum 20 items allowed per user"),
+    PRODUCT_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "Product is not available"),
+    CANNOT_FOLLOW_OWN_SHOP(HttpStatus.BAD_REQUEST, "You cannot follow your own shop"),
+    PAYMENT_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "Payment information not found"),
+    PAYMENT_INFO_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "Payment information limit reached. Maximum 5 accounts allowed per user"),
+    DUPLICATE_PAYMENT_INFO(HttpStatus.BAD_REQUEST, "Payment account number already saved for this provider"),
+    INVALID_CARD_EXPIRY(HttpStatus.BAD_REQUEST, "Invalid card expiry date or card has expired"),
+    ORDER_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "Order item not found"),
+    ORDER_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "Only completed orders can be reviewed"),
+    ORDER_ITEM_ALREADY_REVIEWED(HttpStatus.BAD_REQUEST, "Order item has already been reviewed"),
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "Review not found"),
+    REVIEW_MEDIA_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "Maximum 5 media files allowed per review"),
+    REVIEW_EDIT_WINDOW_EXPIRED(HttpStatus.BAD_REQUEST, "Review edit window has expired (maximum 30 days)"),
+    CANNOT_VOTE_OWN_REVIEW(HttpStatus.BAD_REQUEST, "You cannot vote your own review as helpful"),
+    REVIEW_ALREADY_RESPONDED(HttpStatus.BAD_REQUEST, "Review has already been responded to"),
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "Notification not found"),
+    CANNOT_CHAT_WITH_SELF(HttpStatus.BAD_REQUEST, "You cannot chat with yourself"),
+    USER_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "User account is not active"),
+    INVALID_CONVERSATION_TYPE(HttpStatus.BAD_REQUEST, "Invalid conversation type for the participants' roles"),
+    CONVERSATION_NOT_FOUND(HttpStatus.NOT_FOUND, "Conversation not found"),
+    NOT_CONVERSATION_PARTICIPANT(HttpStatus.FORBIDDEN, "You are not a participant in this conversation"),
+
+    // Phase 11: Seller Wallet & Payout Operations
+    INSUFFICIENT_WALLET_BALANCE(HttpStatus.BAD_REQUEST, "Insufficient wallet balance for withdrawal"),
+    SELLER_NOT_VERIFIED(HttpStatus.FORBIDDEN, "Seller profile is not approved or verified"),
+    BANK_ACCOUNT_NOT_CONFIGURED(HttpStatus.BAD_REQUEST, "Seller bank account information is not configured"),
+    DAILY_WITHDRAWAL_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "Daily withdrawal limit of 100,000,000 VND exceeded"),
+    PAYOUT_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "Payout request not found"),
+    PAYOUT_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "Payout request has already been processed"),
+    PAYOUT_REJECTION_REASON_REQUIRED(HttpStatus.BAD_REQUEST, "Rejection reason is required when rejecting a payout request"),
+
+    // Platform Policy Operations
+    POLICY_NOT_FOUND(HttpStatus.NOT_FOUND, "Platform policy not found"),
+    INVALID_POLICY_VALUE(HttpStatus.BAD_REQUEST, "Invalid platform policy value");
 
     private final HttpStatus status;
     private final String message;

@@ -34,4 +34,6 @@ public interface OrderService {
             UUID orderId,
             com.techhub.model.dto.request.CancelOrderRequest request
     );
+
+    com.techhub.model.dto.response.ReorderResponse reorder(UUID userId, UUID orderId);
 }
