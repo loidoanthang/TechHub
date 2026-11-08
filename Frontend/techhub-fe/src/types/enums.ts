@@ -8,7 +8,7 @@ export type SellerVerificationStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 // Product Status
 export type ProductApprovalStatus = "DRAFT" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED";
-export type ProductVisibilityStatus = "ACTIVE" | "INACTIVE";
+export type ProductVisibilityStatus = "PUBLISHED" | "UNPUBLISHED";
 export type ProductVariantStatus = "ACTIVE" | "INACTIVE";
 export type CategoryStatus = "ACTIVE" | "INACTIVE";
 export type CategoryAttributeDataType = "TEXT" | "NUMBER" | "SELECT";
@@ -19,13 +19,19 @@ export type AddressLabel = "HOME" | "OFFICE" | "OTHER";
 // Order & Payment
 export type OrderStatus =
   | "PENDING_PAYMENT"
+  | "PENDING_CONFIRMATION"
   | "PROCESSING"
   | "CONFIRMED"
+  | "PREPARING"
+  | "WAITING_FOR_PICKUP"
+  | "SHIPPING"
   | "SHIPPED"
   | "DELIVERED"
+  | "RETURN_REQUESTED"
   | "COMPLETED"
   | "CANCELLED"
-  | "RETURNED";
+  | "RETURNED"
+  | "REFUNDED";
 
 export type PaymentMethod = "COD" | "VNPAY";
 export type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED" | "EXPIRED" | "REFUNDED";

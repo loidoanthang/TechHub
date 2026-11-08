@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Store,
   MapPin,
@@ -24,6 +26,10 @@ import {
   useSellerVerificationStatusQuery,
   useRegisterSellerMutation,
 } from "../hooks/useSellerQueries";
+import {
+  sellerRegistrationSchema,
+  type SellerRegistrationFormValues,
+} from "../schemas/sellerRegistrationSchema";
 
 export function SellerRegistrationView() {
   const { data: statusData, isLoading: isStatusLoading } = useSellerVerificationStatusQuery();
@@ -33,6 +39,43 @@ export function SellerRegistrationView() {
   const [verificationStatus, setVerificationStatus] =
     useState<SellerVerificationStatus>("NOT_REGISTERED");
   const [rejectionReason, setRejectionReason] = useState<string | null>(null);
+  const [sellerNameEdited, setSellerNameEdited] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // React Hook Form + Zod
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<SellerRegistrationFormValues>({
+    resolver: zodResolver(sellerRegistrationSchema),
+    defaultValues: {
+      shopName: "GearTech Flagship Store",
+      sellerName: "geartech-official",
+      description:
+        "Authorized distributor of high-performance PC components, GPUs, and custom mechanical keyboards.",
+      contactName: "Alex Morgan",
+      contactPhone: "(+84) 912 345 678",
+      province: "Ho Chi Minh City",
+      district: "District 1",
+      ward: "Ben Nghe Ward",
+      streetAddress: "123 Nguyen Hue Boulevard, Tech Tower, Floor 4",
+      shippingFee: 30000,
+      bankName: VIETNAMESE_BANKS[0].name,
+      bankAccountNumber: "0071001234567",
+      bankAccountHolder: "ALEX MORGAN",
+      agreeTerms: true,
+    },
+    mode: "onTouched",
+  });
+
+  const selectedProvince = watch("province");
+  const selectedDistrict = watch("district");
+  const currentSellerName = watch("sellerName");
+  const currentShopName = watch("shopName");
 
   // Sync with backend status if available
   useEffect(() => {
@@ -40,41 +83,13 @@ export function SellerRegistrationView() {
       if (statusData.hasApplied && statusData.verificationStatus) {
         setVerificationStatus(statusData.verificationStatus);
         setRejectionReason(statusData.rejectionReason || null);
-        if (statusData.shopName) setShopName(statusData.shopName);
-        if (statusData.sellerName) setSellerName(statusData.sellerName);
+        if (statusData.shopName) setValue("shopName", statusData.shopName);
+        if (statusData.sellerName) setValue("sellerName", statusData.sellerName);
       } else {
         setVerificationStatus("NOT_REGISTERED");
       }
     }
-  }, [statusData]);
-
-  // Form State
-  const [shopName, setShopName] = useState("GearTech Flagship Store");
-  const [sellerName, setSellerName] = useState("geartech-official");
-  const [sellerNameEdited, setSellerNameEdited] = useState(true);
-  const [description, setDescription] = useState(
-    "Authorized distributor of high-performance PC components, GPUs, and custom mechanical keyboards."
-  );
-
-  // Warehouse State
-  const [contactName, setContactName] = useState("Alex Morgan");
-  const [contactPhone, setContactPhone] = useState("(+84) 912 345 678");
-  const [selectedProvince, setSelectedProvince] = useState("Ho Chi Minh City");
-  const [selectedDistrict, setSelectedDistrict] = useState("District 1");
-  const [selectedWard, setSelectedWard] = useState("Ben Nghe Ward");
-  const [streetAddress, setStreetAddress] = useState(
-    "123 Nguyen Hue Boulevard, Tech Tower, Floor 4"
-  );
-  const [shippingFee, setShippingFee] = useState<number>(30000);
-
-  // Bank & Payout State
-  const [bankName, setBankName] = useState(VIETNAMESE_BANKS[0].name);
-  const [bankAccountNumber, setBankAccountNumber] = useState("0071001234567");
-  const [bankAccountHolder, setBankAccountHolder] = useState("ALEX MORGAN");
-  const [agreeTerms, setAgreeTerms] = useState(true);
-
-  // UI States
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  }, [statusData, setValue]);
 
   // Handle dynamic districts based on province
   const currentProvinceData = VIETNAM_PROVINCES.find(
@@ -85,26 +100,26 @@ export function SellerRegistrationView() {
   );
 
   const handleProvinceChange = (prov: string) => {
-    setSelectedProvince(prov);
+    setValue("province", prov, { shouldValidate: true });
     const pData = VIETNAM_PROVINCES.find((p) => p.name === prov);
     if (pData && pData.districts.length > 0) {
       const firstD = pData.districts[0];
-      setSelectedDistrict(firstD.name);
-      setSelectedWard(firstD.wards[0] || "");
+      setValue("district", firstD.name, { shouldValidate: true });
+      setValue("ward", firstD.wards[0] || "", { shouldValidate: true });
     }
   };
 
   const handleDistrictChange = (dist: string) => {
-    setSelectedDistrict(dist);
+    setValue("district", dist, { shouldValidate: true });
     const dData = currentProvinceData?.districts.find((d) => d.name === dist);
     if (dData && dData.wards.length > 0) {
-      setSelectedWard(dData.wards[0]);
+      setValue("ward", dData.wards[0], { shouldValidate: true });
     }
   };
 
   const handleShopNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    setShopName(val);
+    setValue("shopName", val, { shouldValidate: true });
     if (!sellerNameEdited) {
       // Auto slugify
       const slug = val
@@ -112,43 +127,30 @@ export function SellerRegistrationView() {
         .replace(/[^a-z0-9]/g, "-")
         .replace(/-+/g, "-")
         .replace(/^-|-$/g, "");
-      setSellerName(slug);
+      setValue("sellerName", slug, { shouldValidate: true });
     }
   };
 
-  const isSellerNameValid = /^[a-z0-9-]+$/.test(sellerName) && sellerName.length >= 3;
+  const isSellerNameValid = /^[a-z0-9-]+$/.test(currentSellerName || "") && (currentSellerName?.length || 0) >= 3;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: SellerRegistrationFormValues) => {
     setErrorMsg(null);
-
-    if (!isSellerNameValid) {
-      setErrorMsg(
-        "Shop Handle must be between 3 and 50 characters, containing only lowercase letters (a-z), digits (0-9), and hyphens (-)."
-      );
-      return;
-    }
-
-    if (!agreeTerms) {
-      setErrorMsg("You must accept the TechHub Merchant Terms of Service to continue.");
-      return;
-    }
 
     try {
       await registerSellerMutation.mutateAsync({
-        sellerName,
-        shopName,
-        shopDescription: description,
-        bankName,
-        bankAccountNumber,
-        bankAccountHolder,
-        warehouseContactName: contactName,
-        warehousePhone: contactPhone,
-        province: selectedProvince,
-        district: selectedDistrict,
-        ward: selectedWard,
-        streetAddress,
-        shippingFee,
+        sellerName: data.sellerName,
+        shopName: data.shopName,
+        shopDescription: data.description,
+        bankName: data.bankName,
+        bankAccountNumber: data.bankAccountNumber,
+        bankAccountHolder: data.bankAccountHolder,
+        warehouseContactName: data.contactName,
+        warehousePhone: data.contactPhone,
+        province: data.province,
+        district: data.district,
+        ward: data.ward,
+        streetAddress: data.streetAddress,
+        shippingFee: data.shippingFee,
       });
 
       setVerificationStatus("PENDING");
@@ -191,22 +193,18 @@ export function SellerRegistrationView() {
                     Your Merchant Profile Is Being Verified
                   </h1>
                   <p className="text-xs text-[#737688] mt-2 leading-relaxed">
-                    Thank you for applying to sell on TechHub Marketplace! Our compliance team is currently reviewing your shop identity (<strong>{shopName}</strong>) and banking records. Verification usually takes 24 business hours.
+                    Thank you for applying to sell on TechHub Marketplace! Our compliance team is currently reviewing your shop identity (<strong>{currentShopName}</strong>) and banking records. Verification usually takes 24 business hours.
                   </p>
                 </div>
 
                 <div className="w-full max-w-md p-4 rounded-2xl bg-[#eff4ff]/60 border border-[#eff4ff] text-left text-xs text-[#434656] space-y-2">
                   <div className="flex justify-between">
                     <span className="text-[#737688]">Shop Handle:</span>
-                    <span className="font-mono font-bold text-[#0045cc]">/shop/{sellerName}</span>
+                    <span className="font-mono font-bold text-[#0045cc]">/shop/{currentSellerName}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[#737688]">Warehouse Hub:</span>
                     <span className="font-medium text-[#0b1c30]">{selectedDistrict}, {selectedProvince}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-[#737688]">Payout Account:</span>
-                    <span className="font-mono font-medium text-[#0b1c30]">•••• {bankAccountNumber.slice(-4)}</span>
                   </div>
                 </div>
 
@@ -236,7 +234,7 @@ export function SellerRegistrationView() {
                     Welcome to TechHub Seller Centre!
                   </h1>
                   <p className="text-xs text-[#737688] mt-2 leading-relaxed">
-                    Your shop <strong>{shopName}</strong> has been officially approved. You can now access your dashboard, upload electronic hardware components, and start fulfilling orders.
+                    Your shop <strong>{currentShopName}</strong> has been officially approved. You can now access your dashboard, upload electronic hardware components, and start fulfilling orders.
                   </p>
                 </div>
 
@@ -250,49 +248,55 @@ export function SellerRegistrationView() {
               </div>
             )}
 
-            {/* State C: Application Rejected (Re-submit allowed) */}
+            {/* State C: Application Rejected */}
             {verificationStatus === "REJECTED" && (
-              <div className="mb-8 p-6 rounded-3xl bg-[#ba1a1a]/5 border border-[#ba1a1a]/20 flex flex-col sm:flex-row items-start justify-between gap-4 animate-in fade-in">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-[#ba1a1a]/10 text-[#ba1a1a] flex items-center justify-center shrink-0">
-                    <XCircle className="w-5 h-5" />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <h3 className="font-heading text-base font-bold text-[#ba1a1a]">
-                      Registration Not Approved
-                    </h3>
-                    <p className="text-xs text-[#434656] leading-relaxed">
-                      Reason from Administrator: <em>&ldquo;{rejectionReason}&rdquo;</em>
-                    </p>
-                    <p className="text-[11px] text-[#737688] mt-0.5">
-                      You can update your credentials below and re-submit your application for immediate review.
-                    </p>
-                  </div>
+              <div className="bg-white rounded-3xl p-8 sm:p-12 border border-[#ba1a1a]/20 shadow-sm text-center flex flex-col items-center gap-5 animate-in fade-in duration-300">
+                <div className="w-16 h-16 rounded-full bg-[#ba1a1a]/10 text-[#ba1a1a] flex items-center justify-center">
+                  <XCircle className="w-8 h-8" />
                 </div>
+
+                <div className="max-w-md">
+                  <span className="text-xs font-bold text-[#ba1a1a] uppercase tracking-wider bg-[#ba1a1a]/10 px-3 py-1 rounded-full">
+                    Application Needs Revision
+                  </span>
+                  <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0b1c30] mt-3">
+                    Verification Incomplete
+                  </h1>
+                  <p className="text-xs text-[#737688] mt-2 leading-relaxed">
+                    Our compliance team could not approve your application at this time.
+                  </p>
+                </div>
+
+                {rejectionReason && (
+                  <div className="w-full max-w-md p-4 rounded-2xl bg-[#ffdad6]/40 border border-[#ffdad6] text-left">
+                    <p className="text-xs font-bold text-[#ba1a1a] mb-1">Reason for Rejection:</p>
+                    <p className="text-xs text-[#434656] leading-relaxed">{rejectionReason}</p>
+                  </div>
+                )}
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setVerificationStatus("NOT_REGISTERED");
-                    setRejectionReason(null);
-                  }}
-                  className="px-4 py-2 rounded-xl bg-[#ba1a1a] text-white text-xs font-bold hover:bg-[#93000a] transition-colors shrink-0 cursor-pointer"
+                  onClick={() => setVerificationStatus("NOT_REGISTERED")}
+                  className="px-6 py-2.5 rounded-xl bg-[#0045cc] text-white text-xs font-bold hover:bg-[#0d5bff] transition-all flex items-center gap-2"
                 >
-                  Edit &amp; Re-submit
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Update and Resubmit Application</span>
                 </button>
               </div>
             )}
 
-            {/* State D: Initial One-Page Registration Form */}
-            {(verificationStatus === "NOT_REGISTERED" || verificationStatus === "REJECTED") && (
-              <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-                {/* Header Titles */}
-                <div className="flex flex-col gap-1.5 text-center sm:text-left">
+            {/* State D: Registration Form */}
+            {verificationStatus === "NOT_REGISTERED" && (
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 animate-in fade-in duration-300">
+                <div className="space-y-2 text-center sm:text-left">
+                  <span className="text-xs font-bold text-[#0045cc] tracking-wider uppercase bg-[#0045cc]/10 px-3 py-1 rounded-full">
+                    Merchant Onboarding
+                  </span>
                   <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0b1c30] tracking-tight">
-                    Register as a TechHub Seller
+                    Register Your TechHub Store
                   </h1>
                   <p className="text-xs text-[#737688]">
-                    Establish your digital electronics storefront, configure automated warehouse fulfillment, and connect escrow payouts in a single step.
+                    Set up your storefront profile, warehouse dispatch facility, and escrow bank account in one streamlined registration.
                   </p>
                 </div>
 
@@ -327,12 +331,14 @@ export function SellerRegistrationView() {
                       </label>
                       <input
                         type="text"
-                        required
-                        value={shopName}
+                        {...register("shopName")}
                         onChange={handleShopNameChange}
                         placeholder="e.g. GearTech Flagship Store"
                         className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] transition-all font-medium"
                       />
+                      {errors.shopName?.message && (
+                        <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.shopName.message}</p>
+                      )}
                     </div>
 
                     {/* Seller Name (URL Slug) */}
@@ -351,17 +357,19 @@ export function SellerRegistrationView() {
                       </div>
                       <input
                         type="text"
-                        required
-                        value={sellerName}
+                        {...register("sellerName")}
                         onChange={(e) => {
-                          setSellerName(e.target.value.toLowerCase());
+                          setValue("sellerName", e.target.value.toLowerCase(), { shouldValidate: true });
                           setSellerNameEdited(true);
                         }}
                         placeholder="e.g. geartech-official"
                         className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] font-mono transition-all"
                       />
+                      {errors.sellerName?.message && (
+                        <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.sellerName.message}</p>
+                      )}
                       <span className="text-[10px] text-[#737688]">
-                        Public URL: <strong className="text-[#0045cc] font-mono">techhub.vn/shop/{sellerName || "your-slug"}</strong>
+                        Public URL: <strong className="text-[#0045cc] font-mono">techhub.vn/shop/{currentSellerName || "your-slug"}</strong>
                       </span>
                     </div>
                   </div>
@@ -369,15 +377,17 @@ export function SellerRegistrationView() {
                   {/* Shop Description */}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-[#0b1c30]">
-                      Shop Description
+                      Shop Description <span className="text-[#ba1a1a]">*</span>
                     </label>
                     <textarea
                       rows={3}
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
+                      {...register("description")}
                       placeholder="Tell customers about your brand, specialty in electronics, and customer support standards..."
                       className="w-full text-xs p-3.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] transition-all resize-none leading-relaxed"
                     />
+                    {errors.description?.message && (
+                      <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.description.message}</p>
+                    )}
                   </div>
                 </section>
 
@@ -405,12 +415,13 @@ export function SellerRegistrationView() {
                       </label>
                       <input
                         type="text"
-                        required
-                        value={contactName}
-                        onChange={(e) => setContactName(e.target.value)}
+                        {...register("contactName")}
                         placeholder="e.g. Alex Morgan"
                         className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30]"
                       />
+                      {errors.contactName?.message && (
+                        <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.contactName.message}</p>
+                      )}
                     </div>
 
                     {/* Contact Phone */}
@@ -420,12 +431,13 @@ export function SellerRegistrationView() {
                       </label>
                       <input
                         type="tel"
-                        required
-                        value={contactPhone}
-                        onChange={(e) => setContactPhone(e.target.value)}
+                        {...register("contactPhone")}
                         placeholder="e.g. (+84) 912 345 678"
                         className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30]"
                       />
+                      {errors.contactPhone?.message && (
+                        <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.contactPhone.message}</p>
+                      )}
                     </div>
                   </div>
 
@@ -444,6 +456,9 @@ export function SellerRegistrationView() {
                           </option>
                         ))}
                       </select>
+                      {errors.province?.message && (
+                        <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.province.message}</p>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1.5">
@@ -459,13 +474,15 @@ export function SellerRegistrationView() {
                           </option>
                         ))}
                       </select>
+                      {errors.district?.message && (
+                        <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.district.message}</p>
+                      )}
                     </div>
 
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-[#0b1c30]">Ward *</label>
                       <select
-                        value={selectedWard}
-                        onChange={(e) => setSelectedWard(e.target.value)}
+                        {...register("ward")}
                         className="w-full text-xs px-3 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] cursor-pointer"
                       >
                         {currentDistrictData?.wards.map((w) => (
@@ -474,6 +491,9 @@ export function SellerRegistrationView() {
                           </option>
                         ))}
                       </select>
+                      {errors.ward?.message && (
+                        <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.ward.message}</p>
+                      )}
                     </div>
                   </div>
 
@@ -484,12 +504,13 @@ export function SellerRegistrationView() {
                     </label>
                     <input
                       type="text"
-                      required
-                      value={streetAddress}
-                      onChange={(e) => setStreetAddress(e.target.value)}
+                      {...register("streetAddress")}
                       placeholder="e.g. 123 Nguyen Hue Boulevard, Tech Tower, Floor 4"
                       className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30]"
                     />
+                    {errors.streetAddress?.message && (
+                      <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.streetAddress.message}</p>
+                    )}
                   </div>
 
                   {/* Flat Shipping Fee */}
@@ -499,13 +520,14 @@ export function SellerRegistrationView() {
                     </label>
                     <input
                       type="number"
-                      required
                       min={0}
                       step={1000}
-                      value={shippingFee}
-                      onChange={(e) => setShippingFee(Number(e.target.value))}
+                      {...register("shippingFee", { valueAsNumber: true })}
                       className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30]"
                     />
+                    {errors.shippingFee?.message && (
+                      <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.shippingFee.message}</p>
+                    )}
                     <span className="text-[10px] text-[#737688]">
                       Default shipping rate applied per checkout order from this shop.
                     </span>
@@ -535,8 +557,7 @@ export function SellerRegistrationView() {
                         Bank Institution <span className="text-[#ba1a1a]">*</span>
                       </label>
                       <select
-                        value={bankName}
-                        onChange={(e) => setBankName(e.target.value)}
+                        {...register("bankName")}
                         className="w-full text-xs px-3 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] cursor-pointer"
                       >
                         {VIETNAMESE_BANKS.map((b) => (
@@ -545,6 +566,9 @@ export function SellerRegistrationView() {
                           </option>
                         ))}
                       </select>
+                      {errors.bankName?.message && (
+                        <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.bankName.message}</p>
+                      )}
                     </div>
 
                     {/* Account Number */}
@@ -554,12 +578,13 @@ export function SellerRegistrationView() {
                       </label>
                       <input
                         type="text"
-                        required
-                        value={bankAccountNumber}
-                        onChange={(e) => setBankAccountNumber(e.target.value.replace(/\s+/g, ""))}
+                        {...register("bankAccountNumber")}
                         placeholder="e.g. 0071001234567"
                         className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] font-mono"
                       />
+                      {errors.bankAccountNumber?.message && (
+                        <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.bankAccountNumber.message}</p>
+                      )}
                     </div>
 
                     {/* Account Holder Name */}
@@ -569,12 +594,13 @@ export function SellerRegistrationView() {
                       </label>
                       <input
                         type="text"
-                        required
-                        value={bankAccountHolder}
-                        onChange={(e) => setBankAccountHolder(e.target.value.toUpperCase())}
+                        {...register("bankAccountHolder")}
                         placeholder="e.g. ALEX MORGAN"
                         className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] font-mono font-bold tracking-wider"
                       />
+                      {errors.bankAccountHolder?.message && (
+                        <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.bankAccountHolder.message}</p>
+                      )}
                     </div>
                   </div>
 
@@ -582,13 +608,17 @@ export function SellerRegistrationView() {
                   <label className="flex items-start gap-3 p-4 rounded-2xl bg-[#eff4ff]/60 border border-[#eff4ff] cursor-pointer mt-2">
                     <input
                       type="checkbox"
-                      checked={agreeTerms}
-                      onChange={(e) => setAgreeTerms(e.target.checked)}
+                      {...register("agreeTerms")}
                       className="mt-0.5 accent-[#0045cc] rounded"
                     />
-                    <span className="text-xs text-[#434656] leading-relaxed">
-                      I certify that all provided details and merchant credentials are authentic. I agree to comply with <strong>TechHub Escrow Protection Regulations</strong>, hardware warranty mandates, and the 7-day customer dispute policy.
-                    </span>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-xs text-[#434656] leading-relaxed">
+                        I certify that all provided details and merchant credentials are authentic. I agree to comply with <strong>TechHub Escrow Protection Regulations</strong>, hardware warranty mandates, and the 7-day customer dispute policy.
+                      </span>
+                      {errors.agreeTerms?.message && (
+                        <p className="text-[11px] text-[#ba1a1a] font-medium mt-1">{errors.agreeTerms.message}</p>
+                      )}
+                    </div>
                   </label>
                 </section>
 

@@ -73,6 +73,7 @@ export const API_ENDPOINTS = {
   SELLER: {
     REGISTER: "/api/seller/register",
     VERIFICATION_STATUS: "/api/seller/verification-status",
+    DASHBOARD_METRICS: "/api/seller/dashboard/metrics",
     PROFILE: "/api/seller/profile",
     SHOP: "/api/seller/shop",
     SHOP_STATUS: "/api/seller/shop/status",
@@ -128,6 +129,11 @@ export const ROUTES = {
   SELLER: {
     DASHBOARD: "/seller/dashboard",
     REGISTER: "/seller/register",
+    PRODUCTS: "/seller/products",
+    NEW_PRODUCT: "/seller/products/new",
+    ORDERS: "/seller/orders",
+    VOUCHERS: "/seller/vouchers",
+    SETTINGS: "/seller/settings",
   },
   SHOPS: (sellerName: string) => `/shops/${sellerName}`,
 } as const;
