@@ -43,8 +43,10 @@ export interface SellerVerificationStatusResponse {
 
 export interface SellerShopResponse {
   shopId: string;
+  sellerId?: string;
   sellerName: string;
-  shopName: string;
+  name: string;
+  shopName?: string; // fallback alias
   description?: string | null;
   avatarUrl?: string | null;
   bannerUrl?: string | null;
@@ -52,11 +54,67 @@ export interface SellerShopResponse {
   totalProducts?: number;
   rating?: number;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface UpdateSellerShopRequest {
-  shopName: string;
+  name: string;
   description?: string;
   avatarUrl?: string;
   bannerUrl?: string;
+}
+
+export interface SellerWarehouseAddressResponse {
+  id: string;
+  shopId: string;
+  contactName: string;
+  phone: string;
+  province: string;
+  district: string;
+  ward: string;
+  streetAddress: string;
+  fullAddress?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface UpdateWarehouseAddressRequest {
+  contactName: string;
+  phone: string;
+  province: string;
+  district: string;
+  ward: string;
+  streetAddress: string;
+}
+
+export interface SellerShippingOptionResponse {
+  id: string;
+  shopId: string;
+  name: string;
+  shippingFee: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface UpdateShippingOptionRequest {
+  shippingFee: number;
+}
+
+export interface SellerProfileResponse {
+  sellerId: string;
+  sellerName: string;
+  verificationStatus: SellerVerificationStatus;
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountHolder: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface UpdateSellerProfileRequest {
+  sellerName: string;
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountHolder: string;
 }

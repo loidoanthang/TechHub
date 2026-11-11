@@ -20,6 +20,7 @@ interface ProductFormFooterBarProps {
   submittingAction: "DRAFT" | "SUBMIT" | null;
   onSaveDraft: () => void;
   onSubmitApproval: () => void;
+  isEditMode?: boolean;
 }
 
 export function ProductFormFooterBar({
@@ -29,6 +30,7 @@ export function ProductFormFooterBar({
   submittingAction,
   onSaveDraft,
   onSubmitApproval,
+  isEditMode = false,
 }: ProductFormFooterBarProps) {
   return (
     <div className="fixed bottom-0 right-0 left-0 lg:left-56 z-40 bg-white/95 backdrop-blur-md px-6 py-3 border-t border-slate-200 shadow-xl flex items-center justify-between transition-all">
@@ -77,7 +79,7 @@ export function ProductFormFooterBar({
           ) : (
             <Bookmark className="w-3.5 h-3.5 text-slate-500" />
           )}
-          <span>Lưu Bản Nháp</span>
+          <span>{isEditMode ? "Lưu Thay Đổi" : "Lưu Bản Nháp"}</span>
         </button>
 
         {/* Submit for Approval Button with SLA Tooltip */}
@@ -93,7 +95,7 @@ export function ProductFormFooterBar({
             ) : (
               <Send className="w-3.5 h-3.5" />
             )}
-            <span>Đăng Bán & Gửi Duyệt</span>
+            <span>{isEditMode ? "Lưu & Gửi Duyệt" : "Đăng Bán & Gửi Duyệt"}</span>
           </button>
 
           {/* Hover SLA Tooltip */}

@@ -117,8 +117,8 @@ export function SellerProductRow({
         </div>
       </td>
 
-      {/* 2. Giá bán (VND) - ALIGN RIGHT (Xuống hàng nếu có nhiều giá) */}
-      <td className="py-2.5 px-2 whitespace-nowrap text-right">
+      {/* 2. Giá bán (VND) - ALIGN RIGHT */}
+      <td className="py-2.5 px-3 whitespace-nowrap text-right">
         {hasPriceRange ? (
           <div className="flex flex-col items-end justify-center leading-tight gap-0.5">
             <span className="font-headline font-bold text-xs text-slate-900">
@@ -182,8 +182,8 @@ export function SellerProductRow({
       </td>
 
       {/* 6. Thao tác - ALIGN RIGHT */}
-      <td className="py-2.5 px-2.5 whitespace-nowrap text-right">
-        <div className="inline-flex items-center justify-end gap-1">
+      <td className="py-2.5 px-3 whitespace-nowrap text-right">
+        <div className="inline-flex items-center justify-end gap-1.5">
           {/* Submit approval button for DRAFT or REJECTED */}
           {(product.approvalStatus === "DRAFT" || product.approvalStatus === "REJECTED") && (
             <button

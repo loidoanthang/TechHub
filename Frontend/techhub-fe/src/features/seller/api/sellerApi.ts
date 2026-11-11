@@ -8,36 +8,22 @@ import type {
   SellerVerificationStatusResponse,
   SellerShopResponse,
   UpdateSellerShopRequest,
+  SellerWarehouseAddressResponse,
+  UpdateWarehouseAddressRequest,
+  SellerShippingOptionResponse,
+  UpdateShippingOptionRequest,
+  SellerProfileResponse,
+  UpdateSellerProfileRequest,
 } from "@/types/seller";
 
-export interface UpdateWarehouseAddressRequest {
-  contactName: string;
-  phone: string;
-  province: string;
-  district: string;
-  ward: string;
-  streetAddress: string;
-}
-
-export interface SellerWarehouseAddressResponse {
-  addressId: string;
-  contactName: string;
-  phone: string;
-  province: string;
-  district: string;
-  ward: string;
-  streetAddress: string;
-}
-
-export interface UpdateShippingOptionRequest {
-  standardShippingFee: number;
-  expressShippingAvailable?: boolean;
-}
-
-export interface SellerShippingOptionResponse {
-  standardShippingFee: number;
-  expressShippingAvailable: boolean;
-}
+export type {
+  UpdateWarehouseAddressRequest,
+  SellerWarehouseAddressResponse,
+  UpdateShippingOptionRequest,
+  SellerShippingOptionResponse,
+  SellerProfileResponse,
+  UpdateSellerProfileRequest,
+};
 
 export const sellerApi = {
   registerSeller: (
@@ -49,9 +35,7 @@ export const sellerApi = {
   getVerificationStatus: (): Promise<
     ApiResponse<SellerVerificationStatusResponse>
   > => {
-    return apiClient.get(
-      ENDPOINTS.SELLER.VERIFICATION_STATUS
-    );
+    return apiClient.get(ENDPOINTS.SELLER.VERIFICATION_STATUS);
   },
 
   getShopInfo: (): Promise<ApiResponse<SellerShopResponse>> => {
@@ -73,34 +57,34 @@ export const sellerApi = {
   getWarehouseAddress: (): Promise<
     ApiResponse<SellerWarehouseAddressResponse>
   > => {
-    return apiClient.get(
-      ENDPOINTS.SELLER.WAREHOUSE_ADDRESS
-    );
+    return apiClient.get(ENDPOINTS.SELLER.WAREHOUSE_ADDRESS);
   },
 
   updateWarehouseAddress: (
     data: UpdateWarehouseAddressRequest
   ): Promise<ApiResponse<SellerWarehouseAddressResponse>> => {
-    return apiClient.put(
-      ENDPOINTS.SELLER.WAREHOUSE_ADDRESS,
-      data
-    );
+    return apiClient.put(ENDPOINTS.SELLER.WAREHOUSE_ADDRESS, data);
   },
 
   getShippingOption: (): Promise<
     ApiResponse<SellerShippingOptionResponse>
   > => {
-    return apiClient.get(
-      ENDPOINTS.SELLER.SHIPPING_OPTION
-    );
+    return apiClient.get(ENDPOINTS.SELLER.SHIPPING_OPTION);
   },
 
   updateShippingOption: (
     data: UpdateShippingOptionRequest
   ): Promise<ApiResponse<SellerShippingOptionResponse>> => {
-    return apiClient.put(
-      ENDPOINTS.SELLER.SHIPPING_OPTION,
-      data
-    );
+    return apiClient.put(ENDPOINTS.SELLER.SHIPPING_OPTION, data);
+  },
+
+  getSellerProfile: (): Promise<ApiResponse<SellerProfileResponse>> => {
+    return apiClient.get(ENDPOINTS.SELLER.PROFILE);
+  },
+
+  updateSellerProfile: (
+    data: UpdateSellerProfileRequest
+  ): Promise<ApiResponse<SellerProfileResponse>> => {
+    return apiClient.put(ENDPOINTS.SELLER.PROFILE, data);
   },
 };

@@ -3,6 +3,7 @@ import {
   sellerApi,
   type UpdateWarehouseAddressRequest,
   type UpdateShippingOptionRequest,
+  type UpdateSellerProfileRequest,
 } from "../api/sellerApi";
 import type { RegisterSellerRequest, UpdateSellerShopRequest } from "@/types/seller";
 import type { ShopStatus } from "@/types/enums";
@@ -12,6 +13,7 @@ export const SELLER_KEYS = {
   shop: ["seller", "shop"] as const,
   warehouseAddress: ["seller", "warehouse-address"] as const,
   shippingOption: ["seller", "shipping-option"] as const,
+  profile: ["seller", "profile"] as const,
 };
 
 export function useSellerVerificationStatusQuery() {
@@ -102,6 +104,27 @@ export function useUpdateShippingOptionMutation() {
       sellerApi.updateShippingOption(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SELLER_KEYS.shippingOption });
+    },
+  });
+}
+
+export function useSellerProfileQuery() {
+  return useQuery({
+    queryKey: SELLER_KEYS.profile,
+    queryFn: async () => {
+      const res = await sellerApi.getSellerProfile();
+      return res.data;
+    },
+  });
+}
+
+export function useUpdateSellerProfileMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: UpdateSellerProfileRequest) =>
+      sellerApi.updateSellerProfile(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: SELLER_KEYS.profile });
     },
   });
 }

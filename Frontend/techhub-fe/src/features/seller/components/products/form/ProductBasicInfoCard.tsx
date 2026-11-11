@@ -118,8 +118,7 @@ export function ProductBasicInfoCard({
             <p className="text-[11px] text-rose-600 font-medium">{errors.name}</p>
           ) : (
             <p className="text-[11px] text-slate-400 leading-normal flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-[#0045cc] shrink-0" />
-              Gợi ý tên chuẩn SEO:{" "}
+              Gợi ý tên:{" "}
               <strong className="text-slate-600">
                 [Thương hiệu] + [Dòng sản phẩm] + [Model] + [Thông số cốt lõi]
               </strong>

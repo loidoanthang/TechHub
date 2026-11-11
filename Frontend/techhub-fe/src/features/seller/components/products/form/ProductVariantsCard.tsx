@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import type { CreateProductVariantRequest } from "@/types/sellerProduct";
+import { formatCurrencyVND, parseCurrencyVND } from "@/lib/utils";
 import {
   Layers,
   Plus,
@@ -196,12 +197,19 @@ export function ProductVariantsCard({
             <div className="flex items-center gap-2 flex-wrap">
               <div className="relative">
                 <input
-                  type="number"
-                  placeholder="Giá bán chung (đ)"
-                  value={bulkPrice}
-                  onChange={(e) => setBulkPrice(e.target.value)}
-                  className="w-36 h-9 px-3 rounded-lg border border-slate-200 bg-white text-xs text-slate-900 focus:outline-none focus:border-[#0045cc]"
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Giá chung (đ)"
+                  value={formatCurrencyVND(bulkPrice)}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, "");
+                    setBulkPrice(raw);
+                  }}
+                  className="w-36 h-9 pl-3 pr-7 rounded-lg border border-slate-200 bg-white text-xs font-bold font-mono text-slate-900 focus:outline-none focus:border-[#0045cc]"
                 />
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400 select-none pointer-events-none">
+                  ₫
+                </span>
               </div>
 
               <div className="relative">
@@ -229,15 +237,29 @@ export function ProductVariantsCard({
 
         {/* Variants Table */}
         <div className="border border-slate-200 rounded-xl overflow-hidden">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full table-fixed text-left text-xs border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold select-none">
-                <th className="py-2.5 px-3 w-[26%]">Tên phân loại *</th>
-                <th className="py-2.5 px-3 w-[24%]">Mã phân loại (SKU) *</th>
-                <th className="py-2.5 px-3 w-[22%] text-right">Giá bán (VND) *</th>
-                <th className="py-2.5 px-3 w-[16%] text-center">Tồn kho *</th>
+                <th
+                  className={`py-2.5 px-3 text-left ${
+                    isMultiVariant ? "w-[28%]" : "w-[32%]"
+                  }`}
+                >
+                  Tên phân loại *
+                </th>
+                <th
+                  className={`py-2.5 px-3 text-left ${
+                    isMultiVariant ? "w-[26%]" : "w-[30%]"
+                  }`}
+                >
+                  Mã phân loại (SKU) *
+                </th>
+                <th className="py-2.5 px-3 w-[24%] text-right">
+                  Giá bán (VND) *
+                </th>
+                <th className="py-2.5 px-3 w-[14%] text-center">Tồn kho *</th>
                 {isMultiVariant && (
-                  <th className="py-2.5 px-2 w-[12%] text-center">Xóa</th>
+                  <th className="py-2.5 px-2 w-[8%] text-center">Xóa</th>
                 )}
               </tr>
             </thead>
@@ -251,7 +273,7 @@ export function ProductVariantsCard({
                 return (
                   <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                     {/* 1. Variant Name */}
-                    <td className="py-3 px-3">
+                    <td className="py-3 px-3 align-top">
                       <input
                         type="text"
                         value={variant.variantName}
@@ -269,7 +291,7 @@ export function ProductVariantsCard({
                     </td>
 
                     {/* 2. SKU */}
-                    <td className="py-3 px-3">
+                    <td className="py-3 px-3 align-top">
                       <input
                         type="text"
                         value={variant.sku}
@@ -286,38 +308,33 @@ export function ProductVariantsCard({
                       )}
                     </td>
 
-                    {/* 3. Price (VND) */}
-                    <td className="py-3 px-3 text-right">
-                      <div className="flex flex-col items-end">
+                    {/* 3. Price (VND) with dot thousand separator */}
+                    <td className="py-3 px-3 align-top">
+                      <div className="relative">
                         <input
-                          type="number"
-                          min={1000}
-                          max={1000000000}
-                          step={1000}
-                          value={variant.price || ""}
-                          onChange={(e) =>
-                            handleUpdateVariant(
-                              idx,
-                              "price",
-                              e.target.value === "" ? 0 : Number(e.target.value)
-                            )
-                          }
-                          placeholder="Nhập giá bán..."
-                          className={`w-full h-9 px-3 text-right rounded-lg border text-xs font-bold text-slate-900 focus:outline-none focus:border-[#0045cc] ${
+                          type="text"
+                          inputMode="numeric"
+                          value={formatCurrencyVND(variant.price)}
+                          onChange={(e) => {
+                            const num = parseCurrencyVND(e.target.value);
+                            handleUpdateVariant(idx, "price", num);
+                          }}
+                          placeholder="0"
+                          className={`w-full h-9 pl-3 pr-8 text-right rounded-lg border text-xs font-bold font-mono text-slate-900 focus:outline-none focus:border-[#0045cc] ${
                             priceError ? "border-rose-300 bg-rose-50/40" : "border-slate-200"
                           }`}
                         />
-                        <span className="text-[10px] text-slate-400 mt-0.5">
-                          {formatVND(variant.price)}
+                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400 select-none pointer-events-none">
+                          ₫
                         </span>
-                        {priceError && (
-                          <p className="text-[10px] text-rose-600 mt-0.5">{priceError}</p>
-                        )}
                       </div>
+                      {priceError && (
+                        <p className="text-[10px] text-rose-600 mt-1 text-right">{priceError}</p>
+                      )}
                     </td>
 
                     {/* 4. Stock Quantity */}
-                    <td className="py-3 px-3 text-center">
+                    <td className="py-3 px-3 align-top text-center">
                       <input
                         type="number"
                         min={0}
@@ -330,7 +347,7 @@ export function ProductVariantsCard({
                             e.target.value === "" ? 0 : Number(e.target.value)
                           )
                         }
-                        placeholder="Số lượng"
+                        placeholder="0"
                         className={`w-20 mx-auto h-9 px-2 text-center rounded-lg border text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#0045cc] ${
                           stockError ? "border-rose-300 bg-rose-50/40" : "border-slate-200"
                         }`}
@@ -342,12 +359,12 @@ export function ProductVariantsCard({
 
                     {/* 5. Delete Action (Multi-variant only) */}
                     {isMultiVariant && (
-                      <td className="py-3 px-2 text-center">
+                      <td className="py-3 px-2 align-top text-center">
                         <button
                           type="button"
                           disabled={variants.length <= 1}
                           onClick={() => handleRemoveVariant(idx)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent mt-0.5"
                           title="Xóa phân loại"
                         >
                           <Trash2 className="w-4 h-4" />

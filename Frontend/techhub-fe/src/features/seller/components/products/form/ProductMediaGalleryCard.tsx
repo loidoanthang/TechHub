@@ -133,7 +133,6 @@ export function ProductMediaGalleryCard({
             onClick={() => setShowPresetModal(true)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-[#0045cc] hover:bg-blue-100 text-xs font-semibold transition-colors"
           >
-            <Sparkles className="w-3.5 h-3.5" />
             <span>Thư viện mẫu TechHub</span>
           </button>
         </div>

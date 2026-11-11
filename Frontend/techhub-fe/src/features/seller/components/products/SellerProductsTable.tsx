@@ -75,15 +75,15 @@ export function SellerProductsTable({
     <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden flex flex-col">
       {/* Table container with responsive handling & no ugly scrollbar */}
       <div className="w-full overflow-x-auto no-scrollbar">
-        <table className="w-full text-left text-xs border-collapse table-fixed">
+        <table className="w-full min-w-[780px] text-left text-xs border-collapse table-fixed">
           <thead>
             <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-semibold select-none">
-              <th className="py-2.5 px-3 w-[46%]">Sản phẩm & Linh kiện</th>
-              <th className="py-2.5 px-2 w-[12%] text-right">Giá bán (VND)</th>
-              <th className="py-2.5 px-1.5 w-[6%] text-center">Tồn kho</th>
+              <th className="py-2.5 px-3 w-[36%]">Sản phẩm & Linh kiện</th>
+              <th className="py-2.5 px-3 w-[13%] text-right">Giá bán (VND)</th>
+              <th className="py-2.5 px-1.5 w-[7%] text-center">Tồn kho</th>
               <th className="py-2.5 px-1.5 w-[12%] text-center">Kiểm duyệt</th>
-              <th className="py-2.5 px-1 w-[5%] text-center">Mở bán</th>
-              <th className="py-2.5 px-2.5 w-[19%] text-right">Thao tác</th>
+              <th className="py-2.5 px-1 w-[8%] text-center">Mở bán</th>
+              <th className="py-2.5 px-3 w-[24%] text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody>

@@ -94,6 +94,8 @@ export const API_ENDPOINTS = {
     RETURN_REQUEST_DETAIL: (id: string) => `/api/seller/return-requests/${id}`,
     PROCESS_RETURN: (id: string) => `/api/seller/return-requests/${id}/process`,
     VOUCHERS: "/api/seller/vouchers",
+    VOUCHER_DETAIL: (id: string) => `/api/seller/vouchers/${id}`,
+    VOUCHER_STATUS: (id: string) => `/api/seller/vouchers/${id}/status`,
   },
   SHOPS: {
     DETAIL: (sellerName: string) => `/api/shops/${sellerName}`,

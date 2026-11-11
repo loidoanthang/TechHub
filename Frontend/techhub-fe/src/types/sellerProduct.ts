@@ -116,6 +116,18 @@ export interface CreateProductRequest {
 }
 
 /**
+ * Request cập nhật thông tin sản phẩm (PUT /api/seller/products/{id})
+ */
+export interface UpdateProductRequest {
+  categoryId: string;
+  name: string;
+  brandName: string;
+  description?: string;
+  attributes: Record<string, unknown>;
+  images: CreateProductImageRequest[];
+}
+
+/**
  * Phản hồi chi tiết sản phẩm tạo mới / chỉnh sửa
  */
 export interface ProductDetailResponse {

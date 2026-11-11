@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { formatCurrencyVND, parseCurrencyVND } from "@/lib/utils";
 import {
   Store,
   MapPin,
@@ -49,6 +50,7 @@ export function SellerRegistrationView() {
     watch,
     setValue,
     reset,
+    control,
     formState: { errors },
   } = useForm<SellerRegistrationFormValues>({
     resolver: zodResolver(sellerRegistrationSchema),
@@ -518,12 +520,21 @@ export function SellerRegistrationView() {
                     <label className="text-xs font-bold text-[#0b1c30]">
                       Standard Logistics Flat Rate (VND) <span className="text-[#ba1a1a]">*</span>
                     </label>
-                    <input
-                      type="number"
-                      min={0}
-                      step={1000}
-                      {...register("shippingFee", { valueAsNumber: true })}
-                      className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30]"
+                    <Controller
+                      name="shippingFee"
+                      control={control}
+                      render={({ field }) => (
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={formatCurrencyVND(field.value, true)}
+                          onChange={(e) => {
+                            const num = parseCurrencyVND(e.target.value);
+                            field.onChange(num);
+                          }}
+                          className="w-full text-xs font-bold font-mono px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30]"
+                        />
+                      )}
                     />
                     {errors.shippingFee?.message && (
                       <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.shippingFee.message}</p>

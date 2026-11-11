@@ -11,6 +11,7 @@ export const productImageSchema = z.object({
 });
 
 export const productVariantSchema = z.object({
+  id: z.string().optional(),
   sku: z
     .string()
     .trim()

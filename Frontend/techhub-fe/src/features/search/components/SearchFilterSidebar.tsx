@@ -6,6 +6,7 @@ import {
   SlidersHorizontal,
   Check,
 } from "lucide-react";
+import { formatCurrencyVND, parseCurrencyVND } from "@/lib/utils";
 import { useCategoriesQuery } from "@/features/products/hooks/useProductQueries";
 
 export interface FilterState {
@@ -206,9 +207,13 @@ export function SearchFilterSidebar({
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
             <input
-              type="number"
-              value={minInput}
-              onChange={(e) => setMinInput(e.target.value)}
+              type="text"
+              inputMode="numeric"
+              value={formatCurrencyVND(minInput, true)}
+              onChange={(e) => {
+                const num = parseCurrencyVND(e.target.value);
+                setMinInput(num.toString());
+              }}
               placeholder="Từ"
               className="w-full pl-2 pr-2 py-1.5 bg-[#eff4ff] rounded-lg text-xs font-semibold text-slate-800 border border-slate-200 focus:outline-none"
             />
@@ -216,9 +221,13 @@ export function SearchFilterSidebar({
           <span className="text-slate-400 text-xs">-</span>
           <div className="relative flex-1">
             <input
-              type="number"
-              value={maxInput}
-              onChange={(e) => setMaxInput(e.target.value)}
+              type="text"
+              inputMode="numeric"
+              value={formatCurrencyVND(maxInput, true)}
+              onChange={(e) => {
+                const num = parseCurrencyVND(e.target.value);
+                setMaxInput(num.toString());
+              }}
               placeholder="Đến"
               className="w-full pl-2 pr-2 py-1.5 bg-[#eff4ff] rounded-lg text-xs font-semibold text-slate-800 border border-slate-200 focus:outline-none"
             />

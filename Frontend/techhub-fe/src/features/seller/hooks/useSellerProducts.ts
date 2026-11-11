@@ -4,6 +4,7 @@ import type {
   SellerProductQueryParams,
   UpdateProductVisibilityRequest,
   CreateProductRequest,
+  UpdateProductRequest,
 } from "@/types/sellerProduct";
 
 export const SELLER_PRODUCT_KEYS = {
@@ -114,6 +115,37 @@ export function useCreateProductMutation() {
     mutationFn: (data: CreateProductRequest) => sellerProductApi.createProduct(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SELLER_PRODUCT_KEYS.all });
+    },
+  });
+}
+
+/**
+ * Hook lấy chi tiết 1 sản phẩm để xem / chỉnh sửa
+ */
+export function useSellerProductDetailQuery(productId?: string) {
+  return useQuery({
+    queryKey: SELLER_PRODUCT_KEYS.detail(productId || ""),
+    queryFn: async () => {
+      if (!productId) return null;
+      const res = await sellerProductApi.getProductDetail(productId);
+      return res.data;
+    },
+    enabled: Boolean(productId),
+    staleTime: 60 * 1000,
+  });
+}
+
+/**
+ * Hook cập nhật thông tin sản phẩm (PUT /api/seller/products/{id})
+ */
+export function useUpdateProductMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateProductRequest }) =>
+      sellerProductApi.updateProduct(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: SELLER_PRODUCT_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: SELLER_PRODUCT_KEYS.detail(id) });
     },
   });
 }

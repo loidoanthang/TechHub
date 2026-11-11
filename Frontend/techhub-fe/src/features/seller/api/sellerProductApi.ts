@@ -7,6 +7,8 @@ import type {
   SellerProductQueryParams,
   UpdateProductVisibilityRequest,
   CreateProductRequest,
+  CreateProductVariantRequest,
+  UpdateProductRequest,
   ProductDetailResponse,
   CategoryAttributeResponse,
 } from "@/types/sellerProduct";
@@ -33,8 +35,49 @@ export const sellerProductApi = {
   /**
    * Lấy chi tiết 1 sản phẩm
    */
-  getProductDetail: (id: string): Promise<ApiResponse<unknown>> => {
+  getProductDetail: (id: string): Promise<ApiResponse<ProductDetailResponse>> => {
     return apiClient.get(ENDPOINTS.SELLER.PRODUCT_DETAIL(id));
+  },
+
+  /**
+   * Cập nhật thông tin sản phẩm (PUT /api/seller/products/{id})
+   */
+  updateProduct: (
+    id: string,
+    data: UpdateProductRequest
+  ): Promise<ApiResponse<ProductDetailResponse>> => {
+    return apiClient.put(ENDPOINTS.SELLER.PRODUCT_DETAIL(id), data);
+  },
+
+  /**
+   * Thêm phân loại cấu hình SKU mới cho sản phẩm
+   */
+  addVariant: (
+    productId: string,
+    data: CreateProductVariantRequest
+  ): Promise<ApiResponse<unknown>> => {
+    return apiClient.post(ENDPOINTS.SELLER.PRODUCT_VARIANTS(productId), data);
+  },
+
+  /**
+   * Cập nhật thông tin phân loại cấu hình SKU
+   */
+  updateVariant: (
+    productId: string,
+    variantId: string,
+    data: {
+      sku: string;
+      variantName: string;
+      price: number;
+      stockQuantity: number;
+      imageUrl?: string;
+      description?: string;
+    }
+  ): Promise<ApiResponse<unknown>> => {
+    return apiClient.put(
+      `${ENDPOINTS.SELLER.PRODUCT_VARIANTS(productId)}/${variantId}`,
+      data
+    );
   },
 
   /**
