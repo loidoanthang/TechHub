@@ -17,6 +17,13 @@ interface VoucherLivePreviewCardProps {
   shopName?: string;
 }
 
+const VND_CURRENCY_FORMATTER = new Intl.NumberFormat("vi-VN", {
+  style: "currency",
+  currency: "VND",
+});
+
+const formatVND = (val: number) => VND_CURRENCY_FORMATTER.format(val);
+
 export function VoucherLivePreviewCard({
   code,
   name,
@@ -29,11 +36,6 @@ export function VoucherLivePreviewCard({
   endDate,
   shopName = "Gian Hàng Chính Hãng",
 }: VoucherLivePreviewCardProps) {
-  const formatVND = (val: number) =>
-    new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(val);
 
   const formatDate = (isoString?: string) => {
     if (!isoString) return "--/--/----";

@@ -50,6 +50,13 @@ export type ReturnRequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELL
 
 // Voucher
 export type VoucherType = "PLATFORM" | "SHOP";
-export type VoucherStatus = "ACTIVE" | "INACTIVE" | "EXPIRED" | "EXHAUSTED";
+export type VoucherStatus = "ACTIVE" | "INACTIVE" | "EXPIRED" | "EXHAUSTED" | "DISABLED" | "UPCOMING" | "ONGOING";
 export type DiscountType = "PERCENTAGE" | "FIXED_AMOUNT";
 export type VoucherAppliesTo = "PRODUCT" | "SHIPPING_FEE" | "ALL_PRODUCTS" | "SPECIFIC_PRODUCTS" | "SHIPPING";
+
+// Admin Dashboard, Payouts & Notifications
+export type DashboardPeriod = "TODAY" | "LAST_7_DAYS" | "THIS_MONTH" | "CUSTOM";
+export type PayoutStatus = "PENDING" | "COMPLETED" | "REJECTED";
+export type PayoutProcessAction = "APPROVE" | "REJECT";
+export type TargetAudience = "ALL_USERS" | "ALL_BUYERS" | "ALL_SELLERS";
+export type NotificationType = "ORDER" | "REVIEW" | "PROMOTION" | "SYSTEM" | "SHOP";

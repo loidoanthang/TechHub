@@ -12,18 +12,24 @@ import {
   Bell,
   LogOut,
   ChevronRight,
+  Heart,
+  Store,
 } from "lucide-react";
 import { useProfileQuery } from "../hooks/useAccountQueries";
+import { useWishlistIdsQuery } from "../api/wishlistApi";
+import { useFollowedShopSlugsQuery } from "@/features/shops/api/shopFollowingApi";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 
 export function AccountSidebar() {
   const pathname = usePathname();
   const { data: profile } = useProfileQuery();
+  const { data: wishlistData } = useWishlistIdsQuery();
+  const { data: followedData } = useFollowedShopSlugsQuery();
   const { logout } = useAuth();
 
   const fullName = profile
     ? `${profile.firstName || ""} ${profile.lastName || ""}`.trim() || profile.email
-    : "My Account";
+    : "Tài khoản của tôi";
 
   const avatarUrl =
     profile?.avatarUrl ||
@@ -31,27 +37,33 @@ export function AccountSidebar() {
 
   const navItems = [
     {
-      label: "Account Information",
+      label: "Thông tin tài khoản",
       href: "/account/profile",
       icon: BadgeCheck,
       badge: null,
     },
     {
-      label: "My Purchases & Orders",
+      label: "Đơn mua của tôi",
       href: "/account/orders",
       icon: Receipt,
       badge: null,
     },
     {
-      label: "Shipping Addresses",
-      href: "/account/addresses",
-      icon: Truck,
-      badge: null,
+      label: "Danh sách Yêu thích",
+      href: "/account/wishlist",
+      icon: Heart,
+      badge: wishlistData?.totalCount ? String(wishlistData.totalCount) : null,
     },
     {
-      label: "Banks & Cards",
-      href: "#",
-      icon: CreditCard,
+      label: "Shop đang theo dõi",
+      href: "/account/followed-shops",
+      icon: Store,
+      badge: followedData?.totalCount ? String(followedData.totalCount) : null,
+    },
+    {
+      label: "Sổ địa chỉ nhận hàng",
+      href: "/account/addresses",
+      icon: Truck,
       badge: null,
     },
     {
@@ -59,12 +71,6 @@ export function AccountSidebar() {
       href: "/account/security",
       icon: Lock,
       hasDot: false,
-      badge: null,
-    },
-    {
-      label: "Notifications & Alerts",
-      href: "#",
-      icon: Bell,
       badge: null,
     },
   ];

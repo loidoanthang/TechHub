@@ -24,6 +24,7 @@ import {
   Loader2,
   FileX,
   RotateCcw,
+  MessageSquareQuote,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSellerShopQuery, useUpdateShopStatusMutation } from "../hooks/useSellerQueries";
@@ -172,6 +173,11 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
           href: "/seller/orders?tab=returns",
           icon: RotateCcw,
         },
+        {
+          label: "Đánh giá & Phản hồi",
+          href: "/seller/reviews",
+          icon: MessageSquareQuote,
+        },
       ],
     },
     {
@@ -209,7 +215,7 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#f8f9fc] flex flex-col">
       {/* 1. TOP HEADER */}
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-[#e2e8f0] shadow-xs">
+      <header className="sticky top-0 z-40 w-full bg-white border-b border-[#e2e8f0] shadow-xs">
         <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           {/* Left: Mobile hamburger & Logo */}
           <div className="flex items-center gap-3">
@@ -410,7 +416,7 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
         {mobileMenuOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
             <div
-              className="fixed inset-0 bg-black/40 backdrop-blur-xs"
+              className="fixed inset-0 bg-black/40"
               onClick={() => setMobileMenuOpen(false)}
             />
             <div className="fixed inset-y-0 left-0 w-72 bg-white p-5 flex flex-col gap-5 z-50 overflow-y-auto">

@@ -85,7 +85,7 @@ export function ProductHoverCard({
             }}
             className="pointer-events-none animate-in fade-in-0 zoom-in-95 duration-100"
           >
-            <div className="bg-white rounded-2xl p-3 shadow-2xl border border-slate-200/90 text-slate-900 flex items-start gap-3 backdrop-blur-md">
+            <div className="bg-white rounded-2xl p-3 shadow-2xl border border-slate-200/90 text-slate-900 flex items-start gap-3">
               {/* Product Thumbnail Preview (64x64px) */}
               <div className="w-16 h-16 rounded-xl bg-slate-50 border border-slate-200 shrink-0 overflow-hidden relative flex items-center justify-center shadow-2xs">
                 {product.coverImageUrl && !imageError ? (

@@ -17,14 +17,18 @@ import {
   Package,
   MapPin,
   Store,
+  ShieldCheck,
 } from "lucide-react";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useWishlistIdsQuery } from "@/features/account/api/wishlistApi";
 import { ROUTES } from "@/lib/constants";
 
 export function Header() {
   const { toggleCart, totalCount } = useCart();
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { data: wishlistData } = useWishlistIdsQuery();
+  const wishlistCount = isAuthenticated ? (wishlistData?.totalCount || 0) : 0;
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -67,9 +71,10 @@ export function Header() {
     : "";
 
   const isSeller = user?.roles?.includes("SELLER");
+  const isAdmin = user?.roles?.includes("ADMIN");
 
   return (
-    <header className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+    <header className="fixed top-0 w-full z-50 bg-white border-b border-slate-200/70 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
       {/* Top utility sub-header */}
       <div className="bg-[#eff4ff] text-[#434656]">
         <div className="max-w-6xl mx-auto px-6 lg:px-12 h-9 flex items-center justify-between text-[11px] font-semibold">
@@ -146,11 +151,17 @@ export function Header() {
           {/* Wishlist & Cart */}
           <div className="flex items-center gap-2">
             <Link
-              href={ROUTES.ACCOUNT.ORDERS}
+              href={isAuthenticated ? ROUTES.ACCOUNT.WISHLIST : ROUTES.LOGIN}
               className="relative p-2 rounded-lg hover:bg-[#dce9ff] transition-colors text-[#434656] hover:text-[#0b1c30]"
               aria-label="Wishlist"
+              title="Danh sách yêu thích"
             >
               <Heart className="w-5 h-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold rounded-full h-4 min-w-[16px] px-1 flex items-center justify-center shadow-sm">
+                  {wishlistCount > 99 ? "99+" : wishlistCount}
+                </span>
+              )}
             </Link>
 
             <button
@@ -245,6 +256,17 @@ export function Header() {
                       <Store className="w-4 h-4" />
                       <span>{isSeller ? "Seller Portal" : "Become a Seller"}</span>
                     </Link>
+
+                    {isAdmin && (
+                      <Link
+                        href={ROUTES.ADMIN.DASHBOARD}
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#0b1c30] font-bold hover:bg-[#eff4ff] transition-colors border-t border-slate-50"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-[#0045cc]" />
+                        <span>Cổng Quản trị (Admin Portal)</span>
+                      </Link>
+                    )}
 
                     <button
                       type="button"

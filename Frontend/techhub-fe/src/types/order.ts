@@ -38,6 +38,7 @@ export interface BuyerOrderItemResponse {
   quantity: number;
   subtotal?: number;
   imageUrl?: string | null;
+  hasReviewed?: boolean;
 }
 
 export interface OrderTimelineStepResponse {

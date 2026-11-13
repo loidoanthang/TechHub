@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/features/auth/api/authApi";
 import {
@@ -20,7 +20,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (tokens: AuthTokens, redirectUrl?: string) => Promise<void>;
   logout: () => Promise<void>;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: () => Promise<UserProfile | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
-  const refreshProfile = useCallback(async () => {
+  const refreshProfile = useCallback(async (): Promise<UserProfile | null> => {
     try {
       const response = await authApi.getProfile();
       if (response && response.success && response.data) {
@@ -38,11 +38,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (typeof window !== "undefined") {
           localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(response.data));
         }
+        return response.data;
       } else {
         setUser(null);
+        return null;
       }
     } catch {
       setUser(null);
+      return null;
     }
   }, []);
 
@@ -58,37 +61,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Try reading cached user first to prevent UI flickering
+      // Optimistic hydration from cached user to prevent blocking UI waterfall
+      let hasCachedUser = false;
       if (typeof window !== "undefined") {
         const cachedUser = localStorage.getItem(STORAGE_KEYS.USER);
         if (cachedUser) {
           try {
-            setUser(JSON.parse(cachedUser));
+            const parsed = JSON.parse(cachedUser) as UserProfile;
+            if (parsed && typeof parsed === "object" && parsed.email) {
+              setUser(parsed);
+              setIsLoading(false);
+              hasCachedUser = true;
+            }
           } catch {
-            // ignore
+            // ignore corrupted cache
           }
         }
       }
 
       await refreshProfile();
-      setIsLoading(false);
+      if (!hasCachedUser) {
+        setIsLoading(false);
+      }
     };
 
     initAuth();
   }, [refreshProfile]);
 
-  const login = async (tokens: AuthTokens, redirectUrl?: string) => {
+  const login = useCallback(async (tokens: AuthTokens, redirectUrl?: string) => {
     setTokens(tokens.accessToken, tokens.refreshToken);
-    await refreshProfile();
+    const profile = await refreshProfile();
     // Prevent Open Redirect (CWE-601): Strictly validate relative path
     if (isSafeRelativeUrl(redirectUrl)) {
       router.push(redirectUrl as string);
+    } else if (profile?.roles?.includes("ADMIN")) {
+      router.push(ROUTES.ADMIN.DASHBOARD);
     } else {
       router.push(ROUTES.HOME);
     }
-  };
+  }, [refreshProfile, router]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       const refreshToken = getRefreshToken();
       if (refreshToken) {
@@ -101,16 +114,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       router.push(ROUTES.LOGIN);
     }
-  };
+  }, [router]);
 
-  const value = {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
-    login,
-    logout,
-    refreshProfile,
-  };
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user,
+      isLoading,
+      isAuthenticated: !!user,
+      login,
+      logout,
+      refreshProfile,
+    }),
+    [user, isLoading, login, logout, refreshProfile]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

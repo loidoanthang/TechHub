@@ -26,13 +26,14 @@ export function useSellerVerificationStatusQuery() {
   });
 }
 
-export function useSellerShopQuery() {
+export function useSellerShopQuery(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: SELLER_KEYS.shop,
     queryFn: async () => {
       const res = await sellerApi.getShopInfo();
       return res.data;
     },
+    enabled: options?.enabled,
   });
 }
 

@@ -18,12 +18,14 @@ import {
   RotateCcw,
   Loader2,
   AlertCircle,
+  Star,
 } from "lucide-react";
 import { useBuyerOrderDetailQuery, useCompleteOrderMutation } from "@/features/orders/hooks/useOrderQueries";
 import { resolveSellerSlug } from "@/features/shops";
 import type { OrderTimelineStepResponse, BuyerOrderItemResponse } from "@/types/order";
 import { CancelOrderModal } from "./CancelOrderModal";
 import { ReturnRefundModal } from "./ReturnRefundModal";
+import { ReviewProductModal } from "./ReviewProductModal";
 
 interface OrderDetailViewProps {
   orderId: string;
@@ -36,6 +38,8 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+  const [selectedReviewItem, setSelectedReviewItem] =
+    useState<BuyerOrderItemResponse | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -306,8 +310,21 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
                   </div>
                 </div>
 
-                <div className="text-sm font-bold text-[#0b1c30] sm:text-right shrink-0">
-                  {formatPrice(subtotal)}
+                <div className="flex flex-col sm:items-end gap-2 shrink-0">
+                  <div className="text-sm font-bold text-[#0b1c30] sm:text-right">
+                    {formatPrice(subtotal)}
+                  </div>
+                  {(order.status === "DELIVERED" ||
+                    order.status === "COMPLETED") && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedReviewItem(item)}
+                      className="px-3 py-1.5 rounded-xl border border-[#0045cc]/30 text-[#0045cc] hover:bg-[#0045cc]/5 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                    >
+                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      <span>{item.hasReviewed ? "Sửa đánh giá" : "Đánh giá sản phẩm"}</span>
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -420,6 +437,19 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
           onClose={() => setIsReturnModalOpen(false)}
           onSuccess={() => {
             showToast("Return & Refund request submitted successfully.");
+            refetch();
+          }}
+        />
+      )}
+
+      {/* Review Product Modal */}
+      {selectedReviewItem && (
+        <ReviewProductModal
+          item={selectedReviewItem}
+          isOpen={Boolean(selectedReviewItem)}
+          onClose={() => setSelectedReviewItem(null)}
+          onSuccess={(msg) => {
+            showToast(msg);
             refetch();
           }}
         />

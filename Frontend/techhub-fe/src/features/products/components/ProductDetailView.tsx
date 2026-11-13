@@ -24,11 +24,22 @@ import {
   X,
   Ticket,
   MapPin,
+  Store,
+  ImageIcon,
 } from "lucide-react";
 import { ProductCard } from "@/components/shared";
+import { Pagination } from "@/components/shared/Pagination";
 import { useCart } from "@/features/cart/context/CartContext";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useToggleWishlist } from "@/features/account/api/wishlistApi";
+import { toast } from "@/lib/toast";
 import { useProductsQuery } from "@/features/products/hooks/useProductQueries";
 import { mapProductSummaryToProduct } from "@/features/products/utils/productMapper";
+import {
+  useProductRatingSummaryQuery,
+  useProductReviewsQuery,
+  useToggleHelpfulVoteMutation,
+} from "@/features/products/api/reviewApi";
 import {
   useShopProfileQuery,
   useShopVouchersQuery,
@@ -46,12 +57,54 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
   const [selectedImg, setSelectedImg] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedStarFilter, setSelectedStarFilter] = useState<number | null>(null);
+  const [onlyMediaFilter, setOnlyMediaFilter] = useState<boolean>(false);
+  const [reviewSortBy, setReviewSortBy] = useState<"createdAt" | "rating">("createdAt");
+  const [reviewPage, setReviewPage] = useState<number>(0);
+  const [previewMediaUrl, setPreviewMediaUrl] = useState<string | null>(null);
+
+  // Real Reviews & Rating Summary Queries
+  const { data: ratingSummaryRes } = useProductRatingSummaryQuery(product.id);
+  const { data: reviewsRes, isLoading: isReviewsLoading } = useProductReviewsQuery(
+    product.id,
+    {
+      rating: selectedStarFilter || undefined,
+      hasMedia: onlyMediaFilter || undefined,
+      sortBy: reviewSortBy,
+      sortDirection: "DESC",
+      page: reviewPage,
+      size: 5,
+    }
+  );
+  const toggleHelpfulMutation = useToggleHelpfulVoteMutation(product.id);
+
+  // Real Wishlist Integration
+  const { isWishlisted, toggleWishlist, isPending: isWishlistPending } = useToggleWishlist(product.id);
+
+  const ratingSummary = ratingSummaryRes?.data;
+  const avgRating = ratingSummary?.averageRating ?? product.rating ?? 5.0;
+  const totalReviewsCount = ratingSummary?.totalReviews ?? product.reviewsCount ?? 0;
+  const mediaReviewsCount = ratingSummary?.mediaReviewCount ?? 0;
+
+  const realReviews = reviewsRes?.data?.content || [];
+  const reviewTotalPages = reviewsRes?.data?.totalPages || 1;
+  const reviewTotalElements = reviewsRes?.data?.totalElements ?? totalReviewsCount;
+
+  const ratingBreakdown = useMemo(() => {
+    return [5, 4, 3, 2, 1].map((star) => {
+      const count = ratingSummary?.ratingCounts?.[star] ?? 0;
+      const percentage =
+        totalReviewsCount > 0
+          ? Math.round((count / totalReviewsCount) * 100)
+          : 0;
+      return { star, count, percentage };
+    });
+  }, [ratingSummary, totalReviewsCount]);
   const router = useRouter();
   const { openCart, addToCart, isAddingToCart } = useCart();
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [isBuyNowPending, setIsBuyNowPending] = useState(false);
-  const [toast, setToast] = useState<{
+  const [cartToast, setCartToast] = useState<{
     message: string;
     itemInfo?: string;
   } | null>(null);
@@ -219,14 +272,14 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
       }
 
       const variantDesc = activeVariant.name || Object.values(selectedAttributes).join(", ");
-      setToast({
+      setCartToast({
         message: "Đã thêm vào giỏ hàng thành công!",
         itemInfo: `${product.title}${variantDesc ? ` • ${variantDesc}` : ""} (x${quantity})`,
       });
 
       // Tự động đóng thông báo sau đúng 5 giây
       toastTimeoutRef.current = setTimeout(() => {
-        setToast(null);
+        setCartToast(null);
       }, 5000);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
@@ -420,13 +473,38 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
 
             {/* Wishlist & Share */}
             <div className="flex items-center justify-between pt-2 text-xs text-slate-500 border-t border-slate-100">
-              <button className="flex items-center gap-1.5 hover:text-[#ba1a1a] transition-colors cursor-pointer">
-                <Heart className="w-4 h-4" />
-                <span>Add to Wishlist</span>
+              <button
+                type="button"
+                onClick={toggleWishlist}
+                disabled={isWishlistPending}
+                className={`flex items-center gap-1.5 transition-colors cursor-pointer ${
+                  isWishlisted
+                    ? "text-rose-600 font-semibold"
+                    : "hover:text-[#ba1a1a] text-slate-600"
+                }`}
+                title={isWishlisted ? "Bỏ yêu thích" : "Thêm vào danh sách yêu thích"}
+              >
+                <Heart
+                  className={`w-4 h-4 transition-transform active:scale-75 ${
+                    isWishlisted ? "fill-rose-500 text-rose-500" : ""
+                  }`}
+                />
+                <span>{isWishlisted ? "Đã yêu thích" : "Thêm vào Yêu thích"}</span>
               </button>
-              <button className="flex items-center gap-1.5 hover:text-[#0045cc] transition-colors cursor-pointer">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof navigator !== "undefined" && navigator.share) {
+                    navigator.share({ title: product.title, url: window.location.href });
+                  } else if (typeof navigator !== "undefined") {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success("Đã sao chép liên kết sản phẩm");
+                  }
+                }}
+                className="flex items-center gap-1.5 hover:text-[#0045cc] transition-colors cursor-pointer"
+              >
                 <Share2 className="w-4 h-4" />
-                <span>Share Component</span>
+                <span>Chia sẻ</span>
               </button>
             </div>
           </div>
@@ -462,13 +540,13 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
               <div className="flex items-center gap-4 mt-3 pb-4 border-b border-slate-100 text-xs">
                 <div className="flex items-center gap-1 text-amber-500 font-bold">
                   <Star className="w-4 h-4 fill-current" />
-                  <span>{product.rating ? product.rating.toFixed(1) : "5.0"}</span>
+                  <span>{avgRating.toFixed(1)}</span>
                 </div>
                 <span className="text-slate-300">|</span>
                 <span className="text-slate-500">
-                  {product.reviewsCount > 0 ? (
+                  {totalReviewsCount > 0 ? (
                     <>
-                      <strong className="text-slate-800">{product.reviewsCount}</strong> Đánh giá
+                      <strong className="text-slate-800">{totalReviewsCount}</strong> Đánh giá
                     </>
                   ) : (
                     <span className="text-slate-400">Chưa có đánh giá</span>
@@ -883,128 +961,356 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
         </div>
       </section>
 
-      {/* 6. Verified Customer Reviews & Interactive Star Filter */}
+      {/* 6. Verified Customer Reviews & Interactive Real Filter */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 w-full" id="reviews">
         <div className="p-6 md:p-8 rounded-2xl bg-white shadow-sm border border-[#eff4ff]">
-          <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 gap-4">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100 gap-4">
             <div>
               <h2 className="text-xl font-bold text-[#0b1c30] font-heading">
-                Verified Customer Reviews
+                Đánh giá từ Khách hàng
               </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Nhận xét thực tế từ người mua đã nhận hàng (Verified Purchase)
+              </p>
             </div>
             {selectedStarFilter && (
               <button
-                onClick={() => setSelectedStarFilter(null)}
-                className="text-xs text-[#0045cc] hover:underline font-semibold"
+                type="button"
+                onClick={() => {
+                  setSelectedStarFilter(null);
+                  setReviewPage(0);
+                }}
+                className="text-xs text-primary hover:underline font-semibold cursor-pointer"
               >
-                Clear Filter ({selectedStarFilter} Stars)
+                Xóa bộ lọc ({selectedStarFilter} Sao)
               </button>
             )}
           </div>
 
           {/* Rating Overview Bento */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pb-8 border-b border-slate-100">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-6 border-b border-slate-100">
             {/* Big Rating Number */}
             <div className="lg:col-span-4 flex flex-col items-center justify-center p-6 rounded-2xl bg-[#eff4ff] text-center">
               <span className="text-5xl font-extrabold text-[#0b1c30] tracking-tight font-mono">
-                {product.reviewStats.average.toFixed(1)}
+                {avgRating.toFixed(1)}
               </span>
               <div className="flex items-center gap-1 text-amber-500 my-2">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-current" />
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${
+                      i < Math.round(avgRating)
+                        ? "fill-current"
+                        : "text-slate-300"
+                    }`}
+                  />
                 ))}
               </div>
               <span className="text-xs text-slate-500">
-                Based on {product.reviewStats.totalReviews} reviews worldwide
+                Dựa trên {totalReviewsCount} đánh giá toàn sàn
               </span>
             </div>
 
             {/* Rating Progress Bars (Interactive Filtering) */}
-            <div className="lg:col-span-8 flex flex-col gap-2.5 text-xs">
-              {product.reviewStats.breakdown.map((row) => (
+            <div className="lg:col-span-8 flex flex-col gap-2 text-xs">
+              {ratingBreakdown.map((row) => (
                 <button
                   key={row.star}
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
                     setSelectedStarFilter(
                       selectedStarFilter === row.star ? null : row.star
-                    )
-                  }
+                    );
+                    setReviewPage(0);
+                  }}
                   className={`flex items-center gap-3 p-1.5 rounded-xl transition-colors cursor-pointer text-left ${
                     selectedStarFilter === row.star
-                      ? "bg-[#eff4ff] ring-1 ring-[#0045cc]"
+                      ? "bg-[#eff4ff] ring-1 ring-primary"
                       : "hover:bg-[#eff4ff]/60"
                   }`}
                 >
-                  <span className="w-14 text-slate-600 font-semibold flex items-center gap-1">
-                    <span>{row.star}</span>
-                    <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                  <span className="w-16 text-slate-700 font-semibold flex items-center gap-1">
+                    <span>{row.star} sao</span>
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                   </span>
-                  <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
+                  <div className="flex-1 bg-slate-100 rounded-full h-2.5 overflow-hidden">
                     <div
-                      className="bg-[#0045cc] h-full rounded-full"
+                      className="bg-primary h-full rounded-full transition-all duration-300"
                       style={{ width: `${row.percentage}%` }}
                     />
                   </div>
-                  <span className="w-10 text-right font-mono text-slate-400">
-                    {row.percentage}%
+                  <span className="w-20 text-right font-mono text-slate-500 text-[11px]">
+                    {row.count} ({row.percentage}%)
                   </span>
                 </button>
               ))}
             </div>
           </div>
 
+          {/* Filter & Sort Chips Bar */}
+          <div className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedStarFilter(null);
+                  setOnlyMediaFilter(false);
+                  setReviewPage(0);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                  selectedStarFilter === null && !onlyMediaFilter
+                    ? "bg-slate-900 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                Tất cả ({totalReviewsCount})
+              </button>
+              {[5, 4, 3, 2, 1].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => {
+                    setSelectedStarFilter(selectedStarFilter === s ? null : s);
+                    setReviewPage(0);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                    selectedStarFilter === s
+                      ? "bg-primary text-white"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {s} Sao ({ratingSummary?.ratingCounts?.[s] ?? 0})
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setOnlyMediaFilter(!onlyMediaFilter);
+                  setReviewPage(0);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
+                  onlyMediaFilter
+                    ? "bg-primary text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>Có hình ảnh ({mediaReviewsCount})</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+              <span className="text-[11px] text-slate-400">Sắp xếp:</span>
+              <select
+                value={reviewSortBy}
+                onChange={(e) => {
+                  setReviewSortBy(e.target.value as "createdAt" | "rating");
+                  setReviewPage(0);
+                }}
+                className="h-8 px-2.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary"
+              >
+                <option value="createdAt">Mới nhất</option>
+                <option value="rating">Đánh giá cao nhất</option>
+              </select>
+            </div>
+          </div>
+
           {/* Individual Review Cards */}
           <div className="space-y-4 pt-6">
-            {filteredReviews.length === 0 ? (
+            {isReviewsLoading ? (
+              <div className="p-8 text-center flex flex-col items-center justify-center gap-2">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <span className="text-xs text-slate-400">Đang tải đánh giá...</span>
+              </div>
+            ) : realReviews.length === 0 ? (
               <div className="p-8 text-center bg-slate-50/70 rounded-2xl border border-dashed border-slate-200 my-2">
                 <MessageSquare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                 <p className="text-sm font-semibold text-slate-700">
-                  Chưa có đánh giá nào cho sản phẩm này
+                  Chưa có đánh giá nào phù hợp với bộ lọc
                 </p>
                 <p className="text-xs text-slate-400 mt-1">
-                  Đánh giá sẽ hiển thị tại đây khi người mua để lại nhận xét sau khi nhận hàng.
+                  Hãy thử chọn số sao khác hoặc bấm &ldquo;Tất cả&rdquo; để xem toàn bộ nhận xét.
                 </p>
               </div>
             ) : (
-              filteredReviews.map((rev) => (
-                <div key={rev.id} className="p-5 rounded-2xl bg-[#eff4ff]/50 flex flex-col gap-3 border border-slate-100">
-                  <div className="flex items-center justify-between">
+              realReviews.map((rev) => (
+                <div
+                  key={rev.id}
+                  className="p-5 rounded-2xl bg-[#eff4ff]/40 flex flex-col gap-3 border border-slate-100 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs ${rev.avatarColor}`}>
-                        {rev.userAvatarText}
-                      </div>
+                      {rev.reviewerAvatar ? (
+                        <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 border border-slate-200">
+                          <Image
+                            src={rev.reviewerAvatar}
+                            alt={rev.reviewerName}
+                            fill
+                            className="object-cover"
+                            unoptimized
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-9 h-9 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0 border border-primary/20">
+                          {rev.reviewerName ? rev.reviewerName.charAt(0).toUpperCase() : "U"}
+                        </div>
+                      )}
                       <div>
-                        <span className="font-bold text-sm text-[#0b1c30]">{rev.userName}</span>
-                        <div className="flex items-center gap-0.5 text-amber-500 mt-0.5">
-                          {[...Array(rev.rating)].map((_, i) => (
-                            <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-xs text-slate-900">
+                            {rev.reviewerName}
+                          </span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200/60">
+                            Đã mua hàng
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-0.5 text-amber-400 mt-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3.5 h-3.5 ${
+                                i < rev.rating
+                                  ? "fill-current"
+                                  : "text-slate-200"
+                              }`}
+                            />
                           ))}
                         </div>
                       </div>
                     </div>
-                    <span className="text-xs text-slate-400">{rev.date}</span>
+                    <span className="text-[11px] text-slate-400 font-mono">
+                      {new Date(rev.createdAt).toLocaleDateString("vi-VN")}
+                    </span>
                   </div>
 
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-                    {rev.comment}
-                  </p>
+                  {rev.variantName && (
+                    <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                      <span className="text-slate-400">Phân loại hàng:</span>
+                      <span className="font-medium text-slate-700 bg-white px-2 py-0.5 rounded-md border border-slate-200/80">
+                        {rev.variantName}
+                      </span>
+                    </div>
+                  )}
 
-                  <div className="flex items-center gap-4 pt-1 text-xs text-slate-500">
-                    <button className="flex items-center gap-1.5 hover:text-[#0045cc] transition-colors cursor-pointer">
-                      <ThumbsUp className="w-3.5 h-3.5" />
-                      <span>Helpful ({rev.helpfulCount})</span>
-                    </button>
-                    <button className="flex items-center gap-1.5 hover:text-[#0b1c30] transition-colors cursor-pointer">
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>Reply</span>
+                  {rev.comment && (
+                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                      {rev.comment}
+                    </p>
+                  )}
+
+                  {/* Review Media Images */}
+                  {rev.mediaList && rev.mediaList.length > 0 && (
+                    <div className="flex items-center gap-2 pt-1 flex-wrap">
+                      {rev.mediaList.map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => setPreviewMediaUrl(m.mediaUrl)}
+                          className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-slate-200 bg-white group cursor-pointer hover:ring-2 hover:ring-primary transition-all shrink-0"
+                        >
+                          <Image
+                            src={m.mediaUrl}
+                            alt="Ảnh đánh giá"
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform"
+                            unoptimized
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Shop Response (if present) */}
+                  {rev.sellerResponse && (
+                    <div className="p-3.5 rounded-xl bg-white border border-primary/15 text-xs shadow-2xs">
+                      <div className="flex items-center gap-1.5 font-bold text-primary mb-1">
+                        <Store className="w-3.5 h-3.5 shrink-0" />
+                        <span>Phản hồi của Người bán:</span>
+                        {rev.sellerResponseAt && (
+                          <span className="text-[10px] font-normal text-slate-400">
+                            • {new Date(rev.sellerResponseAt).toLocaleDateString("vi-VN")}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-slate-700 leading-relaxed pl-5">
+                        {rev.sellerResponse}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Review Footer Actions */}
+                  <div className="flex items-center gap-4 pt-1 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => toggleHelpfulMutation.mutate(rev.id)}
+                      disabled={toggleHelpfulMutation.isPending}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                        rev.hasVotedHelpful
+                          ? "bg-primary/10 text-primary font-bold"
+                          : "text-slate-500 hover:bg-slate-100"
+                      }`}
+                    >
+                      <ThumbsUp
+                        className={`w-3.5 h-3.5 ${
+                          rev.hasVotedHelpful ? "fill-primary" : ""
+                        }`}
+                      />
+                      <span>Hữu ích ({rev.helpfulCount})</span>
                     </button>
                   </div>
                 </div>
               ))
             )}
           </div>
+
+          {/* Pagination */}
+          {reviewTotalPages > 1 && (
+            <div className="mt-6 pt-4 border-t border-slate-100">
+              <Pagination
+                page={reviewPage}
+                size={5}
+                totalElements={reviewTotalElements}
+                totalPages={reviewTotalPages}
+                onPageChange={setReviewPage}
+                isLoading={isReviewsLoading}
+                variant="bottom-full"
+              />
+            </div>
+          )}
         </div>
+
+        {/* Media Fullscreen Preview Modal */}
+        {previewMediaUrl && (
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-in fade-in"
+            onClick={() => setPreviewMediaUrl(null)}
+          >
+            <div
+              className="relative max-w-3xl w-full max-h-[85vh] bg-black rounded-2xl overflow-hidden flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setPreviewMediaUrl(null)}
+                className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <div className="relative w-full h-[70vh]">
+                <Image
+                  src={previewMediaUrl}
+                  alt="Ảnh phóng to"
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* 7. Recommendations Section */}
@@ -1039,16 +1345,16 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
       )}
 
       {/* Floating 5-Second Toast Notification */}
-      {toast && (
+      {cartToast && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[#0b1c30] text-white px-4 py-3.5 rounded-2xl shadow-2xl border border-slate-700/60 animate-in fade-in slide-in-from-bottom-5 duration-300">
           <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
             <Check className="w-4 h-4 stroke-[2.5]" />
           </div>
           <div className="text-xs">
-            <p className="font-bold text-white">{toast.message}</p>
-            {toast.itemInfo && (
+            <p className="font-bold text-white">{cartToast.message}</p>
+            {cartToast.itemInfo && (
               <p className="text-slate-300 text-[11px] truncate max-w-[240px] mt-0.5">
-                {toast.itemInfo}
+                {cartToast.itemInfo}
               </p>
             )}
           </div>
@@ -1061,7 +1367,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           </button>
           <button
             type="button"
-            onClick={() => setToast(null)}
+            onClick={() => setCartToast(null)}
             className="text-slate-400 hover:text-white p-1 rounded cursor-pointer"
             aria-label="Đóng thông báo"
           >

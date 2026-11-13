@@ -291,30 +291,52 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     updateCartItemMutation.isPending ||
     deleteCartItemMutation.isPending;
 
+  const refetchCart = useCallback(() => {
+    cartQuery.refetch();
+    cartCountQuery.refetch();
+  }, [cartQuery, cartCountQuery]);
+
+  const contextValue = useMemo<CartContextType>(
+    () => ({
+      isOpen,
+      openCart,
+      closeCart,
+      toggleCart,
+      items,
+      rawCart: cartQuery.data,
+      updateQuantity,
+      removeItem,
+      addToCart,
+      subtotal,
+      totalCount,
+      isLoading,
+      isAddingToCart: addToCartMutation.isPending,
+      error,
+      clearError,
+      refetchCart,
+    }),
+    [
+      isOpen,
+      openCart,
+      closeCart,
+      toggleCart,
+      items,
+      cartQuery.data,
+      updateQuantity,
+      removeItem,
+      addToCart,
+      subtotal,
+      totalCount,
+      isLoading,
+      addToCartMutation.isPending,
+      error,
+      clearError,
+      refetchCart,
+    ]
+  );
+
   return (
-    <CartContext.Provider
-      value={{
-        isOpen,
-        openCart,
-        closeCart,
-        toggleCart,
-        items,
-        rawCart: cartQuery.data,
-        updateQuantity,
-        removeItem,
-        addToCart,
-        subtotal,
-        totalCount,
-        isLoading,
-        isAddingToCart: addToCartMutation.isPending,
-        error,
-        clearError,
-        refetchCart: () => {
-          cartQuery.refetch();
-          cartCountQuery.refetch();
-        },
-      }}
-    >
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );
