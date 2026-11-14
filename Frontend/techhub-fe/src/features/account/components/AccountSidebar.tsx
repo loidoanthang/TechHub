@@ -14,11 +14,13 @@ import {
   ChevronRight,
   Heart,
   Store,
+  MessagesSquare,
 } from "lucide-react";
 import { useProfileQuery } from "../hooks/useAccountQueries";
 import { useWishlistIdsQuery } from "../api/wishlistApi";
 import { useFollowedShopSlugsQuery } from "@/features/shops/api/shopFollowingApi";
 import { useUnreadNotificationCount } from "@/features/notifications/api/notificationQueries";
+import { useChatUnreadCountFromCache } from "@/features/chat/hooks/useChatQueries";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { UserAvatar } from "@/components/shared";
 import { ROUTES } from "@/lib/constants";
@@ -33,6 +35,7 @@ export function AccountSidebar() {
     useUnreadNotificationCount({
       enabled: isAuthenticated,
     });
+  const chatUnread = useChatUnreadCountFromCache(isAuthenticated);
 
   const fullName = profile
     ? `${profile.firstName || ""} ${profile.lastName || ""}`.trim() || profile.email
@@ -52,6 +55,12 @@ export function AccountSidebar() {
       href: "/account/orders",
       icon: Receipt,
       badge: null,
+    },
+    {
+      label: "Tin nhắn",
+      href: ROUTES.ACCOUNT.MESSAGES,
+      icon: MessagesSquare,
+      badge: chatUnread > 0 ? (chatUnread > 99 ? "99+" : String(chatUnread)) : null,
     },
     {
       label: "Thông báo của tôi",

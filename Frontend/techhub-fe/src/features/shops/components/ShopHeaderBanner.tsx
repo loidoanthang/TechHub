@@ -11,9 +11,11 @@ import {
   UserPlus,
   UserCheck,
   Users,
+  MessageCircle,
 } from "lucide-react";
 import type { PublicShopResponse } from "../types/shop";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useChat } from "@/features/chat";
 import { useSellerShopQuery } from "@/features/seller/hooks/useSellerQueries";
 import {
   useFollowedShopSlugsQuery,
@@ -29,6 +31,7 @@ interface ShopHeaderBannerProps {
 
 export function ShopHeaderBanner({ shop, productCount = 0 }: ShopHeaderBannerProps) {
   const { user, isAuthenticated } = useAuth();
+  const { openChatWithSeller } = useChat();
   const { data: followedData } = useFollowedShopSlugsQuery();
   const followMutation = useFollowShopMutation();
   const unfollowMutation = useUnfollowShopMutation();
@@ -77,6 +80,22 @@ export function ShopHeaderBanner({ shop, productCount = 0 }: ShopHeaderBannerPro
         },
       });
     }
+  };
+
+  const handleChatWithShop = async () => {
+    if (!isAuthenticated) {
+      toast.info("Vui lòng đăng nhập để chat với shop");
+      return;
+    }
+    if (isOwnShop) {
+      toast.error("Bạn không thể tự chat với gian hàng của chính mình");
+      return;
+    }
+    if (!shop.sellerUserId) {
+      toast.error("Không thể xác định người bán của gian hàng này");
+      return;
+    }
+    await openChatWithSeller(shop.sellerUserId);
   };
 
   const joinedDate = shop.createdAt
@@ -190,6 +209,18 @@ export function ShopHeaderBanner({ shop, productCount = 0 }: ShopHeaderBannerPro
                     Gian hàng của bạn
                   </span>
                 )}
+
+                {/* Chat Button */}
+                {!isOwnShop && shop.sellerUserId ? (
+                  <button
+                    type="button"
+                    onClick={handleChatWithShop}
+                    className="ml-1 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5 bg-white hover:bg-[#eff4ff] text-[#0045cc] border border-[#0045cc]/30 shadow-sm active:scale-95 cursor-pointer"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>Chat với Shop</span>
+                  </button>
+                ) : null}
               </div>
 
               <div className="flex items-center gap-2">

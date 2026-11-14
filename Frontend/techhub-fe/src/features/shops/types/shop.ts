@@ -13,6 +13,8 @@ export interface PublicShopResponse {
   warehouseProvince: string | null;
   warehouseDistrict: string | null;
   createdAt: string;
+  // Seller's User id for chat.
+  sellerUserId?: string | null;
 }
 
 export interface CartShopVoucherResponse {

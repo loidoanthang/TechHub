@@ -116,6 +116,7 @@ export function mapPublicDetailToProductDetailData(
       id: detail.shopId,
       name: detail.shopName,
       sellerName: detail.sellerName || detail.shopName,
+      sellerUserId: detail.sellerUserId ?? undefined,
       avatarUrl: detail.shopAvatarUrl || undefined,
       avatarText: (detail.shopName || "TH").substring(0, 2).toUpperCase(),
       joinedText: "Đối tác TechHub",

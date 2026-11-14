@@ -8,6 +8,7 @@ import com.techhub.security.JwtAccessDeniedHandler;
 import com.techhub.security.JwtAuthenticationEntryPoint;
 import com.techhub.security.JwtAuthenticationFilter;
 import com.techhub.security.oauth2.OAuth2AuthenticationSuccessHandler;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -57,7 +58,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler)
                 )
-                .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth -> auth.dispatcherTypeMatchers(DispatcherType.ASYNC, DispatcherType.ERROR).permitAll()
                         .requestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/login",
@@ -69,7 +70,8 @@ public class SecurityConfig {
                                 "/api/auth/logout",
                                 "/oauth2/**",
                                 "/login/oauth2/**",
-                                "/ws-chat/**"
+                                "/ws-chat/**",
+                                "/ws-chat"
                         ).permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,

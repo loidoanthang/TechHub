@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext } from "react";
+import React, { createContext, Suspense, useContext } from "react";
 import { useNotificationStream } from "@/features/notifications/hooks/useNotificationStream";
 import { NotificationToast } from "@/features/notifications/components/NotificationToast";
 import type { NotificationResponse } from "@/features/notifications/types";
@@ -37,7 +37,11 @@ export function NotificationProvider({
       }}
     >
       {children}
-      <NotificationToast />
+      {/* Suspense: NotificationToast reads router hooks that are unavailable
+          during prerender; stream it in so client-hook prerender blocks pass. */}
+      <Suspense fallback={null}>
+        <NotificationToast />
+      </Suspense>
     </NotificationContext.Provider>
   );
 }

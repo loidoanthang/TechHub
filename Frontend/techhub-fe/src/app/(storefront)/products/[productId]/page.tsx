@@ -7,6 +7,10 @@ import {
 } from "@/features/products/api/productResolver";
 import type { Metadata } from "next";
 
+// Blocking route: product detail reads runtime data (connection()) before
+// render; opt out of prerendering per project convention.
+export const instant = false;
+
 interface ProductPageProps {
   params: Promise<{ productId: string }>;
 }

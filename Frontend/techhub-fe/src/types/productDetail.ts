@@ -24,6 +24,8 @@ export interface MerchantInfo {
   id: string;
   name: string;
   sellerName?: string;
+  //sellerId - For Chat
+  sellerUserId?: string | null;
   avatarUrl?: string;
   avatarText: string;
   joinedText: string;

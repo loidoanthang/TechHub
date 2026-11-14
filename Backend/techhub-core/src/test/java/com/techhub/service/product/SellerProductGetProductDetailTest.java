@@ -166,6 +166,7 @@ class SellerProductGetProductDetailTest {
         assertNotNull(response);
         assertEquals(productId, response.id());
         assertEquals(shopId, response.shopId());
+        assertEquals("apple-store-vn", response.sellerName());
         assertEquals(categoryId, response.categoryId());
         assertEquals("Điện thoại thông minh", response.categoryName());
         assertEquals("Apple", response.brandName());

@@ -57,7 +57,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
             FROM Message m
             JOIN FETCH m.sender
             WHERE m.conversation.id = :conversationId
-              AND (:beforeTime IS NULL OR m.createdAt < :beforeTime)
+              AND m.createdAt < :beforeTime
             ORDER BY m.createdAt DESC, m.id DESC
             """)
     List<Message> findMessagesBefore(

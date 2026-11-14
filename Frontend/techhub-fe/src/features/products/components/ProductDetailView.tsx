@@ -31,6 +31,7 @@ import { ProductCard, UserAvatar } from "@/components/shared";
 import { Pagination } from "@/components/shared/Pagination";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { useChat } from "@/features/chat";
 import { useToggleWishlist } from "@/features/account/api/wishlistApi";
 import { toast } from "@/lib/toast";
 import { useProductsQuery } from "@/features/products/hooks/useProductQueries";
@@ -100,6 +101,8 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
   }, [ratingSummary, totalReviewsCount]);
   const router = useRouter();
   const { openCart, addToCart, isAddingToCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const { openChatWithSeller } = useChat();
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [isBuyNowPending, setIsBuyNowPending] = useState(false);
@@ -138,6 +141,30 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
 
   const { data: realShop } = useShopProfileQuery(shopSellerName);
   const { data: shopVouchers } = useShopVouchersQuery(shopSellerName);
+
+  async function handleOpenChatWithSeller() {
+    if (!isAuthenticated) {
+      toast.info("Đăng nhập để nhắn tin với shop.");
+      router.push(
+        `${ROUTES.LOGIN}?returnUrl=${encodeURIComponent(window.location.pathname)}`
+      );
+      return;
+    }
+    const sellerUserId =
+      realShop?.sellerUserId ?? product.merchant.sellerUserId;
+    if (!sellerUserId) {
+      toast.error("Không thể xác định người bán cho sản phẩm này.");
+      return;
+    }
+    await openChatWithSeller(sellerUserId, {
+      id: product.id,
+      title: product.title,
+      price: activeVariant?.price ?? fallbackPrice,
+      imageUrl: product.images[selectedImg] ?? null,
+      slug: product.slug || product.id,
+    });
+  }
+
   const displayShopName = realShop?.name || product.merchant.name;
   const { data: shopProductsData } = useShopProductsQuery(
     product.merchant.id || realShop?.id || "",
@@ -821,7 +848,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                 <div className="flex items-center gap-2.5 pt-0.5">
                   <button
                     type="button"
-                    onClick={() => toast.info("Tính năng trò chuyện trực tiếp đang được kết nối.")}
+                    onClick={handleOpenChatWithSeller}
                     className="px-3.5 py-1.5 bg-[#eff4ff] hover:bg-[#0045cc] text-[#0045cc] hover:text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer border border-[#0045cc]/20"
                   >
                     <MessageCircle className="w-3.5 h-3.5" />

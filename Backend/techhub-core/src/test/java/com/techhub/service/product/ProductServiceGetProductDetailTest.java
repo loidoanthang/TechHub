@@ -60,6 +60,7 @@ class ProductServiceGetProductDetailTest {
         seller = Seller.builder()
                 .id(UUID.randomUUID())
                 .user(user)
+                .sellerName("apple-store")
                 .build();
 
         shop = Shop.builder()
@@ -160,6 +161,7 @@ class ProductServiceGetProductDetailTest {
         assertEquals("Apple", res.brandName());
         assertEquals("Laptop", res.categoryName());
         assertEquals("Apple Official Store", res.shopName());
+        assertEquals("apple-store", res.sellerName());
         assertEquals("https://cdn.techhub.com/shops/apple.png", res.shopAvatarUrl());
         assertFalse(res.isShopPaused());
         assertEquals(2, res.images().size());

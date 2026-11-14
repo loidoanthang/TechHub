@@ -56,6 +56,8 @@ export interface PublicProductDetailResponse {
   totalStock: number;
   inStock: boolean;
   createdAt: string;
+  //sellerid - for chat
+  sellerUserId?: string | null;
 }
 
 // UI product model

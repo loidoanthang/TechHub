@@ -15,6 +15,22 @@ public record PublicShopResponse(
         ShopStatus status,
         String warehouseProvince,
         String warehouseDistrict,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        UUID sellerUserId
 ) {
+    public PublicShopResponse(
+            UUID id,
+            String sellerName,
+            String name,
+            String description,
+            String avatarUrl,
+            String bannerUrl,
+            ShopStatus status,
+            String warehouseProvince,
+            String warehouseDistrict,
+            LocalDateTime createdAt
+    ) {
+        this(id, sellerName, name, description, avatarUrl, bannerUrl, status,
+                warehouseProvince, warehouseDistrict, createdAt, null);
+    }
 }

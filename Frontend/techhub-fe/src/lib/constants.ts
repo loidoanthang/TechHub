@@ -1,6 +1,11 @@
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
 
+//Web Socket
+export const WS_CHAT_URL =
+  process.env.NEXT_PUBLIC_WS_URL ||
+  (API_BASE_URL.replace(/^http/, "ws") + "/ws-chat" as string);
+
 export const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
@@ -14,6 +19,11 @@ export const STORAGE_KEYS = {
 } as const;
 
 export const API_ENDPOINTS = {
+  CONVERSATIONS: {
+    BASE: "/api/conversations",
+    MESSAGES: (id: string) => `/api/conversations/${id}/messages`,
+    DELETE: (id: string) => `/api/conversations/${id}`,
+  },
   AUTH: {
     LOGIN: "/api/auth/login",
     REGISTER: "/api/auth/register",
@@ -186,6 +196,7 @@ export const ROUTES = {
     WISHLIST: "/account/wishlist",
     FOLLOWED_SHOPS: "/account/followed-shops",
     NOTIFICATIONS: "/account/notifications",
+    MESSAGES: "/account/messages",
   },
   SELLER: {
     DASHBOARD: "/seller/dashboard",
@@ -199,6 +210,7 @@ export const ROUTES = {
     VOUCHERS: "/seller/vouchers",
     SETTINGS: "/seller/settings",
     NOTIFICATIONS: "/seller/notifications",
+    CHAT: "/seller/chat",
   },
   ADMIN: {
     DASHBOARD: "/admin/dashboard",

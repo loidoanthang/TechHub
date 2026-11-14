@@ -11,6 +11,7 @@ import com.techhub.model.dto.response.PublicProductDetailResponse;
 import com.techhub.model.entity.Product;
 import com.techhub.model.entity.ProductImage;
 import com.techhub.model.entity.ProductVariant;
+import com.techhub.model.entity.User;
 import com.techhub.model.enums.*;
 import com.techhub.repository.ProductImageRepository;
 import com.techhub.repository.ProductRepository;
@@ -252,6 +253,13 @@ public class ProductServiceImpl implements ProductService {
                 .sum();
         boolean inStock = totalStock > 0;
         boolean isShopPaused = product.getShop().getStatus() == ShopStatus.PAUSED;
+        String sellerName = (product.getShop() != null && product.getShop().getSeller() != null)
+                ? product.getShop().getSeller().getSellerName()
+                : null;
+        User sellerUser = (product.getShop() != null && product.getShop().getSeller() != null)
+                ? product.getShop().getSeller().getUser()
+                : null;
+        UUID sellerUserId = sellerUser != null ? sellerUser.getId() : null;
 
         // 7. In-Memory Assembly to PublicProductDetailResponse DTO
         return new PublicProductDetailResponse(
@@ -264,6 +272,7 @@ public class ProductServiceImpl implements ProductService {
                 product.getCategory().getName(),
                 product.getShop().getId(),
                 product.getShop().getName(),
+                sellerName,
                 product.getShop().getAvatarUrl(),
                 isShopPaused,
                 product.getAttributes() != null ? product.getAttributes() : Collections.emptyMap(),
@@ -274,7 +283,8 @@ public class ProductServiceImpl implements ProductService {
                 maxPrice,
                 totalStock,
                 inStock,
-                product.getCreatedAt()
+                product.getCreatedAt(),
+                sellerUserId
         );
     }
 

@@ -78,7 +78,8 @@ public class ShopServiceImpl implements ShopService {
                 shop.getStatus(),
                 warehouseProvince,
                 warehouseDistrict,
-                shop.getCreatedAt()
+                shop.getCreatedAt(),
+                user != null ? user.getId() : null
         );
     }
 }

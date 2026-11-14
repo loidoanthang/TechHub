@@ -175,9 +175,12 @@ public class ConversationServiceImpl implements ConversationService {
         }
 
         // 3. Truy vấn tin nhắn theo Cursor (lấy limit + 1 để xác định hasMore)
+        // Postgres không thể suy luận kiểu khi :param dùng trong "IS NULL OR",
+        // nên thay vì truyền NULL ta dùng mốc 9999-12-31 = "không giới hạn dưới".
+        LocalDateTime effectiveBefore = beforeTime != null ? beforeTime : LocalDateTime.of(9999, 12, 31, 23, 59, 59);
         List<Message> messages = messageRepository.findMessagesBefore(
                 conversationId,
-                beforeTime,
+                effectiveBefore,
                 PageRequest.of(0, limit + 1)
         );
 

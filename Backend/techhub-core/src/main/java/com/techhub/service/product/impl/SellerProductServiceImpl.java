@@ -209,6 +209,7 @@ public class SellerProductServiceImpl implements SellerProductService {
         return new ProductDetailResponse(
                 savedProduct.getId(),
                 shop.getId(),
+                seller.getSellerName(),
                 category.getId(),
                 category.getName(),
                 savedProduct.getBrandName(),
@@ -449,6 +450,7 @@ public class SellerProductServiceImpl implements SellerProductService {
         return new ProductDetailResponse(
                 product.getId(),
                 shop.getId(),
+                seller.getSellerName(),
                 product.getCategory().getId(),
                 product.getCategory().getName(),
                 product.getBrandName(),
@@ -627,6 +629,7 @@ public class SellerProductServiceImpl implements SellerProductService {
         return new ProductDetailResponse(
                 updatedProduct.getId(),
                 shop.getId(),
+                seller.getSellerName(),
                 targetCategory.getId(),
                 targetCategory.getName(),
                 updatedProduct.getBrandName(),
@@ -1086,7 +1089,7 @@ public class SellerProductServiceImpl implements SellerProductService {
         Product savedProduct = productRepository.save(product);
         log.info("Product {} successfully submitted for approval (status: PENDING_APPROVAL)", productId);
 
-        return buildProductDetailResponse(savedProduct, shop);
+        return buildProductDetailResponse(savedProduct, shop, seller.getSellerName());
     }
 
     @Override
@@ -1132,7 +1135,7 @@ public class SellerProductServiceImpl implements SellerProductService {
         // 4. Idempotency Check (If already at requested visibility status, return directly)
         if (product.getVisibilityStatus() == request.visibilityStatus()) {
             log.info("Product {} is already {}. Returning directly (idempotent).", productId, request.visibilityStatus());
-            return buildProductDetailResponse(product, shop);
+            return buildProductDetailResponse(product, shop, seller.getSellerName());
         }
 
         // 5. Validate Publish Preconditions when transitioning to PUBLISHED
@@ -1169,10 +1172,10 @@ public class SellerProductServiceImpl implements SellerProductService {
         Product savedProduct = productRepository.save(product);
         log.info("Product {} visibility successfully updated to {}", productId, request.visibilityStatus());
 
-        return buildProductDetailResponse(savedProduct, shop);
+        return buildProductDetailResponse(savedProduct, shop, seller.getSellerName());
     }
 
-    private ProductDetailResponse buildProductDetailResponse(Product product, Shop shop) {
+    private ProductDetailResponse buildProductDetailResponse(Product product, Shop shop, String sellerName) {
         List<ProductImage> images = productImageRepository.findByProductIdOrderByDisplayOrderAsc(product.getId());
         List<ProductVariant> variants = productVariantRepository.findByProductIdOrderByCreatedAtAsc(product.getId());
 
@@ -1195,7 +1198,8 @@ public class SellerProductServiceImpl implements SellerProductService {
 
         return new ProductDetailResponse(
                 product.getId(),
-                shop.getId(),
+                shop != null ? shop.getId() : null,
+                sellerName,
                 product.getCategory().getId(),
                 product.getCategory().getName(),
                 product.getBrandName(),

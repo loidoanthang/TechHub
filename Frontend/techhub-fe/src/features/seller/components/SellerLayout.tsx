@@ -25,12 +25,13 @@ import {
   FileX,
   RotateCcw,
   MessageSquareQuote,
+  MessageCircle,
   Wallet,
   Bell,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import { useSellerShopQuery, useUpdateShopStatusMutation } from "../hooks/useSellerQueries";
-import { useUnreadNotificationCount } from "@/features/notifications/api/notificationQueries";
+import { useSellerShopQuery, useUpdateShopStatusMutation } from "../hooks/useSellerQueries";import { useUnreadNotificationCount } from "@/features/notifications/api/notificationQueries";
+import { useChatUnreadCount } from "@/features/chat/hooks/useChatWebSocket";
 import { NotificationBell } from "@/features/notifications/components";
 import { ROUTES } from "@/lib/constants";
 import { UserAvatar } from "@/components/shared";
@@ -54,6 +55,7 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
   const { data: shop, isLoading: isShopLoading } = useSellerShopQuery();
   const { badgeText: notifBadge, hasUnread: hasUnreadNotif } =
     useUnreadNotificationCount({ enabled: isAuthenticated });
+  const chatUnread = useChatUnreadCount(isAuthenticated, null, user?.id ?? null);
   const updateStatusMutation = useUpdateShopStatusMutation();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -165,6 +167,17 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
           href: ROUTES.SELLER.NOTIFICATIONS,
           icon: Bell,
           badge: hasUnreadNotif ? notifBadge : undefined,
+        },
+        {
+          label: "Tin nhắn khách hàng",
+          href: ROUTES.SELLER.CHAT,
+          icon: MessageCircle,
+          badge:
+            chatUnread > 0
+              ? chatUnread > 99
+                ? "99+"
+                : String(chatUnread)
+              : undefined,
         },
       ],
     },
