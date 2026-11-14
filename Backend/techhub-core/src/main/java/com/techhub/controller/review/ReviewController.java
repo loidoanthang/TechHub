@@ -1,7 +1,7 @@
 package com.techhub.controller.review;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.response.review.HelpfulVoteResponse;
+import com.techhub.modules.review.dto.response.HelpfulVoteResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;

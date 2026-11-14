@@ -1,18 +1,18 @@
 package com.techhub.service.product;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.CreateProductRequest;
-import com.techhub.model.dto.response.ProductDetailResponse;
-import com.techhub.model.dto.response.SellerProductSummaryResponse;
+import com.techhub.modules.product.dto.request.CreateProductRequest;
+import com.techhub.modules.product.dto.response.ProductDetailResponse;
+import com.techhub.modules.seller.dto.response.SellerProductSummaryResponse;
 import com.techhub.model.enums.ProductApprovalStatus;
 import com.techhub.model.enums.ProductVisibilityStatus;
 
-import com.techhub.model.dto.request.CreateProductVariantRequest;
-import com.techhub.model.dto.request.UpdateProductRequest;
-import com.techhub.model.dto.request.UpdateProductVariantRequest;
-import com.techhub.model.dto.response.ProductVariantResponse;
+import com.techhub.modules.product.dto.request.CreateProductVariantRequest;
+import com.techhub.modules.product.dto.request.UpdateProductRequest;
+import com.techhub.modules.product.dto.request.UpdateProductVariantRequest;
+import com.techhub.modules.product.dto.response.ProductVariantResponse;
 
-import com.techhub.model.dto.request.UpdateProductVisibilityRequest;
+import com.techhub.modules.product.dto.request.UpdateProductVisibilityRequest;
 
 import java.util.UUID;
 

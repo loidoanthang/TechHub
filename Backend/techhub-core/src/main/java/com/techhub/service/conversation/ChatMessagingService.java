@@ -1,7 +1,7 @@
 package com.techhub.service.conversation;
 
-import com.techhub.model.dto.request.conversation.SendChatMessageRequest;
-import com.techhub.model.dto.response.conversation.MessageResponse;
+import com.techhub.modules.conversation.dto.request.SendChatMessageRequest;
+import com.techhub.modules.conversation.dto.response.MessageResponse;
 
 import java.util.UUID;
 

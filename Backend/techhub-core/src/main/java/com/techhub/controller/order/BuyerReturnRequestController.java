@@ -1,8 +1,8 @@
 package com.techhub.controller.order;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.request.CreateReturnRequest;
-import com.techhub.model.dto.response.ReturnRequestResponse;
+import com.techhub.modules.order.dto.request.CreateReturnRequest;
+import com.techhub.modules.order.dto.response.ReturnRequestResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.order.ReturnRequestService;
 import jakarta.validation.Valid;

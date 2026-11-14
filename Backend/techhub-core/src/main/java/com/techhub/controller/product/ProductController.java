@@ -2,9 +2,9 @@ package com.techhub.controller.product;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.response.ProductSummaryResponse;
-import com.techhub.model.dto.response.PublicProductDetailResponse;
-import com.techhub.model.dto.response.RecentlyViewedResponse;
+import com.techhub.modules.product.dto.response.ProductSummaryResponse;
+import com.techhub.modules.product.dto.response.PublicProductDetailResponse;
+import com.techhub.modules.product.dto.response.RecentlyViewedResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.product.ProductService;
 import com.techhub.service.recentlyviewed.RecentlyViewedService;

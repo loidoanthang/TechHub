@@ -3,13 +3,13 @@ package com.techhub.controller.category;
 import com.techhub.common.ApiResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.CreateCategoryAttributeRequest;
-import com.techhub.model.dto.request.CreateCategoryRequest;
-import com.techhub.model.dto.request.UpdateCategoryAttributeRequest;
-import com.techhub.model.dto.request.UpdateCategoryRequest;
-import com.techhub.model.dto.request.UpdateCategoryStatusRequest;
-import com.techhub.model.dto.response.CategoryAttributeResponse;
-import com.techhub.model.dto.response.CategoryDetailResponse;
+import com.techhub.modules.category.dto.request.CreateCategoryAttributeRequest;
+import com.techhub.modules.category.dto.request.CreateCategoryRequest;
+import com.techhub.modules.category.dto.request.UpdateCategoryAttributeRequest;
+import com.techhub.modules.category.dto.request.UpdateCategoryRequest;
+import com.techhub.modules.category.dto.request.UpdateCategoryStatusRequest;
+import com.techhub.modules.category.dto.response.CategoryAttributeResponse;
+import com.techhub.modules.category.dto.response.CategoryDetailResponse;
 import com.techhub.model.enums.CategoryAttributeDataType;
 import com.techhub.model.enums.CategoryStatus;
 import com.techhub.service.category.AdminCategoryService;
@@ -185,7 +185,7 @@ class AdminCategoryControllerTest {
     @DisplayName("TC-19: controller_getCategories_Success - Trả về HTTP 200 OK kèm danh sách phân trang")
     void controller_getCategories_Success() {
         // Arrange
-        com.techhub.model.dto.response.CategorySummaryResponse summary = new com.techhub.model.dto.response.CategorySummaryResponse(
+        com.techhub.modules.category.dto.response.CategorySummaryResponse summary = new com.techhub.modules.category.dto.response.CategorySummaryResponse(
                 UUID.randomUUID(),
                 "Điện thoại",
                 "Mô tả",
@@ -194,14 +194,14 @@ class AdminCategoryControllerTest {
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
-        com.techhub.common.PageResponse<com.techhub.model.dto.response.CategorySummaryResponse> pageResponse =
+        com.techhub.common.PageResponse<com.techhub.modules.category.dto.response.CategorySummaryResponse> pageResponse =
                 new com.techhub.common.PageResponse<>(List.of(summary), 0, 20, 1, 1, true);
 
         when(adminCategoryService.getCategories("điện", CategoryStatus.ACTIVE, 0, 20, "createdAt", "desc"))
                 .thenReturn(pageResponse);
 
         // Act
-        ApiResponse<com.techhub.common.PageResponse<com.techhub.model.dto.response.CategorySummaryResponse>> response =
+        ApiResponse<com.techhub.common.PageResponse<com.techhub.modules.category.dto.response.CategorySummaryResponse>> response =
                 adminCategoryController.getCategories("điện", CategoryStatus.ACTIVE, 0, 20, "createdAt", "desc");
 
         // Assert

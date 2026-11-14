@@ -1,8 +1,8 @@
 package com.techhub.controller.category;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.response.CategoryAttributeResponse;
-import com.techhub.model.dto.response.CategorySummaryResponse;
+import com.techhub.modules.category.dto.response.CategoryAttributeResponse;
+import com.techhub.modules.category.dto.response.CategorySummaryResponse;
 import com.techhub.service.category.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

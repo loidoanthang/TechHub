@@ -2,8 +2,8 @@ package com.techhub.controller.review;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.response.review.ProductRatingSummaryResponse;
-import com.techhub.model.dto.response.review.ProductReviewResponse;
+import com.techhub.modules.review.dto.response.ProductRatingSummaryResponse;
+import com.techhub.modules.review.dto.response.ProductReviewResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.review.ProductReviewService;
 import jakarta.validation.constraints.Max;

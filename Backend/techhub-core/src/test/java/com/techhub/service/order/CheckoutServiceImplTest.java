@@ -2,12 +2,12 @@ package com.techhub.service.order;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.CheckoutPreviewRequest;
-import com.techhub.model.dto.request.PlaceOrderRequest;
-import com.techhub.model.dto.request.ShopOrderRequest;
-import com.techhub.model.dto.response.CartItemPreviewResponse;
-import com.techhub.model.dto.response.CheckoutPreviewResponse;
-import com.techhub.model.dto.response.PlaceOrderResponse;
+import com.techhub.modules.order.dto.request.CheckoutPreviewRequest;
+import com.techhub.modules.order.dto.request.PlaceOrderRequest;
+import com.techhub.modules.shop.dto.request.ShopOrderRequest;
+import com.techhub.modules.cart.dto.response.CartItemPreviewResponse;
+import com.techhub.modules.order.dto.response.CheckoutPreviewResponse;
+import com.techhub.modules.order.dto.response.PlaceOrderResponse;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.*;
 import com.techhub.repository.*;

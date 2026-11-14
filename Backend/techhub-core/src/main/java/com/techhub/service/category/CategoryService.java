@@ -1,7 +1,7 @@
 package com.techhub.service.category;
 
-import com.techhub.model.dto.response.CategoryAttributeResponse;
-import com.techhub.model.dto.response.CategorySummaryResponse;
+import com.techhub.modules.category.dto.response.CategoryAttributeResponse;
+import com.techhub.modules.category.dto.response.CategorySummaryResponse;
 
 import java.util.List;
 import java.util.UUID;

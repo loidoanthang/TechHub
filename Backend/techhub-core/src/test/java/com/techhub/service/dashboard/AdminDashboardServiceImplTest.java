@@ -2,8 +2,8 @@ package com.techhub.service.dashboard;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.dashboard.AdminDashboardMetricsResponse;
-import com.techhub.model.dto.response.dashboard.TopPerformingShopDto;
+import com.techhub.modules.dashboard.dto.response.AdminDashboardMetricsResponse;
+import com.techhub.modules.dashboard.dto.response.TopPerformingShopDto;
 import com.techhub.model.enums.DashboardPeriod;
 import com.techhub.model.enums.OrderStatus;
 import com.techhub.model.enums.PayoutStatus;

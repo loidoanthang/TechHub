@@ -2,9 +2,9 @@ package com.techhub.service.notification.impl;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.notification.BroadcastNotificationRequest;
-import com.techhub.model.dto.response.notification.BroadcastNotificationResponse;
-import com.techhub.model.dto.response.notification.NotificationResponse;
+import com.techhub.modules.notification.dto.request.BroadcastNotificationRequest;
+import com.techhub.modules.notification.dto.response.BroadcastNotificationResponse;
+import com.techhub.modules.notification.dto.response.NotificationResponse;
 import com.techhub.model.enums.NotificationType;
 import com.techhub.model.enums.TargetAudience;
 import com.techhub.repository.NotificationRepository;

@@ -1,7 +1,7 @@
 package com.techhub.controller.seller;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.response.dashboard.SellerDashboardMetricsResponse;
+import com.techhub.modules.dashboard.dto.response.SellerDashboardMetricsResponse;
 import com.techhub.model.enums.DashboardPeriod;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.dashboard.SellerDashboardService;

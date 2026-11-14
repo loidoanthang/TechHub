@@ -1,7 +1,7 @@
 package com.techhub.service.wishlist;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.response.WishlistResponse;
+import com.techhub.modules.product.dto.response.WishlistResponse;
 
 import java.util.UUID;
 

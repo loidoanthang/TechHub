@@ -2,7 +2,7 @@ package com.techhub.service.recentlyviewed;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.RecentlyViewedResponse;
+import com.techhub.modules.product.dto.response.RecentlyViewedResponse;
 import com.techhub.model.entity.Product;
 import com.techhub.model.entity.RecentlyViewedProduct;
 import com.techhub.model.entity.Shop;

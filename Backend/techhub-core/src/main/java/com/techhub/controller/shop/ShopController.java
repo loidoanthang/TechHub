@@ -1,9 +1,9 @@
 package com.techhub.controller.shop;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.response.CartShopVoucherResponse;
-import com.techhub.model.dto.response.FollowShopResponse;
-import com.techhub.model.dto.response.PublicShopResponse;
+import com.techhub.modules.voucher.dto.response.CartShopVoucherResponse;
+import com.techhub.modules.shop.dto.response.FollowShopResponse;
+import com.techhub.modules.shop.dto.response.PublicShopResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.shop.ShopFollowingService;
 import com.techhub.service.shop.ShopService;

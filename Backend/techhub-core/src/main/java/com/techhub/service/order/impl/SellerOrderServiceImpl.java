@@ -3,8 +3,7 @@ package com.techhub.service.order.impl;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.UpdateSellerOrderStatusRequest;
-import com.techhub.model.dto.response.*;
+import com.techhub.modules.seller.dto.request.UpdateSellerOrderStatusRequest;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.*;
 import com.techhub.repository.*;
@@ -27,6 +26,15 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import com.techhub.modules.order.dto.request.CancelOrderRequest;
+import com.techhub.modules.order.dto.request.ProcessCancellationRequest;
+import com.techhub.modules.order.dto.response.AddressSnapshotResponse;
+import com.techhub.modules.order.dto.response.CancellationRequestResponse;
+import com.techhub.modules.order.dto.response.OrderTimelineStepResponse;
+import com.techhub.modules.seller.dto.response.SellerOrderBuyerResponse;
+import com.techhub.modules.seller.dto.response.SellerOrderDetailResponse;
+import com.techhub.modules.seller.dto.response.SellerOrderItemResponse;
+import com.techhub.modules.seller.dto.response.SellerOrderResponse;
 
 @Slf4j
 @Service
@@ -229,7 +237,7 @@ public class SellerOrderServiceImpl implements SellerOrderService {
 
     @Override
     @Transactional
-    public SellerOrderDetailResponse cancelSellerOrder(UUID userId, UUID orderId, com.techhub.model.dto.request.CancelOrderRequest request) {
+    public SellerOrderDetailResponse cancelSellerOrder(UUID userId, UUID orderId, com.techhub.modules.order.dto.request.CancelOrderRequest request) {
         log.info("Processing cancelSellerOrder for userId={}, orderId={}", userId, orderId);
 
         Shop shop = validateSellerAndShop(userId);
@@ -288,7 +296,7 @@ public class SellerOrderServiceImpl implements SellerOrderService {
 
     @Override
     @Transactional
-    public CancellationRequestResponse processCancellationRequest(UUID userId, UUID requestId, com.techhub.model.dto.request.ProcessCancellationRequest request) {
+    public CancellationRequestResponse processCancellationRequest(UUID userId, UUID requestId, com.techhub.modules.order.dto.request.ProcessCancellationRequest request) {
         log.info("Processing processCancellationRequest for userId={}, requestId={}, decision={}",
                 userId, requestId, request != null ? request.decision() : null);
 

@@ -2,14 +2,14 @@ package com.techhub.controller.order;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.response.BuyerOrderDetailResponse;
-import com.techhub.model.dto.response.BuyerOrderResponse;
+import com.techhub.modules.order.dto.response.BuyerOrderDetailResponse;
+import com.techhub.modules.order.dto.response.BuyerOrderResponse;
 import com.techhub.model.enums.OrderStatus;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.order.OrderService;
 import lombok.RequiredArgsConstructor;
-import com.techhub.model.dto.request.CreateCancellationRequest;
-import com.techhub.model.dto.response.CancellationRequestResponse;
+import com.techhub.modules.order.dto.request.CreateCancellationRequest;
+import com.techhub.modules.order.dto.response.CancellationRequestResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -73,7 +73,7 @@ public class BuyerOrderController {
     @PreAuthorize("hasRole('BUYER')")
     public ApiResponse<BuyerOrderDetailResponse> cancelBuyerOrder(
             @PathVariable UUID id,
-            @Valid @RequestBody com.techhub.model.dto.request.CancelOrderRequest request
+            @Valid @RequestBody com.techhub.modules.order.dto.request.CancelOrderRequest request
     ) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         BuyerOrderDetailResponse response = orderService.cancelBuyerOrder(currentUserId, id, request);
@@ -82,9 +82,9 @@ public class BuyerOrderController {
 
     @PostMapping("/{id}/reorder")
     @PreAuthorize("hasRole('BUYER')")
-    public ApiResponse<com.techhub.model.dto.response.ReorderResponse> reorder(@PathVariable UUID id) {
+    public ApiResponse<com.techhub.modules.order.dto.response.ReorderResponse> reorder(@PathVariable UUID id) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
-        com.techhub.model.dto.response.ReorderResponse response = orderService.reorder(currentUserId, id);
+        com.techhub.modules.order.dto.response.ReorderResponse response = orderService.reorder(currentUserId, id);
         return ApiResponse.success(response, "Xử lý mua lại đơn hàng thành công", null);
     }
 }

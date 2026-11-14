@@ -1,8 +1,8 @@
 package com.techhub.service.shop;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.response.FollowShopResponse;
-import com.techhub.model.dto.response.FollowedShopResponse;
+import com.techhub.modules.shop.dto.response.FollowShopResponse;
+import com.techhub.modules.shop.dto.response.FollowedShopResponse;
 
 import java.util.UUID;
 

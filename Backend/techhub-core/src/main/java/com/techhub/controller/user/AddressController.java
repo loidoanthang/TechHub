@@ -1,9 +1,9 @@
 package com.techhub.controller.user;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.request.CreateAddressRequest;
-import com.techhub.model.dto.request.UpdateAddressRequest;
-import com.techhub.model.dto.response.AddressResponse;
+import com.techhub.modules.user.dto.request.CreateAddressRequest;
+import com.techhub.modules.user.dto.request.UpdateAddressRequest;
+import com.techhub.modules.user.dto.response.AddressResponse;
 import com.techhub.service.user.AddressService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -2,8 +2,8 @@ package com.techhub.service.user.impl;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.CreatePaymentInfoRequest;
-import com.techhub.model.dto.response.PaymentInfoResponse;
+import com.techhub.modules.payment.dto.request.CreatePaymentInfoRequest;
+import com.techhub.modules.payment.dto.response.PaymentInfoResponse;
 import com.techhub.model.entity.User;
 import com.techhub.model.entity.UserPaymentInfo;
 import com.techhub.model.enums.PaymentType;

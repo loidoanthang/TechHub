@@ -3,7 +3,7 @@ package com.techhub.controller.conversation;
 import com.techhub.common.ApiResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.conversation.SendChatMessageRequest;
+import com.techhub.modules.conversation.dto.request.SendChatMessageRequest;
 import com.techhub.model.entity.User;
 import com.techhub.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;

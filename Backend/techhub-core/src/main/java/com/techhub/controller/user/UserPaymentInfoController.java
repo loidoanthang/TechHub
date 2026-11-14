@@ -1,8 +1,8 @@
 package com.techhub.controller.user;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.request.CreatePaymentInfoRequest;
-import com.techhub.model.dto.response.PaymentInfoResponse;
+import com.techhub.modules.payment.dto.request.CreatePaymentInfoRequest;
+import com.techhub.modules.payment.dto.response.PaymentInfoResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.user.UserPaymentInfoService;
 import jakarta.validation.Valid;

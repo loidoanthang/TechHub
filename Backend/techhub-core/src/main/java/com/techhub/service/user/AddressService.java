@@ -1,8 +1,8 @@
 package com.techhub.service.user;
 
-import com.techhub.model.dto.request.CreateAddressRequest;
-import com.techhub.model.dto.request.UpdateAddressRequest;
-import com.techhub.model.dto.response.AddressResponse;
+import com.techhub.modules.user.dto.request.CreateAddressRequest;
+import com.techhub.modules.user.dto.request.UpdateAddressRequest;
+import com.techhub.modules.user.dto.response.AddressResponse;
 
 import java.util.List;
 import java.util.UUID;

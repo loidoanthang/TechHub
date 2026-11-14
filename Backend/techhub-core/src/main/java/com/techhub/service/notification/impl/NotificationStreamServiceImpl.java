@@ -1,6 +1,6 @@
 package com.techhub.service.notification.impl;
 
-import com.techhub.model.dto.response.notification.NotificationResponse;
+import com.techhub.modules.notification.dto.response.NotificationResponse;
 import com.techhub.service.notification.NotificationStreamService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

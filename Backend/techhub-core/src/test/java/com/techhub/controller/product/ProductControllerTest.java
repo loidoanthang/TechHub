@@ -2,7 +2,7 @@ package com.techhub.controller.product;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.response.ProductSummaryResponse;
+import com.techhub.modules.product.dto.response.ProductSummaryResponse;
 import com.techhub.service.product.ProductService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.PublicProductDetailResponse;
-import com.techhub.model.dto.response.ProductVariantResponse;
-import com.techhub.model.dto.response.ProductImageResponse;
-import com.techhub.model.dto.response.RecentlyViewedResponse;
+import com.techhub.modules.product.dto.response.PublicProductDetailResponse;
+import com.techhub.modules.product.dto.response.ProductVariantResponse;
+import com.techhub.modules.product.dto.response.ProductImageResponse;
+import com.techhub.modules.product.dto.response.RecentlyViewedResponse;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.ProductVariantStatus;
 import com.techhub.model.enums.Role;

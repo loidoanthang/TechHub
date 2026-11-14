@@ -1,9 +1,9 @@
 package com.techhub.service.order;
 
-import com.techhub.model.dto.request.CheckoutPreviewRequest;
-import com.techhub.model.dto.request.PlaceOrderRequest;
-import com.techhub.model.dto.response.CheckoutPreviewResponse;
-import com.techhub.model.dto.response.PlaceOrderResponse;
+import com.techhub.modules.order.dto.request.CheckoutPreviewRequest;
+import com.techhub.modules.order.dto.request.PlaceOrderRequest;
+import com.techhub.modules.order.dto.response.CheckoutPreviewResponse;
+import com.techhub.modules.order.dto.response.PlaceOrderResponse;
 
 import java.util.UUID;
 

@@ -1,6 +1,6 @@
 package com.techhub.service.notification;
 
-import com.techhub.model.dto.response.notification.NotificationListResponse;
+import com.techhub.modules.notification.dto.response.NotificationListResponse;
 import com.techhub.model.enums.NotificationType;
 import org.springframework.data.domain.Pageable;
 

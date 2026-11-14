@@ -2,8 +2,8 @@ package com.techhub.controller.payout;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.payout.ProcessPayoutRequest;
-import com.techhub.model.dto.response.payout.AdminPayoutResponse;
+import com.techhub.modules.seller.dto.request.ProcessPayoutRequest;
+import com.techhub.modules.seller.dto.response.AdminPayoutResponse;
 import com.techhub.model.enums.PayoutStatus;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.payout.AdminPayoutService;

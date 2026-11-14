@@ -2,9 +2,9 @@ package com.techhub.service.conversation;
 
 import com.techhub.common.CursorPageResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.conversation.CreateConversationRequest;
-import com.techhub.model.dto.response.conversation.ConversationResponse;
-import com.techhub.model.dto.response.conversation.MessageResponse;
+import com.techhub.modules.conversation.dto.request.CreateConversationRequest;
+import com.techhub.modules.conversation.dto.response.ConversationResponse;
+import com.techhub.modules.conversation.dto.response.MessageResponse;
 import com.techhub.model.enums.ConversationType;
 import org.springframework.data.domain.Pageable;
 

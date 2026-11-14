@@ -2,7 +2,7 @@ package com.techhub.controller.wishlist;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.response.WishlistResponse;
+import com.techhub.modules.product.dto.response.WishlistResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.wishlist.WishlistService;
 import lombok.RequiredArgsConstructor;

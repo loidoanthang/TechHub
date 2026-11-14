@@ -2,9 +2,9 @@ package com.techhub.controller.order;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.UpdateSellerOrderStatusRequest;
-import com.techhub.model.dto.response.SellerOrderDetailResponse;
-import com.techhub.model.dto.response.SellerOrderResponse;
+import com.techhub.modules.seller.dto.request.UpdateSellerOrderStatusRequest;
+import com.techhub.modules.seller.dto.response.SellerOrderDetailResponse;
+import com.techhub.modules.seller.dto.response.SellerOrderResponse;
 import com.techhub.model.enums.OrderStatus;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.order.SellerOrderService;
@@ -69,7 +69,7 @@ public class SellerOrderController {
     @PreAuthorize("hasRole('SELLER')")
     public ApiResponse<SellerOrderDetailResponse> cancelSellerOrder(
             @PathVariable UUID id,
-            @Valid @RequestBody com.techhub.model.dto.request.CancelOrderRequest request
+            @Valid @RequestBody com.techhub.modules.order.dto.request.CancelOrderRequest request
     ) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         SellerOrderDetailResponse response = sellerOrderService.cancelSellerOrder(currentUserId, id, request);
@@ -78,24 +78,24 @@ public class SellerOrderController {
 
     @GetMapping("/cancellation-requests")
     @PreAuthorize("hasRole('SELLER')")
-    public ApiResponse<PageResponse<com.techhub.model.dto.response.CancellationRequestResponse>> getSellerCancellationRequests(
+    public ApiResponse<PageResponse<com.techhub.modules.order.dto.response.CancellationRequestResponse>> getSellerCancellationRequests(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
-        PageResponse<com.techhub.model.dto.response.CancellationRequestResponse> response =
+        PageResponse<com.techhub.modules.order.dto.response.CancellationRequestResponse> response =
                 sellerOrderService.getSellerCancellationRequests(currentUserId, page, size);
         return ApiResponse.success(response, "Fetched seller cancellation requests successfully", null);
     }
 
     @PatchMapping("/cancellation-requests/{id}/process")
     @PreAuthorize("hasRole('SELLER')")
-    public ApiResponse<com.techhub.model.dto.response.CancellationRequestResponse> processCancellationRequest(
+    public ApiResponse<com.techhub.modules.order.dto.response.CancellationRequestResponse> processCancellationRequest(
             @PathVariable UUID id,
-            @Valid @RequestBody com.techhub.model.dto.request.ProcessCancellationRequest request
+            @Valid @RequestBody com.techhub.modules.order.dto.request.ProcessCancellationRequest request
     ) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
-        com.techhub.model.dto.response.CancellationRequestResponse response =
+        com.techhub.modules.order.dto.response.CancellationRequestResponse response =
                 sellerOrderService.processCancellationRequest(currentUserId, id, request);
         return ApiResponse.success(response, "Xử lý yêu cầu hủy đơn thành công", null);
     }

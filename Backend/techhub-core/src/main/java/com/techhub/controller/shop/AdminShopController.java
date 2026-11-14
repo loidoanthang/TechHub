@@ -2,9 +2,9 @@ package com.techhub.controller.shop;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.AdminUpdateShopStatusRequest;
-import com.techhub.model.dto.response.AdminShopDetailResponse;
-import com.techhub.model.dto.response.AdminShopResponse;
+import com.techhub.modules.shop.dto.request.AdminUpdateShopStatusRequest;
+import com.techhub.modules.shop.dto.response.AdminShopDetailResponse;
+import com.techhub.modules.shop.dto.response.AdminShopResponse;
 import com.techhub.model.enums.ShopStatus;
 import com.techhub.service.shop.AdminShopService;
 import jakarta.validation.Valid;

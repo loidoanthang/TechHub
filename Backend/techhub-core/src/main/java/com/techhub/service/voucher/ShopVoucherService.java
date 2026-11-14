@@ -1,6 +1,6 @@
 package com.techhub.service.voucher;
 
-import com.techhub.model.dto.response.CartShopVoucherResponse;
+import com.techhub.modules.voucher.dto.response.CartShopVoucherResponse;
 
 import java.math.BigDecimal;
 import java.util.List;

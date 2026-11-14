@@ -1,19 +1,19 @@
 package com.techhub.service.category;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.CreateCategoryAttributeRequest;
-import com.techhub.model.dto.request.CreateCategoryRequest;
-import com.techhub.model.dto.request.UpdateCategoryRequest;
-import com.techhub.model.dto.response.CategoryAttributeResponse;
-import com.techhub.model.dto.response.CategoryDetailResponse;
-import com.techhub.model.dto.response.CategorySummaryResponse;
+import com.techhub.modules.category.dto.request.CreateCategoryAttributeRequest;
+import com.techhub.modules.category.dto.request.CreateCategoryRequest;
+import com.techhub.modules.category.dto.request.UpdateCategoryRequest;
+import com.techhub.modules.category.dto.response.CategoryAttributeResponse;
+import com.techhub.modules.category.dto.response.CategoryDetailResponse;
+import com.techhub.modules.category.dto.response.CategorySummaryResponse;
 
 import com.techhub.model.enums.CategoryStatus;
 
 import java.util.UUID;
 
-import com.techhub.model.dto.request.UpdateCategoryAttributeRequest;
-import com.techhub.model.dto.request.UpdateCategoryStatusRequest;
+import com.techhub.modules.category.dto.request.UpdateCategoryAttributeRequest;
+import com.techhub.modules.category.dto.request.UpdateCategoryStatusRequest;
 
 public interface AdminCategoryService {
     CategoryDetailResponse createCategory(CreateCategoryRequest request);

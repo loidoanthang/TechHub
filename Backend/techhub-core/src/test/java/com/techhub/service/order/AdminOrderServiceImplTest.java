@@ -3,8 +3,7 @@ package com.techhub.service.order;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.CancelOrderRequest;
-import com.techhub.model.dto.response.*;
+import com.techhub.modules.order.dto.request.CancelOrderRequest;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.*;
 import com.techhub.repository.*;
@@ -31,6 +30,8 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.order.dto.response.AdminOrderDetailResponse;
+import com.techhub.modules.order.dto.response.AdminOrderResponse;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminOrderService")

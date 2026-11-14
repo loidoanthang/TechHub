@@ -1,8 +1,8 @@
 package com.techhub.controller.notification;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.request.notification.BroadcastNotificationRequest;
-import com.techhub.model.dto.response.notification.BroadcastNotificationResponse;
+import com.techhub.modules.notification.dto.request.BroadcastNotificationRequest;
+import com.techhub.modules.notification.dto.response.BroadcastNotificationResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.notification.AdminNotificationService;
 import jakarta.validation.Valid;

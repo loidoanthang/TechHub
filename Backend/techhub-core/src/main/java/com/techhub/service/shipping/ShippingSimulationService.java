@@ -1,6 +1,6 @@
 package com.techhub.service.shipping;
 
-import com.techhub.model.dto.response.ShippingSimulationResponse;
+import com.techhub.modules.shipping.dto.response.ShippingSimulationResponse;
 
 public interface ShippingSimulationService {
 

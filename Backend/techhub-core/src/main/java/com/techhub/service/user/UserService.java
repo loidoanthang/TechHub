@@ -1,7 +1,7 @@
 package com.techhub.service.user;
 
-import com.techhub.model.dto.request.UpdateProfileRequest;
-import com.techhub.model.dto.response.UserProfileResponse;
+import com.techhub.modules.user.dto.request.UpdateProfileRequest;
+import com.techhub.modules.user.dto.response.UserProfileResponse;
 
 public interface UserService {
 

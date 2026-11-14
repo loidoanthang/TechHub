@@ -3,7 +3,7 @@ package com.techhub.service.product;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.SellerProductSummaryResponse;
+import com.techhub.modules.seller.dto.response.SellerProductSummaryResponse;
 import com.techhub.model.entity.Category;
 import com.techhub.model.entity.Product;
 import com.techhub.model.entity.Seller;

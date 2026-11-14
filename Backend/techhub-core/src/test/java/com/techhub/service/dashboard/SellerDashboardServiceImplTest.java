@@ -2,9 +2,9 @@ package com.techhub.service.dashboard;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.dashboard.LowStockVariantDto;
-import com.techhub.model.dto.response.dashboard.SellerDashboardMetricsResponse;
-import com.techhub.model.dto.response.dashboard.TopSellingProductDto;
+import com.techhub.modules.dashboard.dto.response.LowStockVariantDto;
+import com.techhub.modules.dashboard.dto.response.SellerDashboardMetricsResponse;
+import com.techhub.modules.dashboard.dto.response.TopSellingProductDto;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.*;
 import com.techhub.model.projection.OrderStatusSummaryProjection;

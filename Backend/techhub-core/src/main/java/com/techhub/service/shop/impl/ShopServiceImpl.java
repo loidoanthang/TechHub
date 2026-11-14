@@ -2,7 +2,7 @@ package com.techhub.service.shop.impl;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.PublicShopResponse;
+import com.techhub.modules.shop.dto.response.PublicShopResponse;
 import com.techhub.model.entity.Address;
 import com.techhub.model.entity.Seller;
 import com.techhub.model.entity.Shop;

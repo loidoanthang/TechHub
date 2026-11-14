@@ -1,6 +1,6 @@
 package com.techhub.service.voucher;
 
-import com.techhub.model.dto.response.CartPlatformVoucherResponse;
+import com.techhub.modules.voucher.dto.response.CartPlatformVoucherResponse;
 import com.techhub.model.entity.Voucher;
 import com.techhub.model.enums.DiscountType;
 import com.techhub.model.enums.VoucherAppliesTo;

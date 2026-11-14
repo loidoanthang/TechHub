@@ -2,8 +2,8 @@ package com.techhub.service.policy.impl;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.policy.UpdatePlatformPolicyRequest;
-import com.techhub.model.dto.response.policy.PlatformPolicyResponse;
+import com.techhub.modules.policy.dto.request.UpdatePlatformPolicyRequest;
+import com.techhub.modules.policy.dto.response.PlatformPolicyResponse;
 import com.techhub.model.entity.TransactionPolicy;
 import com.techhub.model.entity.User;
 import com.techhub.repository.TransactionPolicyRepository;

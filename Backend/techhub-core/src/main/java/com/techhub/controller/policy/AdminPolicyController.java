@@ -1,8 +1,8 @@
 package com.techhub.controller.policy;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.request.policy.UpdatePlatformPolicyRequest;
-import com.techhub.model.dto.response.policy.PlatformPolicyResponse;
+import com.techhub.modules.policy.dto.request.UpdatePlatformPolicyRequest;
+import com.techhub.modules.policy.dto.response.PlatformPolicyResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.policy.AdminPolicyService;
 import jakarta.validation.Valid;

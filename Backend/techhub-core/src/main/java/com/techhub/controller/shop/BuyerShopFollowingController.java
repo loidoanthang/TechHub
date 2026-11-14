@@ -2,7 +2,7 @@ package com.techhub.controller.shop;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.response.FollowedShopResponse;
+import com.techhub.modules.shop.dto.response.FollowedShopResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.shop.ShopFollowingService;
 import lombok.RequiredArgsConstructor;

@@ -2,8 +2,8 @@ package com.techhub.controller.review;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.review.SellerResponseRequest;
-import com.techhub.model.dto.response.review.SellerReviewResponse;
+import com.techhub.modules.review.dto.request.SellerResponseRequest;
+import com.techhub.modules.review.dto.response.SellerReviewResponse;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.Role;
 import com.techhub.model.enums.UserStatus;

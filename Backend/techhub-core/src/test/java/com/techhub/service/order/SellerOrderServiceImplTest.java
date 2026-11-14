@@ -3,8 +3,7 @@ package com.techhub.service.order;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.UpdateSellerOrderStatusRequest;
-import com.techhub.model.dto.response.*;
+import com.techhub.modules.seller.dto.request.UpdateSellerOrderStatusRequest;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.*;
 import com.techhub.repository.OrderItemRepository;
@@ -36,6 +35,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.order.dto.request.ProcessCancellationRequest;
+import com.techhub.modules.order.dto.response.CancellationRequestResponse;
+import com.techhub.modules.seller.dto.response.SellerOrderDetailResponse;
+import com.techhub.modules.seller.dto.response.SellerOrderResponse;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerOrderService (GET /api/seller/orders)")
@@ -1369,8 +1372,8 @@ class SellerOrderServiceImplTest {
         when(orderRepository.findByPaymentId(payment.getId())).thenReturn(List.of(order));
         when(voucherRedemptionRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.request.ProcessCancellationRequest request =
-                new com.techhub.model.dto.request.ProcessCancellationRequest(CancellationRequestStatus.APPROVED, "Shop đồng ý hủy");
+        com.techhub.modules.order.dto.request.ProcessCancellationRequest request =
+                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(CancellationRequestStatus.APPROVED, "Shop đồng ý hủy");
 
         CancellationRequestResponse response = sellerOrderService.processCancellationRequest(userId, requestId, request);
 
@@ -1419,8 +1422,8 @@ class SellerOrderServiceImplTest {
         when(paymentRepository.findByIdForUpdate(payment.getId())).thenReturn(Optional.of(payment));
         when(voucherRedemptionRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.request.ProcessCancellationRequest request =
-                new com.techhub.model.dto.request.ProcessCancellationRequest(CancellationRequestStatus.APPROVED, null);
+        com.techhub.modules.order.dto.request.ProcessCancellationRequest request =
+                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(CancellationRequestStatus.APPROVED, null);
 
         CancellationRequestResponse response = sellerOrderService.processCancellationRequest(userId, requestId, request);
 
@@ -1453,8 +1456,8 @@ class SellerOrderServiceImplTest {
         when(cancellationRequestRepository.findByIdAndShopIdForUpdate(requestId, shopId)).thenReturn(Optional.of(cr));
         when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
 
-        com.techhub.model.dto.request.ProcessCancellationRequest request =
-                new com.techhub.model.dto.request.ProcessCancellationRequest(CancellationRequestStatus.REJECTED, "Đã đóng gói xong");
+        com.techhub.modules.order.dto.request.ProcessCancellationRequest request =
+                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(CancellationRequestStatus.REJECTED, "Đã đóng gói xong");
 
         CancellationRequestResponse response = sellerOrderService.processCancellationRequest(userId, requestId, request);
 
@@ -1486,8 +1489,8 @@ class SellerOrderServiceImplTest {
         when(cancellationRequestRepository.findByIdAndShopIdForUpdate(requestId, shopId)).thenReturn(Optional.of(cr));
         when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
 
-        com.techhub.model.dto.request.ProcessCancellationRequest request =
-                new com.techhub.model.dto.request.ProcessCancellationRequest(CancellationRequestStatus.APPROVED, "Shop duyệt");
+        com.techhub.modules.order.dto.request.ProcessCancellationRequest request =
+                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(CancellationRequestStatus.APPROVED, "Shop duyệt");
 
         BusinessException ex = assertThrows(BusinessException.class, () ->
                 sellerOrderService.processCancellationRequest(userId, requestId, request));
@@ -1510,8 +1513,8 @@ class SellerOrderServiceImplTest {
 
         when(cancellationRequestRepository.findByIdAndShopIdForUpdate(requestId, shopId)).thenReturn(Optional.of(cr));
 
-        com.techhub.model.dto.request.ProcessCancellationRequest request =
-                new com.techhub.model.dto.request.ProcessCancellationRequest(CancellationRequestStatus.APPROVED, null);
+        com.techhub.modules.order.dto.request.ProcessCancellationRequest request =
+                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(CancellationRequestStatus.APPROVED, null);
 
         BusinessException ex = assertThrows(BusinessException.class, () ->
                 sellerOrderService.processCancellationRequest(userId, requestId, request));
@@ -1527,8 +1530,8 @@ class SellerOrderServiceImplTest {
         UUID requestId = UUID.randomUUID();
         when(cancellationRequestRepository.findByIdAndShopIdForUpdate(requestId, shopId)).thenReturn(Optional.empty());
 
-        com.techhub.model.dto.request.ProcessCancellationRequest request =
-                new com.techhub.model.dto.request.ProcessCancellationRequest(CancellationRequestStatus.APPROVED, null);
+        com.techhub.modules.order.dto.request.ProcessCancellationRequest request =
+                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(CancellationRequestStatus.APPROVED, null);
 
         BusinessException ex = assertThrows(BusinessException.class, () ->
                 sellerOrderService.processCancellationRequest(userId, requestId, request));
@@ -1572,8 +1575,8 @@ class SellerOrderServiceImplTest {
         when(voucherRedemptionRepository.findByOrderId(orderId)).thenReturn(List.of(vr));
         when(voucherRepository.findAllWithShopByIdInForUpdate(List.of(voucher.getId()))).thenReturn(List.of(voucher));
 
-        com.techhub.model.dto.request.ProcessCancellationRequest request =
-                new com.techhub.model.dto.request.ProcessCancellationRequest(CancellationRequestStatus.APPROVED, "OK");
+        com.techhub.modules.order.dto.request.ProcessCancellationRequest request =
+                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(CancellationRequestStatus.APPROVED, "OK");
 
         CancellationRequestResponse response = sellerOrderService.processCancellationRequest(userId, requestId, request);
 

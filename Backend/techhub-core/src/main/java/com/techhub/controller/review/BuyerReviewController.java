@@ -1,9 +1,9 @@
 package com.techhub.controller.review;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.request.review.CreateReviewRequest;
-import com.techhub.model.dto.request.review.UpdateReviewRequest;
-import com.techhub.model.dto.response.review.ReviewResponse;
+import com.techhub.modules.review.dto.request.CreateReviewRequest;
+import com.techhub.modules.review.dto.request.UpdateReviewRequest;
+import com.techhub.modules.review.dto.response.ReviewResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.review.ReviewService;
 import jakarta.validation.Valid;

@@ -1,6 +1,6 @@
 package com.techhub.service.notification;
 
-import com.techhub.model.dto.response.notification.NotificationResponse;
+import com.techhub.modules.notification.dto.response.NotificationResponse;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.UUID;

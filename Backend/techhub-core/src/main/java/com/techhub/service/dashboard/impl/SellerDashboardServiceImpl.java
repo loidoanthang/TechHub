@@ -2,7 +2,6 @@ package com.techhub.service.dashboard.impl;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.dashboard.*;
 import com.techhub.model.entity.ProductVariant;
 import com.techhub.model.entity.Seller;
 import com.techhub.model.entity.Shop;
@@ -27,6 +26,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import com.techhub.modules.dashboard.dto.response.LowStockVariantDto;
+import com.techhub.modules.dashboard.dto.response.SellerDashboardMetricsResponse;
+import com.techhub.modules.dashboard.dto.response.SellerDashboardSummaryDto;
+import com.techhub.modules.dashboard.dto.response.SellerOrderStatusBreakdownDto;
+import com.techhub.modules.dashboard.dto.response.TopSellingProductDto;
 
 @Service
 @RequiredArgsConstructor

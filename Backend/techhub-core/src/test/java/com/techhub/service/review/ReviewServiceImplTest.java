@@ -2,11 +2,11 @@ package com.techhub.service.review;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.review.CreateReviewRequest;
-import com.techhub.model.dto.request.review.ReviewMediaRequest;
-import com.techhub.model.dto.request.review.UpdateReviewRequest;
-import com.techhub.model.dto.response.review.HelpfulVoteResponse;
-import com.techhub.model.dto.response.review.ReviewResponse;
+import com.techhub.modules.review.dto.request.CreateReviewRequest;
+import com.techhub.modules.review.dto.request.ReviewMediaRequest;
+import com.techhub.modules.review.dto.request.UpdateReviewRequest;
+import com.techhub.modules.review.dto.response.HelpfulVoteResponse;
+import com.techhub.modules.review.dto.response.ReviewResponse;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.OrderStatus;
 import com.techhub.model.enums.ReviewMediaType;

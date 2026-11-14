@@ -1,9 +1,9 @@
 package com.techhub.controller.payment;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.response.BuyerPaymentStatusResponse;
-import com.techhub.model.dto.response.PaymentChannelResponse;
-import com.techhub.model.dto.response.PaymentMethodResponse;
+import com.techhub.modules.payment.dto.response.BuyerPaymentStatusResponse;
+import com.techhub.modules.payment.dto.response.PaymentChannelResponse;
+import com.techhub.modules.payment.dto.response.PaymentMethodResponse;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.PaymentMethod;
 import com.techhub.model.enums.PaymentStatus;

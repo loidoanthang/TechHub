@@ -4,8 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.CancelOrderRequest;
-import com.techhub.model.dto.response.*;
+import com.techhub.modules.order.dto.request.CancelOrderRequest;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.*;
 import com.techhub.security.CustomUserDetails;
@@ -42,6 +41,13 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.order.dto.response.AddressSnapshotResponse;
+import com.techhub.modules.order.dto.response.AdminOrderBuyerResponse;
+import com.techhub.modules.order.dto.response.AdminOrderDetailResponse;
+import com.techhub.modules.order.dto.response.AdminOrderItemResponse;
+import com.techhub.modules.order.dto.response.AdminOrderPaymentResponse;
+import com.techhub.modules.order.dto.response.AdminOrderResponse;
+import com.techhub.modules.shop.dto.response.AdminOrderShopResponse;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminOrderController (GET /api/admin/orders)")

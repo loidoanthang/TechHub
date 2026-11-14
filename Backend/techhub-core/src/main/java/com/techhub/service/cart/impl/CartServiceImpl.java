@@ -2,15 +2,14 @@ package com.techhub.service.cart.impl;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.CartCountResponse;
-import com.techhub.model.dto.response.CartItemResponse;
-import com.techhub.model.dto.response.CartResponse;
-import com.techhub.model.dto.response.ShopCartGroupResponse;
+import com.techhub.modules.cart.dto.response.CartCountResponse;
+import com.techhub.modules.cart.dto.response.CartItemResponse;
+import com.techhub.modules.cart.dto.response.CartResponse;
+import com.techhub.modules.cart.dto.response.ShopCartGroupResponse;
 import com.techhub.model.entity.*;
-import com.techhub.model.dto.request.AddToCartRequest;
-import com.techhub.model.dto.request.CartPreviewRequest;
-import com.techhub.model.dto.request.UpdateCartItemRequest;
-import com.techhub.model.dto.response.*;
+import com.techhub.modules.cart.dto.request.AddToCartRequest;
+import com.techhub.modules.cart.dto.request.CartPreviewRequest;
+import com.techhub.modules.cart.dto.request.UpdateCartItemRequest;
 import com.techhub.model.enums.*;
 import com.techhub.repository.*;
 import com.techhub.service.cart.CartService;
@@ -25,6 +24,10 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.techhub.modules.cart.dto.response.AppliedVoucherPreviewResponse;
+import com.techhub.modules.cart.dto.response.CartItemPreviewResponse;
+import com.techhub.modules.cart.dto.response.CartPreviewResponse;
+import com.techhub.modules.cart.dto.response.ShopCartPreviewGroupResponse;
 
 @Service
 @RequiredArgsConstructor

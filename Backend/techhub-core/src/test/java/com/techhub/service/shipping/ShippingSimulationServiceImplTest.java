@@ -1,6 +1,6 @@
 package com.techhub.service.shipping;
 
-import com.techhub.model.dto.response.ShippingSimulationResponse;
+import com.techhub.modules.shipping.dto.response.ShippingSimulationResponse;
 import com.techhub.model.entity.Order;
 import com.techhub.model.entity.Payment;
 import com.techhub.model.enums.OrderStatus;

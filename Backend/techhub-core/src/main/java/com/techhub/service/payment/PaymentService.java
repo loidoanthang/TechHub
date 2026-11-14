@@ -1,7 +1,7 @@
 package com.techhub.service.payment;
 
-import com.techhub.model.dto.response.BuyerPaymentStatusResponse;
-import com.techhub.model.dto.response.PaymentMethodResponse;
+import com.techhub.modules.payment.dto.response.BuyerPaymentStatusResponse;
+import com.techhub.modules.payment.dto.response.PaymentMethodResponse;
 
 import java.util.List;
 import java.util.UUID;

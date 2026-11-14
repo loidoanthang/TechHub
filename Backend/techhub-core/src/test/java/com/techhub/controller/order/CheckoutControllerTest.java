@@ -1,8 +1,8 @@
 package com.techhub.controller.order;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.request.CheckoutPreviewRequest;
-import com.techhub.model.dto.response.CheckoutPreviewResponse;
+import com.techhub.modules.order.dto.request.CheckoutPreviewRequest;
+import com.techhub.modules.order.dto.response.CheckoutPreviewResponse;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.Role;
 import com.techhub.model.enums.UserStatus;
@@ -168,7 +168,7 @@ class CheckoutControllerTest {
     @Test
     @DisplayName("Kiểm tra annotation cấp method của placeOrder (@PostMapping, @PreAuthorize, @ResponseStatus)")
     void controller_placeOrderMethodAnnotations_Correct() throws NoSuchMethodException {
-        Method method = CheckoutController.class.getMethod("placeOrder", com.techhub.model.dto.request.PlaceOrderRequest.class);
+        Method method = CheckoutController.class.getMethod("placeOrder", com.techhub.modules.order.dto.request.PlaceOrderRequest.class);
 
         assertTrue(method.isAnnotationPresent(PostMapping.class),
                 "placeOrder phải có annotation @PostMapping");
@@ -198,14 +198,14 @@ class CheckoutControllerTest {
     void placeOrder_Success_DelegatesToService() {
         UUID addressId = UUID.randomUUID();
         UUID shopId = UUID.randomUUID();
-        com.techhub.model.dto.request.PlaceOrderRequest request = new com.techhub.model.dto.request.PlaceOrderRequest(
+        com.techhub.modules.order.dto.request.PlaceOrderRequest request = new com.techhub.modules.order.dto.request.PlaceOrderRequest(
                 addressId,
                 com.techhub.model.enums.PaymentMethod.COD,
                 List.of(UUID.randomUUID()),
-                List.of(new com.techhub.model.dto.request.ShopOrderRequest(shopId, List.of(), "Giao nhanh giúp mình"))
+                List.of(new com.techhub.modules.shop.dto.request.ShopOrderRequest(shopId, List.of(), "Giao nhanh giúp mình"))
         );
 
-        com.techhub.model.dto.response.PlaceOrderResponse mockResponse = new com.techhub.model.dto.response.PlaceOrderResponse(
+        com.techhub.modules.order.dto.response.PlaceOrderResponse mockResponse = new com.techhub.modules.order.dto.response.PlaceOrderResponse(
                 UUID.randomUUID(),
                 com.techhub.model.enums.PaymentMethod.COD,
                 com.techhub.model.enums.PaymentStatus.PENDING,
@@ -219,7 +219,7 @@ class CheckoutControllerTest {
 
         when(checkoutService.placeOrder(userId, request)).thenReturn(mockResponse);
 
-        ApiResponse<com.techhub.model.dto.response.PlaceOrderResponse> apiResponse = checkoutController.placeOrder(request);
+        ApiResponse<com.techhub.modules.order.dto.response.PlaceOrderResponse> apiResponse = checkoutController.placeOrder(request);
 
         assertNotNull(apiResponse);
         assertTrue(apiResponse.isSuccess());
@@ -231,10 +231,10 @@ class CheckoutControllerTest {
     @Test
     @DisplayName("Validation PlaceOrderRequest: Báo lỗi khi thiếu các trường bắt buộc")
     void validation_Throws_WhenPlaceOrderRequestMissingRequiredFields() {
-        com.techhub.model.dto.request.PlaceOrderRequest request = new com.techhub.model.dto.request.PlaceOrderRequest(
+        com.techhub.modules.order.dto.request.PlaceOrderRequest request = new com.techhub.modules.order.dto.request.PlaceOrderRequest(
                 null, null, List.of(), List.of()
         );
-        Set<ConstraintViolation<com.techhub.model.dto.request.PlaceOrderRequest>> violations = validator.validate(request);
+        Set<ConstraintViolation<com.techhub.modules.order.dto.request.PlaceOrderRequest>> violations = validator.validate(request);
 
         assertFalse(violations.isEmpty());
         assertTrue(violations.stream().anyMatch(v -> v.getMessage().contains("Address ID is required")));

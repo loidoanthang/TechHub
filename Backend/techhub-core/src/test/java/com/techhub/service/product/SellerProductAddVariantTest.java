@@ -2,8 +2,8 @@ package com.techhub.service.product;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.CreateProductVariantRequest;
-import com.techhub.model.dto.response.ProductVariantResponse;
+import com.techhub.modules.product.dto.request.CreateProductVariantRequest;
+import com.techhub.modules.product.dto.response.ProductVariantResponse;
 import com.techhub.model.entity.Category;
 import com.techhub.model.entity.Product;
 import com.techhub.model.entity.ProductVariant;

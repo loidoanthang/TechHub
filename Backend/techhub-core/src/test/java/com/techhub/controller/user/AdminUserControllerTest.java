@@ -2,7 +2,7 @@ package com.techhub.controller.user;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.response.AdminUserResponse;
+import com.techhub.modules.user.dto.response.AdminUserResponse;
 import com.techhub.model.enums.UserStatus;
 import com.techhub.service.user.AdminUserService;
 import org.junit.jupiter.api.DisplayName;
@@ -66,8 +66,8 @@ class AdminUserControllerTest {
     @DisplayName("updateUserStatus gọi service đúng tham số và trả về ApiResponse chuẩn")
     void updateUserStatus_CallsServiceAndReturnsSuccessResponse() {
         UUID targetUserId = UUID.randomUUID();
-        com.techhub.model.dto.request.UpdateUserStatusRequest request =
-                new com.techhub.model.dto.request.UpdateUserStatusRequest(UserStatus.BANNED, "Vi phạm quy định");
+        com.techhub.modules.user.dto.request.UpdateUserStatusRequest request =
+                new com.techhub.modules.user.dto.request.UpdateUserStatusRequest(UserStatus.BANNED, "Vi phạm quy định");
 
         AdminUserResponse userResponse = new AdminUserResponse(
                 targetUserId,

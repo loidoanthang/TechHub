@@ -4,11 +4,11 @@ import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.AddressSnapshotResponse;
-import com.techhub.model.dto.response.BuyerOrderDetailResponse;
-import com.techhub.model.dto.response.BuyerOrderItemResponse;
-import com.techhub.model.dto.response.BuyerOrderResponse;
-import com.techhub.model.dto.response.ReorderResponse;
+import com.techhub.modules.order.dto.response.AddressSnapshotResponse;
+import com.techhub.modules.order.dto.response.BuyerOrderDetailResponse;
+import com.techhub.modules.order.dto.response.BuyerOrderItemResponse;
+import com.techhub.modules.order.dto.response.BuyerOrderResponse;
+import com.techhub.modules.order.dto.response.ReorderResponse;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.OrderStatus;
 import com.techhub.model.enums.PaymentMethod;
@@ -35,8 +35,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import com.techhub.model.dto.request.CreateCancellationRequest;
-import com.techhub.model.dto.response.CancellationRequestResponse;
+import com.techhub.modules.order.dto.request.CreateCancellationRequest;
+import com.techhub.modules.order.dto.response.CancellationRequestResponse;
 import com.techhub.model.enums.CancellationRequestStatus;
 
 import java.lang.reflect.Method;
@@ -215,7 +215,7 @@ class BuyerOrderControllerTest {
         UUID orderId = UUID.randomUUID();
         UUID shopId = UUID.randomUUID();
 
-        com.techhub.model.dto.response.AddressSnapshotResponse address = new com.techhub.model.dto.response.AddressSnapshotResponse(
+        com.techhub.modules.order.dto.response.AddressSnapshotResponse address = new com.techhub.modules.order.dto.response.AddressSnapshotResponse(
                 UUID.randomUUID(), "Nguyễn Văn A", "0987654321", "123 Cầu Giấy", "Dịch Vọng", "Cầu Giấy", "Hà Nội", "123 Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội"
         );
 
@@ -225,7 +225,7 @@ class BuyerOrderControllerTest {
                 BigDecimal.ZERO, new BigDecimal("500000.00"), new BigDecimal("500000.00")
         );
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse detailResponse = new com.techhub.model.dto.response.BuyerOrderDetailResponse(
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse detailResponse = new com.techhub.modules.order.dto.response.BuyerOrderDetailResponse(
                 orderId, "ORD-20261015-001", OrderStatus.DELIVERED, "Đã giao hàng thành công",
                 shopId, "Apple Official Store", "apple-official-store", "http://avatar.png",
                 address, List.of(item), 1,
@@ -239,7 +239,7 @@ class BuyerOrderControllerTest {
 
         when(orderService.getBuyerOrderDetail(eq(userId), eq(orderId))).thenReturn(detailResponse);
 
-        ApiResponse<com.techhub.model.dto.response.BuyerOrderDetailResponse> response = buyerOrderController.getBuyerOrderDetail(orderId);
+        ApiResponse<com.techhub.modules.order.dto.response.BuyerOrderDetailResponse> response = buyerOrderController.getBuyerOrderDetail(orderId);
 
         assertNotNull(response);
         assertTrue(response.isSuccess());

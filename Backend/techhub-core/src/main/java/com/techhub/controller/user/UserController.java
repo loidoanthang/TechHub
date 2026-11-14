@@ -1,8 +1,8 @@
 package com.techhub.controller.user;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.request.UpdateProfileRequest;
-import com.techhub.model.dto.response.UserProfileResponse;
+import com.techhub.modules.user.dto.request.UpdateProfileRequest;
+import com.techhub.modules.user.dto.response.UserProfileResponse;
 import com.techhub.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

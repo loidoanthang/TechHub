@@ -2,7 +2,7 @@ package com.techhub.service.voucher.impl;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.CartShopVoucherResponse;
+import com.techhub.modules.voucher.dto.response.CartShopVoucherResponse;
 import com.techhub.model.entity.Seller;
 import com.techhub.model.entity.Shop;
 import com.techhub.model.entity.User;

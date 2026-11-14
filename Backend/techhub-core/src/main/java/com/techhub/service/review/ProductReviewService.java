@@ -1,8 +1,8 @@
 package com.techhub.service.review;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.response.review.ProductRatingSummaryResponse;
-import com.techhub.model.dto.response.review.ProductReviewResponse;
+import com.techhub.modules.review.dto.response.ProductRatingSummaryResponse;
+import com.techhub.modules.review.dto.response.ProductReviewResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 

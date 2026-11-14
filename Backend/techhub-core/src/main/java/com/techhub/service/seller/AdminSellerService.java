@@ -1,10 +1,10 @@
 package com.techhub.service.seller;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.SellerApprovalRequest;
-import com.techhub.model.dto.response.AdminSellerApprovalResponse;
-import com.techhub.model.dto.response.AdminSellerDetailResponse;
-import com.techhub.model.dto.response.AdminSellerResponse;
+import com.techhub.modules.seller.dto.request.SellerApprovalRequest;
+import com.techhub.modules.seller.dto.response.AdminSellerApprovalResponse;
+import com.techhub.modules.seller.dto.response.AdminSellerDetailResponse;
+import com.techhub.modules.seller.dto.response.AdminSellerResponse;
 import com.techhub.model.enums.SellerVerificationStatus;
 
 import java.util.UUID;

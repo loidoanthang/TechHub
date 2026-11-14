@@ -2,7 +2,7 @@ package com.techhub.service.product;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.PublicProductDetailResponse;
+import com.techhub.modules.product.dto.response.PublicProductDetailResponse;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.*;
 import com.techhub.repository.ProductImageRepository;

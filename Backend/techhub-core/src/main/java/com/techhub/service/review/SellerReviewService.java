@@ -1,7 +1,7 @@
 package com.techhub.service.review;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.response.review.SellerReviewResponse;
+import com.techhub.modules.review.dto.response.SellerReviewResponse;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -21,5 +21,5 @@ public interface SellerReviewService {
             Pageable pageable
     );
 
-    SellerReviewResponse respondToReview(UUID userId, UUID reviewId, com.techhub.model.dto.request.review.SellerResponseRequest request);
+    SellerReviewResponse respondToReview(UUID userId, UUID reviewId, com.techhub.modules.review.dto.request.SellerResponseRequest request);
 }

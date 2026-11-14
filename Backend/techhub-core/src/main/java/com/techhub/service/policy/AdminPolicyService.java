@@ -1,7 +1,7 @@
 package com.techhub.service.policy;
 
-import com.techhub.model.dto.request.policy.UpdatePlatformPolicyRequest;
-import com.techhub.model.dto.response.policy.PlatformPolicyResponse;
+import com.techhub.modules.policy.dto.request.UpdatePlatformPolicyRequest;
+import com.techhub.modules.policy.dto.response.PlatformPolicyResponse;
 
 import java.util.List;
 import java.util.UUID;

@@ -1,0 +1,11 @@
+package com.techhub.modules.cart.dto.response;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+public record AppliedVoucherPreviewResponse(
+        UUID voucherId,
+        String code,
+        String name,
+        BigDecimal discountAmount
+) {}

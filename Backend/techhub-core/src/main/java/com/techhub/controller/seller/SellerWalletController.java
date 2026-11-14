@@ -2,9 +2,9 @@ package com.techhub.controller.seller;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.payout.WithdrawalRequest;
-import com.techhub.model.dto.response.payout.PayoutResponse;
-import com.techhub.model.dto.response.wallet.SellerWalletTransactionResponse;
+import com.techhub.modules.seller.dto.request.WithdrawalRequest;
+import com.techhub.modules.seller.dto.response.PayoutResponse;
+import com.techhub.modules.seller.dto.response.SellerWalletTransactionResponse;
 import com.techhub.model.enums.SellerWalletTransactionType;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.seller.SellerWalletService;

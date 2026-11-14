@@ -1,6 +1,6 @@
 package com.techhub.service.notification.impl;
 
-import com.techhub.model.dto.response.notification.NotificationResponse;
+import com.techhub.modules.notification.dto.response.NotificationResponse;
 import com.techhub.model.enums.NotificationType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

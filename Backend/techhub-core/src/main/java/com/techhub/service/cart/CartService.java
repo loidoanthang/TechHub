@@ -1,12 +1,12 @@
 package com.techhub.service.cart;
 
-import com.techhub.model.dto.request.AddToCartRequest;
-import com.techhub.model.dto.request.CartPreviewRequest;
-import com.techhub.model.dto.request.UpdateCartItemRequest;
-import com.techhub.model.dto.response.CartCountResponse;
-import com.techhub.model.dto.response.CartItemResponse;
-import com.techhub.model.dto.response.CartPreviewResponse;
-import com.techhub.model.dto.response.CartResponse;
+import com.techhub.modules.cart.dto.request.AddToCartRequest;
+import com.techhub.modules.cart.dto.request.CartPreviewRequest;
+import com.techhub.modules.cart.dto.request.UpdateCartItemRequest;
+import com.techhub.modules.cart.dto.response.CartCountResponse;
+import com.techhub.modules.cart.dto.response.CartItemResponse;
+import com.techhub.modules.cart.dto.response.CartPreviewResponse;
+import com.techhub.modules.cart.dto.response.CartResponse;
 
 import java.util.UUID;
 

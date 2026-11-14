@@ -1,11 +1,11 @@
 package com.techhub.service.voucher;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.CreateShopVoucherRequest;
-import com.techhub.model.dto.request.UpdateShopVoucherRequest;
-import com.techhub.model.dto.request.UpdateShopVoucherStatusRequest;
-import com.techhub.model.dto.response.ShopVoucherDetailResponse;
-import com.techhub.model.dto.response.ShopVoucherResponse;
+import com.techhub.modules.shop.dto.request.CreateShopVoucherRequest;
+import com.techhub.modules.shop.dto.request.UpdateShopVoucherRequest;
+import com.techhub.modules.shop.dto.request.UpdateShopVoucherStatusRequest;
+import com.techhub.modules.shop.dto.response.ShopVoucherDetailResponse;
+import com.techhub.modules.shop.dto.response.ShopVoucherResponse;
 import com.techhub.model.enums.DiscountType;
 import com.techhub.model.enums.VoucherAppliesTo;
 import com.techhub.model.enums.VoucherStatus;

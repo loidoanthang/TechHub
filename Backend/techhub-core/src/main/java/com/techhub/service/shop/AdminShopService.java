@@ -1,9 +1,9 @@
 package com.techhub.service.shop;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.AdminUpdateShopStatusRequest;
-import com.techhub.model.dto.response.AdminShopDetailResponse;
-import com.techhub.model.dto.response.AdminShopResponse;
+import com.techhub.modules.shop.dto.request.AdminUpdateShopStatusRequest;
+import com.techhub.modules.shop.dto.response.AdminShopDetailResponse;
+import com.techhub.modules.shop.dto.response.AdminShopResponse;
 import com.techhub.model.enums.ShopStatus;
 
 import java.util.UUID;

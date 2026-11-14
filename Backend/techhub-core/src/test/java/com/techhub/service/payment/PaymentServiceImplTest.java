@@ -2,9 +2,9 @@ package com.techhub.service.payment;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.BuyerPaymentStatusResponse;
-import com.techhub.model.dto.response.PaymentChannelResponse;
-import com.techhub.model.dto.response.PaymentMethodResponse;
+import com.techhub.modules.payment.dto.response.BuyerPaymentStatusResponse;
+import com.techhub.modules.payment.dto.response.PaymentChannelResponse;
+import com.techhub.modules.payment.dto.response.PaymentMethodResponse;
 import com.techhub.model.entity.Order;
 import com.techhub.model.entity.Payment;
 import com.techhub.model.entity.User;

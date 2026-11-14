@@ -1,13 +1,13 @@
 package com.techhub.controller.cart;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.request.AddToCartRequest;
-import com.techhub.model.dto.request.CartPreviewRequest;
-import com.techhub.model.dto.request.UpdateCartItemRequest;
-import com.techhub.model.dto.response.CartCountResponse;
-import com.techhub.model.dto.response.CartItemResponse;
-import com.techhub.model.dto.response.CartPreviewResponse;
-import com.techhub.model.dto.response.CartResponse;
+import com.techhub.modules.cart.dto.request.AddToCartRequest;
+import com.techhub.modules.cart.dto.request.CartPreviewRequest;
+import com.techhub.modules.cart.dto.request.UpdateCartItemRequest;
+import com.techhub.modules.cart.dto.response.CartCountResponse;
+import com.techhub.modules.cart.dto.response.CartItemResponse;
+import com.techhub.modules.cart.dto.response.CartPreviewResponse;
+import com.techhub.modules.cart.dto.response.CartResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.cart.CartService;
 import jakarta.validation.Valid;

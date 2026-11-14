@@ -2,8 +2,8 @@ package com.techhub.service.conversation.impl;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.conversation.SendChatMessageRequest;
-import com.techhub.model.dto.response.conversation.MessageResponse;
+import com.techhub.modules.conversation.dto.request.SendChatMessageRequest;
+import com.techhub.modules.conversation.dto.response.MessageResponse;
 import com.techhub.model.entity.Conversation;
 import com.techhub.model.entity.ConversationParticipant;
 import com.techhub.model.entity.Message;

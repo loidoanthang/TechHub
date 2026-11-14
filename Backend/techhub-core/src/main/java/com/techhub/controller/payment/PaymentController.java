@@ -2,9 +2,9 @@ package com.techhub.controller.payment;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.VNPayUtils;
-import com.techhub.model.dto.request.VNPayRetryRequest;
-import com.techhub.model.dto.response.VNPayCallbackResponse;
-import com.techhub.model.dto.response.VNPayIpnResponse;
+import com.techhub.modules.payment.dto.request.VNPayRetryRequest;
+import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
+import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.payment.VNPayService;
 import jakarta.servlet.http.HttpServletRequest;

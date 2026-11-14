@@ -1,8 +1,8 @@
 package com.techhub.controller.shipping;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.request.ShippingSimulationRequest;
-import com.techhub.model.dto.response.ShippingSimulationResponse;
+import com.techhub.modules.shipping.dto.request.ShippingSimulationRequest;
+import com.techhub.modules.shipping.dto.response.ShippingSimulationResponse;
 import com.techhub.service.shipping.ShippingSimulationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

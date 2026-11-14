@@ -3,7 +3,6 @@ package com.techhub.controller.admin;
 import com.techhub.common.ApiResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.dashboard.*;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.DashboardPeriod;
 import com.techhub.model.enums.Role;
@@ -30,6 +29,10 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.dashboard.dto.response.AdminDashboardMetricsResponse;
+import com.techhub.modules.dashboard.dto.response.AdminDashboardSummaryDto;
+import com.techhub.modules.dashboard.dto.response.AdminOrderStatusBreakdownDto;
+import com.techhub.modules.dashboard.dto.response.PlatformGrowthDto;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminDashboardController (GET /api/admin/dashboard/metrics)")

@@ -2,8 +2,8 @@ package com.techhub.service.user;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.UpdateProfileRequest;
-import com.techhub.model.dto.response.UserProfileResponse;
+import com.techhub.modules.user.dto.request.UpdateProfileRequest;
+import com.techhub.modules.user.dto.response.UserProfileResponse;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.Role;
 import com.techhub.model.enums.UserStatus;

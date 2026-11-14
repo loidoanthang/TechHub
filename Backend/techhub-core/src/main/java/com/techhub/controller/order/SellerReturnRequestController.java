@@ -2,8 +2,8 @@ package com.techhub.controller.order;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.ProcessReturnRequest;
-import com.techhub.model.dto.response.ReturnRequestResponse;
+import com.techhub.modules.order.dto.request.ProcessReturnRequest;
+import com.techhub.modules.order.dto.response.ReturnRequestResponse;
 import com.techhub.model.enums.ReturnRequestStatus;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.order.ReturnRequestService;

@@ -1,9 +1,9 @@
 package com.techhub.service.order;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.UpdateSellerOrderStatusRequest;
-import com.techhub.model.dto.response.SellerOrderDetailResponse;
-import com.techhub.model.dto.response.SellerOrderResponse;
+import com.techhub.modules.seller.dto.request.UpdateSellerOrderStatusRequest;
+import com.techhub.modules.seller.dto.response.SellerOrderDetailResponse;
+import com.techhub.modules.seller.dto.response.SellerOrderResponse;
 import com.techhub.model.enums.OrderStatus;
 
 import java.time.LocalDate;
@@ -27,9 +27,9 @@ public interface SellerOrderService {
 
     SellerOrderDetailResponse updateSellerOrderStatus(UUID userId, UUID orderId, UpdateSellerOrderStatusRequest request);
 
-    SellerOrderDetailResponse cancelSellerOrder(UUID userId, UUID orderId, com.techhub.model.dto.request.CancelOrderRequest request);
+    SellerOrderDetailResponse cancelSellerOrder(UUID userId, UUID orderId, com.techhub.modules.order.dto.request.CancelOrderRequest request);
 
-    com.techhub.model.dto.response.CancellationRequestResponse processCancellationRequest(UUID userId, UUID requestId, com.techhub.model.dto.request.ProcessCancellationRequest request);
+    com.techhub.modules.order.dto.response.CancellationRequestResponse processCancellationRequest(UUID userId, UUID requestId, com.techhub.modules.order.dto.request.ProcessCancellationRequest request);
 
-    PageResponse<com.techhub.model.dto.response.CancellationRequestResponse> getSellerCancellationRequests(UUID userId, int page, int size);
+    PageResponse<com.techhub.modules.order.dto.response.CancellationRequestResponse> getSellerCancellationRequests(UUID userId, int page, int size);
 }

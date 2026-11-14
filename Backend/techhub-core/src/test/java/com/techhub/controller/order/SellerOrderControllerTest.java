@@ -4,9 +4,9 @@ import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.SellerOrderBuyerResponse;
-import com.techhub.model.dto.response.SellerOrderItemResponse;
-import com.techhub.model.dto.response.SellerOrderResponse;
+import com.techhub.modules.seller.dto.response.SellerOrderBuyerResponse;
+import com.techhub.modules.seller.dto.response.SellerOrderItemResponse;
+import com.techhub.modules.seller.dto.response.SellerOrderResponse;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.OrderStatus;
 import com.techhub.model.enums.PaymentMethod;
@@ -32,8 +32,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.techhub.model.dto.request.UpdateSellerOrderStatusRequest;
-import com.techhub.model.dto.response.SellerOrderDetailResponse;
+import com.techhub.modules.seller.dto.request.UpdateSellerOrderStatusRequest;
+import com.techhub.modules.seller.dto.response.SellerOrderDetailResponse;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -222,7 +222,7 @@ class SellerOrderControllerTest {
     @DisplayName("getSellerOrderDetail_Success_ReturnsOrderDetails")
     void getSellerOrderDetail_Success_ReturnsOrderDetails() {
         UUID orderId = UUID.randomUUID();
-        com.techhub.model.dto.response.SellerOrderDetailResponse mockDetail = new com.techhub.model.dto.response.SellerOrderDetailResponse(
+        com.techhub.modules.seller.dto.response.SellerOrderDetailResponse mockDetail = new com.techhub.modules.seller.dto.response.SellerOrderDetailResponse(
                 orderId,
                 "ORD-20261015-8F3A2B1C90",
                 OrderStatus.CONFIRMED,
@@ -255,7 +255,7 @@ class SellerOrderControllerTest {
 
         when(sellerOrderService.getSellerOrderDetail(userId, orderId)).thenReturn(mockDetail);
 
-        ApiResponse<com.techhub.model.dto.response.SellerOrderDetailResponse> response =
+        ApiResponse<com.techhub.modules.seller.dto.response.SellerOrderDetailResponse> response =
                 sellerOrderController.getSellerOrderDetail(orderId);
 
         assertNotNull(response);
@@ -402,11 +402,11 @@ class SellerOrderControllerTest {
     void processCancellationRequest_Success_WhenApproved() {
         UUID requestId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        com.techhub.model.dto.request.ProcessCancellationRequest request =
-                new com.techhub.model.dto.request.ProcessCancellationRequest(com.techhub.model.enums.CancellationRequestStatus.APPROVED, "Đồng ý");
+        com.techhub.modules.order.dto.request.ProcessCancellationRequest request =
+                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(com.techhub.model.enums.CancellationRequestStatus.APPROVED, "Đồng ý");
 
-        com.techhub.model.dto.response.CancellationRequestResponse mockResponse =
-                new com.techhub.model.dto.response.CancellationRequestResponse(
+        com.techhub.modules.order.dto.response.CancellationRequestResponse mockResponse =
+                new com.techhub.modules.order.dto.response.CancellationRequestResponse(
                         requestId, orderId, "ORD-123", com.techhub.model.enums.CancellationRequestStatus.APPROVED,
                         "Đã chấp thuận hủy đơn", "Đổi ý", "Đồng ý",
                         java.time.LocalDateTime.now().minusHours(1), java.time.LocalDateTime.now()
@@ -414,7 +414,7 @@ class SellerOrderControllerTest {
 
         when(sellerOrderService.processCancellationRequest(userId, requestId, request)).thenReturn(mockResponse);
 
-        ApiResponse<com.techhub.model.dto.response.CancellationRequestResponse> response =
+        ApiResponse<com.techhub.modules.order.dto.response.CancellationRequestResponse> response =
                 sellerOrderController.processCancellationRequest(requestId, request);
 
         assertNotNull(response);
@@ -427,8 +427,8 @@ class SellerOrderControllerTest {
     @DisplayName("processCancellationRequest_Throw_WhenAlreadyProcessed")
     void processCancellationRequest_Throw_WhenAlreadyProcessed() {
         UUID requestId = UUID.randomUUID();
-        com.techhub.model.dto.request.ProcessCancellationRequest request =
-                new com.techhub.model.dto.request.ProcessCancellationRequest(com.techhub.model.enums.CancellationRequestStatus.REJECTED, "Không đồng ý");
+        com.techhub.modules.order.dto.request.ProcessCancellationRequest request =
+                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(com.techhub.model.enums.CancellationRequestStatus.REJECTED, "Không đồng ý");
 
         when(sellerOrderService.processCancellationRequest(userId, requestId, request))
                 .thenThrow(new BusinessException(ErrorCode.CANCELLATION_REQUEST_ALREADY_PROCESSED));

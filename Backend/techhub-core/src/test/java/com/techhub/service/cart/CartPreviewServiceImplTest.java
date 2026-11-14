@@ -2,8 +2,8 @@ package com.techhub.service.cart;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.CartPreviewRequest;
-import com.techhub.model.dto.response.CartPreviewResponse;
+import com.techhub.modules.cart.dto.request.CartPreviewRequest;
+import com.techhub.modules.cart.dto.response.CartPreviewResponse;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.*;
 import com.techhub.repository.*;

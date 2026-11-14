@@ -1,8 +1,8 @@
 package com.techhub.service.order;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.response.BuyerOrderDetailResponse;
-import com.techhub.model.dto.response.BuyerOrderResponse;
+import com.techhub.modules.order.dto.response.BuyerOrderDetailResponse;
+import com.techhub.modules.order.dto.response.BuyerOrderResponse;
 import com.techhub.model.enums.OrderStatus;
 
 import java.util.UUID;
@@ -23,17 +23,17 @@ public interface OrderService {
 
     BuyerOrderDetailResponse completeOrder(UUID userId, UUID orderId);
 
-    com.techhub.model.dto.response.CancellationRequestResponse requestOrderCancellation(
+    com.techhub.modules.order.dto.response.CancellationRequestResponse requestOrderCancellation(
             UUID userId,
             UUID orderId,
-            com.techhub.model.dto.request.CreateCancellationRequest request
+            com.techhub.modules.order.dto.request.CreateCancellationRequest request
     );
 
     BuyerOrderDetailResponse cancelBuyerOrder(
             UUID userId,
             UUID orderId,
-            com.techhub.model.dto.request.CancelOrderRequest request
+            com.techhub.modules.order.dto.request.CancelOrderRequest request
     );
 
-    com.techhub.model.dto.response.ReorderResponse reorder(UUID userId, UUID orderId);
+    com.techhub.modules.order.dto.response.ReorderResponse reorder(UUID userId, UUID orderId);
 }

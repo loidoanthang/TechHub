@@ -1,12 +1,12 @@
 package com.techhub.service.voucher;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.CreatePlatformVoucherRequest;
-import com.techhub.model.dto.request.UpdatePlatformVoucherRequest;
-import com.techhub.model.dto.request.UpdatePlatformVoucherStatusRequest;
-import com.techhub.model.dto.response.AdminVoucherDetailResponse;
-import com.techhub.model.dto.response.AdminVoucherResponse;
-import com.techhub.model.dto.response.PlatformVoucherResponse;
+import com.techhub.modules.voucher.dto.request.CreatePlatformVoucherRequest;
+import com.techhub.modules.voucher.dto.request.UpdatePlatformVoucherRequest;
+import com.techhub.modules.voucher.dto.request.UpdatePlatformVoucherStatusRequest;
+import com.techhub.modules.voucher.dto.response.AdminVoucherDetailResponse;
+import com.techhub.modules.voucher.dto.response.AdminVoucherResponse;
+import com.techhub.modules.voucher.dto.response.PlatformVoucherResponse;
 import com.techhub.model.enums.DiscountType;
 import com.techhub.model.enums.VoucherAppliesTo;
 import com.techhub.model.enums.VoucherStatus;

@@ -3,7 +3,7 @@ package com.techhub.service.order;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.BuyerOrderResponse;
+import com.techhub.modules.order.dto.response.BuyerOrderResponse;
 import com.techhub.model.entity.Order;
 import com.techhub.model.entity.OrderItem;
 import com.techhub.model.entity.Payment;
@@ -13,11 +13,11 @@ import com.techhub.model.enums.OrderStatus;
 import com.techhub.model.enums.PaymentMethod;
 import com.techhub.model.enums.PaymentStatus;
 import com.techhub.model.enums.UserStatus;
-import com.techhub.model.dto.request.CreateCancellationRequest;
-import com.techhub.model.dto.response.CancellationRequestResponse;
-import com.techhub.model.dto.response.ReorderItemDto;
-import com.techhub.model.dto.response.ReorderResponse;
-import com.techhub.model.dto.response.ReorderUnavailableItemDto;
+import com.techhub.modules.order.dto.request.CreateCancellationRequest;
+import com.techhub.modules.order.dto.response.CancellationRequestResponse;
+import com.techhub.modules.order.dto.response.ReorderItemDto;
+import com.techhub.modules.order.dto.response.ReorderResponse;
+import com.techhub.modules.order.dto.response.ReorderUnavailableItemDto;
 import com.techhub.model.entity.CancellationRequest;
 import com.techhub.model.entity.Cart;
 import com.techhub.model.entity.CartItem;
@@ -764,7 +764,7 @@ class OrderServiceImplTest {
         when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(List.of(item1, item2));
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
 
         assertNotNull(response);
         assertEquals(orderId, response.orderId());
@@ -822,7 +822,7 @@ class OrderServiceImplTest {
         when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
 
         assertNotNull(response);
         assertEquals(OrderStatus.PENDING_PAYMENT, response.status());
@@ -849,7 +849,7 @@ class OrderServiceImplTest {
         when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
 
         assertNotNull(response);
         assertEquals(OrderStatus.CONFIRMED, response.status());
@@ -870,7 +870,7 @@ class OrderServiceImplTest {
         when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
 
         assertNotNull(response);
         assertEquals(OrderStatus.COMPLETED, response.status());
@@ -892,7 +892,7 @@ class OrderServiceImplTest {
         when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
 
         assertNotNull(response);
         assertEquals(OrderStatus.CANCELLED, response.status());
@@ -949,7 +949,7 @@ class OrderServiceImplTest {
         when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
 
         assertNotNull(response);
         assertNotNull(response.deliveryAddress());
@@ -1035,7 +1035,7 @@ class OrderServiceImplTest {
         when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.of(order));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse response = orderService.getBuyerOrderDetail(userId, orderId);
 
         assertNotNull(response);
         assertEquals("cua-hang-cong-nghe-phu-kien-cao-cap", response.shopSlug());
@@ -1063,7 +1063,7 @@ class OrderServiceImplTest {
         when(orderRepository.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse response = orderService.completeOrder(userId, orderId);
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse response = orderService.completeOrder(userId, orderId);
 
         assertNotNull(response);
         assertEquals(OrderStatus.COMPLETED, response.status());
@@ -1089,7 +1089,7 @@ class OrderServiceImplTest {
         when(orderRepository.findByIdAndUserIdForUpdate(orderId, userId)).thenReturn(Optional.of(order));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse response = orderService.completeOrder(userId, orderId);
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse response = orderService.completeOrder(userId, orderId);
 
         assertNotNull(response);
         assertEquals(OrderStatus.COMPLETED, response.status());
@@ -1189,7 +1189,7 @@ class OrderServiceImplTest {
         when(orderRepository.findByPaymentId(paymentId)).thenReturn(List.of(order));
         when(orderItemRepository.findByOrderId(orderId)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse response = orderService.completeOrder(userId, orderId);
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse response = orderService.completeOrder(userId, orderId);
 
         assertNotNull(response);
         assertEquals(OrderStatus.COMPLETED, response.status());
@@ -1218,7 +1218,7 @@ class OrderServiceImplTest {
         when(orderRepository.findByPaymentId(paymentId)).thenReturn(List.of(order1, order2StillShipping));
         when(orderItemRepository.findByOrderId(orderId1)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse response = orderService.completeOrder(userId, orderId1);
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse response = orderService.completeOrder(userId, orderId1);
 
         assertNotNull(response);
         assertEquals(OrderStatus.COMPLETED, response.status());
@@ -1247,7 +1247,7 @@ class OrderServiceImplTest {
         when(orderRepository.findByPaymentId(paymentId)).thenReturn(List.of(order1, order2Cancelled));
         when(orderItemRepository.findByOrderId(orderId1)).thenReturn(Collections.emptyList());
 
-        com.techhub.model.dto.response.BuyerOrderDetailResponse response = orderService.completeOrder(userId, orderId1);
+        com.techhub.modules.order.dto.response.BuyerOrderDetailResponse response = orderService.completeOrder(userId, orderId1);
 
         assertNotNull(response);
         assertEquals(OrderStatus.COMPLETED, response.status());

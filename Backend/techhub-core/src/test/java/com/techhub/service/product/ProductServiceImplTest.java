@@ -3,7 +3,7 @@ package com.techhub.service.product;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.ProductSummaryResponse;
+import com.techhub.modules.product.dto.response.ProductSummaryResponse;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.*;
 import com.techhub.repository.ProductImageRepository;

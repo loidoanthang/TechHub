@@ -1,6 +1,6 @@
 package com.techhub.service.dashboard;
 
-import com.techhub.model.dto.response.dashboard.SellerDashboardMetricsResponse;
+import com.techhub.modules.dashboard.dto.response.SellerDashboardMetricsResponse;
 import com.techhub.model.enums.DashboardPeriod;
 
 import java.time.LocalDate;

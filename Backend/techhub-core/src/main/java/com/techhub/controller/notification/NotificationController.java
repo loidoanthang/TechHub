@@ -1,7 +1,7 @@
 package com.techhub.controller.notification;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.response.notification.NotificationListResponse;
+import com.techhub.modules.notification.dto.response.NotificationListResponse;
 import com.techhub.model.enums.NotificationType;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.notification.NotificationService;

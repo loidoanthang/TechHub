@@ -1,9 +1,9 @@
 package com.techhub.controller.payment;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.request.VNPayRetryRequest;
-import com.techhub.model.dto.response.VNPayCallbackResponse;
-import com.techhub.model.dto.response.VNPayIpnResponse;
+import com.techhub.modules.payment.dto.request.VNPayRetryRequest;
+import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
+import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.Role;
 import com.techhub.model.enums.UserStatus;

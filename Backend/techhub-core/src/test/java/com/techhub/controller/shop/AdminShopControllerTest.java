@@ -2,8 +2,8 @@ package com.techhub.controller.shop;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.AdminUpdateShopStatusRequest;
-import com.techhub.model.dto.response.AdminShopResponse;
+import com.techhub.modules.shop.dto.request.AdminUpdateShopStatusRequest;
+import com.techhub.modules.shop.dto.response.AdminShopResponse;
 import com.techhub.model.enums.SellerVerificationStatus;
 import com.techhub.model.enums.ShopStatus;
 import com.techhub.model.enums.UserStatus;
@@ -137,8 +137,8 @@ class AdminShopControllerTest {
     @DisplayName("TC-23: Controller gọi Service getShopDetail đúng tham số và đóng gói ApiResponse")
     void controller_getShopDetail_success() {
         UUID shopId = UUID.randomUUID();
-        com.techhub.model.dto.response.AdminShopDetailResponse detailResponse = new com.techhub.model.dto.response.AdminShopDetailResponse(
-                new com.techhub.model.dto.response.AdminShopDetailResponse.ShopCommercialResponse(
+        com.techhub.modules.shop.dto.response.AdminShopDetailResponse detailResponse = new com.techhub.modules.shop.dto.response.AdminShopDetailResponse(
+                new com.techhub.modules.shop.dto.response.AdminShopDetailResponse.ShopCommercialResponse(
                         shopId,
                         "Official Tech Store",
                         "Description",
@@ -152,12 +152,12 @@ class AdminShopControllerTest {
                 null,
                 null,
                 null,
-                new com.techhub.model.dto.response.AdminShopDetailResponse.ShopMetricsResponse(10L, 8L, 5L, new BigDecimal("1000000.00"))
+                new com.techhub.modules.shop.dto.response.AdminShopDetailResponse.ShopMetricsResponse(10L, 8L, 5L, new BigDecimal("1000000.00"))
         );
 
         when(adminShopService.getShopDetail(shopId)).thenReturn(detailResponse);
 
-        ApiResponse<com.techhub.model.dto.response.AdminShopDetailResponse> response = adminShopController.getShopDetail(shopId);
+        ApiResponse<com.techhub.modules.shop.dto.response.AdminShopDetailResponse> response = adminShopController.getShopDetail(shopId);
 
         assertNotNull(response);
         assertTrue(response.isSuccess());

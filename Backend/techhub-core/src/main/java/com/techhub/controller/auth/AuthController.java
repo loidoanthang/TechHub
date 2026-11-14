@@ -1,14 +1,23 @@
 package com.techhub.controller.auth;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.model.dto.request.*;
-import com.techhub.model.dto.response.LoginResponse;
-import com.techhub.model.dto.response.TokenResponse;
+import com.techhub.modules.auth.dto.response.LoginResponse;
+import com.techhub.modules.auth.dto.response.TokenResponse;
 import com.techhub.service.auth.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import com.techhub.modules.auth.dto.request.ChangePasswordRequest;
+import com.techhub.modules.auth.dto.request.DeleteAccountRequest;
+import com.techhub.modules.auth.dto.request.ForgotPasswordRequest;
+import com.techhub.modules.auth.dto.request.LoginRequest;
+import com.techhub.modules.auth.dto.request.LogoutRequest;
+import com.techhub.modules.auth.dto.request.RefreshTokenRequest;
+import com.techhub.modules.auth.dto.request.RegisterRequest;
+import com.techhub.modules.auth.dto.request.ResendVerificationRequest;
+import com.techhub.modules.auth.dto.request.ResetPasswordRequest;
+import com.techhub.modules.auth.dto.request.VerifyEmailRequest;
 
 @RestController
 @RequiredArgsConstructor

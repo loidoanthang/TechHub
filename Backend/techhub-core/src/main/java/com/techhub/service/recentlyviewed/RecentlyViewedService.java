@@ -1,6 +1,6 @@
 package com.techhub.service.recentlyviewed;
 
-import com.techhub.model.dto.response.RecentlyViewedResponse;
+import com.techhub.modules.product.dto.response.RecentlyViewedResponse;
 
 import java.util.List;
 import java.util.UUID;

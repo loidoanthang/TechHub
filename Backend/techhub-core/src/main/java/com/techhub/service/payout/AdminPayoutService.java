@@ -1,8 +1,8 @@
 package com.techhub.service.payout;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.payout.ProcessPayoutRequest;
-import com.techhub.model.dto.response.payout.AdminPayoutResponse;
+import com.techhub.modules.seller.dto.request.ProcessPayoutRequest;
+import com.techhub.modules.seller.dto.response.AdminPayoutResponse;
 import com.techhub.model.enums.PayoutStatus;
 
 import java.time.LocalDate;

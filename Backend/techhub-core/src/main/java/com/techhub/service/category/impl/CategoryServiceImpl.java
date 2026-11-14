@@ -2,8 +2,8 @@ package com.techhub.service.category.impl;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.CategoryAttributeResponse;
-import com.techhub.model.dto.response.CategorySummaryResponse;
+import com.techhub.modules.category.dto.response.CategoryAttributeResponse;
+import com.techhub.modules.category.dto.response.CategorySummaryResponse;
 import com.techhub.model.entity.Category;
 import com.techhub.model.entity.CategoryAttribute;
 import com.techhub.model.enums.CategoryStatus;

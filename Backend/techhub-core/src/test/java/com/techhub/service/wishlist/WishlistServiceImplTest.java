@@ -3,7 +3,7 @@ package com.techhub.service.wishlist;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.response.WishlistResponse;
+import com.techhub.modules.product.dto.response.WishlistResponse;
 import com.techhub.model.entity.Product;
 import com.techhub.model.entity.Shop;
 import com.techhub.model.entity.WishlistItem;

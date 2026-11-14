@@ -2,9 +2,9 @@ package com.techhub.service.product;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.CreateProductImageRequest;
-import com.techhub.model.dto.request.UpdateProductRequest;
-import com.techhub.model.dto.response.ProductDetailResponse;
+import com.techhub.modules.product.dto.request.CreateProductImageRequest;
+import com.techhub.modules.product.dto.request.UpdateProductRequest;
+import com.techhub.modules.product.dto.response.ProductDetailResponse;
 import com.techhub.model.entity.*;
 import com.techhub.model.enums.*;
 import com.techhub.repository.*;

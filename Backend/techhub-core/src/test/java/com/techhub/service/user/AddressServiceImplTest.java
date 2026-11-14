@@ -2,9 +2,9 @@ package com.techhub.service.user;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.CreateAddressRequest;
-import com.techhub.model.dto.request.UpdateAddressRequest;
-import com.techhub.model.dto.response.AddressResponse;
+import com.techhub.modules.user.dto.request.CreateAddressRequest;
+import com.techhub.modules.user.dto.request.UpdateAddressRequest;
+import com.techhub.modules.user.dto.response.AddressResponse;
 import com.techhub.model.entity.Address;
 import com.techhub.model.entity.User;
 import com.techhub.model.enums.AddressLabel;

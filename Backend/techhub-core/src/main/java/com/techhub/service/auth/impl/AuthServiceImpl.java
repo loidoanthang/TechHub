@@ -2,9 +2,8 @@ package com.techhub.service.auth.impl;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.dto.request.*;
-import com.techhub.model.dto.response.LoginResponse;
-import com.techhub.model.dto.response.TokenResponse;
+import com.techhub.modules.auth.dto.response.LoginResponse;
+import com.techhub.modules.auth.dto.response.TokenResponse;
 import com.techhub.model.entity.RefreshToken;
 import com.techhub.model.entity.User;
 import com.techhub.model.entity.VerificationTokens;
@@ -33,6 +32,16 @@ import org.springframework.security.core.Authentication;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import com.techhub.modules.auth.dto.request.ChangePasswordRequest;
+import com.techhub.modules.auth.dto.request.DeleteAccountRequest;
+import com.techhub.modules.auth.dto.request.ForgotPasswordRequest;
+import com.techhub.modules.auth.dto.request.LoginRequest;
+import com.techhub.modules.auth.dto.request.LogoutRequest;
+import com.techhub.modules.auth.dto.request.RefreshTokenRequest;
+import com.techhub.modules.auth.dto.request.RegisterRequest;
+import com.techhub.modules.auth.dto.request.ResendVerificationRequest;
+import com.techhub.modules.auth.dto.request.ResetPasswordRequest;
+import com.techhub.modules.auth.dto.request.VerifyEmailRequest;
 
 @Service
 @RequiredArgsConstructor

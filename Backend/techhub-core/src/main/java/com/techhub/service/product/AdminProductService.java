@@ -1,10 +1,10 @@
 package com.techhub.service.product;
 
 import com.techhub.common.PageResponse;
-import com.techhub.model.dto.request.UpdateProductApprovalRequest;
-import com.techhub.model.dto.request.UpdateProductSuspendRequest;
-import com.techhub.model.dto.response.AdminProductDetailResponse;
-import com.techhub.model.dto.response.AdminProductSummaryResponse;
+import com.techhub.modules.product.dto.request.UpdateProductApprovalRequest;
+import com.techhub.modules.product.dto.request.UpdateProductSuspendRequest;
+import com.techhub.modules.product.dto.response.AdminProductDetailResponse;
+import com.techhub.modules.product.dto.response.AdminProductSummaryResponse;
 import com.techhub.model.enums.ProductApprovalStatus;
 import com.techhub.model.enums.ProductVisibilityStatus;
 
