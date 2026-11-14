@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ProductThumbnail } from "@/components/shared";
 import {
   Store,
   Trash2,
@@ -27,7 +28,6 @@ import { usePlatformVouchersQuery } from "@/features/checkout/hooks/useVouchers"
 import { useCheckoutPreview } from "@/features/checkout/hooks/useCheckoutPreview";
 import { VoucherSelectModal } from "@/features/checkout/components/VoucherSelectModal";
 import { checkoutApi } from "@/features/checkout/api/checkoutApi";
-import { resolveSellerSlug } from "@/features/shops";
 import { ROUTES } from "@/lib/constants";
 import type { PaymentMethod } from "@/types/enums";
 import type { PlaceOrderResponse, ShopOrderRequest } from "@/types/checkout";
@@ -426,7 +426,7 @@ export function OnePageCartCheckoutView() {
                         <div className="flex items-center gap-2">
                           <Store className="w-4 h-4 text-[#0045cc]" />
                           <Link
-                            href={`/shops/${resolveSellerSlug(storeName)}`}
+                            href={`/shops/${storeName}`}
                             className="text-sm font-bold text-[#0b1c30] hover:text-[#0045cc] transition-colors hover:underline"
                           >
                             {storeName}
@@ -449,15 +449,11 @@ export function OnePageCartCheckoutView() {
                               onChange={() => toggleSelectItem(item.id)}
                               className="w-4 h-4 rounded text-[#0d5bff] accent-[#0d5bff] cursor-pointer flex-shrink-0"
                             />
-                            <div className="w-20 h-20 rounded-xl overflow-hidden bg-[#eff4ff] flex-shrink-0 border border-[#c3c5d9]/30 relative">
-                              <Image
-                                src={item.imageUrl}
-                                alt={item.title}
-                                fill
-                                className="object-cover"
-                                unoptimized
-                              />
-                            </div>
+                            <ProductThumbnail
+                              src={item.imageUrl}
+                              alt={item.title}
+                              sizeClassName="w-20 h-20"
+                            />
                           </div>
 
                           <div className="flex-1 min-w-0 flex flex-col gap-1">

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api/client";
 import { ENDPOINTS } from "@/lib/constants";
+import { isValidUuid } from "@/lib/utils";
 import type { ApiResponse, PageResponse } from "@/types/api";
 import type {
   ProductRatingSummaryResponse,
@@ -45,7 +46,7 @@ export function useProductRatingSummaryQuery(productId: string) {
   return useQuery({
     queryKey: ["product-rating-summary", productId],
     queryFn: () => reviewApi.getProductRatingSummary(productId),
-    enabled: Boolean(productId),
+    enabled: isValidUuid(productId),
     staleTime: 5 * 60 * 1000,
   });
 }
@@ -57,7 +58,7 @@ export function useProductReviewsQuery(
   return useQuery({
     queryKey: ["product-reviews", productId, params],
     queryFn: () => reviewApi.getProductReviews(productId, params),
-    enabled: Boolean(productId),
+    enabled: isValidUuid(productId),
   });
 }
 

@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { NotificationProvider } from "@/providers/NotificationProvider";
 import { ToastContainer } from "@/components/shared/ToastContainer";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -35,8 +36,10 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-background text-foreground">
         <QueryProvider>
           <AuthProvider>
-            {children}
-            <ToastContainer />
+            <NotificationProvider>
+              {children}
+              <ToastContainer />
+            </NotificationProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

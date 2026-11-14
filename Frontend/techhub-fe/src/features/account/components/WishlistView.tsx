@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { ProductThumbnail } from "@/components/shared";
 import {
   Heart,
   Trash2,
@@ -63,14 +63,14 @@ export function WishlistView() {
             </span>
           </div>
           <p className="text-xs sm:text-sm text-[#434656]">
-            Lưu trữ sản phẩm quan tâm để theo dõi giá và đặt mua nhanh. (Tối đa 20 sản phẩm theo quy định sàn BR-05B)
+            Lưu trữ sản phẩm quan tâm để theo dõi giá và đặt mua nhanh.
           </p>
         </div>
 
         {/* Progress Bar indicator */}
         <div className="w-full sm:w-48 flex flex-col gap-1.5 z-10">
           <div className="flex justify-between text-[11px] font-medium text-[#737688]">
-            <span>Sức chứa Wishlist</span>
+            <span>Sức chứa</span>
             <span>{Math.round((totalElements / MAX_WISHLIST_LIMIT) * 100)}%</span>
           </div>
           <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -165,12 +165,12 @@ export function WishlistView() {
                       href={productUrl}
                       className="absolute inset-0 flex items-center justify-center"
                     >
-                      <Image
-                        src={item.coverImageUrl || "/images/placeholder.png"}
+                      <ProductThumbnail
+                        src={item.coverImageUrl}
                         alt={item.productName}
-                        fill
-                        className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
-                        unoptimized
+                        sizeClassName="w-full h-full"
+                        className="rounded-none border-0 bg-transparent"
+                        imageClassName="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                       />
                     </Link>
 

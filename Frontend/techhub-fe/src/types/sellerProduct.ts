@@ -133,6 +133,7 @@ export interface UpdateProductRequest {
 export interface ProductDetailResponse {
   id: string;
   shopId: string;
+  sellerName?: string | null;
   categoryId: string;
   categoryName: string;
   brandName: string | null;

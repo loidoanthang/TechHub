@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { ProductThumbnail } from "@/components/shared";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -59,19 +60,19 @@ const QUICK_CHIPS = [
 const SAMPLE_HARDWARE_IMAGES = [
   {
     name: "Ảnh mở hộp linh kiện",
-    url: "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80",
+    url: "/images/sample-evidence.svg",
   },
   {
     name: "Ảnh góc máy / thiết bị",
-    url: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80",
+    url: "/images/sample-evidence.svg",
   },
   {
     name: "Ảnh phụ kiện kèm theo",
-    url: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80",
+    url: "/images/sample-evidence.svg",
   },
   {
     name: "Ảnh kiểm tra hoạt động",
-    url: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
+    url: "/images/sample-evidence.svg",
   },
 ];
 
@@ -144,13 +145,9 @@ export function ReviewProductModal({
     const remainingSlots = 5 - mediaList.length;
     if (remainingSlots <= 0) return;
 
-    // Use hosted public HTTPS images to avoid invalid temporary client blob URLs
+    // Use hosted static image to avoid invalid temporary client blob URLs
     const samplePool = [
-      "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=800&q=80",
+      "/images/sample-evidence.svg",
     ];
 
     const files = Array.from(e.target.files).slice(0, remainingSlots);
@@ -272,15 +269,12 @@ export function ReviewProductModal({
         <form onSubmit={handleSubmit(onSubmit)} className="overflow-y-auto p-6 space-y-5">
           {/* Product Mini Bar */}
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#eff4ff]/40 border border-[#c3c5d9]/30">
-            <div className="relative w-12 h-12 rounded-xl bg-white overflow-hidden shrink-0 border border-slate-100">
-              <Image
-                src={item.imageUrl || "/images/placeholder.png"}
-                alt={item.productName}
-                fill
-                className="object-contain p-1"
-                unoptimized
-              />
-            </div>
+            <ProductThumbnail
+              src={item.imageUrl}
+              alt={item.productName}
+              sizeClassName="w-12 h-12"
+              imageClassName="object-contain p-1"
+            />
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold text-[#0b1c30] truncate">
                 {item.productName}

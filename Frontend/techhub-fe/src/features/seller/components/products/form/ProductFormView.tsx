@@ -156,13 +156,7 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
       categoryId: "",
       brandName: "",
       description: "",
-      images: [
-        {
-          imageUrl:
-            "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&auto=format&fit=crop&q=80",
-          displayOrder: 0,
-        },
-      ],
+      images: [],
       variants: [
         {
           sku: "ROG-OLED-27-01",
@@ -198,13 +192,7 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
                 imageUrl: img.imageUrl,
                 displayOrder: img.displayOrder,
               }))
-            : [
-                {
-                  imageUrl:
-                    "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&auto=format&fit=crop&q=80",
-                  displayOrder: 0,
-                },
-              ],
+            : [],
         variants:
           productDetail.variants && productDetail.variants.length > 0
             ? productDetail.variants.map((v) => ({
@@ -526,13 +514,7 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
       categoryId: "",
       brandName: "",
       description: "",
-      images: [
-        {
-          imageUrl:
-            "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&auto=format&fit=crop&q=80",
-          displayOrder: 0,
-        },
-      ],
+      images: [],
       variants: [
         {
           sku: `TH-${Date.now().toString().slice(-4)}`,

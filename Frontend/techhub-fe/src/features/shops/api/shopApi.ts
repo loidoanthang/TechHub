@@ -1,6 +1,5 @@
 import { apiClient } from "@/lib/api/client";
 import { API_ENDPOINTS } from "@/lib/constants";
-import { resolveSellerSlug } from "../utils/shopSlug";
 import type { ApiResponse, PageResponse } from "@/types/api";
 import type { PublicShopResponse, CartShopVoucherResponse } from "../types/shop";
 import type { ProductSummaryResponse } from "@/types/product";
@@ -16,16 +15,14 @@ export const shopApi = {
   getPublicShopProfile: (
     sellerName: string
   ): Promise<ApiResponse<PublicShopResponse>> => {
-    const slug = resolveSellerSlug(sellerName);
-    return apiClient.get(API_ENDPOINTS.SHOPS.DETAIL(slug));
+    return apiClient.get(API_ENDPOINTS.SHOPS.DETAIL(sellerName));
   },
 
   getShopVouchers: (
     sellerName: string,
     orderAmount?: number
   ): Promise<ApiResponse<CartShopVoucherResponse[]>> => {
-    const slug = resolveSellerSlug(sellerName);
-    return apiClient.get(API_ENDPOINTS.SHOPS.VOUCHERS(slug), {
+    return apiClient.get(API_ENDPOINTS.SHOPS.VOUCHERS(sellerName), {
       params: orderAmount ? { orderAmount } : undefined,
     });
   },

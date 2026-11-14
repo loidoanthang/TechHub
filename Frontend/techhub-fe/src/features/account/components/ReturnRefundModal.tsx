@@ -48,7 +48,7 @@ export function ReturnRefundModal({
     if (evidenceImages.length >= 3) return;
     setEvidenceImages((prev) => [
       ...prev,
-      "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=600&q=80",
+      "/images/sample-evidence.svg",
     ]);
   };
 

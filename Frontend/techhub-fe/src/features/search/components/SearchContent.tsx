@@ -386,9 +386,9 @@ export function SearchContent() {
 
       {/* 2. Main Two-Column Layout */}
       <div className="flex flex-col lg:flex-row gap-8 items-start">
-        {/* LEFT SIDEBAR: Comprehensive Filters */}
+        {/* LEFT SIDEBAR: Comprehensive Filters (w-72) */}
         <div
-          className={`w-full lg:w-72 ${
+          className={`w-full lg:w-72 shrink-0 ${
             mobileFilterOpen ? "block" : "hidden lg:block"
           }`}
         >

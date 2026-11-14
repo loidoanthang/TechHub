@@ -42,12 +42,13 @@ export interface BuyerOrderItemResponse {
 }
 
 export interface OrderTimelineStepResponse {
-  status: OrderStatus;
+  step?: string;
+  status?: OrderStatus;
   title: string;
   description: string;
   timestamp?: string | null;
-  isCompleted: boolean;
-  isCurrent: boolean;
+  completed?: boolean;
+  current?: boolean;
 }
 
 export interface BuyerOrderResponse {

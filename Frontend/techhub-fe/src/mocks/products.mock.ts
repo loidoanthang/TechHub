@@ -244,13 +244,3 @@ export const MOCK_PRODUCT_DETAILS: Record<string, ProductDetailData> = {
   },
 };
 
-export function getMockProductDetail(id: string): ProductDetailData {
-  return MOCK_PRODUCT_DETAILS[id] || {
-    ...MOCK_PRODUCT_DETAILS["default"],
-    id,
-    title: id
-      .split("-")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ") + " High-Performance Hardware",
-  };
-}

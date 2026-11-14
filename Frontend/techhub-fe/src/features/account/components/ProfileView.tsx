@@ -13,6 +13,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useProfileQuery, useUpdateProfileMutation } from "../hooks/useAccountQueries";
+import { UserAvatar } from "@/components/shared";
 
 export function ProfileView() {
   const { data: profile, isLoading, error } = useProfileQuery();
@@ -22,7 +23,7 @@ export function ProfileView() {
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [avatarPreview, setAvatarPreview] = useState(
-    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
+    "/images/default-avatar.svg"
   );
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -43,6 +44,8 @@ export function ProfileView() {
       setPhone(profile.phone || "");
       if (profile.avatarUrl) {
         setAvatarPreview(profile.avatarUrl);
+      } else {
+        setAvatarPreview("/images/default-avatar.svg");
       }
     }
   }, [profile]);
@@ -100,6 +103,8 @@ export function ProfileView() {
       setPhone(profile.phone || "");
       if (profile.avatarUrl) {
         setAvatarPreview(profile.avatarUrl);
+      } else {
+        setAvatarPreview("/images/default-avatar.svg");
       }
     }
   };
@@ -260,15 +265,12 @@ export function ProfileView() {
           <div className="w-full md:w-64 flex flex-col items-center justify-center text-center p-6 bg-[#eff4ff]/40 md:bg-transparent rounded-2xl md:rounded-none md:border-l md:border-[#eff4ff] shrink-0 gap-5 self-stretch">
             {/* Avatar Circle with Camera Overlay */}
             <div className="relative group cursor-pointer">
-              <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-[#0045cc]/15 shadow-sm relative">
-                <Image
-                  src={avatarPreview}
-                  alt={`${firstName} ${lastName}`}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </div>
+              <UserAvatar
+                src={avatarPreview}
+                alt={`${firstName} ${lastName}`}
+                size={128}
+                className="ring-4 ring-[#0045cc]/15 shadow-sm"
+              />
               <label
                 htmlFor="avatar-input"
                 className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"

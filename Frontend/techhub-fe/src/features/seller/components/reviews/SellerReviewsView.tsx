@@ -28,6 +28,8 @@ import type { SellerReviewResponse } from "@/types/review";
 import type { SellerResponseFormValues } from "@/features/seller/schemas/sellerReviewSchema";
 import { sellerResponseSchema } from "@/features/seller/schemas/sellerReviewSchema";
 import { Pagination } from "@/components/shared/Pagination";
+import { ProductThumbnail } from "@/components/shared";
+import { UserAvatar } from "@/components/shared";
 
 export function SellerReviewsView() {
   const [ratingFilter, setRatingFilter] = useState<number | "">("");
@@ -273,21 +275,11 @@ export function SellerReviewsView() {
               {/* Card Top: Customer Info & Order Details */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-3 min-w-0">
-                  {rev.reviewerAvatar ? (
-                    <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-slate-200">
-                      <Image
-                        src={rev.reviewerAvatar}
-                        alt={rev.reviewerName}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0 border border-primary/20">
-                      {rev.reviewerName ? rev.reviewerName.charAt(0).toUpperCase() : "U"}
-                    </div>
-                  )}
+                  <UserAvatar
+                    src={rev.reviewerAvatar}
+                    alt={rev.reviewerName}
+                    size="sm"
+                  />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-slate-900 truncate">
@@ -331,18 +323,11 @@ export function SellerReviewsView() {
 
               {/* Product Reference */}
               <div className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50/70 border border-slate-100">
-                <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-white border border-slate-200 shrink-0">
-                  <Image
-                    src={
-                      rev.imageUrl ||
-                      "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=300&q=80"
-                    }
-                    alt={rev.productName || "Sản phẩm"}
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                </div>
+                <ProductThumbnail
+                  src={rev.imageUrl}
+                  alt={rev.productName || "Sản phẩm"}
+                  sizeClassName="w-10 h-10"
+                />
                 <div className="min-w-0 flex-1">
                   <h4 className="text-xs font-bold text-slate-800 line-clamp-1">
                     {rev.productName || "Sản phẩm"}

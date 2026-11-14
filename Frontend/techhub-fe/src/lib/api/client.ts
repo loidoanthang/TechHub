@@ -47,6 +47,51 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
+/**
+ * Centrally refreshed access & refresh tokens using mutex queue
+ */
+export async function refreshAuthTokens(): Promise<string | null> {
+  if (isRefreshing) {
+    return new Promise((resolve, reject) => {
+      failedQueue.push({ resolve, reject });
+    });
+  }
+
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    clearTokens();
+    return null;
+  }
+
+  isRefreshing = true;
+
+  try {
+    const refreshResponse = await axios.post<ApiResponse<AuthTokens>>(
+      `${API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
+      { refreshToken },
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    const newTokens = refreshResponse.data?.data;
+    if (newTokens?.accessToken && newTokens?.refreshToken) {
+      setTokens(newTokens.accessToken, newTokens.refreshToken);
+      processQueue(null, newTokens.accessToken);
+      return newTokens.accessToken;
+    }
+
+    const err = new Error("Invalid token payload");
+    processQueue(err, null);
+    clearTokens();
+    throw err;
+  } catch (refreshErr) {
+    processQueue(refreshErr, null);
+    clearTokens();
+    throw refreshErr;
+  } finally {
+    isRefreshing = false;
+  }
+}
+
 apiClient.interceptors.response.use(
   (response) => {
     // Backend returns ApiResponse<T>
@@ -83,62 +128,24 @@ apiClient.interceptors.response.use(
       originalRequest?.url?.includes(API_ENDPOINTS.AUTH.REGISTER);
 
     if (status === 401 && originalRequest && !originalRequest._retry && !isAuthEndpoint) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest._retry = true;
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-            }
-            return apiClient(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
       originalRequest._retry = true;
-      isRefreshing = true;
-
-      const refreshToken = getRefreshToken();
-      if (!refreshToken) {
-        isRefreshing = false;
-        clearTokens();
-        if (typeof window !== "undefined") {
-          window.location.href = `${ROUTES.LOGIN}?returnUrl=${encodeURIComponent(
-            window.location.pathname
-          )}`;
-        }
-        return Promise.reject(error);
-      }
 
       try {
-        const refreshResponse = await axios.post<ApiResponse<AuthTokens>>(
-          `${API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
-          { refreshToken },
-          { headers: { "Content-Type": "application/json" } }
-        );
-
-        const newTokens = refreshResponse.data.data;
-        setTokens(newTokens.accessToken, newTokens.refreshToken);
-
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
+        const newAccessToken = await refreshAuthTokens();
+        if (newAccessToken) {
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          }
+          return apiClient(originalRequest);
         }
-
-        processQueue(null, newTokens.accessToken);
-        return apiClient(originalRequest);
+        throw error;
       } catch (refreshErr) {
-        processQueue(refreshErr, null);
-        clearTokens();
         if (typeof window !== "undefined") {
           window.location.href = `${ROUTES.LOGIN}?returnUrl=${encodeURIComponent(
             window.location.pathname
           )}`;
         }
         return Promise.reject(refreshErr);
-      } finally {
-        isRefreshing = false;
       }
     }
 

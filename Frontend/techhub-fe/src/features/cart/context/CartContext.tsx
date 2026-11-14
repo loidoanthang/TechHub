@@ -119,7 +119,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           (item.variantSku ? `SKU: ${item.variantSku}` : "Standard"),
         price: Number(item.price),
         quantity: item.quantity,
-        imageUrl: item.imageUrl || "/images/placeholder.png",
+        imageUrl: item.imageUrl || "",
         stockQuantity: item.stockQuantity,
         isOutOfStock: item.isOutOfStock,
         isAvailable: item.isAvailable,
@@ -178,7 +178,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           specs: payload.specs || "Standard Edition",
           price: payload.price ?? 0,
           quantity: qty,
-          imageUrl: payload.imageUrl || "/images/placeholder.png",
+          imageUrl: payload.imageUrl || "",
         };
 
         const existingIndex = localItems.findIndex(

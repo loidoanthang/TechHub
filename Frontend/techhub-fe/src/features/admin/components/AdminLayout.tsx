@@ -23,6 +23,7 @@ import {
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ROUTES } from "@/lib/constants";
 import { useAdminDialogA11y } from "../hooks/useAdminDialogA11y";
+import { NotificationBell } from "@/features/notifications/components";
 
 interface NavItem {
   label: string;
@@ -287,6 +288,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </Link>
 
             <div className="h-4 w-px bg-outline-variant hidden lg:block" />
+
+            {/* Notification Bell */}
+            <NotificationBell portalContext="admin" />
 
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-2xl bg-primary/10 text-primary font-heading font-bold text-xs flex items-center justify-center ring-2 ring-surface-container-low shrink-0">

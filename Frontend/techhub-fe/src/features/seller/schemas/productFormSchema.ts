@@ -6,7 +6,10 @@ export const productImageSchema = z.object({
     .trim()
     .min(1, "Đường dẫn ảnh không được để trống")
     .max(500, "Đường dẫn ảnh không được vượt quá 500 ký tự")
-    .regex(/^https?:\/\/.+/i, "Đường dẫn ảnh phải là liên kết hợp lệ (bắt đầu bằng http:// hoặc https://)"),
+    .regex(
+      /^(https?:\/\/|\/images\/).+/i,
+      "Đường dẫn ảnh phải là liên kết hợp lệ (http://, https:// hoặc ảnh mẫu hệ thống /images/)"
+    ),
   displayOrder: z.number().int().min(0).max(5),
 });
 

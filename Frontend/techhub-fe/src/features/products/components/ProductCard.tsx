@@ -1,11 +1,12 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Star, ShieldCheck, ChevronRight, Heart } from "lucide-react";
 import type { Product } from "@/types/product";
 import { useToggleWishlist } from "@/features/account/api/wishlistApi";
 import { formatPrice } from "@/lib/utils";
+import { ProductThumbnail } from "@/components/shared";
 
 interface ProductCardProps {
   product: Product;
@@ -29,13 +30,12 @@ export function ProductCard({ product }: ProductCardProps) {
           href={productUrl}
           className="absolute inset-0 flex items-center justify-center"
         >
-          <Image
+          <ProductThumbnail
             src={product.imageUrl}
             alt={product.title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
-            unoptimized
+            sizeClassName="w-full h-full"
+            className="rounded-none border-0 bg-transparent"
+            imageClassName="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
           />
         </Link>
 

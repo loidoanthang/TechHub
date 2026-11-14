@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ProductThumbnail } from "@/components/shared";
 import {
   Search,
   Store,
@@ -17,7 +18,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useBuyerOrdersQuery, useCompleteOrderMutation } from "@/features/orders/hooks/useOrderQueries";
-import { resolveSellerSlug } from "@/features/shops";
 import type { OrderStatus } from "@/types/enums";
 import type { BuyerOrderResponse, BuyerOrderItemResponse } from "@/types/order";
 import { CancelOrderModal } from "./CancelOrderModal";
@@ -169,7 +169,7 @@ export function OrdersListView() {
                 <div className="bg-[#eff4ff]/60 px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[#eff4ff]">
                   <div className="flex items-center gap-3">
                     <Link
-                      href={`/shops/${resolveSellerSlug(order.shopSlug || order.shopName)}`}
+                      href={`/shops/${order.shopSlug || order.shopName}`}
                       className="flex items-center gap-1.5 text-xs font-bold text-[#0b1c30] hover:text-[#0045cc] transition-colors cursor-pointer group"
                     >
                       <Store className="w-4 h-4 text-[#0045cc]" />
@@ -224,18 +224,11 @@ export function OrdersListView() {
                         className="p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
                       >
                         <div className="flex items-start gap-4 flex-1 min-w-0">
-                          <div className="w-20 h-20 rounded-xl overflow-hidden bg-[#eff4ff] shrink-0 border border-[#c3c5d9]/25 relative">
-                            <Image
-                              src={
-                                item.imageUrl ||
-                                "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=300&q=80"
-                              }
-                              alt={item.productName}
-                              fill
-                              className="object-cover"
-                              unoptimized
-                            />
-                          </div>
+                          <ProductThumbnail
+                            src={item.imageUrl}
+                            alt={item.productName}
+                            sizeClassName="w-20 h-20"
+                          />
 
                           <div className="flex flex-col min-w-0">
                             <h3 className="text-sm font-bold text-[#0b1c30] hover:text-[#0045cc] transition-colors line-clamp-2 leading-snug">

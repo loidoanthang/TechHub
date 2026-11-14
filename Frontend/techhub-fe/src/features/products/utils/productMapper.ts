@@ -1,4 +1,3 @@
-import { resolveSellerSlug } from "@/features/shops";
 import type {
   ProductSummaryResponse,
   PublicProductDetailResponse,
@@ -12,17 +11,15 @@ import type {
 } from "@/types/productDetail";
 
 export function mapProductSummaryToProduct(summary: ProductSummaryResponse): Product {
-  const vendorSlug = resolveSellerSlug(summary.shopName);
-
   return {
     id: summary.id,
     slug: summary.slug,
     title: summary.name,
     price: Number(summary.price),
     vendorName: summary.shopName,
-    vendorSlug,
+    vendorSlug: summary.shopName,
     isVerifiedVendor: !summary.isShopPaused,
-    imageUrl: summary.coverImageUrl || "/images/placeholder.png",
+    imageUrl: summary.coverImageUrl || "",
     rating: 5.0,
     reviewsCount: 0,
     inStock: summary.inStock,
@@ -37,7 +34,7 @@ export function mapPublicDetailToProductDetailData(
       ? detail.images
           .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
           .map((img) => img.imageUrl)
-      : ["/images/placeholder.png"];
+      : [];
 
   const variants: ProductVariant[] = (detail.variants || []).map((v) => {
     const rawAttrs = (v.attributes as Record<string, string>) || {};
@@ -73,10 +70,10 @@ export function mapPublicDetailToProductDetailData(
   // Extract specs
   const specs: ProductSpec[] = [];
   if (detail.brandName) {
-    specs.push({ label: "Brand", value: detail.brandName });
+    specs.push({ label: "Thương hiệu", value: detail.brandName });
   }
   if (detail.categoryName) {
-    specs.push({ label: "Category", value: detail.categoryName });
+    specs.push({ label: "Danh mục", value: detail.categoryName });
   }
   if (detail.attributes) {
     Object.entries(detail.attributes).forEach(([k, val]) => {
@@ -87,14 +84,14 @@ export function mapPublicDetailToProductDetailData(
   // Parse description
   const descriptionParagraphs = detail.description
     ? detail.description.split("\n\n").filter(Boolean)
-    : ["High performance hardware distributed through official TechHub marketplace merchants."];
+    : ["Thông tin chi tiết sản phẩm đang được cập nhật."];
 
   return {
     id: detail.id,
     slug: detail.slug,
     title: detail.name,
-    brandName: detail.brandName || "TechHub Certified",
-    categoryName: detail.categoryName || "Hardware",
+    brandName: detail.brandName || undefined,
+    categoryName: detail.categoryName || "Thiết bị",
     categorySlug: detail.categoryName ? detail.categoryName.toLowerCase().replace(/\s+/g, "-") : "all",
     rating: 5.0,
     reviewsCount: 0,
@@ -118,30 +115,21 @@ export function mapPublicDetailToProductDetailData(
     merchant: {
       id: detail.shopId,
       name: detail.shopName,
-      sellerName: resolveSellerSlug(detail.shopName),
+      sellerName: detail.sellerName || detail.shopName,
       avatarUrl: detail.shopAvatarUrl || undefined,
       avatarText: (detail.shopName || "TH").substring(0, 2).toUpperCase(),
       joinedText: "Đối tác TechHub",
       rating: 5.0,
       positiveFeedback: "100%",
       totalProducts: 1,
-      verified: true,
+      verified: !detail.isShopPaused,
       status: detail.isShopPaused ? "PAUSED" : "ACTIVE",
     },
     description: {
       intro: descriptionParagraphs,
-      features: [
-        "Chính hãng 100%, bảo hành tiêu chuẩn từ nhà sản xuất",
-        "Được kiểm định chất lượng và đóng gói an toàn bởi TechHub Verified Merchant",
-        "Hỗ trợ đổi trả trong 30 ngày nếu phát hiện lỗi phần cứng",
-      ],
-      materials: [
-        "Vật liệu và linh kiện cấu thành đạt chuẩn công nghiệp cao cấp",
-      ],
-      inTheBox: [
-        `1x ${detail.name}`,
-        "1x Hướng dẫn sử dụng & Thẻ bảo hành chính hãng",
-      ],
+      features: [],
+      materials: [],
+      inTheBox: [],
     },
     reviewStats: {
       average: 5.0,

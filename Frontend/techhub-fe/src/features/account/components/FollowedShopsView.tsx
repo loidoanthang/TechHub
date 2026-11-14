@@ -40,10 +40,7 @@ export function FollowedShopsView() {
     unfollowMutation.mutate(sellerName);
   };
 
-  const defaultBanner =
-    "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80";
-  const defaultAvatar =
-    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=200&q=80";
+  const defaultAvatar = "/images/default-avatar.svg";
 
   return (
     <div className="flex flex-col gap-6">
@@ -137,13 +134,17 @@ export function FollowedShopsView() {
                 >
                   {/* Top Cover Banner */}
                   <div className="relative w-full h-24 bg-slate-900 overflow-hidden">
-                    <Image
-                      src={shop.bannerUrl || defaultBanner}
-                      alt={shop.shopName}
-                      fill
-                      className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
-                      unoptimized
-                    />
+                    {shop.bannerUrl ? (
+                      <Image
+                        src={shop.bannerUrl}
+                        alt={shop.shopName}
+                        fill
+                        className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 opacity-90 group-hover:scale-105 transition-transform duration-500" />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent" />
 
                     {/* Status badge */}

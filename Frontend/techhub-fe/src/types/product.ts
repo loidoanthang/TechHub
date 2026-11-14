@@ -44,6 +44,7 @@ export interface PublicProductDetailResponse {
   categoryName: string;
   shopId: string;
   shopName: string;
+  sellerName?: string | null;
   shopAvatarUrl?: string | null;
   isShopPaused: boolean;
   attributes?: Record<string, unknown>;

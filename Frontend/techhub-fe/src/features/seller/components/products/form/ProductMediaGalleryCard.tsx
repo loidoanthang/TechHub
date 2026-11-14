@@ -22,34 +22,9 @@ interface ProductMediaGalleryCardProps {
 // Preset library of real high-resolution hardware images for quick sample selection
 const HARDWARE_PRESET_GALLERY = [
   {
-    name: "Màn hình OLED ASUS ROG",
-    url: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=800&auto=format&fit=crop&q=80",
-    tag: "Monitor",
-  },
-  {
-    name: "Chuột Gaming Logitech G Pro",
-    url: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=800&auto=format&fit=crop&q=80",
-    tag: "Mouse",
-  },
-  {
-    name: "Bàn phím cơ Custom Switch",
-    url: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80",
-    tag: "Keyboard",
-  },
-  {
-    name: "Card đồ họa Gaming GPU",
-    url: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=800&auto=format&fit=crop&q=80",
-    tag: "GPU",
-  },
-  {
-    name: "Tai nghe Gaming HyperX Cloud",
-    url: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&auto=format&fit=crop&q=80",
-    tag: "Audio",
-  },
-  {
-    name: "Linh kiện Mainboard & RAM",
-    url: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80",
-    tag: "PC Specs",
+    name: "Ảnh mẫu phần cứng TechHub",
+    url: "/images/sample-evidence.svg",
+    tag: "Hardware",
   },
 ];
 
@@ -67,8 +42,8 @@ export function ProductMediaGalleryCard({
     const trimmed = newUrl.trim();
     if (!trimmed || images.length >= 6) return;
 
-    // Validate that it's a valid http/https URL
-    if (!/^https?:\/\/.+/i.test(trimmed)) return;
+    // Validate that it's a valid http/https URL or local image path
+    if (!/^(https?:\/\/|\/images\/).+/i.test(trimmed)) return;
 
     // Check if duplicate url
     if (images.some((img) => img.imageUrl === trimmed)) return;
@@ -254,8 +229,7 @@ export function ProductMediaGalleryCard({
               </h3>
             </div>
             <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-              Dán đường dẫn ảnh trực tiếp (JPG, PNG, WebP) từ hosting, Cloudinary, Imgur hoặc
-              Unsplash.
+              Dán đường dẫn ảnh trực tiếp (JPG, PNG, WebP) từ hosting, Cloudinary hoặc Imgur.
             </p>
 
             <input

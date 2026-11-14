@@ -14,13 +14,13 @@ export const shopProfileSchema = z.object({
   avatarUrl: z
     .string()
     .max(500, "Đường dẫn ảnh đại diện không quá 500 ký tự")
-    .regex(/^(https?:\/\/.*)?$/, "Đường dẫn ảnh đại diện phải bắt đầu bằng http:// hoặc https://")
+    .regex(/^((https?:\/\/|\/images\/).*)?$/, "Đường dẫn ảnh đại diện phải là liên kết hợp lệ hoặc ảnh hệ thống /images/")
     .optional()
     .or(z.literal("")),
   bannerUrl: z
     .string()
     .max(500, "Đường dẫn ảnh bìa không quá 500 ký tự")
-    .regex(/^(https?:\/\/.*)?$/, "Đường dẫn ảnh bìa phải bắt đầu bằng http:// hoặc https://")
+    .regex(/^((https?:\/\/|\/images\/).*)?$/, "Đường dẫn ảnh bìa phải là liên kết hợp lệ hoặc ảnh hệ thống /images/")
     .optional()
     .or(z.literal("")),
 });

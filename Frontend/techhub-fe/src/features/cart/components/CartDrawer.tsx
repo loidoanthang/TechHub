@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { ProductThumbnail } from "@/components/shared";
 import {
   X,
   Trash2,
@@ -104,16 +105,12 @@ export function CartDrawer() {
                 className="p-3.5 rounded-xl bg-[#eff4ff] flex gap-3.5 items-start group transition-colors hover:bg-[#dce9ff]/50"
               >
                 {/* Product Thumbnail */}
-                <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-white flex items-center justify-center p-1.5 border border-slate-100 relative">
-                  <Image
-                    src={item.imageUrl}
-                    alt={item.title}
-                    width={80}
-                    height={80}
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                    unoptimized
-                  />
-                </div>
+                <ProductThumbnail
+                  src={item.imageUrl}
+                  alt={item.title}
+                  sizeClassName="w-20 h-20"
+                  imageClassName="object-contain p-1.5 group-hover:scale-105 transition-transform duration-300"
+                />
 
                 {/* Details */}
                 <div className="flex-1 min-w-0 flex flex-col justify-between h-full">

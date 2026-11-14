@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ProductThumbnail } from "@/components/shared";
 import {
   ArrowLeft,
   Store,
@@ -10,7 +11,6 @@ import {
   MapPin,
   Clock,
   ShieldCheck,
-  Check,
   Truck,
   CreditCard,
   CheckCircle2,
@@ -21,11 +21,14 @@ import {
   Star,
 } from "lucide-react";
 import { useBuyerOrderDetailQuery, useCompleteOrderMutation } from "@/features/orders/hooks/useOrderQueries";
-import { resolveSellerSlug } from "@/features/shops";
-import type { OrderTimelineStepResponse, BuyerOrderItemResponse } from "@/types/order";
+import type { OrderStatus } from "@/types/enums";
+import type { BuyerOrderItemResponse } from "@/types/order";
 import { CancelOrderModal } from "./CancelOrderModal";
 import { ReturnRefundModal } from "./ReturnRefundModal";
 import { ReviewProductModal } from "./ReviewProductModal";
+import { TimelineStepNode } from "./TimelineStepNode";
+import { TimelineStepInfo } from "./TimelineStepInfo";
+import { buildNormalizedTimeline } from "@/features/orders/utils/orderTimelineMapper";
 
 interface OrderDetailViewProps {
   orderId: string;
@@ -97,6 +100,8 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
     order.status === "CONFIRMED" ||
     order.status === "PROCESSING";
 
+  const normalizedTimeline = buildNormalizedTimeline(order.timeline, order.status);
+
   return (
     <main className="w-full flex flex-col gap-6">
       {/* Back Button & Title */}
@@ -135,7 +140,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
 
         {/* Shop Info */}
         <Link
-          href={`/shops/${resolveSellerSlug(order.shopSlug || order.shopName)}`}
+          href={`/shops/${order.shopSlug || order.shopName}`}
           className="flex items-center gap-2.5 px-3.5 py-2 bg-white hover:bg-[#eff4ff] rounded-xl border border-[#c3c5d9]/25 hover:border-[#0045cc]/30 transition-all group cursor-pointer shadow-2xs"
         >
           <Store className="w-4 h-4 text-[#0045cc]" />
@@ -149,35 +154,76 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
       </div>
 
       {/* Tracking Timeline Bento */}
-      {order.timeline && order.timeline.length > 0 && (
+      {normalizedTimeline.length > 0 && (
         <div className="bg-white rounded-2xl p-6 border border-[#c3c5d9]/25 shadow-sm">
-          <h2 className="text-xs font-bold text-[#0b1c30] uppercase tracking-wider mb-5 flex items-center gap-2">
+          <h2 className="text-xs font-bold text-[#0b1c30] uppercase tracking-wider mb-6 flex items-center gap-2">
             <Truck className="w-4 h-4 text-[#0045cc]" />
             Order Timeline &amp; Delivery Progress
           </h2>
-          <div className="flex flex-col sm:flex-row items-start justify-between relative gap-4">
-            {order.timeline.map((step: OrderTimelineStepResponse, idx: number) => (
-              <div key={idx} className="flex sm:flex-col items-center sm:text-center gap-3 sm:gap-2 flex-1">
-                <div
-                  className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-xs font-bold transition-all ${
-                    step.isCompleted
-                      ? "bg-[#0045cc] text-white"
-                      : step.isCurrent
-                      ? "bg-[#0045cc]/20 text-[#0045cc] ring-2 ring-[#0045cc]"
-                      : "bg-[#eff4ff] text-[#737688]"
-                  }`}
-                >
-                  {step.isCompleted ? <Check className="w-4 h-4" /> : idx + 1}
-                </div>
-                <div className="flex flex-col sm:items-center">
-                  <span className="text-xs font-bold text-[#0b1c30]">{step.title}</span>
-                  <span className="text-[11px] text-[#737688]">{step.description}</span>
-                  {step.timestamp && (
-                    <span className="text-[10px] text-[#737688] font-mono mt-0.5">
-                      {new Date(step.timestamp).toLocaleDateString("vi-VN")}
-                    </span>
-                  )}
-                </div>
+
+          {/* DESKTOP & TABLET VIEW: Connected Continuous Stepper */}
+          <div className="hidden sm:flex items-start justify-between relative w-full">
+            {normalizedTimeline.map((step, idx) => (
+              <div
+                key={idx}
+                className="flex-1 flex flex-col items-center text-center relative px-1"
+              >
+                {/* Connecting Line to next step */}
+                {!step.isLast && (
+                  <div
+                    aria-hidden="true"
+                    className={`absolute top-[17px] left-1/2 w-full h-1 -z-0 transition-all duration-300 ${
+                      step.isNextDone ? "bg-primary" : "bg-slate-200"
+                    }`}
+                  />
+                )}
+
+                <TimelineStepNode
+                  stepNum={step.stepNum}
+                  isCompleted={step.isCompleted}
+                  isCurrent={step.isCurrent}
+                />
+
+                <TimelineStepInfo
+                  title={step.title}
+                  description={step.description}
+                  timestamp={step.timestamp}
+                  isCompleted={step.isCompleted}
+                  isCurrent={step.isCurrent}
+                  layout="horizontal"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* MOBILE VIEW: Vertical Stepper */}
+          <div className="flex sm:hidden flex-col gap-6 relative pl-1">
+            {normalizedTimeline.map((step, idx) => (
+              <div key={idx} className="flex items-start gap-3.5 relative">
+                {/* Connecting Vertical Line */}
+                {!step.isLast && (
+                  <div
+                    aria-hidden="true"
+                    className={`absolute left-[17px] top-9 bottom-[-24px] w-0.5 -z-0 ${
+                      step.isNextDone ? "bg-primary" : "bg-slate-200"
+                    }`}
+                  />
+                )}
+
+                <TimelineStepNode
+                  stepNum={step.stepNum}
+                  isCompleted={step.isCompleted}
+                  isCurrent={step.isCurrent}
+                />
+
+                <TimelineStepInfo
+                  title={step.title}
+                  description={step.description}
+                  timestamp={step.timestamp}
+                  isCompleted={step.isCompleted}
+                  isCurrent={step.isCurrent}
+                  layout="vertical"
+                />
               </div>
             ))}
           </div>
@@ -271,18 +317,11 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
                 className="p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
               >
                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-[#eff4ff] shrink-0 border border-[#c3c5d9]/25 relative">
-                    <Image
-                      src={
-                        item.imageUrl ||
-                        "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=300&q=80"
-                      }
-                      alt={item.productName}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
+                  <ProductThumbnail
+                    src={item.imageUrl}
+                    alt={item.productName}
+                    sizeClassName="w-16 h-16"
+                  />
                   <div className="flex flex-col min-w-0">
                     <h3 className="text-xs font-bold text-[#0b1c30] line-clamp-1">
                       {item.productName}

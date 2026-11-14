@@ -90,23 +90,24 @@ export function ShopHeaderBanner({ shop, productCount = 0 }: ShopHeaderBannerPro
     .filter(Boolean)
     .join(", ");
 
-  const defaultBanner =
-    "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1600&q=80";
-  const defaultAvatar =
-    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80";
+  const defaultAvatar = "/images/default-avatar.svg";
 
   return (
     <div className="w-full bg-white rounded-3xl overflow-hidden border border-[#c3c5d9]/30 shadow-sm transition-all flex flex-col">
       {/* 1. Cover Banner Image */}
       <div className="relative w-full h-44 sm:h-56 md:h-64 bg-slate-900 overflow-hidden">
-        <Image
-          src={shop.bannerUrl || defaultBanner}
-          alt={shop.name}
-          fill
-          priority
-          className="object-cover opacity-90 hover:scale-105 transition-transform duration-700 ease-out"
-          unoptimized
-        />
+        {shop.bannerUrl ? (
+          <Image
+            src={shop.bannerUrl}
+            alt={shop.name}
+            fill
+            priority
+            className="object-cover opacity-90 hover:scale-105 transition-transform duration-700 ease-out"
+            unoptimized
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 opacity-95" />
+        )}
         {/* Subtle cinematic gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/10 to-transparent" />
 

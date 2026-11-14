@@ -19,17 +19,6 @@ export function NotificationToast() {
 
   const isSeller = Boolean(user?.roles?.includes("SELLER"));
 
-  let portalContext: PortalContext = "buyer";
-  if (pathname?.startsWith("/admin")) {
-    portalContext = "admin";
-  } else if (
-    pathname?.startsWith("/seller") ||
-    (isSeller &&
-      (activeToast?.type === "REVIEW" || activeToast?.type === "SHOP"))
-  ) {
-    portalContext = "seller";
-  }
-
   // Auto-dismiss after 5 seconds
   useEffect(() => {
     if (!activeToast) return;
@@ -51,6 +40,18 @@ export function NotificationToast() {
     if (!activeToast.isRead) {
       markAsReadMutation.mutate(activeToast.id);
     }
+
+    let portalContext: PortalContext = "buyer";
+    if (pathname?.startsWith("/admin")) {
+      portalContext = "admin";
+    } else if (
+      pathname?.startsWith("/seller") ||
+      (isSeller &&
+        (activeToast?.type === "REVIEW" || activeToast?.type === "SHOP"))
+    ) {
+      portalContext = "seller";
+    }
+
     const targetRoute = resolveNotificationRoute(activeToast, portalContext);
     dismissToast();
     router.push(targetRoute);

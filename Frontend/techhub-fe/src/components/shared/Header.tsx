@@ -23,6 +23,8 @@ import { useCart } from "@/features/cart/context/CartContext";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useWishlistIdsQuery } from "@/features/account/api/wishlistApi";
 import { ROUTES } from "@/lib/constants";
+import { UserAvatar } from "./UserAvatar";
+import { NotificationBell } from "@/features/notifications/components";
 
 export function Header() {
   const { toggleCart, totalCount } = useCart();
@@ -148,8 +150,10 @@ export function Header() {
 
         {/* Header Actions */}
         <div className="flex items-center gap-4 flex-shrink-0">
-          {/* Wishlist & Cart */}
-          <div className="flex items-center gap-2">
+          {/* Notifications, Wishlist & Cart */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <NotificationBell portalContext="buyer" />
+
             <Link
               href={isAuthenticated ? ROUTES.ACCOUNT.WISHLIST : ROUTES.LOGIN}
               className="relative p-2 rounded-lg hover:bg-[#dce9ff] transition-colors text-[#434656] hover:text-[#0b1c30]"
@@ -190,19 +194,11 @@ export function Header() {
                   onClick={() => setDropdownOpen((prev) => !prev)}
                   className="flex items-center gap-2 cursor-pointer p-1 rounded-xl hover:bg-[#eff4ff] transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-[#0045cc]/10 text-[#0045cc] relative overflow-hidden flex-shrink-0 flex items-center justify-center font-bold text-xs">
-                    {user.avatarUrl ? (
-                      <Image
-                        src={user.avatarUrl}
-                        alt={fullName}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
-                    ) : (
-                      <span>{(user.firstName?.[0] || user.email?.[0] || "U").toUpperCase()}</span>
-                    )}
-                  </div>
+                  <UserAvatar
+                    src={user.avatarUrl}
+                    alt={fullName}
+                    size="sm"
+                  />
                   <div className="hidden md:flex flex-col text-left">
                     <span className="text-[13px] font-semibold text-[#0b1c30] leading-tight truncate max-w-[120px]">
                       {fullName}

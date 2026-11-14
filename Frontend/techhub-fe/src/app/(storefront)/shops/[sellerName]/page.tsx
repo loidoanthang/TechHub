@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ShopProfileView, resolveSellerSlug } from "@/features/shops";
+import { ShopProfileView } from "@/features/shops";
 import type { Metadata } from "next";
 
 interface ShopPageProps {
@@ -24,8 +24,8 @@ export async function generateMetadata({ params }: ShopPageProps): Promise<Metad
 
 async function ShopProfileLoader({ params }: ShopPageProps) {
   const { sellerName } = await params;
-  const canonicalSlug = resolveSellerSlug(decodeURIComponent(sellerName));
-  return <ShopProfileView sellerName={canonicalSlug} />;
+  const decoded = decodeURIComponent(sellerName);
+  return <ShopProfileView sellerName={decoded} />;
 }
 
 export default function ShopPage({ params }: ShopPageProps) {

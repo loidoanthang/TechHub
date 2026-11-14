@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { UserAvatar } from "@/components/shared/UserAvatar";
 import {
   Store,
   Image as ImageIcon,
@@ -25,31 +27,15 @@ import {
 // Preset curated avatar and banner images for electronics sellers
 const PRESET_AVATARS = [
   {
-    name: "Tech Blue",
-    url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80",
-  },
-  {
-    name: "Cyber Neon",
-    url: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=200&auto=format&fit=crop&q=80",
-  },
-  {
-    name: "Minimal Hardware",
-    url: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&auto=format&fit=crop&q=80",
+    name: "TechHub Official",
+    url: "/images/default-avatar.svg",
   },
 ];
 
 const PRESET_BANNERS = [
   {
-    name: "Bàn làm việc Công nghệ",
-    url: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=1200&auto=format&fit=crop&q=80",
-  },
-  {
-    name: "Gaming Gear Setup",
-    url: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&auto=format&fit=crop&q=80",
-  },
-  {
-    name: "Abstract Neon Circuit",
-    url: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80",
+    name: "TechHub Hardware Banner",
+    url: "/images/sample-evidence.svg",
   },
 ];
 
@@ -257,7 +243,7 @@ export function ShopProfileTab() {
             <input
               type="url"
               {...register("avatarUrl")}
-              placeholder="https://images.unsplash.com/... hoặc link ảnh online"
+              placeholder="https://example.com/logo.png hoặc link ảnh online"
               className={`w-full h-10 px-3.5 rounded-xl border text-xs text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] ${
                 errors.avatarUrl
                   ? "border-rose-400 bg-rose-50/20"
@@ -301,7 +287,7 @@ export function ShopProfileTab() {
             <input
               type="url"
               {...register("bannerUrl")}
-              placeholder="https://images.unsplash.com/... hoặc link ảnh bìa banner"
+              placeholder="https://example.com/banner.jpg hoặc link ảnh bìa banner"
               className={`w-full h-10 px-3.5 rounded-xl border text-xs text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] ${
                 errors.bannerUrl
                   ? "border-rose-400 bg-rose-50/20"
@@ -361,15 +347,12 @@ export function ShopProfileTab() {
           {/* Banner container */}
           <div className="relative h-32 sm:h-36 w-full bg-slate-800 overflow-hidden">
             {watchedBanner ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={watchedBanner}
                 alt="Banner preview"
-                className="w-full h-full object-cover transition-opacity duration-300"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=1200&auto=format&fit=crop&q=80";
-                }}
+                fill
+                className="object-cover transition-opacity duration-300"
+                unoptimized
               />
             ) : (
               <div className="w-full h-full bg-linear-to-r from-[#0045cc] to-[#002b80] flex items-center justify-center text-white/50 text-xs">
@@ -390,17 +373,14 @@ export function ShopProfileTab() {
           <div className="p-4 sm:p-5 flex flex-col gap-3 relative -mt-8 pt-0">
             {/* Avatar & Header */}
             <div className="flex items-end gap-3.5">
-              <div className="w-16 h-16 rounded-2xl bg-white p-1 border-2 border-white shadow-md shrink-0 overflow-hidden bg-slate-100 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-2xl bg-white p-1 border-2 border-white shadow-md shrink-0 overflow-hidden flex items-center justify-center">
                 {watchedAvatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <UserAvatar
                     src={watchedAvatar}
-                    alt="Avatar preview"
-                    className="w-full h-full object-cover rounded-xl"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src =
-                        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&auto=format&fit=crop&q=80";
-                    }}
+                    alt={watchedName || "Shop avatar"}
+                    size={56}
+                    className="rounded-xl"
+                    fallbackSrc="/images/default-avatar.svg"
                   />
                 ) : (
                   <span className="text-xl font-heading font-black text-[#0045cc]">

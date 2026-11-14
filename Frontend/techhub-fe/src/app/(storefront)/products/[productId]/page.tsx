@@ -1,65 +1,34 @@
-import { Suspense } from "react";
+import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
-import { notFound } from "next/navigation";
 import { ProductDetailView } from "@/features/products/components";
-import { productApi } from "@/features/products/api/productApi";
-import { mapPublicDetailToProductDetailData } from "@/features/products/utils/productMapper";
+import {
+  resolveProductDetail,
+  resolveProductMetadata,
+} from "@/features/products/api/productResolver";
 import type { Metadata } from "next";
 
 interface ProductPageProps {
-  params: Promise<{
-    productId: string;
-  }>;
+  params: Promise<{ productId: string }>;
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
-  await connection();
   const { productId } = await params;
-  try {
-    const res = await productApi.getProductBySlug(productId);
-    if (res?.data) {
-      return {
-        title: `${res.data.name} | TechHub Marketplace`,
-        description: res.data.description || "High-performance tech hardware on TechHub",
-      };
-    }
-  } catch {
-    // Fallback to title from slug
-  }
-  return {
-    title: "Product Details | TechHub Marketplace",
-  };
+  return resolveProductMetadata(productId);
 }
 
-async function ProductDetailLoader({ params }: ProductPageProps) {
+export default async function ProductDetailPage({ params }: ProductPageProps) {
   await connection();
   const { productId } = await params;
 
-  try {
-    // Attempt fetching real product from Backend by slug
-    const res = await productApi.getProductBySlug(productId);
-    if (res?.data) {
-      const realProductData = mapPublicDetailToProductDetailData(res.data);
-      return <ProductDetailView product={realProductData} />;
-    }
-  } catch (err) {
-    console.warn(`Product slug "${productId}" not found on backend DB:`, err);
+  const result = await resolveProductDetail(productId);
+
+  if (result.type === "REDIRECT") {
+    redirect(`/products/${result.targetSlug}`);
   }
 
-  // Trigger 404 if product is not found in DB
-  notFound();
-}
+  if (result.type === "NOT_FOUND") {
+    notFound();
+  }
 
-export default function ProductDetailPage(props: ProductPageProps) {
-  return (
-    <Suspense
-      fallback={
-        <div className="max-w-6xl mx-auto px-6 py-20 text-center text-sm text-slate-500">
-          Loading hardware specifications...
-        </div>
-      }
-    >
-      <ProductDetailLoader {...props} />
-    </Suspense>
-  );
+  return <ProductDetailView product={result.data} />;
 }
