@@ -7,7 +7,7 @@ import com.techhub.modules.shop.dto.response.AdminShopResponse;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;
-import com.techhub.service.shop.AdminShopService;
+import com.techhub.modules.shop.service.AdminShopService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

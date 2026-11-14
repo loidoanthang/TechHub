@@ -5,7 +5,7 @@ import com.techhub.common.PageResponse;
 import com.techhub.modules.review.dto.request.SellerResponseRequest;
 import com.techhub.modules.review.dto.response.SellerReviewResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.review.SellerReviewService;
+import com.techhub.modules.review.service.SellerReviewService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.dashboard.dto.response.SellerDashboardMetricsResponse;
 import com.techhub.modules.dashboard.enums.DashboardPeriod;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.dashboard.SellerDashboardService;
+import com.techhub.modules.dashboard.service.SellerDashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;

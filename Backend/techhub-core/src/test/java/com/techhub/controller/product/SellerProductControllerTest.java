@@ -21,7 +21,7 @@ import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.product.SellerProductService;
+import com.techhub.modules.product.service.SellerProductService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

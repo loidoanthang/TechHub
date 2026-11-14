@@ -49,6 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.conversation.service.impl.ConversationServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests for ConversationServiceImpl (POST /api/conversations)")

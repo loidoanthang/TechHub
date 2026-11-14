@@ -11,7 +11,7 @@ import com.techhub.modules.conversation.repository.ConversationRepository;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.security.CustomUserDetailsService;
-import com.techhub.service.auth.JwtService;
+import com.techhub.modules.auth.service.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

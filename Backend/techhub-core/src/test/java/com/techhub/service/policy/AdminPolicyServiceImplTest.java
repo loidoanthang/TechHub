@@ -8,7 +8,7 @@ import com.techhub.modules.policy.entity.TransactionPolicy;
 import com.techhub.modules.user.entity.User;
 import com.techhub.modules.policy.repository.TransactionPolicyRepository;
 import com.techhub.modules.user.repository.UserRepository;
-import com.techhub.service.policy.impl.AdminPolicyServiceImpl;
+import com.techhub.modules.policy.service.impl.AdminPolicyServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

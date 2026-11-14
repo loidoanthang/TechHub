@@ -10,7 +10,7 @@ import com.techhub.modules.review.dto.response.ReviewResponse;
 import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.modules.review.enums.ReviewMediaType;
 import com.techhub.modules.user.enums.UserStatus;
-import com.techhub.service.review.impl.ReviewServiceImpl;
+import com.techhub.modules.review.service.impl.ReviewServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

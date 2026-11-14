@@ -10,7 +10,7 @@ import com.techhub.modules.payment.enums.PaymentType;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.modules.user.repository.UserPaymentInfoRepository;
 import com.techhub.modules.user.repository.UserRepository;
-import com.techhub.service.user.impl.UserPaymentInfoServiceImpl;
+import com.techhub.modules.user.service.impl.UserPaymentInfoServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

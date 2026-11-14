@@ -6,7 +6,7 @@ import com.techhub.modules.product.dto.request.CreateProductImageRequest;
 import com.techhub.modules.product.dto.request.CreateProductRequest;
 import com.techhub.modules.product.dto.request.CreateProductVariantRequest;
 import com.techhub.modules.product.dto.response.ProductDetailResponse;
-import com.techhub.service.product.impl.SellerProductServiceImpl;
+import com.techhub.modules.product.service.impl.SellerProductServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

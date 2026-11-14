@@ -21,7 +21,7 @@ import com.techhub.modules.seller.repository.SellerRepository;
 import com.techhub.modules.seller.repository.SellerWalletTransactionRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.modules.user.repository.UserRepository;
-import com.techhub.service.payout.impl.AdminPayoutServiceImpl;
+import com.techhub.modules.seller.service.impl.AdminPayoutServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

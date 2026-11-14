@@ -15,7 +15,7 @@ import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import com.techhub.modules.voucher.enums.VoucherStatus;
 import com.techhub.modules.voucher.enums.VoucherType;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.voucher.SellerVoucherService;
+import com.techhub.modules.voucher.service.SellerVoucherService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

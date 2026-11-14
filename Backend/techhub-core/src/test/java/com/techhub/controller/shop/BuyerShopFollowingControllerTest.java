@@ -8,7 +8,7 @@ import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.shop.ShopFollowingService;
+import com.techhub.modules.shop.service.ShopFollowingService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

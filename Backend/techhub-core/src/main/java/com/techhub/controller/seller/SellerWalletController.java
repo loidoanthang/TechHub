@@ -7,7 +7,7 @@ import com.techhub.modules.seller.dto.response.PayoutResponse;
 import com.techhub.modules.seller.dto.response.SellerWalletTransactionResponse;
 import com.techhub.modules.seller.enums.SellerWalletTransactionType;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.seller.SellerWalletService;
+import com.techhub.modules.seller.service.SellerWalletService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

@@ -8,7 +8,7 @@ import com.techhub.modules.notification.dto.response.NotificationResponse;
 import com.techhub.modules.notification.enums.NotificationType;
 import com.techhub.modules.notification.enums.TargetAudience;
 import com.techhub.modules.notification.repository.NotificationRepository;
-import com.techhub.service.notification.NotificationStreamService;
+import com.techhub.modules.notification.service.NotificationStreamService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +25,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.notification.service.impl.AdminNotificationServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminNotificationServiceImpl (POST /api/admin/notifications/broadcast)")

@@ -13,8 +13,8 @@ import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.modules.user.repository.AddressRepository;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.auth.RefreshTokenService;
-import com.techhub.service.user.impl.AdminUserServiceImpl;
+import com.techhub.modules.auth.service.RefreshTokenService;
+import com.techhub.modules.user.service.impl.AdminUserServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +36,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.user.service.AdminUserService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminUserService (View Users & Ban/Suspend User)")

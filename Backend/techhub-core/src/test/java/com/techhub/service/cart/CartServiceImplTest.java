@@ -8,7 +8,7 @@ import com.techhub.modules.cart.dto.response.CartCountResponse;
 import com.techhub.modules.cart.dto.response.CartItemResponse;
 import com.techhub.modules.cart.dto.response.CartResponse;
 import com.techhub.modules.cart.dto.response.ShopCartGroupResponse;
-import com.techhub.service.cart.impl.CartServiceImpl;
+import com.techhub.modules.cart.service.impl.CartServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,6 +48,7 @@ import com.techhub.modules.shop.entity.Shop;
 import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.modules.voucher.repository.VoucherRepository;
+import com.techhub.modules.cart.service.CartService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho CartService (GET /api/cart, GET /api/cart/count, POST /api/cart/items)")

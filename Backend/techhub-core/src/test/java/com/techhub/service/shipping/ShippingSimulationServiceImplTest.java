@@ -8,7 +8,7 @@ import com.techhub.modules.payment.enums.PaymentMethod;
 import com.techhub.modules.payment.enums.PaymentStatus;
 import com.techhub.modules.order.repository.OrderRepository;
 import com.techhub.modules.payment.repository.PaymentRepository;
-import com.techhub.service.shipping.impl.ShippingSimulationServiceImpl;
+import com.techhub.modules.shipping.service.impl.ShippingSimulationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

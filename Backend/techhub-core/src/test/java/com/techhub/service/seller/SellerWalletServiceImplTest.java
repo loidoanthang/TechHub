@@ -20,7 +20,7 @@ import com.techhub.modules.seller.repository.SellerPayoutRequestRepository;
 import com.techhub.modules.seller.repository.SellerRepository;
 import com.techhub.modules.seller.repository.SellerWalletTransactionRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
-import com.techhub.service.seller.impl.SellerWalletServiceImpl;
+import com.techhub.modules.seller.service.impl.SellerWalletServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

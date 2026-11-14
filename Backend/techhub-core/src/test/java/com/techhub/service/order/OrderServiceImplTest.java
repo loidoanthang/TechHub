@@ -36,7 +36,7 @@ import com.techhub.modules.order.repository.OrderItemRepository;
 import com.techhub.modules.order.repository.OrderRepository;
 import com.techhub.modules.payment.repository.PaymentRepository;
 import com.techhub.modules.user.repository.UserRepository;
-import com.techhub.service.order.impl.OrderServiceImpl;
+import com.techhub.modules.order.service.impl.OrderServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -60,6 +60,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.order.service.OrderService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho OrderService (GET /api/buyer/orders & GET /api/buyer/orders/{id})")

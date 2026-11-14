@@ -13,7 +13,7 @@ import com.techhub.modules.product.repository.ProductImageRepository;
 import com.techhub.modules.product.repository.ProductRepository;
 import com.techhub.modules.product.repository.ProductVariantRepository;
 import com.techhub.modules.product.repository.WishlistRepository;
-import com.techhub.service.wishlist.impl.WishlistServiceImpl;
+import com.techhub.modules.product.service.impl.WishlistServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,6 +37,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.product.service.WishlistService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho WishlistService (POST /api/wishlist/{productId})")

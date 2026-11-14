@@ -3,7 +3,7 @@ package com.techhub.controller.auth;
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.auth.dto.response.LoginResponse;
 import com.techhub.modules.auth.dto.response.TokenResponse;
-import com.techhub.service.auth.AuthService;
+import com.techhub.modules.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;

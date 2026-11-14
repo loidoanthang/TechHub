@@ -13,7 +13,7 @@ import com.techhub.modules.seller.dto.response.SellerProductSummaryResponse;
 import com.techhub.modules.product.enums.ProductApprovalStatus;
 import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.product.SellerProductService;
+import com.techhub.modules.product.service.SellerProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

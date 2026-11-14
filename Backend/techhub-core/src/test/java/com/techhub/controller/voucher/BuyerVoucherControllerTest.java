@@ -5,7 +5,7 @@ import com.techhub.modules.voucher.dto.response.CartPlatformVoucherResponse;
 import com.techhub.modules.voucher.enums.DiscountType;
 import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import com.techhub.modules.voucher.enums.VoucherType;
-import com.techhub.service.voucher.BuyerVoucherService;
+import com.techhub.modules.voucher.service.BuyerVoucherService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -3,7 +3,7 @@ package com.techhub.controller.shipping;
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.shipping.dto.request.ShippingSimulationRequest;
 import com.techhub.modules.shipping.dto.response.ShippingSimulationResponse;
-import com.techhub.service.shipping.ShippingSimulationService;
+import com.techhub.modules.shipping.service.ShippingSimulationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;

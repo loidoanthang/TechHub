@@ -8,7 +8,7 @@ import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.payment.VNPayService;
+import com.techhub.modules.payment.service.VNPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

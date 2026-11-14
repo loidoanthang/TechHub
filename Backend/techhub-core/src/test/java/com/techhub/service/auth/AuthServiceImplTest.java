@@ -22,7 +22,7 @@ import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.modules.auth.enums.VerificationTokenType;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.auth.impl.AuthServiceImpl;
+import com.techhub.modules.auth.service.impl.AuthServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,6 +50,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.auth.service.EmailService;
+import com.techhub.modules.auth.service.JwtService;
+import com.techhub.modules.auth.service.RefreshTokenService;
+import com.techhub.modules.auth.service.VerificationTokensService;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceImplTest {

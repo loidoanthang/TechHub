@@ -11,7 +11,7 @@ import com.techhub.modules.category.dto.response.CategoryAttributeResponse;
 import com.techhub.modules.category.dto.response.CategoryDetailResponse;
 import com.techhub.modules.category.dto.response.CategorySummaryResponse;
 import com.techhub.modules.category.enums.CategoryStatus;
-import com.techhub.service.category.AdminCategoryService;
+import com.techhub.modules.category.service.AdminCategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

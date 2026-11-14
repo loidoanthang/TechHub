@@ -7,7 +7,7 @@ import com.techhub.modules.user.entity.User;
 import com.techhub.modules.auth.entity.VerificationTokens;
 import com.techhub.modules.auth.enums.VerificationTokenType;
 import com.techhub.modules.auth.repository.VerificationTokensRepository;
-import com.techhub.service.auth.impl.VerificationTokensServiceImpl;
+import com.techhub.modules.auth.service.impl.VerificationTokensServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

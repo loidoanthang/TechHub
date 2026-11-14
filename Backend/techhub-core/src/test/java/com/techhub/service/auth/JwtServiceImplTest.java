@@ -4,7 +4,7 @@ import com.techhub.config.properties.JwtProperties;
 import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.auth.impl.JwtServiceImpl;
+import com.techhub.modules.auth.service.impl.JwtServiceImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;

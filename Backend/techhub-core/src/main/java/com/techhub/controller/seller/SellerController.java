@@ -13,7 +13,7 @@ import com.techhub.modules.seller.dto.response.SellerShippingOptionResponse;
 import com.techhub.modules.seller.dto.response.SellerShopResponse;
 import com.techhub.modules.seller.dto.response.SellerVerificationStatusResponse;
 import com.techhub.modules.seller.dto.response.SellerWarehouseAddressResponse;
-import com.techhub.service.seller.SellerService;
+import com.techhub.modules.seller.service.SellerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

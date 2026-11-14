@@ -3,7 +3,7 @@ package com.techhub.controller.category;
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.category.dto.response.CategoryAttributeResponse;
 import com.techhub.modules.category.dto.response.CategorySummaryResponse;
-import com.techhub.service.category.CategoryService;
+import com.techhub.modules.category.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

@@ -17,7 +17,7 @@ import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import com.techhub.modules.voucher.enums.VoucherStatus;
 import com.techhub.modules.voucher.enums.VoucherType;
 import com.techhub.modules.voucher.repository.VoucherRepository;
-import com.techhub.service.voucher.impl.AdminVoucherServiceImpl;
+import com.techhub.modules.voucher.service.impl.AdminVoucherServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

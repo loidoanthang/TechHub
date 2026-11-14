@@ -3,7 +3,7 @@ package com.techhub.service.product;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.product.dto.response.ProductDetailResponse;
-import com.techhub.service.product.impl.SellerProductServiceImpl;
+import com.techhub.modules.product.service.impl.SellerProductServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

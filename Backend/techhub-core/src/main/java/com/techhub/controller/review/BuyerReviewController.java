@@ -5,7 +5,7 @@ import com.techhub.modules.review.dto.request.CreateReviewRequest;
 import com.techhub.modules.review.dto.request.UpdateReviewRequest;
 import com.techhub.modules.review.dto.response.ReviewResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.review.ReviewService;
+import com.techhub.modules.review.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

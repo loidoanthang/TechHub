@@ -12,7 +12,7 @@ import com.techhub.modules.payment.enums.PaymentMethod;
 import com.techhub.modules.payment.enums.PaymentStatus;
 import com.techhub.modules.order.repository.OrderRepository;
 import com.techhub.modules.payment.repository.PaymentRepository;
-import com.techhub.service.payment.impl.PaymentServiceImpl;
+import com.techhub.modules.payment.service.impl.PaymentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

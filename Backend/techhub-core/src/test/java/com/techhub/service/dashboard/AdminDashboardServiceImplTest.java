@@ -11,7 +11,7 @@ import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.order.projection.PlatformOrderStatusSummaryProjection;
 import com.techhub.modules.shop.projection.ShopStatusSummaryProjection;
 import com.techhub.modules.shop.projection.TopPerformingShopProjection;
-import com.techhub.service.dashboard.impl.AdminDashboardServiceImpl;
+import com.techhub.modules.dashboard.service.impl.AdminDashboardServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

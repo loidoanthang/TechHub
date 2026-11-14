@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.user.dto.request.CreateAddressRequest;
 import com.techhub.modules.user.dto.request.UpdateAddressRequest;
 import com.techhub.modules.user.dto.response.AddressResponse;
-import com.techhub.service.user.AddressService;
+import com.techhub.modules.user.service.AddressService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

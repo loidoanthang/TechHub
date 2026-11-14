@@ -7,7 +7,7 @@ import com.techhub.modules.dashboard.dto.response.SellerDashboardMetricsResponse
 import com.techhub.modules.dashboard.dto.response.TopSellingProductDto;
 import com.techhub.modules.order.projection.OrderStatusSummaryProjection;
 import com.techhub.modules.product.projection.TopSellingProductProjection;
-import com.techhub.service.dashboard.impl.SellerDashboardServiceImpl;
+import com.techhub.modules.dashboard.service.impl.SellerDashboardServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

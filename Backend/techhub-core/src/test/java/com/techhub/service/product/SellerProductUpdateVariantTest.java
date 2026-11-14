@@ -9,7 +9,7 @@ import com.techhub.modules.product.entity.Product;
 import com.techhub.modules.product.entity.ProductVariant;
 import com.techhub.modules.seller.entity.Seller;
 import com.techhub.modules.shop.entity.Shop;
-import com.techhub.service.product.impl.SellerProductServiceImpl;
+import com.techhub.modules.product.service.impl.SellerProductServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -9,7 +9,7 @@ import com.techhub.modules.review.repository.ReviewHelpfulRepository;
 import com.techhub.modules.review.repository.ReviewRepository;
 import com.techhub.modules.seller.repository.SellerRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
-import com.techhub.service.review.impl.SellerReviewServiceImpl;
+import com.techhub.modules.review.service.impl.SellerReviewServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

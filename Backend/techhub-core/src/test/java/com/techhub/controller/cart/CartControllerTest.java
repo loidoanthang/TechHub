@@ -10,7 +10,7 @@ import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.cart.CartService;
+import com.techhub.modules.cart.service.CartService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -7,7 +7,7 @@ import com.techhub.modules.product.dto.response.ProductSummaryResponse;
 import com.techhub.modules.product.repository.ProductImageRepository;
 import com.techhub.modules.product.repository.ProductRepository;
 import com.techhub.modules.product.repository.ProductVariantRepository;
-import com.techhub.service.product.impl.ProductServiceImpl;
+import com.techhub.modules.product.service.impl.ProductServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -9,7 +9,7 @@ import com.techhub.modules.cart.dto.response.CartItemResponse;
 import com.techhub.modules.cart.dto.response.CartPreviewResponse;
 import com.techhub.modules.cart.dto.response.CartResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.cart.CartService;
+import com.techhub.modules.cart.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

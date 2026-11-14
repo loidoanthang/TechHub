@@ -10,7 +10,7 @@ import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.conversation.ChatMessagingService;
+import com.techhub.modules.conversation.service.ChatMessagingService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

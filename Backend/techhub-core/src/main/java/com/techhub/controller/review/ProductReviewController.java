@@ -5,7 +5,7 @@ import com.techhub.common.PageResponse;
 import com.techhub.modules.review.dto.response.ProductRatingSummaryResponse;
 import com.techhub.modules.review.dto.response.ProductReviewResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.review.ProductReviewService;
+import com.techhub.modules.review.service.ProductReviewService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;

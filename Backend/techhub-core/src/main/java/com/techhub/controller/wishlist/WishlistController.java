@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.product.dto.response.WishlistResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.wishlist.WishlistService;
+import com.techhub.modules.product.service.WishlistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;

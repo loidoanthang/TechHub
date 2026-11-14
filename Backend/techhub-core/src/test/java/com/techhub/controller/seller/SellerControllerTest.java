@@ -17,7 +17,7 @@ import com.techhub.modules.seller.dto.response.SellerVerificationStatusResponse;
 import com.techhub.modules.seller.dto.response.SellerWarehouseAddressResponse;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
-import com.techhub.service.seller.SellerService;
+import com.techhub.modules.seller.service.SellerService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

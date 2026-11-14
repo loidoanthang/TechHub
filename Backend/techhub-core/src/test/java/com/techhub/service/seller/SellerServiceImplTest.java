@@ -19,7 +19,7 @@ import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.seller.impl.SellerServiceImpl;
+import com.techhub.modules.seller.service.impl.SellerServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,6 +52,7 @@ import com.techhub.modules.user.entity.Address;
 import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.repository.AddressRepository;
 import com.techhub.modules.user.repository.UserRepository;
+import com.techhub.modules.seller.service.SellerService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerService - Đăng ký Người bán & Re-submit (POST /api/seller/register)")

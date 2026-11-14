@@ -9,7 +9,7 @@ import com.techhub.modules.review.enums.ReviewMediaType;
 import com.techhub.modules.product.repository.ProductRepository;
 import com.techhub.modules.review.repository.ReviewHelpfulRepository;
 import com.techhub.modules.review.repository.ReviewRepository;
-import com.techhub.service.review.impl.ProductReviewServiceImpl;
+import com.techhub.modules.review.service.impl.ProductReviewServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

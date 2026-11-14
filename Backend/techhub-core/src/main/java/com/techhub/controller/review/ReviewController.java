@@ -3,7 +3,7 @@ package com.techhub.controller.review;
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.review.dto.response.HelpfulVoteResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.review.ReviewService;
+import com.techhub.modules.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;

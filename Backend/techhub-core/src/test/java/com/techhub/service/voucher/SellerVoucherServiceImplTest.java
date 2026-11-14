@@ -14,7 +14,7 @@ import com.techhub.modules.voucher.entity.Voucher;
 import com.techhub.modules.seller.repository.SellerRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.modules.voucher.repository.VoucherRepository;
-import com.techhub.service.voucher.impl.SellerVoucherServiceImpl;
+import com.techhub.modules.voucher.service.impl.SellerVoucherServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

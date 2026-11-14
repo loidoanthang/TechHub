@@ -6,7 +6,7 @@ import com.techhub.modules.review.enums.ReviewMediaType;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.review.repository.ReviewRepository;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.review.impl.AdminReviewServiceImpl;
+import com.techhub.modules.review.service.impl.AdminReviewServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

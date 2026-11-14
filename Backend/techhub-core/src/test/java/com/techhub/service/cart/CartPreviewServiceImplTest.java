@@ -4,7 +4,7 @@ import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.cart.dto.request.CartPreviewRequest;
 import com.techhub.modules.cart.dto.response.CartPreviewResponse;
-import com.techhub.service.cart.impl.CartServiceImpl;
+import com.techhub.modules.cart.service.impl.CartServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +40,7 @@ import com.techhub.modules.shop.entity.Shop;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.modules.voucher.entity.Voucher;
 import com.techhub.modules.voucher.repository.VoucherRepository;
+import com.techhub.modules.cart.service.CartService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho CartService.previewCart (POST /api/cart/preview)")

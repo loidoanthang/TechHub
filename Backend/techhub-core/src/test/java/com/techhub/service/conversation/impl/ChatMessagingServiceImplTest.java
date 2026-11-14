@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.conversation.service.impl.ChatMessagingServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests for ChatMessagingServiceImpl (WS STOMP /app/chat.send)")

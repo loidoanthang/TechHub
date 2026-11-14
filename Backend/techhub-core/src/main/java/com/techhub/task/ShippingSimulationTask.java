@@ -1,6 +1,6 @@
 package com.techhub.task;
 
-import com.techhub.service.shipping.ShippingSimulationService;
+import com.techhub.modules.shipping.service.ShippingSimulationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

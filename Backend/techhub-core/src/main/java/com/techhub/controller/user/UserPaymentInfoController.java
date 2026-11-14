@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.payment.dto.request.CreatePaymentInfoRequest;
 import com.techhub.modules.payment.dto.response.PaymentInfoResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.user.UserPaymentInfoService;
+import com.techhub.modules.user.service.UserPaymentInfoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

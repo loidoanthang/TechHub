@@ -8,7 +8,7 @@ import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.review.SellerReviewService;
+import com.techhub.modules.review.service.SellerReviewService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

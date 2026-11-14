@@ -10,7 +10,7 @@ import com.techhub.modules.order.repository.OrderRepository;
 import com.techhub.modules.payment.repository.PaymentRepository;
 import com.techhub.modules.voucher.repository.VoucherRedemptionRepository;
 import com.techhub.modules.voucher.repository.VoucherRepository;
-import com.techhub.service.payment.impl.VNPayServiceImpl;
+import com.techhub.modules.payment.service.impl.VNPayServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

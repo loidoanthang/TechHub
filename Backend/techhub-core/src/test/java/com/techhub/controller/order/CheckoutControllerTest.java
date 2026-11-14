@@ -7,7 +7,7 @@ import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.order.CheckoutService;
+import com.techhub.modules.order.service.CheckoutService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

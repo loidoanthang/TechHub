@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.review.dto.response.ProductRatingSummaryResponse;
 import com.techhub.modules.review.dto.response.ProductReviewResponse;
-import com.techhub.service.review.ProductReviewService;
+import com.techhub.modules.review.service.ProductReviewService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

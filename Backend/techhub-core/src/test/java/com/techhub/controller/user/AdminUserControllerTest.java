@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.user.dto.response.AdminUserResponse;
 import com.techhub.modules.user.enums.UserStatus;
-import com.techhub.service.user.AdminUserService;
+import com.techhub.modules.user.service.AdminUserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -7,7 +7,7 @@ import com.techhub.modules.category.dto.response.CategoryAttributeResponse;
 import com.techhub.modules.category.dto.response.CategorySummaryResponse;
 import com.techhub.modules.category.enums.CategoryAttributeDataType;
 import com.techhub.modules.category.enums.CategoryStatus;
-import com.techhub.service.category.CategoryService;
+import com.techhub.modules.category.service.CategoryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

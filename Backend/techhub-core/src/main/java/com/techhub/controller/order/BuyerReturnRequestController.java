@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.order.dto.request.CreateReturnRequest;
 import com.techhub.modules.order.dto.response.ReturnRequestResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.order.ReturnRequestService;
+import com.techhub.modules.order.service.ReturnRequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

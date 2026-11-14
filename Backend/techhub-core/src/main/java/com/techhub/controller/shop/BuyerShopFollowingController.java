@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.shop.dto.response.FollowedShopResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.shop.ShopFollowingService;
+import com.techhub.modules.shop.service.ShopFollowingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -13,7 +13,7 @@ import com.techhub.modules.product.repository.ProductImageRepository;
 import com.techhub.modules.product.repository.ProductRepository;
 import com.techhub.modules.product.repository.ProductVariantRepository;
 import com.techhub.modules.product.repository.RecentlyViewedProductRepository;
-import com.techhub.service.recentlyviewed.impl.RecentlyViewedServiceImpl;
+import com.techhub.modules.product.service.impl.RecentlyViewedServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

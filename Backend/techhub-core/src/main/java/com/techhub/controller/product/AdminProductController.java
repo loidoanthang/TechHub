@@ -8,7 +8,7 @@ import com.techhub.modules.product.dto.response.AdminProductDetailResponse;
 import com.techhub.modules.product.dto.response.AdminProductSummaryResponse;
 import com.techhub.modules.product.enums.ProductApprovalStatus;
 import com.techhub.modules.product.enums.ProductVisibilityStatus;
-import com.techhub.service.product.AdminProductService;
+import com.techhub.modules.product.service.AdminProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

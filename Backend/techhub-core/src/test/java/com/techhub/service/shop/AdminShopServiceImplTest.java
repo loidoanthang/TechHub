@@ -19,7 +19,7 @@ import com.techhub.modules.order.repository.OrderRepository;
 import com.techhub.modules.product.repository.ProductRepository;
 import com.techhub.modules.shipping.repository.ShippingOptionRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
-import com.techhub.service.shop.impl.AdminShopServiceImpl;
+import com.techhub.modules.shop.service.impl.AdminShopServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,6 +43,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.shop.service.AdminShopService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminShopService (GET /api/admin/shops & GET /api/admin/shops/{id})")

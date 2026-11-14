@@ -16,7 +16,7 @@ import com.techhub.modules.payment.enums.PaymentStatus;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.order.OrderService;
+import com.techhub.modules.order.service.OrderService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

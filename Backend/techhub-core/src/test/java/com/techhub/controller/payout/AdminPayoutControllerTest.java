@@ -7,7 +7,7 @@ import com.techhub.modules.seller.dto.response.AdminPayoutResponse;
 import com.techhub.modules.seller.enums.PayoutProcessAction;
 import com.techhub.modules.seller.enums.PayoutStatus;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.payout.AdminPayoutService;
+import com.techhub.modules.seller.service.AdminPayoutService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

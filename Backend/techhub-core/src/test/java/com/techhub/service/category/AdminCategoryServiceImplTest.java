@@ -18,7 +18,7 @@ import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import com.techhub.modules.category.repository.CategoryAttributeRepository;
 import com.techhub.modules.category.repository.CategoryRepository;
 import com.techhub.modules.product.repository.ProductRepository;
-import com.techhub.service.category.impl.AdminCategoryServiceImpl;
+import com.techhub.modules.category.service.impl.AdminCategoryServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

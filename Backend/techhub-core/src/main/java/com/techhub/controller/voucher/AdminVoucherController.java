@@ -12,7 +12,7 @@ import com.techhub.modules.voucher.enums.DiscountType;
 import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import com.techhub.modules.voucher.enums.VoucherStatus;
 import com.techhub.modules.voucher.enums.VoucherType;
-import com.techhub.service.voucher.AdminVoucherService;
+import com.techhub.modules.voucher.service.AdminVoucherService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -14,7 +14,7 @@ import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.modules.user.repository.AddressRepository;
 import com.techhub.modules.seller.repository.SellerRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
-import com.techhub.service.shop.impl.ShopServiceImpl;
+import com.techhub.modules.shop.service.impl.ShopServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.shop.service.ShopService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho ShopService - Xem trang thông tin gian hàng công khai (GET /api/shops/{sellerName})")

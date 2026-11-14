@@ -12,7 +12,7 @@ import com.techhub.modules.user.entity.User;
 import com.techhub.modules.conversation.enums.ConversationType;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.conversation.ConversationService;
+import com.techhub.modules.conversation.service.ConversationService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validation;

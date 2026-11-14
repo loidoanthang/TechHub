@@ -21,7 +21,7 @@ import com.techhub.modules.seller.repository.SellerRepository;
 import com.techhub.modules.shipping.repository.ShippingOptionRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.modules.user.repository.UserRepository;
-import com.techhub.service.seller.impl.AdminSellerServiceImpl;
+import com.techhub.modules.seller.service.impl.AdminSellerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,6 +47,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.seller.service.AdminSellerService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminSellerService (GET /api/admin/sellers)")

@@ -8,7 +8,7 @@ import com.techhub.modules.order.repository.OrderItemRepository;
 import com.techhub.modules.order.repository.OrderRepository;
 import com.techhub.modules.seller.repository.SellerRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
-import com.techhub.service.order.impl.SellerOrderServiceImpl;
+import com.techhub.modules.order.service.impl.SellerOrderServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -63,6 +63,7 @@ import com.techhub.modules.voucher.entity.Voucher;
 import com.techhub.modules.voucher.entity.VoucherRedemption;
 import com.techhub.modules.voucher.repository.VoucherRedemptionRepository;
 import com.techhub.modules.voucher.repository.VoucherRepository;
+import com.techhub.modules.order.service.SellerOrderService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerOrderService (GET /api/seller/orders)")

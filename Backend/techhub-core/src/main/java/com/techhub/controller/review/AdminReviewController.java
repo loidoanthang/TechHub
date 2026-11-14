@@ -1,7 +1,7 @@
 package com.techhub.controller.review;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.service.review.AdminReviewService;
+import com.techhub.modules.review.service.AdminReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;

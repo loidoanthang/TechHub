@@ -6,7 +6,7 @@ import com.techhub.modules.order.dto.request.PlaceOrderRequest;
 import com.techhub.modules.order.dto.response.CheckoutPreviewResponse;
 import com.techhub.modules.order.dto.response.PlaceOrderResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.order.CheckoutService;
+import com.techhub.modules.order.service.CheckoutService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

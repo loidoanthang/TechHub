@@ -3,7 +3,7 @@ package com.techhub.controller.user;
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.user.dto.request.UpdateProfileRequest;
 import com.techhub.modules.user.dto.response.UserProfileResponse;
-import com.techhub.service.user.UserService;
+import com.techhub.modules.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;

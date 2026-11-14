@@ -13,7 +13,7 @@ import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.seller.enums.SellerWalletTransactionType;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.seller.SellerWalletService;
+import com.techhub.modules.seller.service.SellerWalletService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

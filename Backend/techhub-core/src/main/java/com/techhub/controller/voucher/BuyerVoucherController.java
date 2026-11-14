@@ -3,7 +3,7 @@ package com.techhub.controller.voucher;
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.voucher.dto.response.CartPlatformVoucherResponse;
 import com.techhub.modules.voucher.enums.VoucherAppliesTo;
-import com.techhub.service.voucher.BuyerVoucherService;
+import com.techhub.modules.voucher.service.BuyerVoucherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

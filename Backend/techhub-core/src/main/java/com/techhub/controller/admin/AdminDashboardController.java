@@ -3,7 +3,7 @@ package com.techhub.controller.admin;
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.dashboard.dto.response.AdminDashboardMetricsResponse;
 import com.techhub.modules.dashboard.enums.DashboardPeriod;
-import com.techhub.service.dashboard.AdminDashboardService;
+import com.techhub.modules.dashboard.service.AdminDashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;

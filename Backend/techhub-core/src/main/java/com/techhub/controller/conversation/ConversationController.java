@@ -8,7 +8,7 @@ import com.techhub.modules.conversation.dto.response.ConversationResponse;
 import com.techhub.modules.conversation.dto.response.MessageResponse;
 import com.techhub.modules.conversation.enums.ConversationType;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.conversation.ConversationService;
+import com.techhub.modules.conversation.service.ConversationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

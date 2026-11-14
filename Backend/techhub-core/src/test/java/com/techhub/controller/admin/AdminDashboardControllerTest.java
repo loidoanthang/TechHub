@@ -8,7 +8,7 @@ import com.techhub.modules.dashboard.enums.DashboardPeriod;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.dashboard.AdminDashboardService;
+import com.techhub.modules.dashboard.service.AdminDashboardService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

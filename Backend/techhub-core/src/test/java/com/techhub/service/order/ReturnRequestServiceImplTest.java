@@ -5,7 +5,7 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.order.dto.request.CreateReturnRequest;
 import com.techhub.modules.order.dto.request.ProcessReturnRequest;
 import com.techhub.modules.order.dto.response.ReturnRequestResponse;
-import com.techhub.service.order.impl.ReturnRequestServiceImpl;
+import com.techhub.modules.order.service.impl.ReturnRequestServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,6 +45,7 @@ import com.techhub.modules.shop.entity.Shop;
 import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.repository.UserRepository;
+import com.techhub.modules.order.service.ReturnRequestService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho ReturnRequestService (Return & Refund)")

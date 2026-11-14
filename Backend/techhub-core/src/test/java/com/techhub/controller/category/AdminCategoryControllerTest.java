@@ -12,7 +12,7 @@ import com.techhub.modules.category.dto.response.CategoryAttributeResponse;
 import com.techhub.modules.category.dto.response.CategoryDetailResponse;
 import com.techhub.modules.category.enums.CategoryAttributeDataType;
 import com.techhub.modules.category.enums.CategoryStatus;
-import com.techhub.service.category.AdminCategoryService;
+import com.techhub.modules.category.service.AdminCategoryService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

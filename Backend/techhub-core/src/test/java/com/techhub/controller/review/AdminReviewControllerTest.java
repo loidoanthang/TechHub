@@ -1,7 +1,7 @@
 package com.techhub.controller.review;
 
 import com.techhub.common.ApiResponse;
-import com.techhub.service.review.AdminReviewService;
+import com.techhub.modules.review.service.AdminReviewService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

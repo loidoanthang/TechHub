@@ -11,7 +11,7 @@ import com.techhub.modules.voucher.enums.DiscountType;
 import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import com.techhub.modules.voucher.enums.VoucherStatus;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.voucher.SellerVoucherService;
+import com.techhub.modules.voucher.service.SellerVoucherService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

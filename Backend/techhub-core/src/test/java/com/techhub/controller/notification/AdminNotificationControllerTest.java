@@ -8,7 +8,7 @@ import com.techhub.modules.notification.enums.NotificationType;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.notification.enums.TargetAudience;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.notification.AdminNotificationService;
+import com.techhub.modules.notification.service.AdminNotificationService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
 import jakarta.validation.Validation;

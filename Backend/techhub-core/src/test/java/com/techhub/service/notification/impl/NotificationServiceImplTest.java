@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.notification.service.impl.NotificationServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho NotificationServiceImpl (GET /api/notifications)")

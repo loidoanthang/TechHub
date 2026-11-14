@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.notification.dto.request.BroadcastNotificationRequest;
 import com.techhub.modules.notification.dto.response.BroadcastNotificationResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.notification.AdminNotificationService;
+import com.techhub.modules.notification.service.AdminNotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

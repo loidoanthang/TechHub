@@ -8,8 +8,8 @@ import com.techhub.modules.shop.dto.request.ShopOrderRequest;
 import com.techhub.modules.cart.dto.response.CartItemPreviewResponse;
 import com.techhub.modules.order.dto.response.CheckoutPreviewResponse;
 import com.techhub.modules.order.dto.response.PlaceOrderResponse;
-import com.techhub.service.order.impl.CheckoutServiceImpl;
-import com.techhub.service.payment.VNPayService;
+import com.techhub.modules.order.service.impl.CheckoutServiceImpl;
+import com.techhub.modules.payment.service.VNPayService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,6 +62,7 @@ import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.modules.voucher.entity.Voucher;
 import com.techhub.modules.voucher.repository.VoucherRedemptionRepository;
 import com.techhub.modules.voucher.repository.VoucherRepository;
+import com.techhub.modules.order.service.CheckoutService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho CheckoutService (POST /api/checkout/preview - 24 Test Cases)")

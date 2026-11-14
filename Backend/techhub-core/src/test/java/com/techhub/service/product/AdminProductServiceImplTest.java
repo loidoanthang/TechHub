@@ -16,7 +16,7 @@ import com.techhub.modules.shop.entity.Shop;
 import com.techhub.modules.product.repository.ProductImageRepository;
 import com.techhub.modules.product.repository.ProductRepository;
 import com.techhub.modules.product.repository.ProductVariantRepository;
-import com.techhub.service.product.impl.AdminProductServiceImpl;
+import com.techhub.modules.product.service.impl.AdminProductServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

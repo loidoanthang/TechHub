@@ -13,7 +13,7 @@ import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.modules.user.repository.AddressRepository;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.user.impl.AddressServiceImpl;
+import com.techhub.modules.user.service.impl.AddressServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,6 +37,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.user.service.AddressService;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AddressService - API Thêm Mới Địa Chỉ (POST /api/addresses)")

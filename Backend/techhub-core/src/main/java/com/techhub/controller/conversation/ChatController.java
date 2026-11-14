@@ -7,7 +7,7 @@ import com.techhub.modules.conversation.dto.request.SendChatMessageRequest;
 import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.conversation.ChatMessagingService;
+import com.techhub.modules.conversation.service.ChatMessagingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

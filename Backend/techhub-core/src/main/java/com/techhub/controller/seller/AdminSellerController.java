@@ -7,7 +7,7 @@ import com.techhub.modules.seller.dto.response.AdminSellerApprovalResponse;
 import com.techhub.modules.seller.dto.response.AdminSellerDetailResponse;
 import com.techhub.modules.seller.dto.response.AdminSellerResponse;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
-import com.techhub.service.seller.AdminSellerService;
+import com.techhub.modules.seller.service.AdminSellerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

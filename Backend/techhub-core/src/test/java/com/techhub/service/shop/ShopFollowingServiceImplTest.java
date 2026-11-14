@@ -17,7 +17,7 @@ import com.techhub.modules.product.repository.ProductRepository;
 import com.techhub.modules.seller.repository.SellerRepository;
 import com.techhub.modules.shop.repository.ShopFollowingRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
-import com.techhub.service.shop.impl.ShopFollowingServiceImpl;
+import com.techhub.modules.shop.service.impl.ShopFollowingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

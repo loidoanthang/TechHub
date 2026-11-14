@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.policy.dto.request.UpdatePlatformPolicyRequest;
 import com.techhub.modules.policy.dto.response.PlatformPolicyResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.policy.AdminPolicyService;
+import com.techhub.modules.policy.service.AdminPolicyService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

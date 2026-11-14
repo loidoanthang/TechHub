@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.payment.dto.response.BuyerPaymentStatusResponse;
 import com.techhub.modules.payment.dto.response.PaymentMethodResponse;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.payment.PaymentService;
+import com.techhub.modules.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;

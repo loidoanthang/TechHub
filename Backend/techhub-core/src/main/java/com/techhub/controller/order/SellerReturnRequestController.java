@@ -6,7 +6,7 @@ import com.techhub.modules.order.dto.request.ProcessReturnRequest;
 import com.techhub.modules.order.dto.response.ReturnRequestResponse;
 import com.techhub.modules.order.enums.ReturnRequestStatus;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.order.ReturnRequestService;
+import com.techhub.modules.order.service.ReturnRequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

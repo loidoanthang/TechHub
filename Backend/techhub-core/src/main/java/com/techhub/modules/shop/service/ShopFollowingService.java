@@ -1,0 +1,16 @@
+package com.techhub.modules.shop.service;
+
+import com.techhub.common.PageResponse;
+import com.techhub.modules.shop.dto.response.FollowShopResponse;
+import com.techhub.modules.shop.dto.response.FollowedShopResponse;
+
+import java.util.UUID;
+
+public interface ShopFollowingService {
+
+    FollowShopResponse followShop(UUID userId, String sellerName);
+
+    void unfollowShop(UUID userId, String sellerName);
+
+    PageResponse<FollowedShopResponse> getFollowedShops(UUID userId, int page, int size);
+}

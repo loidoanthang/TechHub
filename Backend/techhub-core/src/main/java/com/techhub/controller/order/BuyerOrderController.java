@@ -6,7 +6,7 @@ import com.techhub.modules.order.dto.response.BuyerOrderDetailResponse;
 import com.techhub.modules.order.dto.response.BuyerOrderResponse;
 import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.order.OrderService;
+import com.techhub.modules.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import com.techhub.modules.order.dto.request.CreateCancellationRequest;
 import com.techhub.modules.order.dto.response.CancellationRequestResponse;

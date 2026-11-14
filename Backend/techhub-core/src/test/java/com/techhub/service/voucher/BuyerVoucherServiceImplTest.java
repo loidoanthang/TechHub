@@ -6,7 +6,7 @@ import com.techhub.modules.voucher.enums.DiscountType;
 import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import com.techhub.modules.voucher.enums.VoucherType;
 import com.techhub.modules.voucher.repository.VoucherRepository;
-import com.techhub.service.voucher.impl.BuyerVoucherServiceImpl;
+import com.techhub.modules.voucher.service.impl.BuyerVoucherServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

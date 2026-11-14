@@ -7,7 +7,7 @@ import com.techhub.modules.seller.dto.response.SellerOrderDetailResponse;
 import com.techhub.modules.seller.dto.response.SellerOrderResponse;
 import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.security.SecurityUtils;
-import com.techhub.service.order.SellerOrderService;
+import com.techhub.modules.order.service.SellerOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;

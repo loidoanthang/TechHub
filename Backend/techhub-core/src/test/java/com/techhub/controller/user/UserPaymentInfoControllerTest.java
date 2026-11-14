@@ -8,7 +8,7 @@ import com.techhub.modules.payment.enums.PaymentType;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.user.UserPaymentInfoService;
+import com.techhub.modules.user.service.UserPaymentInfoService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

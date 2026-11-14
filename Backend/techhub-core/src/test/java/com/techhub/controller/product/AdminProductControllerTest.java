@@ -8,7 +8,7 @@ import com.techhub.modules.product.dto.response.AdminProductDetailResponse;
 import com.techhub.modules.product.dto.response.AdminProductSummaryResponse;
 import com.techhub.modules.product.dto.response.ProductImageResponse;
 import com.techhub.modules.product.dto.response.ProductVariantResponse;
-import com.techhub.service.product.AdminProductService;
+import com.techhub.modules.product.service.AdminProductService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

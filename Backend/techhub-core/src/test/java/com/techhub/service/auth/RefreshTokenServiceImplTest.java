@@ -6,7 +6,7 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.auth.entity.RefreshToken;
 import com.techhub.modules.user.entity.User;
 import com.techhub.modules.auth.repository.RefreshTokenRepository;
-import com.techhub.service.auth.impl.RefreshTokenServiceImpl;
+import com.techhub.modules.auth.service.impl.RefreshTokenServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

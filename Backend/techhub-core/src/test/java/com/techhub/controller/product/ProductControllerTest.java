@@ -3,7 +3,7 @@ package com.techhub.controller.product;
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.product.dto.response.ProductSummaryResponse;
-import com.techhub.service.product.ProductService;
+import com.techhub.modules.product.service.ProductService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ import com.techhub.modules.product.enums.ProductVariantStatus;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
-import com.techhub.service.recentlyviewed.RecentlyViewedService;
+import com.techhub.modules.product.service.RecentlyViewedService;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;

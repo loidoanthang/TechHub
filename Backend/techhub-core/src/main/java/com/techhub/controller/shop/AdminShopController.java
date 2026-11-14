@@ -6,7 +6,7 @@ import com.techhub.modules.shop.dto.request.AdminUpdateShopStatusRequest;
 import com.techhub.modules.shop.dto.response.AdminShopDetailResponse;
 import com.techhub.modules.shop.dto.response.AdminShopResponse;
 import com.techhub.modules.shop.enums.ShopStatus;
-import com.techhub.service.shop.AdminShopService;
+import com.techhub.modules.shop.service.AdminShopService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;

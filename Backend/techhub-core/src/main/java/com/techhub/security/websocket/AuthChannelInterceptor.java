@@ -7,7 +7,7 @@ import com.techhub.modules.conversation.repository.ConversationRepository;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.security.CustomUserDetailsService;
-import com.techhub.service.auth.JwtService;
+import com.techhub.modules.auth.service.JwtService;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
