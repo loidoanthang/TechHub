@@ -96,6 +96,8 @@ export const API_ENDPOINTS = {
     VOUCHERS: "/api/seller/vouchers",
     VOUCHER_DETAIL: (id: string) => `/api/seller/vouchers/${id}`,
     VOUCHER_STATUS: (id: string) => `/api/seller/vouchers/${id}/status`,
+    WALLET_WITHDRAW: "/api/seller/wallet/withdraw",
+    WALLET_TRANSACTIONS: "/api/seller/wallet/transactions",
   },
   SHOPS: {
     DETAIL: (sellerName: string) => `/api/shops/${sellerName}`,
@@ -109,6 +111,13 @@ export const API_ENDPOINTS = {
   },
   VOUCHERS: {
     PLATFORM: "/api/vouchers/platform",
+  },
+  NOTIFICATIONS: {
+    BASE: "/api/notifications",
+    READ: (id: string) => `/api/notifications/${id}/read`,
+    READ_ALL: "/api/notifications/read-all",
+    DELETE: (id: string) => `/api/notifications/${id}`,
+    STREAM: "/api/notifications/stream",
   },
   REVIEWS: {
     PRODUCT_REVIEWS: (productId: string) => `/api/products/${productId}/reviews`,
@@ -176,6 +185,7 @@ export const ROUTES = {
     SECURITY: "/account/security",
     WISHLIST: "/account/wishlist",
     FOLLOWED_SHOPS: "/account/followed-shops",
+    NOTIFICATIONS: "/account/notifications",
   },
   SELLER: {
     DASHBOARD: "/seller/dashboard",
@@ -183,9 +193,12 @@ export const ROUTES = {
     PRODUCTS: "/seller/products",
     NEW_PRODUCT: "/seller/products/new",
     ORDERS: "/seller/orders",
+    ORDER_DETAIL: (id: string) => `/seller/orders/${id}`,
     REVIEWS: "/seller/reviews",
+    WALLET: "/seller/wallet",
     VOUCHERS: "/seller/vouchers",
     SETTINGS: "/seller/settings",
+    NOTIFICATIONS: "/seller/notifications",
   },
   ADMIN: {
     DASHBOARD: "/admin/dashboard",

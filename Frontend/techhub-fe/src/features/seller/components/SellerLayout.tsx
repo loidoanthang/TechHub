@@ -25,17 +25,22 @@ import {
   FileX,
   RotateCcw,
   MessageSquareQuote,
+  Wallet,
+  Bell,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSellerShopQuery, useUpdateShopStatusMutation } from "../hooks/useSellerQueries";
+import { useUnreadNotificationCount } from "@/features/notifications/api/notificationQueries";
+import { NotificationBell } from "@/features/notifications/components";
 import { ROUTES } from "@/lib/constants";
+import { UserAvatar } from "@/components/shared";
 import type { ShopStatus } from "@/types/enums";
 
 interface NavItem {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
-  badge?: number;
+  badge?: number | string;
 }
 
 interface NavSection {
@@ -47,6 +52,8 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, isLoading: isAuthLoading, isAuthenticated, logout, refreshProfile } = useAuth();
   const { data: shop, isLoading: isShopLoading } = useSellerShopQuery();
+  const { badgeText: notifBadge, hasUnread: hasUnreadNotif } =
+    useUnreadNotificationCount({ enabled: isAuthenticated });
   const updateStatusMutation = useUpdateShopStatusMutation();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -153,6 +160,12 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
           href: ROUTES.SELLER.DASHBOARD,
           icon: LayoutDashboard,
         },
+        {
+          label: "Thông báo gian hàng",
+          href: ROUTES.SELLER.NOTIFICATIONS,
+          icon: Bell,
+          badge: hasUnreadNotif ? notifBadge : undefined,
+        },
       ],
     },
     {
@@ -162,6 +175,11 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
           label: "Tất cả đơn hàng",
           href: "/seller/orders",
           icon: PackageCheck,
+        },
+        {
+          label: "Ví & Doanh thu",
+          href: ROUTES.SELLER.WALLET,
+          icon: Wallet,
         },
         {
           label: "Yêu cầu hủy đơn",
@@ -317,18 +335,19 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
               <span>Về sàn mua hàng</span>
             </Link>
 
+            {/* Notification Bell */}
+            <NotificationBell portalContext="seller" />
+
             <div className="h-4 w-px bg-[#c3c5d9]"></div>
 
             {/* User Profile */}
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-[#0045cc]/10 text-[#0045cc] font-heading font-bold text-xs flex items-center justify-center ring-2 ring-[#eff4ff] overflow-hidden">
-                {shop?.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={shop.avatarUrl} alt={shop.shopName} className="w-full h-full object-cover" />
-                ) : (
-                  (shop?.shopName || user.firstName || "S").charAt(0).toUpperCase()
-                )}
-              </div>
+              <UserAvatar
+                src={shop?.avatarUrl || user.avatarUrl}
+                alt={shop?.shopName || "Gian hàng"}
+                size={36}
+                className="rounded-2xl ring-2 ring-[#eff4ff]"
+              />
               <div className="hidden sm:flex flex-col text-left">
                 <span className="text-xs font-bold text-[#0b1c30] leading-tight line-clamp-1 max-w-[120px]">
                   {shop?.shopName || "Gian hàng của tôi"}
@@ -394,10 +413,10 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
                           <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-[#737688]"}`} />
                           <span className="truncate">{item.label}</span>
                         </div>
-                        {item.badge !== undefined && item.badge > 0 && (
+                        {item.badge !== undefined && (
                           <span
                             className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
-                              isActive ? "bg-white text-[#0045cc]" : "bg-red-500 text-white"
+                              isActive ? "bg-white text-primary" : "bg-red-500 text-white"
                             }`}
                           >
                             {item.badge}
@@ -457,6 +476,11 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
                             <Icon className="w-4 h-4" />
                             <span>{item.label}</span>
                           </div>
+                          {item.badge !== undefined && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-red-500 text-white">
+                              {item.badge}
+                            </span>
+                          )}
                         </Link>
                       );
                     })}
