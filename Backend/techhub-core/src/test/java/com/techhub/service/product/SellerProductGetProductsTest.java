@@ -4,11 +4,10 @@ import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.seller.dto.response.SellerProductSummaryResponse;
-import com.techhub.model.entity.Category;
-import com.techhub.model.entity.Product;
-import com.techhub.model.entity.Seller;
-import com.techhub.model.entity.Shop;
-import com.techhub.repository.*;
+import com.techhub.modules.category.entity.Category;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.shop.entity.Shop;
 import com.techhub.service.product.impl.SellerProductServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +33,14 @@ import com.techhub.modules.product.enums.ProductApprovalStatus;
 import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.category.repository.CategoryAttributeRepository;
+import com.techhub.modules.category.repository.CategoryRepository;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.product.repository.ProductImageRepository;
+import com.techhub.modules.product.repository.ProductRepository;
+import com.techhub.modules.product.repository.ProductVariantRepository;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.shop.repository.ShopRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerProductServiceImpl (GET /api/seller/products)")

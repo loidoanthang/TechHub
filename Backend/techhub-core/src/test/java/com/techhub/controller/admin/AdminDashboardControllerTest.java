@@ -3,7 +3,7 @@ package com.techhub.controller.admin;
 import com.techhub.common.ApiResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.dashboard.enums.DashboardPeriod;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;

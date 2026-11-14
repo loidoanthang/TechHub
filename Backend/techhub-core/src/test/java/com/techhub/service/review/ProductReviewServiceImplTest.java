@@ -5,11 +5,10 @@ import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.review.dto.response.ProductRatingSummaryResponse;
 import com.techhub.modules.review.dto.response.ProductReviewResponse;
-import com.techhub.model.entity.*;
 import com.techhub.modules.review.enums.ReviewMediaType;
-import com.techhub.repository.ProductRepository;
-import com.techhub.repository.ReviewHelpfulRepository;
-import com.techhub.repository.ReviewRepository;
+import com.techhub.modules.product.repository.ProductRepository;
+import com.techhub.modules.review.repository.ReviewHelpfulRepository;
+import com.techhub.modules.review.repository.ReviewRepository;
 import com.techhub.service.review.impl.ProductReviewServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +27,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.order.entity.OrderItem;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.review.entity.Review;
+import com.techhub.modules.review.entity.ReviewMedia;
+import com.techhub.modules.user.entity.User;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho ProductReviewServiceImpl (GET /api/products/{id}/reviews)")

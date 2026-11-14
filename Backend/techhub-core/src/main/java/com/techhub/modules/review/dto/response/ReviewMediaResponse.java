@@ -1,6 +1,6 @@
 package com.techhub.modules.review.dto.response;
 
-import com.techhub.model.entity.ReviewMedia;
+import com.techhub.modules.review.entity.ReviewMedia;
 import com.techhub.modules.review.enums.ReviewMediaType;
 
 import java.util.UUID;

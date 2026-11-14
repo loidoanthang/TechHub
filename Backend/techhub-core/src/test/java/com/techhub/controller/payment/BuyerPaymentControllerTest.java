@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.payment.dto.response.BuyerPaymentStatusResponse;
 import com.techhub.modules.payment.dto.response.PaymentChannelResponse;
 import com.techhub.modules.payment.dto.response.PaymentMethodResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.payment.enums.PaymentMethod;
 import com.techhub.modules.payment.enums.PaymentStatus;
 import com.techhub.modules.user.enums.Role;

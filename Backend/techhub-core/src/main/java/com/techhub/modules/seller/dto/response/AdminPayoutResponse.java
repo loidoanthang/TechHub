@@ -1,6 +1,6 @@
 package com.techhub.modules.seller.dto.response;
 
-import com.techhub.model.entity.SellerPayoutRequest;
+import com.techhub.modules.seller.entity.SellerPayoutRequest;
 import com.techhub.modules.seller.enums.PayoutStatus;
 import lombok.Builder;
 

@@ -5,7 +5,7 @@ import com.techhub.modules.cart.dto.response.CartCountResponse;
 import com.techhub.modules.cart.dto.response.CartItemResponse;
 import com.techhub.modules.cart.dto.response.CartResponse;
 import com.techhub.modules.cart.dto.response.ShopCartGroupResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;

@@ -9,14 +9,14 @@ import com.techhub.modules.voucher.dto.request.UpdatePlatformVoucherStatusReques
 import com.techhub.modules.voucher.dto.response.AdminVoucherDetailResponse;
 import com.techhub.modules.voucher.dto.response.AdminVoucherResponse;
 import com.techhub.modules.voucher.dto.response.PlatformVoucherResponse;
-import com.techhub.model.entity.Shop;
-import com.techhub.model.entity.Voucher;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.voucher.entity.Voucher;
 import com.techhub.modules.voucher.enums.DiscountType;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import com.techhub.modules.voucher.enums.VoucherStatus;
 import com.techhub.modules.voucher.enums.VoucherType;
-import com.techhub.repository.VoucherRepository;
+import com.techhub.modules.voucher.repository.VoucherRepository;
 import com.techhub.service.voucher.impl.AdminVoucherServiceImpl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

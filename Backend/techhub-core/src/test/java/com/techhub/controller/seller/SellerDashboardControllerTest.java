@@ -6,7 +6,7 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.dashboard.dto.response.SellerDashboardMetricsResponse;
 import com.techhub.modules.dashboard.dto.response.SellerDashboardSummaryDto;
 import com.techhub.modules.dashboard.dto.response.SellerOrderStatusBreakdownDto;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.dashboard.enums.DashboardPeriod;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;

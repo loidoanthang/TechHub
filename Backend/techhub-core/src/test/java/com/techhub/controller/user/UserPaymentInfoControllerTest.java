@@ -3,7 +3,7 @@ package com.techhub.controller.user;
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.payment.dto.request.CreatePaymentInfoRequest;
 import com.techhub.modules.payment.dto.response.PaymentInfoResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.payment.enums.PaymentType;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;

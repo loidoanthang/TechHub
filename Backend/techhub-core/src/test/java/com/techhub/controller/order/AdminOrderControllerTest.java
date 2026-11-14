@@ -5,7 +5,7 @@ import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.order.dto.request.CancelOrderRequest;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.service.order.AdminOrderService;
 import jakarta.validation.ConstraintViolation;

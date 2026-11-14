@@ -3,7 +3,7 @@ package com.techhub.controller.notification;
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.notification.dto.request.BroadcastNotificationRequest;
 import com.techhub.modules.notification.dto.response.BroadcastNotificationResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.notification.enums.NotificationType;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.notification.enums.TargetAudience;

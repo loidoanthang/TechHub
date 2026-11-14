@@ -4,8 +4,6 @@ import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.seller.dto.request.UpdateSellerOrderStatusRequest;
-import com.techhub.model.entity.*;
-import com.techhub.repository.*;
 import com.techhub.service.order.SellerOrderService;
 import com.techhub.specification.OrderSpecification;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +42,28 @@ import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.modules.voucher.enums.VoucherRedemptionStatus;
+import com.techhub.modules.order.entity.CancellationRequest;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.entity.OrderItem;
+import com.techhub.modules.order.repository.CancellationRequestRepository;
+import com.techhub.modules.order.repository.OrderItemRepository;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.payment.entity.Payment;
+import com.techhub.modules.payment.entity.RefundTransaction;
+import com.techhub.modules.payment.repository.PaymentRepository;
+import com.techhub.modules.payment.repository.RefundTransactionRepository;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.product.repository.ProductVariantRepository;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.shop.repository.ShopRepository;
+import com.techhub.modules.user.entity.Address;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.voucher.entity.Voucher;
+import com.techhub.modules.voucher.entity.VoucherRedemption;
+import com.techhub.modules.voucher.repository.VoucherRedemptionRepository;
+import com.techhub.modules.voucher.repository.VoucherRepository;
 
 @Slf4j
 @Service
@@ -70,11 +90,11 @@ public class SellerOrderServiceImpl implements SellerOrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final CancellationRequestRepository cancellationRequestRepository;
-    private final com.techhub.repository.ProductVariantRepository productVariantRepository;
-    private final com.techhub.repository.PaymentRepository paymentRepository;
-    private final com.techhub.repository.RefundTransactionRepository refundTransactionRepository;
-    private final com.techhub.repository.VoucherRedemptionRepository voucherRedemptionRepository;
-    private final com.techhub.repository.VoucherRepository voucherRepository;
+    private final com.techhub.modules.product.repository.ProductVariantRepository productVariantRepository;
+    private final com.techhub.modules.payment.repository.PaymentRepository paymentRepository;
+    private final com.techhub.modules.payment.repository.RefundTransactionRepository refundTransactionRepository;
+    private final com.techhub.modules.voucher.repository.VoucherRedemptionRepository voucherRedemptionRepository;
+    private final com.techhub.modules.voucher.repository.VoucherRepository voucherRepository;
 
     @Override
     @Transactional(readOnly = true)

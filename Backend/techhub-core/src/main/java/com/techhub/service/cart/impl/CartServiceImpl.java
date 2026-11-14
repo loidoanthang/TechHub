@@ -6,11 +6,9 @@ import com.techhub.modules.cart.dto.response.CartCountResponse;
 import com.techhub.modules.cart.dto.response.CartItemResponse;
 import com.techhub.modules.cart.dto.response.CartResponse;
 import com.techhub.modules.cart.dto.response.ShopCartGroupResponse;
-import com.techhub.model.entity.*;
 import com.techhub.modules.cart.dto.request.AddToCartRequest;
 import com.techhub.modules.cart.dto.request.CartPreviewRequest;
 import com.techhub.modules.cart.dto.request.UpdateCartItemRequest;
-import com.techhub.repository.*;
 import com.techhub.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +34,24 @@ import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.modules.voucher.enums.DiscountType;
 import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import com.techhub.modules.voucher.enums.VoucherType;
+import com.techhub.modules.cart.entity.Cart;
+import com.techhub.modules.cart.entity.CartItem;
+import com.techhub.modules.cart.repository.CartItemRepository;
+import com.techhub.modules.cart.repository.CartRepository;
+import com.techhub.modules.category.entity.Category;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.product.entity.ProductImage;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.product.repository.ProductImageRepository;
+import com.techhub.modules.product.repository.ProductVariantRepository;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.shipping.entity.ShippingOption;
+import com.techhub.modules.shipping.repository.ShippingOptionRepository;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.user.repository.UserRepository;
+import com.techhub.modules.voucher.entity.Voucher;
+import com.techhub.modules.voucher.repository.VoucherRepository;
 
 @Service
 @RequiredArgsConstructor

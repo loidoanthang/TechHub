@@ -1,9 +1,9 @@
 package com.techhub.specification;
 
-import com.techhub.model.entity.Order;
-import com.techhub.model.entity.OrderItem;
-import com.techhub.model.entity.ProductVariant;
-import com.techhub.model.entity.Review;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.entity.OrderItem;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.review.entity.Review;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
@@ -100,7 +100,7 @@ public final class ReviewSpecification {
                 return null;
             }
             jakarta.persistence.criteria.Subquery<Long> subquery = query.subquery(Long.class);
-            jakarta.persistence.criteria.Root<com.techhub.model.entity.ReviewHelpful> helpfulRoot = subquery.from(com.techhub.model.entity.ReviewHelpful.class);
+            jakarta.persistence.criteria.Root<com.techhub.modules.review.entity.ReviewHelpful> helpfulRoot = subquery.from(com.techhub.modules.review.entity.ReviewHelpful.class);
             subquery.select(cb.count(helpfulRoot));
             subquery.where(cb.equal(helpfulRoot.get("review"), root));
 

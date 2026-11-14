@@ -2,10 +2,9 @@ package com.techhub.service.review;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.entity.*;
 import com.techhub.modules.review.enums.ReviewMediaType;
 import com.techhub.modules.user.enums.Role;
-import com.techhub.repository.ReviewRepository;
+import com.techhub.modules.review.repository.ReviewRepository;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.service.review.impl.AdminReviewServiceImpl;
 import org.junit.jupiter.api.AfterEach;
@@ -28,6 +27,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.review.entity.Review;
+import com.techhub.modules.review.entity.ReviewMedia;
+import com.techhub.modules.user.entity.User;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminReviewServiceImpl (DELETE /api/admin/reviews/{id})")

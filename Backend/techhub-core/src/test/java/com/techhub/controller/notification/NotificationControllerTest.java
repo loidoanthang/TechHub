@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.notification.dto.response.NotificationListResponse;
 import com.techhub.modules.notification.dto.response.NotificationResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.notification.enums.NotificationType;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.security.CustomUserDetails;

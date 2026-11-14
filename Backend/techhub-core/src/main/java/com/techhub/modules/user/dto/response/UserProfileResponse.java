@@ -1,6 +1,6 @@
 package com.techhub.modules.user.dto.response;
 
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 

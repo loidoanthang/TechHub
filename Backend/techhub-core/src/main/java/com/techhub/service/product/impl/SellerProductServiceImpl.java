@@ -15,8 +15,6 @@ import com.techhub.modules.product.dto.response.ProductImageResponse;
 import com.techhub.modules.product.dto.response.ProductVariantMetrics;
 import com.techhub.modules.product.dto.response.ProductVariantResponse;
 import com.techhub.modules.seller.dto.response.SellerProductSummaryResponse;
-import com.techhub.model.entity.*;
-import com.techhub.repository.*;
 import com.techhub.service.product.SellerProductService;
 import com.techhub.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +35,20 @@ import com.techhub.modules.product.enums.ProductVariantStatus;
 import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.category.entity.Category;
+import com.techhub.modules.category.entity.CategoryAttribute;
+import com.techhub.modules.category.repository.CategoryAttributeRepository;
+import com.techhub.modules.category.repository.CategoryRepository;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.product.entity.ProductImage;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.product.repository.ProductImageRepository;
+import com.techhub.modules.product.repository.ProductRepository;
+import com.techhub.modules.product.repository.ProductVariantRepository;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.shop.repository.ShopRepository;
 
 @Service
 @RequiredArgsConstructor

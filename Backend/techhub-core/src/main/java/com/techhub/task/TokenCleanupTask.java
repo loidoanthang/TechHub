@@ -1,8 +1,8 @@
 package com.techhub.task;
 
-import com.techhub.repository.RefreshTokenRepository;
-import com.techhub.repository.UserRepository;
-import com.techhub.repository.VerificationTokensRepository;
+import com.techhub.modules.auth.repository.RefreshTokenRepository;
+import com.techhub.modules.user.repository.UserRepository;
+import com.techhub.modules.auth.repository.VerificationTokensRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

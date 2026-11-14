@@ -1,13 +1,13 @@
 package com.techhub.service.shipping;
 
 import com.techhub.modules.shipping.dto.response.ShippingSimulationResponse;
-import com.techhub.model.entity.Order;
-import com.techhub.model.entity.Payment;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.payment.entity.Payment;
 import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.modules.payment.enums.PaymentMethod;
 import com.techhub.modules.payment.enums.PaymentStatus;
-import com.techhub.repository.OrderRepository;
-import com.techhub.repository.PaymentRepository;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.payment.repository.PaymentRepository;
 import com.techhub.service.shipping.impl.ShippingSimulationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

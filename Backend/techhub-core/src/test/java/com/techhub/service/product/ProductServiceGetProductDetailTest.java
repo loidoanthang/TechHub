@@ -3,10 +3,9 @@ package com.techhub.service.product;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.product.dto.response.PublicProductDetailResponse;
-import com.techhub.model.entity.*;
-import com.techhub.repository.ProductImageRepository;
-import com.techhub.repository.ProductRepository;
-import com.techhub.repository.ProductVariantRepository;
+import com.techhub.modules.product.repository.ProductImageRepository;
+import com.techhub.modules.product.repository.ProductRepository;
+import com.techhub.modules.product.repository.ProductVariantRepository;
 import com.techhub.service.product.impl.ProductServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +27,13 @@ import com.techhub.modules.product.enums.ProductVariantStatus;
 import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.category.entity.Category;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.product.entity.ProductImage;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.user.entity.User;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho ProductServiceImpl - Chi tiết sản phẩm công khai (GET /api/products/{slug})")

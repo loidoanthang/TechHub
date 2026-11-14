@@ -1,6 +1,6 @@
 package com.techhub.specification;
 
-import com.techhub.model.entity.Category;
+import com.techhub.modules.category.entity.Category;
 import com.techhub.modules.category.enums.CategoryStatus;
 import org.springframework.data.jpa.domain.Specification;
 

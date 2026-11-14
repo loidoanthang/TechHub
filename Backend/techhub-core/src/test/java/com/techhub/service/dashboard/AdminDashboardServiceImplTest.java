@@ -11,7 +11,6 @@ import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.order.projection.PlatformOrderStatusSummaryProjection;
 import com.techhub.modules.shop.projection.ShopStatusSummaryProjection;
 import com.techhub.modules.shop.projection.TopPerformingShopProjection;
-import com.techhub.repository.*;
 import com.techhub.service.dashboard.impl.AdminDashboardServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +29,12 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.order.repository.OrderItemRepository;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.seller.repository.SellerPayoutRequestRepository;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.shop.repository.ShopRepository;
+import com.techhub.modules.user.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminDashboardServiceImpl (GET /api/admin/dashboard/metrics)")

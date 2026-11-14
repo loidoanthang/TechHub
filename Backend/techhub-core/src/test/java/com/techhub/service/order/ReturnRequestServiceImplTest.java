@@ -5,8 +5,6 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.order.dto.request.CreateReturnRequest;
 import com.techhub.modules.order.dto.request.ProcessReturnRequest;
 import com.techhub.modules.order.dto.response.ReturnRequestResponse;
-import com.techhub.model.entity.*;
-import com.techhub.repository.*;
 import com.techhub.service.order.impl.ReturnRequestServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +29,22 @@ import com.techhub.modules.payment.enums.PaymentStatus;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.entity.ReturnRequest;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.order.repository.ReturnRequestRepository;
+import com.techhub.modules.payment.entity.Payment;
+import com.techhub.modules.payment.entity.RefundTransaction;
+import com.techhub.modules.payment.repository.PaymentRepository;
+import com.techhub.modules.payment.repository.RefundTransactionRepository;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.seller.entity.SellerWalletTransaction;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.seller.repository.SellerWalletTransactionRepository;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.shop.repository.ShopRepository;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.user.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho ReturnRequestService (Return & Refund)")

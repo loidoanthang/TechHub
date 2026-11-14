@@ -1,6 +1,6 @@
 package com.techhub.modules.seller.dto.response;
 
-import com.techhub.model.entity.SellerWalletTransaction;
+import com.techhub.modules.seller.entity.SellerWalletTransaction;
 import com.techhub.modules.seller.enums.SellerWalletTransactionType;
 import lombok.Builder;
 

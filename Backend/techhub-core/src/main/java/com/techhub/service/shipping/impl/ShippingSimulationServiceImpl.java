@@ -1,13 +1,13 @@
 package com.techhub.service.shipping.impl;
 
 import com.techhub.modules.shipping.dto.response.ShippingSimulationResponse;
-import com.techhub.model.entity.Order;
-import com.techhub.model.entity.Payment;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.payment.entity.Payment;
 import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.modules.payment.enums.PaymentMethod;
 import com.techhub.modules.payment.enums.PaymentStatus;
-import com.techhub.repository.OrderRepository;
-import com.techhub.repository.PaymentRepository;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.payment.repository.PaymentRepository;
 import com.techhub.service.shipping.ShippingSimulationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

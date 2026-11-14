@@ -7,7 +7,7 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.seller.dto.request.WithdrawalRequest;
 import com.techhub.modules.seller.dto.response.PayoutResponse;
 import com.techhub.modules.seller.dto.response.SellerWalletTransactionResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.seller.enums.PayoutStatus;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.seller.enums.SellerWalletTransactionType;

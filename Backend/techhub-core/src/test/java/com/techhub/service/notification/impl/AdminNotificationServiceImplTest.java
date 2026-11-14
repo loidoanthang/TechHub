@@ -7,7 +7,7 @@ import com.techhub.modules.notification.dto.response.BroadcastNotificationRespon
 import com.techhub.modules.notification.dto.response.NotificationResponse;
 import com.techhub.modules.notification.enums.NotificationType;
 import com.techhub.modules.notification.enums.TargetAudience;
-import com.techhub.repository.NotificationRepository;
+import com.techhub.modules.notification.repository.NotificationRepository;
 import com.techhub.service.notification.NotificationStreamService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

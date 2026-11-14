@@ -3,7 +3,7 @@ package com.techhub.controller.order;
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.order.dto.request.CheckoutPreviewRequest;
 import com.techhub.modules.order.dto.response.CheckoutPreviewResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;

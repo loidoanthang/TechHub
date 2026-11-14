@@ -1,6 +1,6 @@
 package com.techhub.modules.policy.dto.response;
 
-import com.techhub.model.entity.TransactionPolicy;
+import com.techhub.modules.policy.entity.TransactionPolicy;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

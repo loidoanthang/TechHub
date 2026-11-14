@@ -1,7 +1,7 @@
 package com.techhub.security;
 
-import com.techhub.model.entity.User;
-import com.techhub.repository.UserRepository;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.user.repository.UserRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

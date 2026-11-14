@@ -1,6 +1,6 @@
 package com.techhub.service.auth;
 
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface JwtService {

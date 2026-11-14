@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.payment.dto.request.VNPayRetryRequest;
 import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
 import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;

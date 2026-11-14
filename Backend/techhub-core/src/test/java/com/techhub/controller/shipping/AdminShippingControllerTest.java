@@ -3,7 +3,7 @@ package com.techhub.controller.shipping;
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.shipping.dto.request.ShippingSimulationRequest;
 import com.techhub.modules.shipping.dto.response.ShippingSimulationResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;

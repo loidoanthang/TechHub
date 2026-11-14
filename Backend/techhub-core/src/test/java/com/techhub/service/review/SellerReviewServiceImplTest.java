@@ -5,11 +5,10 @@ import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.review.dto.request.SellerResponseRequest;
 import com.techhub.modules.review.dto.response.SellerReviewResponse;
-import com.techhub.model.entity.*;
-import com.techhub.repository.ReviewHelpfulRepository;
-import com.techhub.repository.ReviewRepository;
-import com.techhub.repository.SellerRepository;
-import com.techhub.repository.ShopRepository;
+import com.techhub.modules.review.repository.ReviewHelpfulRepository;
+import com.techhub.modules.review.repository.ReviewRepository;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.service.review.impl.SellerReviewServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,6 +34,15 @@ import com.techhub.modules.review.enums.ReviewMediaType;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.entity.OrderItem;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.review.entity.Review;
+import com.techhub.modules.review.entity.ReviewMedia;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.user.entity.User;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerReviewServiceImpl (GET /api/seller/reviews)")

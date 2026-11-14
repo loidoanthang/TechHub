@@ -2,8 +2,8 @@ package com.techhub.service.review.impl;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.entity.Review;
-import com.techhub.repository.ReviewRepository;
+import com.techhub.modules.review.entity.Review;
+import com.techhub.modules.review.repository.ReviewRepository;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.review.AdminReviewService;
 import lombok.RequiredArgsConstructor;

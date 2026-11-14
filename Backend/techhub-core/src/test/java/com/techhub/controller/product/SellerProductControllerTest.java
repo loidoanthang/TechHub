@@ -14,7 +14,7 @@ import com.techhub.modules.product.dto.response.ProductDetailResponse;
 import com.techhub.modules.product.dto.response.ProductImageResponse;
 import com.techhub.modules.product.dto.response.ProductVariantResponse;
 import com.techhub.modules.seller.dto.response.SellerProductSummaryResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.product.enums.ProductApprovalStatus;
 import com.techhub.modules.product.enums.ProductVariantStatus;
 import com.techhub.modules.product.enums.ProductVisibilityStatus;

@@ -7,7 +7,7 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.seller.dto.response.SellerOrderBuyerResponse;
 import com.techhub.modules.seller.dto.response.SellerOrderItemResponse;
 import com.techhub.modules.seller.dto.response.SellerOrderResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.modules.payment.enums.PaymentMethod;
 import com.techhub.modules.payment.enums.PaymentStatus;

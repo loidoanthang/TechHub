@@ -1,10 +1,10 @@
 package com.techhub.modules.review.dto.response;
 
-import com.techhub.model.entity.Order;
-import com.techhub.model.entity.OrderItem;
-import com.techhub.model.entity.ProductVariant;
-import com.techhub.model.entity.Review;
-import com.techhub.model.entity.User;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.entity.OrderItem;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.review.entity.Review;
+import com.techhub.modules.user.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.Collections;

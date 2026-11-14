@@ -1,9 +1,9 @@
 package com.techhub.specification;
 
-import com.techhub.model.entity.Order;
-import com.techhub.model.entity.OrderItem;
-import com.techhub.model.entity.Shop;
-import com.techhub.model.entity.User;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.entity.OrderItem;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.order.enums.OrderStatus;
 import jakarta.persistence.criteria.*;
 import org.junit.jupiter.api.DisplayName;

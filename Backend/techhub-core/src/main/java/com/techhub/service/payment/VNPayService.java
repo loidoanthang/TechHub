@@ -2,7 +2,7 @@ package com.techhub.service.payment;
 
 import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
 import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
-import com.techhub.model.entity.Payment;
+import com.techhub.modules.payment.entity.Payment;
 
 import java.util.Map;
 import java.util.UUID;

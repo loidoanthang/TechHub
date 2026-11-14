@@ -9,7 +9,7 @@ import com.techhub.modules.order.dto.response.BuyerOrderDetailResponse;
 import com.techhub.modules.order.dto.response.BuyerOrderItemResponse;
 import com.techhub.modules.order.dto.response.BuyerOrderResponse;
 import com.techhub.modules.order.dto.response.ReorderResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.modules.payment.enums.PaymentMethod;
 import com.techhub.modules.payment.enums.PaymentStatus;

@@ -1,7 +1,7 @@
 package com.techhub.specification;
 
-import com.techhub.model.entity.Product;
-import com.techhub.model.entity.ProductVariant;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.product.entity.ProductVariant;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;

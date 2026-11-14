@@ -2,7 +2,7 @@ package com.techhub.controller.review;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.review.dto.response.HelpfulVoteResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;

@@ -9,7 +9,6 @@ import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.order.projection.PlatformOrderStatusSummaryProjection;
 import com.techhub.modules.shop.projection.ShopStatusSummaryProjection;
 import com.techhub.modules.shop.projection.TopPerformingShopProjection;
-import com.techhub.repository.*;
 import com.techhub.service.dashboard.AdminDashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +28,13 @@ import com.techhub.modules.dashboard.dto.response.AdminDashboardSummaryDto;
 import com.techhub.modules.dashboard.dto.response.AdminOrderStatusBreakdownDto;
 import com.techhub.modules.dashboard.dto.response.PlatformGrowthDto;
 import com.techhub.modules.dashboard.dto.response.TopPerformingShopDto;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.repository.OrderItemRepository;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.seller.repository.SellerPayoutRequestRepository;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.shop.repository.ShopRepository;
+import com.techhub.modules.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor

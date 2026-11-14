@@ -1,7 +1,7 @@
 package com.techhub.modules.voucher.dto.response;
 
-import com.techhub.model.entity.Shop;
-import com.techhub.model.entity.Voucher;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.voucher.entity.Voucher;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

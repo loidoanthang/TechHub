@@ -6,11 +6,10 @@ import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
 import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
-import com.techhub.model.entity.*;
-import com.techhub.repository.OrderRepository;
-import com.techhub.repository.PaymentRepository;
-import com.techhub.repository.VoucherRedemptionRepository;
-import com.techhub.repository.VoucherRepository;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.payment.repository.PaymentRepository;
+import com.techhub.modules.voucher.repository.VoucherRedemptionRepository;
+import com.techhub.modules.voucher.repository.VoucherRepository;
 import com.techhub.service.payment.impl.VNPayServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +30,11 @@ import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.modules.payment.enums.PaymentMethod;
 import com.techhub.modules.payment.enums.PaymentStatus;
 import com.techhub.modules.voucher.enums.VoucherRedemptionStatus;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.payment.entity.Payment;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.voucher.entity.Voucher;
+import com.techhub.modules.voucher.entity.VoucherRedemption;
 
 @ExtendWith(MockitoExtension.class)
 class VNPayServiceImplTest {

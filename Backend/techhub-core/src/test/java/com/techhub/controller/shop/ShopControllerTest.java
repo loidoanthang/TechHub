@@ -6,7 +6,7 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.voucher.dto.response.CartShopVoucherResponse;
 import com.techhub.modules.shop.dto.response.FollowShopResponse;
 import com.techhub.modules.shop.dto.response.PublicShopResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.voucher.enums.DiscountType;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.shop.enums.ShopStatus;

@@ -5,10 +5,8 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.dashboard.dto.response.LowStockVariantDto;
 import com.techhub.modules.dashboard.dto.response.SellerDashboardMetricsResponse;
 import com.techhub.modules.dashboard.dto.response.TopSellingProductDto;
-import com.techhub.model.entity.*;
 import com.techhub.modules.order.projection.OrderStatusSummaryProjection;
 import com.techhub.modules.product.projection.TopSellingProductProjection;
-import com.techhub.repository.*;
 import com.techhub.service.dashboard.impl.SellerDashboardServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,6 +31,17 @@ import com.techhub.modules.seller.enums.PayoutStatus;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.order.repository.OrderItemRepository;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.product.repository.ProductVariantRepository;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.seller.repository.SellerPayoutRequestRepository;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.shop.repository.ShopRepository;
+import com.techhub.modules.user.entity.User;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerDashboardServiceImpl (GET /api/seller/dashboard/metrics)")

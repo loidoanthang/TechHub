@@ -4,11 +4,11 @@ import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.order.dto.response.BuyerOrderResponse;
-import com.techhub.model.entity.Order;
-import com.techhub.model.entity.OrderItem;
-import com.techhub.model.entity.Payment;
-import com.techhub.model.entity.Shop;
-import com.techhub.model.entity.User;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.entity.OrderItem;
+import com.techhub.modules.payment.entity.Payment;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.modules.payment.enums.PaymentMethod;
 import com.techhub.modules.payment.enums.PaymentStatus;
@@ -18,24 +18,24 @@ import com.techhub.modules.order.dto.response.CancellationRequestResponse;
 import com.techhub.modules.order.dto.response.ReorderItemDto;
 import com.techhub.modules.order.dto.response.ReorderResponse;
 import com.techhub.modules.order.dto.response.ReorderUnavailableItemDto;
-import com.techhub.model.entity.CancellationRequest;
-import com.techhub.model.entity.Cart;
-import com.techhub.model.entity.CartItem;
-import com.techhub.model.entity.Category;
-import com.techhub.model.entity.Product;
-import com.techhub.model.entity.ProductVariant;
-import com.techhub.model.entity.Seller;
+import com.techhub.modules.order.entity.CancellationRequest;
+import com.techhub.modules.cart.entity.Cart;
+import com.techhub.modules.cart.entity.CartItem;
+import com.techhub.modules.category.entity.Category;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.seller.entity.Seller;
 import com.techhub.modules.category.enums.CategoryStatus;
 import com.techhub.modules.product.enums.ProductApprovalStatus;
 import com.techhub.modules.product.enums.ProductVariantStatus;
 import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.order.enums.CancellationRequestStatus;
-import com.techhub.repository.CancellationRequestRepository;
-import com.techhub.repository.OrderItemRepository;
-import com.techhub.repository.OrderRepository;
-import com.techhub.repository.PaymentRepository;
-import com.techhub.repository.UserRepository;
+import com.techhub.modules.order.repository.CancellationRequestRepository;
+import com.techhub.modules.order.repository.OrderItemRepository;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.payment.repository.PaymentRepository;
+import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.service.order.impl.OrderServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -81,28 +81,28 @@ class OrderServiceImplTest {
     private CancellationRequestRepository cancellationRequestRepository;
 
     @Mock
-    private com.techhub.repository.SellerRepository sellerRepository;
+    private com.techhub.modules.seller.repository.SellerRepository sellerRepository;
 
     @Mock
-    private com.techhub.repository.SellerWalletTransactionRepository sellerWalletTransactionRepository;
+    private com.techhub.modules.seller.repository.SellerWalletTransactionRepository sellerWalletTransactionRepository;
 
     @Mock
-    private com.techhub.repository.ProductVariantRepository productVariantRepository;
+    private com.techhub.modules.product.repository.ProductVariantRepository productVariantRepository;
 
     @Mock
-    private com.techhub.repository.VoucherRedemptionRepository voucherRedemptionRepository;
+    private com.techhub.modules.voucher.repository.VoucherRedemptionRepository voucherRedemptionRepository;
 
     @Mock
-    private com.techhub.repository.VoucherRepository voucherRepository;
+    private com.techhub.modules.voucher.repository.VoucherRepository voucherRepository;
 
     @Mock
-    private com.techhub.repository.RefundTransactionRepository refundTransactionRepository;
+    private com.techhub.modules.payment.repository.RefundTransactionRepository refundTransactionRepository;
 
     @Mock
-    private com.techhub.repository.CartRepository cartRepository;
+    private com.techhub.modules.cart.repository.CartRepository cartRepository;
 
     @Mock
-    private com.techhub.repository.CartItemRepository cartItemRepository;
+    private com.techhub.modules.cart.repository.CartItemRepository cartItemRepository;
 
     @InjectMocks
     private OrderServiceImpl orderService;

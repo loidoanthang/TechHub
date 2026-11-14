@@ -1,8 +1,8 @@
 package com.techhub.specification;
 
-import com.techhub.model.entity.Seller;
-import com.techhub.model.entity.Shop;
-import com.techhub.model.entity.User;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;

@@ -1,7 +1,7 @@
 package com.techhub.service.auth.impl;
 
 import com.techhub.config.properties.JwtProperties;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.service.auth.JwtService;
 import io.jsonwebtoken.Claims;

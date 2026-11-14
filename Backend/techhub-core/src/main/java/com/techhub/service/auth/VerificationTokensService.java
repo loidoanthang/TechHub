@@ -1,7 +1,7 @@
 package com.techhub.service.auth;
 
-import com.techhub.model.entity.User;
-import com.techhub.model.entity.VerificationTokens;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.auth.entity.VerificationTokens;
 import com.techhub.modules.auth.enums.VerificationTokenType;
 
 public interface VerificationTokensService {

@@ -7,7 +7,7 @@ import com.techhub.modules.shop.dto.request.UpdateShopVoucherRequest;
 import com.techhub.modules.shop.dto.request.UpdateShopVoucherStatusRequest;
 import com.techhub.modules.shop.dto.response.ShopVoucherDetailResponse;
 import com.techhub.modules.shop.dto.response.ShopVoucherResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.voucher.enums.DiscountType;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;

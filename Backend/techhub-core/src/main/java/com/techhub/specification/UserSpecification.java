@@ -1,6 +1,6 @@
 package com.techhub.specification;
 
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.UserStatus;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;

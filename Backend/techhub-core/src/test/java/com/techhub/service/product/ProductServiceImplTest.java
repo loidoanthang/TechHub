@@ -4,10 +4,9 @@ import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.product.dto.response.ProductSummaryResponse;
-import com.techhub.model.entity.*;
-import com.techhub.repository.ProductImageRepository;
-import com.techhub.repository.ProductRepository;
-import com.techhub.repository.ProductVariantRepository;
+import com.techhub.modules.product.repository.ProductImageRepository;
+import com.techhub.modules.product.repository.ProductRepository;
+import com.techhub.modules.product.repository.ProductVariantRepository;
 import com.techhub.service.product.impl.ProductServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,6 +31,9 @@ import com.techhub.modules.category.enums.CategoryStatus;
 import com.techhub.modules.product.enums.ProductApprovalStatus;
 import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.category.entity.Category;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.shop.entity.Shop;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho ProductServiceImpl (GET /api/products)")

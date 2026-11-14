@@ -2,16 +2,15 @@ package com.techhub.service.dashboard.impl;
 
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.model.entity.ProductVariant;
-import com.techhub.model.entity.Seller;
-import com.techhub.model.entity.Shop;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.shop.entity.Shop;
 import com.techhub.modules.dashboard.enums.DashboardPeriod;
 import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.modules.seller.enums.PayoutStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.order.projection.OrderStatusSummaryProjection;
 import com.techhub.modules.product.projection.TopSellingProductProjection;
-import com.techhub.repository.*;
 import com.techhub.service.dashboard.SellerDashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +30,14 @@ import com.techhub.modules.dashboard.dto.response.SellerDashboardMetricsResponse
 import com.techhub.modules.dashboard.dto.response.SellerDashboardSummaryDto;
 import com.techhub.modules.dashboard.dto.response.SellerOrderStatusBreakdownDto;
 import com.techhub.modules.dashboard.dto.response.TopSellingProductDto;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.repository.OrderItemRepository;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.product.repository.ProductVariantRepository;
+import com.techhub.modules.seller.repository.SellerPayoutRequestRepository;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.shop.repository.ShopRepository;
+import com.techhub.modules.user.entity.User;
 
 @Service
 @RequiredArgsConstructor

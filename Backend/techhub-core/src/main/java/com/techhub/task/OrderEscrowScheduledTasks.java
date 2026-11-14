@@ -1,7 +1,5 @@
 package com.techhub.task;
 
-import com.techhub.model.entity.*;
-import com.techhub.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +20,28 @@ import com.techhub.modules.payment.enums.RefundMethod;
 import com.techhub.modules.payment.enums.RefundStatus;
 import com.techhub.modules.seller.enums.SellerWalletTransactionType;
 import com.techhub.modules.voucher.enums.VoucherRedemptionStatus;
+import com.techhub.modules.order.entity.CancellationRequest;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.entity.OrderItem;
+import com.techhub.modules.order.entity.ReturnRequest;
+import com.techhub.modules.order.repository.CancellationRequestRepository;
+import com.techhub.modules.order.repository.OrderItemRepository;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.order.repository.ReturnRequestRepository;
+import com.techhub.modules.payment.entity.Payment;
+import com.techhub.modules.payment.entity.RefundTransaction;
+import com.techhub.modules.payment.repository.PaymentRepository;
+import com.techhub.modules.payment.repository.RefundTransactionRepository;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.product.repository.ProductVariantRepository;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.seller.entity.SellerWalletTransaction;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.seller.repository.SellerWalletTransactionRepository;
+import com.techhub.modules.voucher.entity.Voucher;
+import com.techhub.modules.voucher.entity.VoucherRedemption;
+import com.techhub.modules.voucher.repository.VoucherRedemptionRepository;
+import com.techhub.modules.voucher.repository.VoucherRepository;
 
 @Slf4j
 @Component

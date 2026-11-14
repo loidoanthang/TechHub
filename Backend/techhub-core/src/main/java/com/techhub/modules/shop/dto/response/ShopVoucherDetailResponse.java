@@ -1,6 +1,6 @@
 package com.techhub.modules.shop.dto.response;
 
-import com.techhub.model.entity.Voucher;
+import com.techhub.modules.voucher.entity.Voucher;
 import com.techhub.modules.voucher.enums.DiscountType;
 import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import com.techhub.modules.voucher.enums.VoucherStatus;

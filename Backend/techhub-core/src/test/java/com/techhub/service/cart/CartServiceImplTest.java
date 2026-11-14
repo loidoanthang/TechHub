@@ -8,8 +8,6 @@ import com.techhub.modules.cart.dto.response.CartCountResponse;
 import com.techhub.modules.cart.dto.response.CartItemResponse;
 import com.techhub.modules.cart.dto.response.CartResponse;
 import com.techhub.modules.cart.dto.response.ShopCartGroupResponse;
-import com.techhub.model.entity.*;
-import com.techhub.repository.*;
 import com.techhub.service.cart.impl.CartServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +32,22 @@ import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.cart.entity.Cart;
+import com.techhub.modules.cart.entity.CartItem;
+import com.techhub.modules.cart.repository.CartItemRepository;
+import com.techhub.modules.cart.repository.CartRepository;
+import com.techhub.modules.category.entity.Category;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.product.entity.ProductImage;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.product.repository.ProductImageRepository;
+import com.techhub.modules.product.repository.ProductVariantRepository;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.shipping.repository.ShippingOptionRepository;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.user.repository.UserRepository;
+import com.techhub.modules.voucher.repository.VoucherRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho CartService (GET /api/cart, GET /api/cart/count, POST /api/cart/items)")

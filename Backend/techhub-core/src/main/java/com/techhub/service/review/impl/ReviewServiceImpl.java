@@ -7,10 +7,8 @@ import com.techhub.modules.review.dto.request.ReviewMediaRequest;
 import com.techhub.modules.review.dto.request.UpdateReviewRequest;
 import com.techhub.modules.review.dto.response.HelpfulVoteResponse;
 import com.techhub.modules.review.dto.response.ReviewResponse;
-import com.techhub.model.entity.*;
 import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.modules.user.enums.UserStatus;
-import com.techhub.repository.*;
 import com.techhub.service.review.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +22,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.entity.OrderItem;
+import com.techhub.modules.order.repository.OrderItemRepository;
+import com.techhub.modules.review.entity.Review;
+import com.techhub.modules.review.entity.ReviewHelpful;
+import com.techhub.modules.review.entity.ReviewMedia;
+import com.techhub.modules.review.repository.ReviewHelpfulRepository;
+import com.techhub.modules.review.repository.ReviewMediaRepository;
+import com.techhub.modules.review.repository.ReviewRepository;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.user.repository.UserRepository;
 
 @Slf4j
 @Service

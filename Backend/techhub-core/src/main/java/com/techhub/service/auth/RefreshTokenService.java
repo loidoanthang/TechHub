@@ -1,7 +1,7 @@
 package com.techhub.service.auth;
 
-import com.techhub.model.entity.RefreshToken;
-import com.techhub.model.entity.User;
+import com.techhub.modules.auth.entity.RefreshToken;
+import com.techhub.modules.user.entity.User;
 
 public interface RefreshTokenService {
 

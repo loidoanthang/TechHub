@@ -8,7 +8,7 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.conversation.dto.request.CreateConversationRequest;
 import com.techhub.modules.conversation.dto.response.ConversationResponse;
 import com.techhub.modules.conversation.dto.response.MessageResponse;
-import com.techhub.model.entity.User;
+import com.techhub.modules.user.entity.User;
 import com.techhub.modules.conversation.enums.ConversationType;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.security.CustomUserDetails;

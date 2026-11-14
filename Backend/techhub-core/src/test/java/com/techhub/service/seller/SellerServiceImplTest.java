@@ -14,12 +14,10 @@ import com.techhub.modules.seller.dto.response.SellerShippingOptionResponse;
 import com.techhub.modules.seller.dto.response.SellerShopResponse;
 import com.techhub.modules.seller.dto.response.SellerVerificationStatusResponse;
 import com.techhub.modules.seller.dto.response.SellerWarehouseAddressResponse;
-import com.techhub.model.entity.*;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;
-import com.techhub.repository.*;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.service.seller.impl.SellerServiceImpl;
 import org.junit.jupiter.api.AfterEach;
@@ -44,6 +42,16 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.shipping.entity.ShippingOption;
+import com.techhub.modules.shipping.repository.ShippingOptionRepository;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.shop.repository.ShopRepository;
+import com.techhub.modules.user.entity.Address;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.user.repository.AddressRepository;
+import com.techhub.modules.user.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerService - Đăng ký Người bán & Re-submit (POST /api/seller/register)")
