@@ -2,12 +2,16 @@ package com.techhub.modules.voucher.dto.response;
 
 import com.techhub.model.entity.Shop;
 import com.techhub.model.entity.Voucher;
-import com.techhub.model.enums.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherStatus;
+import com.techhub.modules.voucher.enums.VoucherType;
 
 public record AdminVoucherDetailResponse(
         UUID id,

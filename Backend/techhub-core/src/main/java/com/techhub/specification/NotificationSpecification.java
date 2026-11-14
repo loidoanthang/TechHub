@@ -1,7 +1,7 @@
 package com.techhub.specification;
 
 import com.techhub.model.entity.Notification;
-import com.techhub.model.enums.NotificationType;
+import com.techhub.modules.notification.enums.NotificationType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.UUID;

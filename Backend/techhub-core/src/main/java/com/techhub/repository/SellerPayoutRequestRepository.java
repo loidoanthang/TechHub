@@ -1,7 +1,7 @@
 package com.techhub.repository;
 
 import com.techhub.model.entity.SellerPayoutRequest;
-import com.techhub.model.enums.PayoutStatus;
+import com.techhub.modules.seller.enums.PayoutStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

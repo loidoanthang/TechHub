@@ -1,7 +1,6 @@
 package com.techhub.config;
 
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
 import com.techhub.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +14,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import com.techhub.modules.category.enums.CategoryAttributeDataType;
+import com.techhub.modules.category.enums.CategoryStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.AddressLabel;
+import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherType;
 
 @Slf4j
 @Component

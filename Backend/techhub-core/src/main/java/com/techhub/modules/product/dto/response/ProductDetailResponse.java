@@ -1,7 +1,7 @@
 package com.techhub.modules.product.dto.response;
 
-import com.techhub.model.enums.ProductApprovalStatus;
-import com.techhub.model.enums.ProductVisibilityStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;

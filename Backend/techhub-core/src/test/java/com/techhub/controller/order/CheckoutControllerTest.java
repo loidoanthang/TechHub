@@ -4,8 +4,8 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.order.dto.request.CheckoutPreviewRequest;
 import com.techhub.modules.order.dto.response.CheckoutPreviewResponse;
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.Role;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.service.order.CheckoutService;
 import jakarta.validation.ConstraintViolation;
@@ -200,15 +200,15 @@ class CheckoutControllerTest {
         UUID shopId = UUID.randomUUID();
         com.techhub.modules.order.dto.request.PlaceOrderRequest request = new com.techhub.modules.order.dto.request.PlaceOrderRequest(
                 addressId,
-                com.techhub.model.enums.PaymentMethod.COD,
+                com.techhub.modules.payment.enums.PaymentMethod.COD,
                 List.of(UUID.randomUUID()),
                 List.of(new com.techhub.modules.shop.dto.request.ShopOrderRequest(shopId, List.of(), "Giao nhanh giúp mình"))
         );
 
         com.techhub.modules.order.dto.response.PlaceOrderResponse mockResponse = new com.techhub.modules.order.dto.response.PlaceOrderResponse(
                 UUID.randomUUID(),
-                com.techhub.model.enums.PaymentMethod.COD,
-                com.techhub.model.enums.PaymentStatus.PENDING,
+                com.techhub.modules.payment.enums.PaymentMethod.COD,
+                com.techhub.modules.payment.enums.PaymentStatus.PENDING,
                 BigDecimal.valueOf(500000),
                 1,
                 List.of(),

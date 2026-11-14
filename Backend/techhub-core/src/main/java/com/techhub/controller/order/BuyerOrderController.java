@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.order.dto.response.BuyerOrderDetailResponse;
 import com.techhub.modules.order.dto.response.BuyerOrderResponse;
-import com.techhub.model.enums.OrderStatus;
+import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.order.OrderService;
 import lombok.RequiredArgsConstructor;

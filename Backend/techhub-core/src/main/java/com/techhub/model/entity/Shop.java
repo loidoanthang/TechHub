@@ -1,6 +1,6 @@
 package com.techhub.model.entity;
 
-import com.techhub.model.enums.ShopStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

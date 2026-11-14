@@ -7,7 +7,6 @@ import com.techhub.modules.order.dto.request.CreateReturnRequest;
 import com.techhub.modules.order.dto.request.ProcessReturnRequest;
 import com.techhub.modules.order.dto.response.ReturnRequestResponse;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
 import com.techhub.repository.*;
 import com.techhub.service.order.ReturnRequestService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +22,15 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.order.enums.ReturnRequestStatus;
+import com.techhub.modules.payment.enums.PaymentMethod;
+import com.techhub.modules.payment.enums.RefundMethod;
+import com.techhub.modules.payment.enums.RefundStatus;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.seller.enums.SellerWalletTransactionType;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.UserStatus;
 
 @Slf4j
 @Service

@@ -7,7 +7,6 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
 import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
 import com.techhub.repository.OrderRepository;
 import com.techhub.repository.PaymentRepository;
 import com.techhub.repository.VoucherRedemptionRepository;
@@ -28,6 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.payment.enums.PaymentMethod;
+import com.techhub.modules.payment.enums.PaymentStatus;
+import com.techhub.modules.voucher.enums.VoucherRedemptionStatus;
 
 @ExtendWith(MockitoExtension.class)
 class VNPayServiceImplTest {

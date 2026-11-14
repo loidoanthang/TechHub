@@ -1,6 +1,6 @@
 package com.techhub.modules.conversation.dto.response;
 
-import com.techhub.model.enums.ConversationType;
+import com.techhub.modules.conversation.enums.ConversationType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

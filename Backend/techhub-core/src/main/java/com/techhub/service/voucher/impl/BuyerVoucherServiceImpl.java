@@ -2,7 +2,7 @@ package com.techhub.service.voucher.impl;
 
 import com.techhub.modules.voucher.dto.response.CartPlatformVoucherResponse;
 import com.techhub.model.entity.Voucher;
-import com.techhub.model.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import com.techhub.repository.VoucherRepository;
 import com.techhub.service.voucher.BuyerVoucherService;
 import lombok.RequiredArgsConstructor;

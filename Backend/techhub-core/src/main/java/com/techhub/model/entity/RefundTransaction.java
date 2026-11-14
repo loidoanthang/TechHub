@@ -1,7 +1,7 @@
 package com.techhub.model.entity;
 
-import com.techhub.model.enums.RefundMethod;
-import com.techhub.model.enums.RefundStatus;
+import com.techhub.modules.payment.enums.RefundMethod;
+import com.techhub.modules.payment.enums.RefundStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

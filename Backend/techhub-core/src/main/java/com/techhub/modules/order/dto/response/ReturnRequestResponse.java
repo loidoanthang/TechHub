@@ -1,6 +1,6 @@
 package com.techhub.modules.order.dto.response;
 
-import com.techhub.model.enums.ReturnRequestStatus;
+import com.techhub.modules.order.enums.ReturnRequestStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

@@ -1,8 +1,8 @@
 package com.techhub.modules.order.dto.response;
 
-import com.techhub.model.enums.OrderStatus;
-import com.techhub.model.enums.PaymentMethod;
-import com.techhub.model.enums.PaymentStatus;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.payment.enums.PaymentMethod;
+import com.techhub.modules.payment.enums.PaymentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

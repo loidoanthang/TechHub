@@ -8,10 +8,10 @@ import com.techhub.modules.voucher.dto.request.UpdatePlatformVoucherStatusReques
 import com.techhub.modules.voucher.dto.response.AdminVoucherDetailResponse;
 import com.techhub.modules.voucher.dto.response.AdminVoucherResponse;
 import com.techhub.modules.voucher.dto.response.PlatformVoucherResponse;
-import com.techhub.model.enums.DiscountType;
-import com.techhub.model.enums.VoucherAppliesTo;
-import com.techhub.model.enums.VoucherStatus;
-import com.techhub.model.enums.VoucherType;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherStatus;
+import com.techhub.modules.voucher.enums.VoucherType;
 import com.techhub.service.voucher.AdminVoucherService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -326,7 +326,7 @@ class AdminVoucherControllerTest {
                 UUID.randomUUID(),
                 shopId,
                 "Tech Official Store",
-                com.techhub.model.enums.ShopStatus.ACTIVE,
+                com.techhub.modules.shop.enums.ShopStatus.ACTIVE,
                 "TECH50K",
                 "Giảm 50K cho đồ công nghệ",
                 VoucherType.SHOP,
@@ -389,7 +389,7 @@ class AdminVoucherControllerTest {
         assertEquals(1, response.getData().content().size());
         assertEquals("TECH50K", response.getData().content().get(0).code());
         assertEquals("Tech Official Store", response.getData().content().get(0).shopName());
-        assertEquals(com.techhub.model.enums.ShopStatus.ACTIVE, response.getData().content().get(0).shopStatus());
+        assertEquals(com.techhub.modules.shop.enums.ShopStatus.ACTIVE, response.getData().content().get(0).shopStatus());
 
         verify(adminVoucherService, times(1)).getVouchers(
                 VoucherType.SHOP,
@@ -437,7 +437,7 @@ class AdminVoucherControllerTest {
                 25.0,
                 shopId,
                 "Official Tech Store",
-                com.techhub.model.enums.ShopStatus.ACTIVE,
+                com.techhub.modules.shop.enums.ShopStatus.ACTIVE,
                 "https://cdn.techhub.vn/shop/avatar.png",
                 "SHOP",
                 "Người bán tự chi trả 100% ngân sách khuyến mãi",

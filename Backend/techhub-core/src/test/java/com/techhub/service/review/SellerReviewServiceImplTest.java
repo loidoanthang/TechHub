@@ -6,7 +6,6 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.review.dto.request.SellerResponseRequest;
 import com.techhub.modules.review.dto.response.SellerReviewResponse;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
 import com.techhub.repository.ReviewHelpfulRepository;
 import com.techhub.repository.ReviewRepository;
 import com.techhub.repository.SellerRepository;
@@ -31,6 +30,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.review.enums.ReviewMediaType;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.UserStatus;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerReviewServiceImpl (GET /api/seller/reviews)")

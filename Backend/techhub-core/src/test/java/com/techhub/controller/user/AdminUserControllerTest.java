@@ -3,7 +3,7 @@ package com.techhub.controller.user;
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.user.dto.response.AdminUserResponse;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.service.user.AdminUserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

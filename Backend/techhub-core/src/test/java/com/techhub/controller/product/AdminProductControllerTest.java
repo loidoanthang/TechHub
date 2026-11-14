@@ -8,7 +8,6 @@ import com.techhub.modules.product.dto.response.AdminProductDetailResponse;
 import com.techhub.modules.product.dto.response.AdminProductSummaryResponse;
 import com.techhub.modules.product.dto.response.ProductImageResponse;
 import com.techhub.modules.product.dto.response.ProductVariantResponse;
-import com.techhub.model.enums.*;
 import com.techhub.service.product.AdminProductService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,6 +45,11 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.category.enums.CategoryStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.Role;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminProductController (GET /api/admin/products, PATCH /api/admin/products/{id}/approval)")

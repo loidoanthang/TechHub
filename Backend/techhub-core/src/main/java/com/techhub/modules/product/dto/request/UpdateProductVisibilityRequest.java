@@ -1,6 +1,6 @@
 package com.techhub.modules.product.dto.request;
 
-import com.techhub.model.enums.ProductVisibilityStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import jakarta.validation.constraints.NotNull;
 
 public record UpdateProductVisibilityRequest(

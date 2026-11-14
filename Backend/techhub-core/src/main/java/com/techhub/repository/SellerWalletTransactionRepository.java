@@ -1,7 +1,7 @@
 package com.techhub.repository;
 
 import com.techhub.model.entity.SellerWalletTransaction;
-import com.techhub.model.enums.SellerWalletTransactionType;
+import com.techhub.modules.seller.enums.SellerWalletTransactionType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

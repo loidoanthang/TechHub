@@ -1,6 +1,6 @@
 package com.techhub.modules.category.dto.response;
 
-import com.techhub.model.enums.CategoryAttributeDataType;
+import com.techhub.modules.category.enums.CategoryAttributeDataType;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.techhub.modules.order.dto.request;
 
-import com.techhub.model.enums.ReturnRequestStatus;
+import com.techhub.modules.order.enums.ReturnRequestStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 

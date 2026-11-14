@@ -4,7 +4,7 @@ import com.techhub.common.PageResponse;
 import com.techhub.modules.order.dto.request.CancelOrderRequest;
 import com.techhub.modules.order.dto.response.AdminOrderDetailResponse;
 import com.techhub.modules.order.dto.response.AdminOrderResponse;
-import com.techhub.model.enums.OrderStatus;
+import com.techhub.modules.order.enums.OrderStatus;
 
 import java.time.LocalDate;
 import java.util.UUID;

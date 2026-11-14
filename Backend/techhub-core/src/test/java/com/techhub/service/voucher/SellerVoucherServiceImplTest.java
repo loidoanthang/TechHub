@@ -11,7 +11,6 @@ import com.techhub.modules.shop.dto.response.ShopVoucherResponse;
 import com.techhub.model.entity.Seller;
 import com.techhub.model.entity.Shop;
 import com.techhub.model.entity.Voucher;
-import com.techhub.model.enums.*;
 import com.techhub.repository.SellerRepository;
 import com.techhub.repository.ShopRepository;
 import com.techhub.repository.VoucherRepository;
@@ -42,6 +41,12 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherStatus;
+import com.techhub.modules.voucher.enums.VoucherType;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerVoucherServiceImpl (POST, GET, GET by ID & PUT /api/seller/vouchers)")

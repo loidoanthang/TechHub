@@ -9,7 +9,6 @@ import com.techhub.modules.cart.dto.response.CartItemPreviewResponse;
 import com.techhub.modules.order.dto.response.CheckoutPreviewResponse;
 import com.techhub.modules.order.dto.response.PlaceOrderResponse;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
 import com.techhub.repository.*;
 import com.techhub.service.order.impl.CheckoutServiceImpl;
 import com.techhub.service.payment.VNPayService;
@@ -30,6 +29,17 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.payment.enums.PaymentMethod;
+import com.techhub.modules.payment.enums.PaymentStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherType;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho CheckoutService (POST /api/checkout/preview - 24 Test Cases)")

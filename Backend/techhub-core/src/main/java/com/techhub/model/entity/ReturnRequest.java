@@ -1,6 +1,6 @@
 package com.techhub.model.entity;
 
-import com.techhub.model.enums.ReturnRequestStatus;
+import com.techhub.modules.order.enums.ReturnRequestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

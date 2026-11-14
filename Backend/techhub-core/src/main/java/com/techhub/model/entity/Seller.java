@@ -1,6 +1,6 @@
 package com.techhub.model.entity;
 
-import com.techhub.model.enums.SellerVerificationStatus;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

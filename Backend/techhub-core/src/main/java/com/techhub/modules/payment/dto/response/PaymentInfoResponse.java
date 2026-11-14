@@ -1,7 +1,7 @@
 package com.techhub.modules.payment.dto.response;
 
 import com.techhub.model.entity.UserPaymentInfo;
-import com.techhub.model.enums.PaymentType;
+import com.techhub.modules.payment.enums.PaymentType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

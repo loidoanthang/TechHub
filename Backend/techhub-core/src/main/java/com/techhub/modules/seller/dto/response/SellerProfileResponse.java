@@ -1,6 +1,6 @@
 package com.techhub.modules.seller.dto.response;
 
-import com.techhub.model.enums.SellerVerificationStatus;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

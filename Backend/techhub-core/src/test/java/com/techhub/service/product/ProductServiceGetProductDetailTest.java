@@ -4,7 +4,6 @@ import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.product.dto.response.PublicProductDetailResponse;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
 import com.techhub.repository.ProductImageRepository;
 import com.techhub.repository.ProductRepository;
 import com.techhub.repository.ProductVariantRepository;
@@ -23,6 +22,12 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.category.enums.CategoryStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.UserStatus;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho ProductServiceImpl - Chi tiết sản phẩm công khai (GET /api/products/{slug})")

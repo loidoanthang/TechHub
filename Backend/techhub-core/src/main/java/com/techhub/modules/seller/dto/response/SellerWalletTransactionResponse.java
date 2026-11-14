@@ -1,7 +1,7 @@
 package com.techhub.modules.seller.dto.response;
 
 import com.techhub.model.entity.SellerWalletTransaction;
-import com.techhub.model.enums.SellerWalletTransactionType;
+import com.techhub.modules.seller.enums.SellerWalletTransactionType;
 import lombok.Builder;
 
 import java.math.BigDecimal;

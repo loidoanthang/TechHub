@@ -1,6 +1,6 @@
 package com.techhub.model.entity;
 
-import com.techhub.model.enums.ConversationType;
+import com.techhub.modules.conversation.enums.ConversationType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

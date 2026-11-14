@@ -7,7 +7,6 @@ import com.techhub.model.entity.Product;
 import com.techhub.model.entity.ProductVariant;
 import com.techhub.model.entity.Seller;
 import com.techhub.model.entity.Shop;
-import com.techhub.model.enums.*;
 import com.techhub.repository.*;
 import com.techhub.service.product.impl.SellerProductServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +23,12 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.category.enums.CategoryStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerProductServiceImpl (DELETE /api/seller/products/{productId}/variants/{variantId})")

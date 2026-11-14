@@ -1,6 +1,6 @@
 package com.techhub.modules.seller.dto.request;
 
-import com.techhub.model.enums.ShopStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
 import jakarta.validation.constraints.NotNull;
 
 public record UpdateShopStatusRequest(

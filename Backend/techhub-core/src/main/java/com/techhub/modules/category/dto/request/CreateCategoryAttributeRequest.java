@@ -1,6 +1,6 @@
 package com.techhub.modules.category.dto.request;
 
-import com.techhub.model.enums.CategoryAttributeDataType;
+import com.techhub.modules.category.enums.CategoryAttributeDataType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

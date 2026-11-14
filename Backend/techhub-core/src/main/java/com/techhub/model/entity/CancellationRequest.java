@@ -1,6 +1,6 @@
 package com.techhub.model.entity;
 
-import com.techhub.model.enums.CancellationRequestStatus;
+import com.techhub.modules.order.enums.CancellationRequestStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -44,7 +44,7 @@ public class CancellationRequest {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "reason_code", length = 50)
-    private com.techhub.model.enums.CancellationReasonCode reasonCode;
+    private com.techhub.modules.order.enums.CancellationReasonCode reasonCode;
 
     @Column(name = "reason_note", columnDefinition = "TEXT")
     private String reasonNote;

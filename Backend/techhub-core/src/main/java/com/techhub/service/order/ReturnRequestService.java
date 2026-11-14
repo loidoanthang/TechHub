@@ -4,7 +4,7 @@ import com.techhub.common.PageResponse;
 import com.techhub.modules.order.dto.request.CreateReturnRequest;
 import com.techhub.modules.order.dto.request.ProcessReturnRequest;
 import com.techhub.modules.order.dto.response.ReturnRequestResponse;
-import com.techhub.model.enums.ReturnRequestStatus;
+import com.techhub.modules.order.enums.ReturnRequestStatus;
 
 import java.util.UUID;
 

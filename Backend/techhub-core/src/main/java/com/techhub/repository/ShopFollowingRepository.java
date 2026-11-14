@@ -33,14 +33,14 @@ public interface ShopFollowingRepository extends JpaRepository<ShopFollowing, UU
         JOIN FETCH sf.shop s 
         JOIN FETCH s.seller sel 
         WHERE sf.userId = :userId 
-          AND s.status NOT IN (com.techhub.model.enums.ShopStatus.SUSPENDED, com.techhub.model.enums.ShopStatus.BANNED) 
+          AND s.status NOT IN (com.techhub.modules.shop.enums.ShopStatus.SUSPENDED, com.techhub.modules.shop.enums.ShopStatus.BANNED) 
         ORDER BY sf.createdAt DESC
         """,
         countQuery = """
         SELECT COUNT(sf) FROM ShopFollowing sf 
         JOIN sf.shop s 
         WHERE sf.userId = :userId 
-          AND s.status NOT IN (com.techhub.model.enums.ShopStatus.SUSPENDED, com.techhub.model.enums.ShopStatus.BANNED)
+          AND s.status NOT IN (com.techhub.modules.shop.enums.ShopStatus.SUSPENDED, com.techhub.modules.shop.enums.ShopStatus.BANNED)
         """)
     Page<ShopFollowing> findByUserIdWithShopAndSeller(@Param("userId") UUID userId, Pageable pageable);
 

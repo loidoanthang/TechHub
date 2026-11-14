@@ -1,6 +1,6 @@
 package com.techhub.modules.product.dto.request;
 
-import com.techhub.model.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 

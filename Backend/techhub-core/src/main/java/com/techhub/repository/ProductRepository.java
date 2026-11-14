@@ -1,8 +1,8 @@
 package com.techhub.repository;
 
 import com.techhub.model.entity.Product;
-import com.techhub.model.enums.ProductApprovalStatus;
-import com.techhub.model.enums.ProductVisibilityStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -56,10 +56,10 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
         WHERE c.id = :categoryId 
           AND p.id != :targetProductId 
           AND p.isDeleted = false 
-          AND p.visibilityStatus = com.techhub.model.enums.ProductVisibilityStatus.PUBLISHED 
-          AND p.approvalStatus = com.techhub.model.enums.ProductApprovalStatus.APPROVED 
+          AND p.visibilityStatus = com.techhub.modules.product.enums.ProductVisibilityStatus.PUBLISHED 
+          AND p.approvalStatus = com.techhub.modules.product.enums.ProductApprovalStatus.APPROVED 
           AND p.isSuspended = false 
-          AND (s IS NULL OR s.status != com.techhub.model.enums.ShopStatus.BANNED) 
+          AND (s IS NULL OR s.status != com.techhub.modules.shop.enums.ShopStatus.BANNED) 
         ORDER BY 
           CASE WHEN LOWER(p.brandName) = LOWER(:brandName) THEN 0 ELSE 1 END, 
           p.createdAt DESC
@@ -76,8 +76,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
         FROM Product p
         WHERE p.shop.id IN :shopIds
           AND p.isDeleted = false
-          AND p.visibilityStatus = com.techhub.model.enums.ProductVisibilityStatus.PUBLISHED
-          AND p.approvalStatus = com.techhub.model.enums.ProductApprovalStatus.APPROVED
+          AND p.visibilityStatus = com.techhub.modules.product.enums.ProductVisibilityStatus.PUBLISHED
+          AND p.approvalStatus = com.techhub.modules.product.enums.ProductApprovalStatus.APPROVED
           AND p.isSuspended = false
         GROUP BY p.shop.id
     """)
@@ -98,8 +98,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID>, JpaSpec
         SELECT COUNT(p.id) FROM Product p 
         WHERE p.shop.id = :shopId 
           AND p.isDeleted = false 
-          AND p.visibilityStatus = com.techhub.model.enums.ProductVisibilityStatus.PUBLISHED 
-          AND p.approvalStatus = com.techhub.model.enums.ProductApprovalStatus.APPROVED 
+          AND p.visibilityStatus = com.techhub.modules.product.enums.ProductVisibilityStatus.PUBLISHED 
+          AND p.approvalStatus = com.techhub.modules.product.enums.ProductApprovalStatus.APPROVED 
           AND p.isSuspended = false
     """)
     long countActiveProductsByShopId(@Param("shopId") UUID shopId);

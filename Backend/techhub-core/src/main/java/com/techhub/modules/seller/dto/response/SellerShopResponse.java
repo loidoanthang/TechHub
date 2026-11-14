@@ -1,6 +1,6 @@
 package com.techhub.modules.seller.dto.response;
 
-import com.techhub.model.enums.ShopStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

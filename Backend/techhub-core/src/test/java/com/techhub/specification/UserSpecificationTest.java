@@ -1,7 +1,7 @@
 package com.techhub.specification;
 
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.user.enums.UserStatus;
 import jakarta.persistence.criteria.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

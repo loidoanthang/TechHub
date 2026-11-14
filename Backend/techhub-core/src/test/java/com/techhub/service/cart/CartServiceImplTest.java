@@ -9,7 +9,6 @@ import com.techhub.modules.cart.dto.response.CartItemResponse;
 import com.techhub.modules.cart.dto.response.CartResponse;
 import com.techhub.modules.cart.dto.response.ShopCartGroupResponse;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
 import com.techhub.repository.*;
 import com.techhub.service.cart.impl.CartServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +27,13 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.category.enums.CategoryStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.UserStatus;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho CartService (GET /api/cart, GET /api/cart/count, POST /api/cart/items)")

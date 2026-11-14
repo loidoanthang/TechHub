@@ -2,7 +2,7 @@ package com.techhub.repository;
 
 import com.techhub.model.entity.User;
 import com.techhub.model.entity.VerificationTokens;
-import com.techhub.model.enums.VerificationTokenType;
+import com.techhub.modules.auth.enums.VerificationTokenType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

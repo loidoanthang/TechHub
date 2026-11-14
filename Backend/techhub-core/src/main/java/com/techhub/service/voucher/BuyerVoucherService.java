@@ -1,7 +1,7 @@
 package com.techhub.service.voucher;
 
 import com.techhub.modules.voucher.dto.response.CartPlatformVoucherResponse;
-import com.techhub.model.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 
 import java.math.BigDecimal;
 import java.util.List;

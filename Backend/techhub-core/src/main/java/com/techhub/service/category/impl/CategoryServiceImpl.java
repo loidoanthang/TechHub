@@ -6,7 +6,7 @@ import com.techhub.modules.category.dto.response.CategoryAttributeResponse;
 import com.techhub.modules.category.dto.response.CategorySummaryResponse;
 import com.techhub.model.entity.Category;
 import com.techhub.model.entity.CategoryAttribute;
-import com.techhub.model.enums.CategoryStatus;
+import com.techhub.modules.category.enums.CategoryStatus;
 import com.techhub.repository.CategoryAttributeRepository;
 import com.techhub.repository.CategoryRepository;
 import com.techhub.service.category.CategoryService;

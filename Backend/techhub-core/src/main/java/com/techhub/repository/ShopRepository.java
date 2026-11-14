@@ -44,5 +44,5 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
     long countNewShopsByDateRange(@Param("startDate") java.time.LocalDateTime startDate, @Param("endDate") java.time.LocalDateTime endDate);
 
     @Query("SELECT s.status AS status, COUNT(s.id) AS count FROM Shop s GROUP BY s.status")
-    java.util.List<com.techhub.model.projection.ShopStatusSummaryProjection> countShopsByStatusGrouped();
+    java.util.List<com.techhub.modules.shop.projection.ShopStatusSummaryProjection> countShopsByStatusGrouped();
 }

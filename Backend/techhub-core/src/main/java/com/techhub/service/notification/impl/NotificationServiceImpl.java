@@ -6,7 +6,7 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.notification.dto.response.NotificationListResponse;
 import com.techhub.modules.notification.dto.response.NotificationResponse;
 import com.techhub.model.entity.Notification;
-import com.techhub.model.enums.NotificationType;
+import com.techhub.modules.notification.enums.NotificationType;
 import com.techhub.repository.NotificationRepository;
 import com.techhub.service.notification.NotificationService;
 import com.techhub.specification.NotificationSpecification;

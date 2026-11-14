@@ -1,7 +1,7 @@
 package com.techhub.repository;
 
 import com.techhub.model.entity.ProductVariant;
-import com.techhub.model.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -74,7 +74,7 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     @Query("""
         SELECT pv.product.id, COUNT(pv.id), MIN(pv.price), MAX(pv.price), COALESCE(SUM(pv.stockQuantity), 0)
         FROM ProductVariant pv
-        WHERE pv.product.id IN :productIds AND pv.status = com.techhub.model.enums.ProductVariantStatus.ACTIVE AND pv.isDeleted = false
+        WHERE pv.product.id IN :productIds AND pv.status = com.techhub.modules.product.enums.ProductVariantStatus.ACTIVE AND pv.isDeleted = false
         GROUP BY pv.product.id
     """)
     List<Object[]> aggregateActiveVariantMetricsByProductIds(@Param("productIds") List<UUID> productIds);
@@ -90,9 +90,9 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
         JOIN pv.product p
         WHERE p.shop.id = :shopId
           AND pv.isDeleted = false
-          AND pv.status = com.techhub.model.enums.ProductVariantStatus.ACTIVE
+          AND pv.status = com.techhub.modules.product.enums.ProductVariantStatus.ACTIVE
           AND p.isDeleted = false
-          AND p.visibilityStatus = com.techhub.model.enums.ProductVisibilityStatus.PUBLISHED
+          AND p.visibilityStatus = com.techhub.modules.product.enums.ProductVisibilityStatus.PUBLISHED
           AND pv.stockQuantity <= :threshold
         ORDER BY pv.stockQuantity ASC, pv.updatedAt DESC
     """)

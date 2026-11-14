@@ -6,7 +6,7 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.review.dto.response.ProductRatingSummaryResponse;
 import com.techhub.modules.review.dto.response.ProductReviewResponse;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.ReviewMediaType;
+import com.techhub.modules.review.enums.ReviewMediaType;
 import com.techhub.repository.ProductRepository;
 import com.techhub.repository.ReviewHelpfulRepository;
 import com.techhub.repository.ReviewRepository;

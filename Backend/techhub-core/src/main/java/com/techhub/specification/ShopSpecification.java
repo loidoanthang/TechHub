@@ -3,7 +3,7 @@ package com.techhub.specification;
 import com.techhub.model.entity.Seller;
 import com.techhub.model.entity.Shop;
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.ShopStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;

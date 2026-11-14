@@ -1,7 +1,7 @@
 package com.techhub.repository;
 
 import com.techhub.model.entity.ReturnRequest;
-import com.techhub.model.enums.ReturnRequestStatus;
+import com.techhub.modules.order.enums.ReturnRequestStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;

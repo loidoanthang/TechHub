@@ -5,7 +5,7 @@ import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.model.entity.User;
 import com.techhub.model.entity.VerificationTokens;
-import com.techhub.model.enums.VerificationTokenType;
+import com.techhub.modules.auth.enums.VerificationTokenType;
 import com.techhub.repository.VerificationTokensRepository;
 import com.techhub.service.auth.VerificationTokensService;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.techhub.modules.order.dto.request;
 
-import com.techhub.model.enums.PaymentMethod;
+import com.techhub.modules.payment.enums.PaymentMethod;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

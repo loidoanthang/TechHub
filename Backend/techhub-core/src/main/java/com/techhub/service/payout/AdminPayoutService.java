@@ -3,7 +3,7 @@ package com.techhub.service.payout;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.seller.dto.request.ProcessPayoutRequest;
 import com.techhub.modules.seller.dto.response.AdminPayoutResponse;
-import com.techhub.model.enums.PayoutStatus;
+import com.techhub.modules.seller.enums.PayoutStatus;
 
 import java.time.LocalDate;
 import java.util.UUID;

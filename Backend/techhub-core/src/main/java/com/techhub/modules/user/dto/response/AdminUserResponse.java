@@ -1,6 +1,6 @@
 package com.techhub.modules.user.dto.response;
 
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.user.enums.UserStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

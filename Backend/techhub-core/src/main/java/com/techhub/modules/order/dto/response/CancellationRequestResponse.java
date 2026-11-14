@@ -1,6 +1,6 @@
 package com.techhub.modules.order.dto.response;
 
-import com.techhub.model.enums.CancellationRequestStatus;
+import com.techhub.modules.order.enums.CancellationRequestStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

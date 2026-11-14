@@ -1,7 +1,7 @@
 package com.techhub.repository;
 
 import com.techhub.model.entity.CancellationRequest;
-import com.techhub.model.enums.CancellationRequestStatus;
+import com.techhub.modules.order.enums.CancellationRequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

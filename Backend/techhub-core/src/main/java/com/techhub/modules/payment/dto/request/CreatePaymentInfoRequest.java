@@ -1,6 +1,6 @@
 package com.techhub.modules.payment.dto.request;
 
-import com.techhub.model.enums.PaymentType;
+import com.techhub.modules.payment.enums.PaymentType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

@@ -1,6 +1,6 @@
 package com.techhub.modules.conversation.dto.request;
 
-import com.techhub.model.enums.ConversationType;
+import com.techhub.modules.conversation.enums.ConversationType;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;

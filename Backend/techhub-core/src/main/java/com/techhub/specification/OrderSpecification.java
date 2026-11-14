@@ -3,7 +3,7 @@ package com.techhub.specification;
 import com.techhub.model.entity.Order;
 import com.techhub.model.entity.OrderItem;
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.OrderStatus;
+import com.techhub.modules.order.enums.OrderStatus;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;

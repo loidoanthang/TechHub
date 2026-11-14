@@ -1,7 +1,7 @@
 package com.techhub.repository;
 
 import com.techhub.model.entity.Voucher;
-import com.techhub.model.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -44,7 +44,7 @@ public interface VoucherRepository extends JpaRepository<Voucher, UUID>, JpaSpec
     @Query("""
         SELECT v FROM Voucher v
         WHERE v.shop.id = :shopId
-          AND v.type = com.techhub.model.enums.VoucherType.SHOP
+          AND v.type = com.techhub.modules.voucher.enums.VoucherType.SHOP
           AND v.isDeleted = false
           AND v.isActive = true
           AND v.startDate <= :now
@@ -56,7 +56,7 @@ public interface VoucherRepository extends JpaRepository<Voucher, UUID>, JpaSpec
 
     @Query("""
         SELECT v FROM Voucher v
-        WHERE v.type = com.techhub.model.enums.VoucherType.PLATFORM
+        WHERE v.type = com.techhub.modules.voucher.enums.VoucherType.PLATFORM
           AND v.shop IS NULL
           AND v.isDeleted = false
           AND v.isActive = true

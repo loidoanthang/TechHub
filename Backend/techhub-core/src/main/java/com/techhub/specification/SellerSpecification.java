@@ -3,7 +3,7 @@ package com.techhub.specification;
 import com.techhub.model.entity.Seller;
 import com.techhub.model.entity.Shop;
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.SellerVerificationStatus;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Root;

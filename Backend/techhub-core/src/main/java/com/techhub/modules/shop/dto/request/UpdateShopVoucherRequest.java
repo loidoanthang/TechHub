@@ -1,6 +1,6 @@
 package com.techhub.modules.shop.dto.request;
 
-import com.techhub.model.enums.DiscountType;
+import com.techhub.modules.voucher.enums.DiscountType;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;

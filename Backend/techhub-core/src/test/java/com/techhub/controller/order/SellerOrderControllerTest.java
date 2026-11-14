@@ -8,11 +8,11 @@ import com.techhub.modules.seller.dto.response.SellerOrderBuyerResponse;
 import com.techhub.modules.seller.dto.response.SellerOrderItemResponse;
 import com.techhub.modules.seller.dto.response.SellerOrderResponse;
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.OrderStatus;
-import com.techhub.model.enums.PaymentMethod;
-import com.techhub.model.enums.PaymentStatus;
-import com.techhub.model.enums.Role;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.payment.enums.PaymentMethod;
+import com.techhub.modules.payment.enums.PaymentStatus;
+import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.service.order.SellerOrderService;
 import org.junit.jupiter.api.AfterEach;
@@ -403,11 +403,11 @@ class SellerOrderControllerTest {
         UUID requestId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
         com.techhub.modules.order.dto.request.ProcessCancellationRequest request =
-                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(com.techhub.model.enums.CancellationRequestStatus.APPROVED, "Đồng ý");
+                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(com.techhub.modules.order.enums.CancellationRequestStatus.APPROVED, "Đồng ý");
 
         com.techhub.modules.order.dto.response.CancellationRequestResponse mockResponse =
                 new com.techhub.modules.order.dto.response.CancellationRequestResponse(
-                        requestId, orderId, "ORD-123", com.techhub.model.enums.CancellationRequestStatus.APPROVED,
+                        requestId, orderId, "ORD-123", com.techhub.modules.order.enums.CancellationRequestStatus.APPROVED,
                         "Đã chấp thuận hủy đơn", "Đổi ý", "Đồng ý",
                         java.time.LocalDateTime.now().minusHours(1), java.time.LocalDateTime.now()
                 );
@@ -419,7 +419,7 @@ class SellerOrderControllerTest {
 
         assertNotNull(response);
         assertTrue(response.isSuccess());
-        assertEquals(com.techhub.model.enums.CancellationRequestStatus.APPROVED, response.getData().status());
+        assertEquals(com.techhub.modules.order.enums.CancellationRequestStatus.APPROVED, response.getData().status());
         verify(sellerOrderService).processCancellationRequest(userId, requestId, request);
     }
 
@@ -428,7 +428,7 @@ class SellerOrderControllerTest {
     void processCancellationRequest_Throw_WhenAlreadyProcessed() {
         UUID requestId = UUID.randomUUID();
         com.techhub.modules.order.dto.request.ProcessCancellationRequest request =
-                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(com.techhub.model.enums.CancellationRequestStatus.REJECTED, "Không đồng ý");
+                new com.techhub.modules.order.dto.request.ProcessCancellationRequest(com.techhub.modules.order.enums.CancellationRequestStatus.REJECTED, "Không đồng ý");
 
         when(sellerOrderService.processCancellationRequest(userId, requestId, request))
                 .thenThrow(new BusinessException(ErrorCode.CANCELLATION_REQUEST_ALREADY_PROCESSED));

@@ -8,7 +8,7 @@ import com.techhub.model.entity.Conversation;
 import com.techhub.model.entity.ConversationParticipant;
 import com.techhub.model.entity.Message;
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.repository.ConversationParticipantRepository;
 import com.techhub.repository.ConversationRepository;
 import com.techhub.repository.MessageRepository;

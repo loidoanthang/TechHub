@@ -1,7 +1,7 @@
 package com.techhub.modules.user.dto.response;
 
 import com.techhub.model.entity.Address;
-import com.techhub.model.enums.AddressLabel;
+import com.techhub.modules.user.enums.AddressLabel;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

@@ -4,7 +4,7 @@ import com.techhub.common.PageResponse;
 import com.techhub.modules.seller.dto.request.UpdateSellerOrderStatusRequest;
 import com.techhub.modules.seller.dto.response.SellerOrderDetailResponse;
 import com.techhub.modules.seller.dto.response.SellerOrderResponse;
-import com.techhub.model.enums.OrderStatus;
+import com.techhub.modules.order.enums.OrderStatus;
 
 import java.time.LocalDate;
 import java.util.UUID;

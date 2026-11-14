@@ -1,7 +1,7 @@
 package com.techhub.repository;
 
 import com.techhub.model.entity.Conversation;
-import com.techhub.model.enums.ConversationType;
+import com.techhub.modules.conversation.enums.ConversationType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

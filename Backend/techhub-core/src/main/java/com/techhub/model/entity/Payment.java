@@ -1,7 +1,7 @@
 package com.techhub.model.entity;
 
-import com.techhub.model.enums.PaymentMethod;
-import com.techhub.model.enums.PaymentStatus;
+import com.techhub.modules.payment.enums.PaymentMethod;
+import com.techhub.modules.payment.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

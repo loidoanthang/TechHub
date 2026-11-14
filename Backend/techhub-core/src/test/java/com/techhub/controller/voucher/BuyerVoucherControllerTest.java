@@ -2,9 +2,9 @@ package com.techhub.controller.voucher;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.modules.voucher.dto.response.CartPlatformVoucherResponse;
-import com.techhub.model.enums.DiscountType;
-import com.techhub.model.enums.VoucherAppliesTo;
-import com.techhub.model.enums.VoucherType;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherType;
 import com.techhub.service.voucher.BuyerVoucherService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

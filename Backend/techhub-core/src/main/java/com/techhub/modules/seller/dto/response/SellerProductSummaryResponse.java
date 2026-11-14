@@ -1,7 +1,7 @@
 package com.techhub.modules.seller.dto.response;
 
-import com.techhub.model.enums.ProductApprovalStatus;
-import com.techhub.model.enums.ProductVisibilityStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

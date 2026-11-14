@@ -5,7 +5,6 @@ import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.seller.dto.request.UpdateSellerOrderStatusRequest;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
 import com.techhub.repository.OrderItemRepository;
 import com.techhub.repository.OrderRepository;
 import com.techhub.repository.SellerRepository;
@@ -39,6 +38,15 @@ import com.techhub.modules.order.dto.request.ProcessCancellationRequest;
 import com.techhub.modules.order.dto.response.CancellationRequestResponse;
 import com.techhub.modules.seller.dto.response.SellerOrderDetailResponse;
 import com.techhub.modules.seller.dto.response.SellerOrderResponse;
+import com.techhub.modules.order.enums.CancellationRequestStatus;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.payment.enums.PaymentMethod;
+import com.techhub.modules.payment.enums.PaymentStatus;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.voucher.enums.VoucherRedemptionStatus;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerOrderService (GET /api/seller/orders)")

@@ -1,6 +1,6 @@
 package com.techhub.modules.user.dto.request;
 
-import com.techhub.model.enums.AddressLabel;
+import com.techhub.modules.user.enums.AddressLabel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

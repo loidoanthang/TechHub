@@ -49,10 +49,10 @@ public interface RecentlyViewedProductRepository extends JpaRepository<RecentlyV
         LEFT JOIN FETCH p.shop s 
         WHERE r.userId = :userId 
           AND p.isDeleted = false 
-          AND p.visibilityStatus = com.techhub.model.enums.ProductVisibilityStatus.PUBLISHED 
-          AND p.approvalStatus = com.techhub.model.enums.ProductApprovalStatus.APPROVED 
+          AND p.visibilityStatus = com.techhub.modules.product.enums.ProductVisibilityStatus.PUBLISHED 
+          AND p.approvalStatus = com.techhub.modules.product.enums.ProductApprovalStatus.APPROVED 
           AND p.isSuspended = false 
-          AND (s IS NULL OR s.status != com.techhub.model.enums.ShopStatus.BANNED) 
+          AND (s IS NULL OR s.status != com.techhub.modules.shop.enums.ShopStatus.BANNED) 
         ORDER BY r.viewedAt DESC, r.id DESC
     """)
     List<RecentlyViewedProduct> findActiveRecentlyViewedByUserId(@Param("userId") UUID userId, Pageable pageable);

@@ -6,7 +6,7 @@ import com.techhub.common.PageResponse;
 import com.techhub.modules.conversation.dto.request.CreateConversationRequest;
 import com.techhub.modules.conversation.dto.response.ConversationResponse;
 import com.techhub.modules.conversation.dto.response.MessageResponse;
-import com.techhub.model.enums.ConversationType;
+import com.techhub.modules.conversation.enums.ConversationType;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.conversation.ConversationService;
 import jakarta.validation.Valid;

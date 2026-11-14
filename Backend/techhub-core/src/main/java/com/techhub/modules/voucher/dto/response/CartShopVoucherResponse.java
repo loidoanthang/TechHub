@@ -1,9 +1,9 @@
 package com.techhub.modules.voucher.dto.response;
 
 import com.techhub.model.entity.Voucher;
-import com.techhub.model.enums.DiscountType;
-import com.techhub.model.enums.VoucherAppliesTo;
-import com.techhub.model.enums.VoucherType;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherType;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

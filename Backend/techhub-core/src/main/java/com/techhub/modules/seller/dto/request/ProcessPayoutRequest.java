@@ -1,6 +1,6 @@
 package com.techhub.modules.seller.dto.request;
 
-import com.techhub.model.enums.PayoutProcessAction;
+import com.techhub.modules.seller.enums.PayoutProcessAction;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 

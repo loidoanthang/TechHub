@@ -1,6 +1,6 @@
 package com.techhub.modules.review.dto.request;
 
-import com.techhub.model.enums.ReviewMediaType;
+import com.techhub.modules.review.enums.ReviewMediaType;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

@@ -32,7 +32,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
     """)
     long sumUnitsSoldByShopIdAndStatusesAndDateRange(
             @org.springframework.data.repository.query.Param("shopId") UUID shopId,
-            @org.springframework.data.repository.query.Param("statuses") Collection<com.techhub.model.enums.OrderStatus> statuses,
+            @org.springframework.data.repository.query.Param("statuses") Collection<com.techhub.modules.order.enums.OrderStatus> statuses,
             @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate,
             @org.springframework.data.repository.query.Param("endDate") java.time.LocalDateTime endDate
     );
@@ -51,9 +51,9 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
         GROUP BY oi.productVariant.product.id, oi.productNameSnapshot
         ORDER BY SUM(oi.quantity) DESC
     """)
-    List<com.techhub.model.projection.TopSellingProductProjection> findTopSellingProductsByShopId(
+    List<com.techhub.modules.product.projection.TopSellingProductProjection> findTopSellingProductsByShopId(
             @org.springframework.data.repository.query.Param("shopId") UUID shopId,
-            @org.springframework.data.repository.query.Param("statuses") Collection<com.techhub.model.enums.OrderStatus> statuses,
+            @org.springframework.data.repository.query.Param("statuses") Collection<com.techhub.modules.order.enums.OrderStatus> statuses,
             @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate,
             @org.springframework.data.repository.query.Param("endDate") java.time.LocalDateTime endDate,
             org.springframework.data.domain.Pageable pageable
@@ -67,7 +67,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, UUID> {
           AND o.createdAt >= :startDate AND o.createdAt <= :endDate
     """)
     long sumTotalUnitsSoldByStatusesAndDateRange(
-            @org.springframework.data.repository.query.Param("statuses") Collection<com.techhub.model.enums.OrderStatus> statuses,
+            @org.springframework.data.repository.query.Param("statuses") Collection<com.techhub.modules.order.enums.OrderStatus> statuses,
             @org.springframework.data.repository.query.Param("startDate") java.time.LocalDateTime startDate,
             @org.springframework.data.repository.query.Param("endDate") java.time.LocalDateTime endDate
     );

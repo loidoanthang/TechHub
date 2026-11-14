@@ -1,8 +1,8 @@
 package com.techhub.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.techhub.model.enums.Role;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.user.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

@@ -7,7 +7,6 @@ import com.techhub.model.entity.Seller;
 import com.techhub.model.entity.Shop;
 import com.techhub.model.entity.User;
 import com.techhub.model.entity.Voucher;
-import com.techhub.model.enums.*;
 import com.techhub.repository.SellerRepository;
 import com.techhub.repository.ShopRepository;
 import com.techhub.repository.VoucherRepository;
@@ -28,6 +27,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherType;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho ShopVoucherServiceImpl - Chọn xem Voucher Shop trong Giỏ Hàng & Checkout (GET /api/shops/{sellerName}/vouchers)")

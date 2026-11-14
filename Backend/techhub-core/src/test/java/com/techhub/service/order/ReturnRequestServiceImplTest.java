@@ -6,7 +6,6 @@ import com.techhub.modules.order.dto.request.CreateReturnRequest;
 import com.techhub.modules.order.dto.request.ProcessReturnRequest;
 import com.techhub.modules.order.dto.response.ReturnRequestResponse;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
 import com.techhub.repository.*;
 import com.techhub.service.order.impl.ReturnRequestServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +24,13 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.order.enums.ReturnRequestStatus;
+import com.techhub.modules.payment.enums.PaymentMethod;
+import com.techhub.modules.payment.enums.PaymentStatus;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.UserStatus;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho ReturnRequestService (Return & Refund)")

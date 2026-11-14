@@ -5,7 +5,6 @@ import com.techhub.exception.ErrorCode;
 import com.techhub.modules.cart.dto.request.CartPreviewRequest;
 import com.techhub.modules.cart.dto.response.CartPreviewResponse;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
 import com.techhub.repository.*;
 import com.techhub.service.cart.impl.CartServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +22,13 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherType;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho CartService.previewCart (POST /api/cart/preview)")

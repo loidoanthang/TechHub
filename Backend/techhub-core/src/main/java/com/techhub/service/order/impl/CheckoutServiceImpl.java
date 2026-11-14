@@ -6,7 +6,6 @@ import com.techhub.modules.order.dto.request.CheckoutPreviewRequest;
 import com.techhub.modules.order.dto.request.PlaceOrderRequest;
 import com.techhub.modules.shop.dto.request.ShopOrderRequest;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
 import com.techhub.repository.*;
 import com.techhub.service.order.CheckoutService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +32,19 @@ import com.techhub.modules.order.dto.response.CheckoutPreviewResponse;
 import com.techhub.modules.order.dto.response.OrderSummaryResponse;
 import com.techhub.modules.order.dto.response.PlaceOrderResponse;
 import com.techhub.modules.user.dto.response.AddressResponse;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.payment.enums.PaymentMethod;
+import com.techhub.modules.payment.enums.PaymentStatus;
+import com.techhub.modules.payment.enums.VNPayBankCode;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherRedemptionStatus;
+import com.techhub.modules.voucher.enums.VoucherType;
 
 @Slf4j
 @Service

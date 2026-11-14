@@ -3,7 +3,7 @@ package com.techhub.service.user;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.user.dto.response.AdminUserResponse;
 import com.techhub.modules.user.dto.request.UpdateUserStatusRequest;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.user.enums.UserStatus;
 
 import java.util.UUID;
 

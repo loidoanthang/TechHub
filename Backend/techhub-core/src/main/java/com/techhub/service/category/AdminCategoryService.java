@@ -8,7 +8,7 @@ import com.techhub.modules.category.dto.response.CategoryAttributeResponse;
 import com.techhub.modules.category.dto.response.CategoryDetailResponse;
 import com.techhub.modules.category.dto.response.CategorySummaryResponse;
 
-import com.techhub.model.enums.CategoryStatus;
+import com.techhub.modules.category.enums.CategoryStatus;
 
 import java.util.UUID;
 

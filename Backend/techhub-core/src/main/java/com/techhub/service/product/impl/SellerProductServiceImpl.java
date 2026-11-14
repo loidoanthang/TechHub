@@ -16,7 +16,6 @@ import com.techhub.modules.product.dto.response.ProductVariantMetrics;
 import com.techhub.modules.product.dto.response.ProductVariantResponse;
 import com.techhub.modules.seller.dto.response.SellerProductSummaryResponse;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
 import com.techhub.repository.*;
 import com.techhub.service.product.SellerProductService;
 import com.techhub.specification.ProductSpecification;
@@ -32,6 +31,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
+import com.techhub.modules.category.enums.CategoryStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
 
 @Service
 @RequiredArgsConstructor

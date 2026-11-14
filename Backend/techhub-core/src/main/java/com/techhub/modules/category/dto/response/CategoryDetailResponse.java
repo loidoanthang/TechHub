@@ -1,6 +1,6 @@
 package com.techhub.modules.category.dto.response;
 
-import com.techhub.model.enums.CategoryStatus;
+import com.techhub.modules.category.enums.CategoryStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;

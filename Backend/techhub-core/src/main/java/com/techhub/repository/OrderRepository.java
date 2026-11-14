@@ -1,7 +1,7 @@
 package com.techhub.repository;
 
 import com.techhub.model.entity.Order;
-import com.techhub.model.enums.OrderStatus;
+import com.techhub.modules.order.enums.OrderStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -63,20 +63,20 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
     List<Order> findByStatusAndDeliveredAtBefore(@Param("status") OrderStatus status, @Param("deliveredBefore") java.time.LocalDateTime deliveredBefore, Pageable pageable);
 
     @org.springframework.data.jpa.repository.Modifying
-    @Query("UPDATE Order o SET o.status = com.techhub.model.enums.OrderStatus.COMPLETED, o.completedAt = :now, o.updatedAt = :now WHERE o.id = :id AND o.status = com.techhub.model.enums.OrderStatus.DELIVERED")
+    @Query("UPDATE Order o SET o.status = com.techhub.modules.order.enums.OrderStatus.COMPLETED, o.completedAt = :now, o.updatedAt = :now WHERE o.id = :id AND o.status = com.techhub.modules.order.enums.OrderStatus.DELIVERED")
     int completeDeliveredOrderAtomic(@Param("id") UUID id, @Param("now") java.time.LocalDateTime now);
 
     @Query("""
         SELECT COUNT(o.id) FROM Order o 
         WHERE o.shop.id = :shopId 
-          AND o.status = com.techhub.model.enums.OrderStatus.COMPLETED
+          AND o.status = com.techhub.modules.order.enums.OrderStatus.COMPLETED
     """)
     long countCompletedOrdersByShopId(@Param("shopId") UUID shopId);
 
     @Query("""
         SELECT COALESCE(SUM(o.totalSellerEarnings), 0) FROM Order o 
         WHERE o.shop.id = :shopId 
-          AND o.status = com.techhub.model.enums.OrderStatus.COMPLETED
+          AND o.status = com.techhub.modules.order.enums.OrderStatus.COMPLETED
     """)
     java.math.BigDecimal calculateCumulativeRevenueByShopId(@Param("shopId") UUID shopId);
 
@@ -89,7 +89,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
           AND o.createdAt >= :startDate AND o.createdAt <= :endDate
         GROUP BY o.status
     """)
-    List<com.techhub.model.projection.OrderStatusSummaryProjection> aggregateOrdersByShopIdAndDateRange(
+    List<com.techhub.modules.order.projection.OrderStatusSummaryProjection> aggregateOrdersByShopIdAndDateRange(
             @Param("shopId") UUID shopId,
             @Param("startDate") java.time.LocalDateTime startDate,
             @Param("endDate") java.time.LocalDateTime endDate
@@ -104,7 +104,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
         WHERE o.createdAt >= :startDate AND o.createdAt <= :endDate
         GROUP BY o.status
     """)
-    List<com.techhub.model.projection.PlatformOrderStatusSummaryProjection> aggregatePlatformOrdersByDateRange(
+    List<com.techhub.modules.order.projection.PlatformOrderStatusSummaryProjection> aggregatePlatformOrdersByDateRange(
             @Param("startDate") java.time.LocalDateTime startDate,
             @Param("endDate") java.time.LocalDateTime endDate
     );
@@ -122,8 +122,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
         GROUP BY o.shop.id, o.shop.name, o.shop.avatarUrl
         ORDER BY SUM(o.totalAmount) DESC
     """)
-    List<com.techhub.model.projection.TopPerformingShopProjection> findTopPerformingShopsByDateRange(
-            @Param("statuses") Collection<com.techhub.model.enums.OrderStatus> statuses,
+    List<com.techhub.modules.shop.projection.TopPerformingShopProjection> findTopPerformingShopsByDateRange(
+            @Param("statuses") Collection<com.techhub.modules.order.enums.OrderStatus> statuses,
             @Param("startDate") java.time.LocalDateTime startDate,
             @Param("endDate") java.time.LocalDateTime endDate,
             org.springframework.data.domain.Pageable pageable

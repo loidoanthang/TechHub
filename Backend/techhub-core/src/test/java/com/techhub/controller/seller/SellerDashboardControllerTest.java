@@ -7,9 +7,9 @@ import com.techhub.modules.dashboard.dto.response.SellerDashboardMetricsResponse
 import com.techhub.modules.dashboard.dto.response.SellerDashboardSummaryDto;
 import com.techhub.modules.dashboard.dto.response.SellerOrderStatusBreakdownDto;
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.DashboardPeriod;
-import com.techhub.model.enums.Role;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.dashboard.enums.DashboardPeriod;
+import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.service.dashboard.SellerDashboardService;
 import org.junit.jupiter.api.AfterEach;

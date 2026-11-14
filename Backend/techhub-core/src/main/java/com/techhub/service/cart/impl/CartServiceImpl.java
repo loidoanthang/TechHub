@@ -10,7 +10,6 @@ import com.techhub.model.entity.*;
 import com.techhub.modules.cart.dto.request.AddToCartRequest;
 import com.techhub.modules.cart.dto.request.CartPreviewRequest;
 import com.techhub.modules.cart.dto.request.UpdateCartItemRequest;
-import com.techhub.model.enums.*;
 import com.techhub.repository.*;
 import com.techhub.service.cart.CartService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +27,15 @@ import com.techhub.modules.cart.dto.response.AppliedVoucherPreviewResponse;
 import com.techhub.modules.cart.dto.response.CartItemPreviewResponse;
 import com.techhub.modules.cart.dto.response.CartPreviewResponse;
 import com.techhub.modules.cart.dto.response.ShopCartPreviewGroupResponse;
+import com.techhub.modules.category.enums.CategoryStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherType;
 
 @Service
 @RequiredArgsConstructor

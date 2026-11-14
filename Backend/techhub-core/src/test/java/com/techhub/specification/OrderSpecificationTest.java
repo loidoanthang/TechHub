@@ -4,7 +4,7 @@ import com.techhub.model.entity.Order;
 import com.techhub.model.entity.OrderItem;
 import com.techhub.model.entity.Shop;
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.OrderStatus;
+import com.techhub.modules.order.enums.OrderStatus;
 import jakarta.persistence.criteria.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

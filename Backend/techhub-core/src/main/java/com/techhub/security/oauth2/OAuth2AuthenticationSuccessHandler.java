@@ -2,8 +2,8 @@ package com.techhub.security.oauth2;
 
 import com.techhub.model.entity.RefreshToken;
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.Role;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.repository.UserRepository;
 import com.techhub.service.auth.JwtService;
 import com.techhub.service.auth.RefreshTokenService;

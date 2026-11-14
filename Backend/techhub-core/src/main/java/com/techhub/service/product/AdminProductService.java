@@ -5,8 +5,8 @@ import com.techhub.modules.product.dto.request.UpdateProductApprovalRequest;
 import com.techhub.modules.product.dto.request.UpdateProductSuspendRequest;
 import com.techhub.modules.product.dto.response.AdminProductDetailResponse;
 import com.techhub.modules.product.dto.response.AdminProductSummaryResponse;
-import com.techhub.model.enums.ProductApprovalStatus;
-import com.techhub.model.enums.ProductVisibilityStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
 
 import java.util.UUID;
 

@@ -1,7 +1,7 @@
 package com.techhub.modules.notification.dto.response;
 
-import com.techhub.model.enums.NotificationType;
-import com.techhub.model.enums.TargetAudience;
+import com.techhub.modules.notification.enums.NotificationType;
+import com.techhub.modules.notification.enums.TargetAudience;
 
 import java.time.LocalDateTime;
 

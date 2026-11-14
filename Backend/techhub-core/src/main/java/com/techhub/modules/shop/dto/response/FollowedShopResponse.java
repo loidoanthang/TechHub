@@ -1,6 +1,6 @@
 package com.techhub.modules.shop.dto.response;
 
-import com.techhub.model.enums.ShopStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

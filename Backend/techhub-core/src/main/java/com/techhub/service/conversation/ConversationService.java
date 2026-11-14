@@ -5,7 +5,7 @@ import com.techhub.common.PageResponse;
 import com.techhub.modules.conversation.dto.request.CreateConversationRequest;
 import com.techhub.modules.conversation.dto.response.ConversationResponse;
 import com.techhub.modules.conversation.dto.response.MessageResponse;
-import com.techhub.model.enums.ConversationType;
+import com.techhub.modules.conversation.enums.ConversationType;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;

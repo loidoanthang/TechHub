@@ -1,7 +1,7 @@
 package com.techhub.model.entity;
 
-import com.techhub.model.enums.ProductApprovalStatus;
-import com.techhub.model.enums.ProductVisibilityStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

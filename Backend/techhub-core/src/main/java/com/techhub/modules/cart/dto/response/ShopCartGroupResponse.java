@@ -1,6 +1,6 @@
 package com.techhub.modules.cart.dto.response;
 
-import com.techhub.model.enums.ShopStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
 
 import java.util.List;
 import java.util.UUID;

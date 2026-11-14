@@ -1,6 +1,6 @@
 package com.techhub.modules.product.dto.response;
 
-import com.techhub.model.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
 
 import java.math.BigDecimal;
 import java.util.Map;

@@ -1,8 +1,8 @@
 package com.techhub.model.entity;
 
-import com.techhub.model.enums.DiscountType;
-import com.techhub.model.enums.VoucherAppliesTo;
-import com.techhub.model.enums.VoucherType;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

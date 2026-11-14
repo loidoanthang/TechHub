@@ -26,9 +26,9 @@ import com.techhub.modules.product.dto.response.ProductVariantResponse;
 import com.techhub.modules.product.dto.response.ProductImageResponse;
 import com.techhub.modules.product.dto.response.RecentlyViewedResponse;
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.ProductVariantStatus;
-import com.techhub.model.enums.Role;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
+import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.service.recentlyviewed.RecentlyViewedService;
 

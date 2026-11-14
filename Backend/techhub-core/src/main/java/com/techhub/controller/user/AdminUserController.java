@@ -4,7 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.user.dto.request.UpdateUserStatusRequest;
 import com.techhub.modules.user.dto.response.AdminUserResponse;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.service.user.AdminUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

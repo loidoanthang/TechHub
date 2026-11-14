@@ -2,10 +2,10 @@ package com.techhub.specification;
 
 import com.techhub.model.entity.Shop;
 import com.techhub.model.entity.Voucher;
-import com.techhub.model.enums.DiscountType;
-import com.techhub.model.enums.VoucherAppliesTo;
-import com.techhub.model.enums.VoucherStatus;
-import com.techhub.model.enums.VoucherType;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherStatus;
+import com.techhub.modules.voucher.enums.VoucherType;
 import jakarta.persistence.criteria.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

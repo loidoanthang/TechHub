@@ -7,7 +7,7 @@ import com.techhub.modules.notification.dto.response.NotificationListResponse;
 import com.techhub.modules.notification.dto.response.NotificationResponse;
 import com.techhub.model.entity.Notification;
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.NotificationType;
+import com.techhub.modules.notification.enums.NotificationType;
 import com.techhub.repository.NotificationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

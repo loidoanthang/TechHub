@@ -3,7 +3,7 @@ package com.techhub.service.order;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.order.dto.response.BuyerOrderDetailResponse;
 import com.techhub.modules.order.dto.response.BuyerOrderResponse;
-import com.techhub.model.enums.OrderStatus;
+import com.techhub.modules.order.enums.OrderStatus;
 
 import java.util.UUID;
 

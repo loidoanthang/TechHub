@@ -5,7 +5,7 @@ import com.techhub.common.PageResponse;
 import com.techhub.modules.shop.dto.request.AdminUpdateShopStatusRequest;
 import com.techhub.modules.shop.dto.response.AdminShopDetailResponse;
 import com.techhub.modules.shop.dto.response.AdminShopResponse;
-import com.techhub.model.enums.ShopStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.service.shop.AdminShopService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

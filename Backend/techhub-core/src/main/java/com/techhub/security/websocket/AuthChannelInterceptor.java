@@ -1,7 +1,7 @@
 package com.techhub.security.websocket;
 
 import com.techhub.model.entity.User;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.repository.ConversationParticipantRepository;
 import com.techhub.repository.ConversationRepository;
 import com.techhub.repository.UserRepository;

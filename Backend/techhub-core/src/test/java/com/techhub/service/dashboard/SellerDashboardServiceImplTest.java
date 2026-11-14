@@ -6,9 +6,8 @@ import com.techhub.modules.dashboard.dto.response.LowStockVariantDto;
 import com.techhub.modules.dashboard.dto.response.SellerDashboardMetricsResponse;
 import com.techhub.modules.dashboard.dto.response.TopSellingProductDto;
 import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
-import com.techhub.model.projection.OrderStatusSummaryProjection;
-import com.techhub.model.projection.TopSellingProductProjection;
+import com.techhub.modules.order.projection.OrderStatusSummaryProjection;
+import com.techhub.modules.product.projection.TopSellingProductProjection;
 import com.techhub.repository.*;
 import com.techhub.service.dashboard.impl.SellerDashboardServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +27,12 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.dashboard.enums.DashboardPeriod;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.seller.enums.PayoutStatus;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.UserStatus;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerDashboardServiceImpl (GET /api/seller/dashboard/metrics)")

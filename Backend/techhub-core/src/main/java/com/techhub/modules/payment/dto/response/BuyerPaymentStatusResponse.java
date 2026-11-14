@@ -1,7 +1,7 @@
 package com.techhub.modules.payment.dto.response;
 
-import com.techhub.model.enums.PaymentMethod;
-import com.techhub.model.enums.PaymentStatus;
+import com.techhub.modules.payment.enums.PaymentMethod;
+import com.techhub.modules.payment.enums.PaymentStatus;
 import lombok.Builder;
 
 import java.math.BigDecimal;

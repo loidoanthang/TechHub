@@ -1,6 +1,6 @@
 package com.techhub.modules.product.dto.request;
 
-import com.techhub.model.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;

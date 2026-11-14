@@ -4,8 +4,8 @@ import com.techhub.common.PageResponse;
 import com.techhub.modules.product.dto.request.CreateProductRequest;
 import com.techhub.modules.product.dto.response.ProductDetailResponse;
 import com.techhub.modules.seller.dto.response.SellerProductSummaryResponse;
-import com.techhub.model.enums.ProductApprovalStatus;
-import com.techhub.model.enums.ProductVisibilityStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
 
 import com.techhub.modules.product.dto.request.CreateProductVariantRequest;
 import com.techhub.modules.product.dto.request.UpdateProductRequest;

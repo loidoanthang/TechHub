@@ -1,7 +1,7 @@
 package com.techhub.modules.voucher.dto.request;
 
-import com.techhub.model.enums.DiscountType;
-import com.techhub.model.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;

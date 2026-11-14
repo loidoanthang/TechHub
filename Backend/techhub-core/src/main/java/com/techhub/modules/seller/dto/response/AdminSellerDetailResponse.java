@@ -1,9 +1,9 @@
 package com.techhub.modules.seller.dto.response;
 
-import com.techhub.model.enums.Role;
-import com.techhub.model.enums.SellerVerificationStatus;
-import com.techhub.model.enums.ShopStatus;
-import com.techhub.model.enums.UserStatus;
+import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.UserStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

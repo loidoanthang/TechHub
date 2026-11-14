@@ -8,10 +8,10 @@ import com.techhub.modules.voucher.dto.request.UpdatePlatformVoucherStatusReques
 import com.techhub.modules.voucher.dto.response.AdminVoucherDetailResponse;
 import com.techhub.modules.voucher.dto.response.AdminVoucherResponse;
 import com.techhub.modules.voucher.dto.response.PlatformVoucherResponse;
-import com.techhub.model.enums.DiscountType;
-import com.techhub.model.enums.VoucherAppliesTo;
-import com.techhub.model.enums.VoucherStatus;
-import com.techhub.model.enums.VoucherType;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherStatus;
+import com.techhub.modules.voucher.enums.VoucherType;
 import com.techhub.service.voucher.AdminVoucherService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
