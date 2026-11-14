@@ -20,7 +20,7 @@ import com.techhub.modules.shipping.repository.ShippingOptionRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.shop.AdminShopService;
-import com.techhub.specification.ShopSpecification;
+import com.techhub.modules.shop.specification.ShopSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

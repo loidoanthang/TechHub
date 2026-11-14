@@ -1,4 +1,4 @@
-package com.techhub.specification;
+package com.techhub.modules.user.specification;
 
 import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.UserStatus;

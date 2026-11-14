@@ -1,4 +1,4 @@
-package com.techhub.specification;
+package com.techhub.modules.voucher.specification;
 
 import com.techhub.modules.shop.entity.Shop;
 import com.techhub.modules.voucher.entity.Voucher;

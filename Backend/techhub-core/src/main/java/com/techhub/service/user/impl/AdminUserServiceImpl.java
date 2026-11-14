@@ -14,7 +14,7 @@ import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.security.SecurityUtils;
 import com.techhub.service.auth.RefreshTokenService;
-import com.techhub.specification.UserSpecification;
+import com.techhub.modules.user.specification.UserSpecification;
 import com.techhub.service.user.AdminUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.techhub.specification;
+package com.techhub.modules.order.specification;
 
 import com.techhub.modules.order.entity.Order;
 import com.techhub.modules.order.entity.OrderItem;

@@ -1,4 +1,4 @@
-package com.techhub.specification;
+package com.techhub.modules.category.specification;
 
 import com.techhub.modules.category.entity.Category;
 import com.techhub.modules.category.enums.CategoryStatus;

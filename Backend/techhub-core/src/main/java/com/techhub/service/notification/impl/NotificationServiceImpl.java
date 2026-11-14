@@ -9,7 +9,7 @@ import com.techhub.modules.notification.entity.Notification;
 import com.techhub.modules.notification.enums.NotificationType;
 import com.techhub.modules.notification.repository.NotificationRepository;
 import com.techhub.service.notification.NotificationService;
-import com.techhub.specification.NotificationSpecification;
+import com.techhub.modules.notification.specification.NotificationSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

@@ -1,4 +1,4 @@
-package com.techhub.specification;
+package com.techhub.modules.product.specification;
 
 import com.techhub.modules.product.entity.Product;
 import com.techhub.modules.product.entity.ProductVariant;

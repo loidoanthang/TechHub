@@ -16,7 +16,7 @@ import com.techhub.modules.order.dto.request.CreateCancellationRequest;
 import com.techhub.modules.order.dto.request.CancelOrderRequest;
 import com.techhub.modules.order.dto.response.CancellationRequestResponse;
 import com.techhub.service.order.OrderService;
-import com.techhub.specification.OrderSpecification;
+import com.techhub.modules.order.specification.OrderSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

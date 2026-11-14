@@ -16,7 +16,7 @@ import com.techhub.modules.product.dto.response.ProductVariantMetrics;
 import com.techhub.modules.product.dto.response.ProductVariantResponse;
 import com.techhub.modules.seller.dto.response.SellerProductSummaryResponse;
 import com.techhub.service.product.SellerProductService;
-import com.techhub.specification.ProductSpecification;
+import com.techhub.modules.product.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

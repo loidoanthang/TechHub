@@ -1,5 +1,7 @@
 package com.techhub.specification;
 
+import com.techhub.modules.user.specification.UserSpecification;
+
 import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.UserStatus;
 import jakarta.persistence.criteria.*;

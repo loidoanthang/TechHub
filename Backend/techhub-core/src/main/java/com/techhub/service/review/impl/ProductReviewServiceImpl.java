@@ -10,7 +10,7 @@ import com.techhub.modules.product.repository.ProductRepository;
 import com.techhub.modules.review.repository.ReviewHelpfulRepository;
 import com.techhub.modules.review.repository.ReviewRepository;
 import com.techhub.service.review.ProductReviewService;
-import com.techhub.specification.ReviewSpecification;
+import com.techhub.modules.review.specification.ReviewSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

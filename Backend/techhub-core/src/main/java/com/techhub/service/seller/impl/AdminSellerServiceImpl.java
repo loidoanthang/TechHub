@@ -22,7 +22,7 @@ import com.techhub.modules.shipping.repository.ShippingOptionRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.service.seller.AdminSellerService;
-import com.techhub.specification.SellerSpecification;
+import com.techhub.modules.seller.specification.SellerSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

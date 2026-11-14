@@ -15,7 +15,7 @@ import com.techhub.modules.product.repository.ProductImageRepository;
 import com.techhub.modules.product.repository.ProductRepository;
 import com.techhub.modules.product.repository.ProductVariantRepository;
 import com.techhub.service.product.ProductService;
-import com.techhub.specification.ProductSpecification;
+import com.techhub.modules.product.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

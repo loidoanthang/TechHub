@@ -21,7 +21,7 @@ import com.techhub.modules.category.repository.CategoryAttributeRepository;
 import com.techhub.modules.category.repository.CategoryRepository;
 import com.techhub.modules.product.repository.ProductRepository;
 import com.techhub.service.category.AdminCategoryService;
-import com.techhub.specification.CategorySpecification;
+import com.techhub.modules.category.specification.CategorySpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

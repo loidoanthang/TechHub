@@ -1,5 +1,7 @@
 package com.techhub.specification;
 
+import com.techhub.modules.voucher.specification.VoucherSpecification;
+
 import com.techhub.modules.shop.entity.Shop;
 import com.techhub.modules.voucher.entity.Voucher;
 import com.techhub.modules.voucher.enums.DiscountType;

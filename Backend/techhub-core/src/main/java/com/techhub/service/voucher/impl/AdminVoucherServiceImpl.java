@@ -16,7 +16,7 @@ import com.techhub.modules.voucher.enums.VoucherStatus;
 import com.techhub.modules.voucher.enums.VoucherType;
 import com.techhub.modules.voucher.repository.VoucherRepository;
 import com.techhub.service.voucher.AdminVoucherService;
-import com.techhub.specification.VoucherSpecification;
+import com.techhub.modules.voucher.specification.VoucherSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;

@@ -1,5 +1,7 @@
 package com.techhub.specification;
 
+import com.techhub.modules.order.specification.OrderSpecification;
+
 import com.techhub.modules.order.entity.Order;
 import com.techhub.modules.order.entity.OrderItem;
 import com.techhub.modules.shop.entity.Shop;

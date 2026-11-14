@@ -20,7 +20,7 @@ import com.techhub.modules.seller.repository.SellerRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.modules.voucher.repository.VoucherRepository;
 import com.techhub.service.voucher.SellerVoucherService;
-import com.techhub.specification.VoucherSpecification;
+import com.techhub.modules.voucher.specification.VoucherSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;

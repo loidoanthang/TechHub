@@ -1,4 +1,4 @@
-package com.techhub.specification;
+package com.techhub.modules.notification.specification;
 
 import com.techhub.modules.notification.entity.Notification;
 import com.techhub.modules.notification.enums.NotificationType;
