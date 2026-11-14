@@ -30,6 +30,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.policy.controller.AdminPolicyController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminPolicyController (Platform Policies)")

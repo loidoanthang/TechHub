@@ -35,6 +35,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.order.controller.CheckoutController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho CheckoutController (POST /api/checkout/preview)")

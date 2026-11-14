@@ -36,6 +36,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.payment.controller.PaymentController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho PaymentController (/api/payment/vnpay)")

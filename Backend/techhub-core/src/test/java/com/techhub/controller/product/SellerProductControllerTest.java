@@ -48,6 +48,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.product.controller.SellerProductController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerProductController (POST /api/seller/products)")

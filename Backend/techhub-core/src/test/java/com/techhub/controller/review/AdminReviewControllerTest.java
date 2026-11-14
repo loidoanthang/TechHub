@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.review.controller.AdminReviewController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminReviewController (DELETE /api/admin/reviews/{id})")

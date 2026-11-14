@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.review.controller.ProductReviewController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho ProductReviewController (GET /api/products/{id}/reviews)")

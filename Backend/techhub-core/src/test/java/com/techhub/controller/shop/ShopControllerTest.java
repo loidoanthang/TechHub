@@ -36,6 +36,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.shop.controller.ShopController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho ShopController - Endpoint công khai xem trang gian hàng & voucher trong giỏ hàng (GET /api/shops/{sellerName})")

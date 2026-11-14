@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.shop.controller.BuyerShopFollowingController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho BuyerShopFollowingController (GET /api/buyer/followed-shops)")

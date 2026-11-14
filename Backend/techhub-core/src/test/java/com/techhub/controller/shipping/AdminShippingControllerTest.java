@@ -30,6 +30,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.shipping.controller.AdminShippingController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminShippingController - POST /api/admin/shipping/simulate-advance")

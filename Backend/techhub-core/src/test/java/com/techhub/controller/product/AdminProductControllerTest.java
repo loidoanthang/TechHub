@@ -50,6 +50,7 @@ import com.techhub.modules.product.enums.ProductApprovalStatus;
 import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.product.controller.AdminProductController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminProductController (GET /api/admin/products, PATCH /api/admin/products/{id}/approval)")

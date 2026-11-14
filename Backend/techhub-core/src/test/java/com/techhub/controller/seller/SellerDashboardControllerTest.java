@@ -32,6 +32,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.seller.controller.SellerDashboardController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerDashboardController (GET /api/seller/dashboard/metrics)")

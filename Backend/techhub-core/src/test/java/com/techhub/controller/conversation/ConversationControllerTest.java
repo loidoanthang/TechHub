@@ -42,6 +42,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.conversation.controller.ConversationController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests for ConversationController (POST /api/conversations)")

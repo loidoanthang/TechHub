@@ -41,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.conversation.controller.ChatController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests for ChatController (WS STOMP /app/chat.send)")

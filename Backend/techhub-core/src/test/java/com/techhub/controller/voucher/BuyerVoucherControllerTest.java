@@ -20,6 +20,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.voucher.controller.BuyerVoucherController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho BuyerVoucherController - Endpoint công khai xem voucher toàn sàn trong giỏ hàng (GET /api/vouchers/platform)")

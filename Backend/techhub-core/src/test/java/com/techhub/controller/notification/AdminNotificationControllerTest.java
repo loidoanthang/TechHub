@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.notification.controller.AdminNotificationController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminNotificationController (POST /api/admin/notifications/broadcast)")
