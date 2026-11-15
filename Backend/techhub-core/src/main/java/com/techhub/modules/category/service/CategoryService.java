@@ -1,0 +1,12 @@
+package com.techhub.modules.category.service;
+
+import com.techhub.modules.category.dto.response.CategoryAttributeResponse;
+import com.techhub.modules.category.dto.response.CategorySummaryResponse;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface CategoryService {
+    List<CategorySummaryResponse> getCategories(String keyword, String sortBy, String sortDir);
+    List<CategoryAttributeResponse> getCategoryAttributes(UUID categoryId);
+}

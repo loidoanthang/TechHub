@@ -1,0 +1,17 @@
+package com.techhub.modules.order.dto.response;
+
+import com.techhub.modules.order.enums.OrderStatus;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+public record OrderSummaryResponse(
+        UUID orderId,
+        String orderNumber,
+        UUID shopId,
+        String shopName,
+        OrderStatus status,
+        BigDecimal totalAmount,
+        BigDecimal shippingFee,
+        int itemsCount
+) {}

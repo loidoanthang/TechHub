@@ -1,0 +1,13 @@
+package com.techhub.modules.order.dto.request;
+
+import com.techhub.modules.order.enums.CancellationRequestStatus;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+public record ProcessCancellationRequest(
+        @NotNull(message = "Decision status is required (APPROVED or REJECTED)")
+        CancellationRequestStatus decision,
+
+        @Size(max = 500, message = "Seller response cannot exceed 500 characters")
+        String sellerResponse
+) {}

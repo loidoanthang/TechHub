@@ -1,12 +1,12 @@
 package com.techhub.security.oauth2;
 
-import com.techhub.model.entity.RefreshToken;
-import com.techhub.model.entity.User;
-import com.techhub.model.enums.Role;
-import com.techhub.model.enums.UserStatus;
-import com.techhub.repository.UserRepository;
-import com.techhub.service.auth.JwtService;
-import com.techhub.service.auth.RefreshTokenService;
+import com.techhub.modules.auth.entity.RefreshToken;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.user.repository.UserRepository;
+import com.techhub.modules.auth.service.JwtService;
+import com.techhub.modules.auth.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

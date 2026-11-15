@@ -1,0 +1,891 @@
+package com.techhub.modules.product.service;
+
+import com.techhub.common.PageResponse;
+import com.techhub.exception.BusinessException;
+import com.techhub.exception.ErrorCode;
+import com.techhub.modules.product.dto.response.ProductSummaryResponse;
+import com.techhub.modules.product.repository.ProductImageRepository;
+import com.techhub.modules.product.repository.ProductRepository;
+import com.techhub.modules.product.repository.ProductVariantRepository;
+import com.techhub.modules.product.service.impl.ProductServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.*;
+import com.techhub.modules.category.enums.CategoryStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.category.entity.Category;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.shop.entity.Shop;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("Unit Tests cho ProductServiceImpl (GET /api/products)")
+class ProductServiceImplTest {
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @Mock
+    private ProductImageRepository productImageRepository;
+
+    @Mock
+    private ProductVariantRepository productVariantRepository;
+
+    @InjectMocks
+    private ProductServiceImpl productService;
+
+    private UUID categoryId;
+    private UUID shopId;
+    private Category category;
+    private Shop shop;
+    private Product product1;
+    private Product product2;
+    private Product product3;
+
+    @BeforeEach
+    void setUp() {
+        categoryId = UUID.randomUUID();
+        shopId = UUID.randomUUID();
+
+        category = Category.builder()
+                .id(categoryId)
+                .name("Laptop")
+                .status(CategoryStatus.ACTIVE)
+                .build();
+
+        shop = Shop.builder()
+                .id(shopId)
+                .name("Apple Official Store")
+                .status(ShopStatus.ACTIVE)
+                .build();
+
+        product1 = Product.builder()
+                .id(UUID.randomUUID())
+                .name("MacBook Air M3")
+                .slug("macbook-air-m3")
+                .brandName("Apple")
+                .category(category)
+                .shop(shop)
+                .approvalStatus(ProductApprovalStatus.APPROVED)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isSuspended(false)
+                .isDeleted(false)
+                .createdAt(LocalDateTime.now().minusDays(2))
+                .build();
+
+        product2 = Product.builder()
+                .id(UUID.randomUUID())
+                .name("Dell XPS 13")
+                .slug("dell-xps-13")
+                .brandName("Dell")
+                .category(category)
+                .shop(shop)
+                .approvalStatus(ProductApprovalStatus.APPROVED)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isSuspended(false)
+                .isDeleted(false)
+                .createdAt(LocalDateTime.now().minusDays(1))
+                .build();
+
+        product3 = Product.builder()
+                .id(UUID.randomUUID())
+                .name("iPad Pro M4")
+                .slug("ipad-pro-m4")
+                .brandName("Apple")
+                .category(category)
+                .shop(shop)
+                .approvalStatus(ProductApprovalStatus.APPROVED)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isSuspended(false)
+                .isDeleted(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
+    @Test
+    @DisplayName("TC-01: getPublicProducts_Success_DefaultParams")
+    void getPublicProducts_Success_DefaultParams() {
+        List<Product> products = List.of(product1, product2, product3);
+        Page<Product> page = new PageImpl<>(products, PageRequest.of(0, 20), 3);
+
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(productImageRepository.findCoverImagesByProductIds(anyList())).thenReturn(List.of(
+                new Object[]{product1.getId(), "https://cdn.techhub.com/p1-cover.jpg"},
+                new Object[]{product2.getId(), "https://cdn.techhub.com/p2-cover.jpg"}
+        ));
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList())).thenReturn(List.of(
+                new Object[]{product1.getId(), 2L, new BigDecimal("27490000"), new BigDecimal("32990000"), 10L},
+                new Object[]{product2.getId(), 1L, new BigDecimal("34990000"), new BigDecimal("34990000"), 5L},
+                new Object[]{product3.getId(), 1L, new BigDecimal("22990000"), new BigDecimal("22990000"), 0L}
+        ));
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, null, null, null, null, false, "newest", 0, 20
+        );
+
+        assertNotNull(response);
+        assertEquals(3, response.content().size());
+        assertEquals(3, response.totalElements());
+        assertEquals(0, response.pageNumber());
+        assertEquals(20, response.pageSize());
+
+        ProductSummaryResponse p1 = response.content().get(0);
+        assertEquals(product1.getId(), p1.id());
+        assertEquals("MacBook Air M3", p1.name());
+        assertEquals("Apple", p1.brandName());
+        assertEquals("Laptop", p1.categoryName());
+        assertEquals("Apple Official Store", p1.shopName());
+        assertFalse(p1.isShopPaused());
+        assertEquals(new BigDecimal("27490000"), p1.price());
+        assertTrue(p1.inStock());
+        assertEquals("https://cdn.techhub.com/p1-cover.jpg", p1.coverImageUrl());
+
+        ProductSummaryResponse p3 = response.content().get(2);
+        assertFalse(p3.inStock()); // totalStock is 0
+    }
+
+    @Test
+    @DisplayName("TC-02: getPublicProducts_FilterByKeyword_MatchesNameOrBrand")
+    void getPublicProducts_FilterByKeyword_MatchesNameOrBrand() {
+        Page<Product> page = new PageImpl<>(List.of(product1, product3), PageRequest.of(0, 20), 2);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(productImageRepository.findCoverImagesByProductIds(anyList())).thenReturn(Collections.emptyList());
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList())).thenReturn(Collections.emptyList());
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                "apple", null, null, null, null, false, "newest", 0, 20
+        );
+
+        assertEquals(2, response.content().size());
+        verify(productRepository).findAll(any(Specification.class), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("TC-03: getPublicProducts_FilterByCategoryId_MatchesCategory")
+    void getPublicProducts_FilterByCategoryId_MatchesCategory() {
+        Page<Product> page = new PageImpl<>(List.of(product1), PageRequest.of(0, 20), 1);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(productImageRepository.findCoverImagesByProductIds(anyList())).thenReturn(Collections.emptyList());
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList())).thenReturn(Collections.emptyList());
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, categoryId, null, null, null, false, "newest", 0, 20
+        );
+
+        assertEquals(1, response.content().size());
+    }
+
+    @Test
+    @DisplayName("TC-04: getPublicProducts_FilterByBrandName_CaseInsensitive")
+    void getPublicProducts_FilterByBrandName_CaseInsensitive() {
+        Page<Product> page = new PageImpl<>(List.of(product2), PageRequest.of(0, 20), 1);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(productImageRepository.findCoverImagesByProductIds(anyList())).thenReturn(Collections.emptyList());
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList())).thenReturn(Collections.emptyList());
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, null, "DELL", null, null, false, "newest", 0, 20
+        );
+
+        assertEquals(1, response.content().size());
+        assertEquals("Dell XPS 13", response.content().get(0).name());
+    }
+
+    @Test
+    @DisplayName("TC-05: getPublicProducts_FilterByPriceRange_Success")
+    void getPublicProducts_FilterByPriceRange_Success() {
+        Page<Product> page = new PageImpl<>(List.of(product1), PageRequest.of(0, 20), 1);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(productImageRepository.findCoverImagesByProductIds(anyList())).thenReturn(Collections.emptyList());
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList())).thenReturn(Collections.emptyList());
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, null, null, new BigDecimal("25000000"), new BigDecimal("30000000"), false, "newest", 0, 20
+        );
+
+        assertNotNull(response);
+        assertEquals(1, response.content().size());
+    }
+
+    @Test
+    @DisplayName("TC-06: getPublicProducts_FilterInStockOnly_ExcludesOutOfStock")
+    void getPublicProducts_FilterInStockOnly_ExcludesOutOfStock() {
+        Page<Product> page = new PageImpl<>(List.of(product1, product2), PageRequest.of(0, 20), 2);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(productImageRepository.findCoverImagesByProductIds(anyList())).thenReturn(Collections.emptyList());
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList())).thenReturn(Collections.emptyList());
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, null, null, null, null, true, "newest", 0, 20
+        );
+
+        assertEquals(2, response.content().size());
+    }
+
+    @Test
+    @DisplayName("TC-07: getPublicProducts_SortByNewest_OrderedByCreatedAtDesc")
+    void getPublicProducts_SortByNewest_OrderedByCreatedAtDesc() {
+        Page<Product> page = new PageImpl<>(List.of(product3, product2, product1), PageRequest.of(0, 20), 3);
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
+        when(productRepository.findAll(any(Specification.class), pageableCaptor.capture())).thenReturn(page);
+        when(productImageRepository.findCoverImagesByProductIds(anyList())).thenReturn(Collections.emptyList());
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList())).thenReturn(Collections.emptyList());
+
+        productService.getPublicProducts(null, null, null, null, null, false, "newest", 0, 20);
+
+        Pageable capturedPageable = pageableCaptor.getValue();
+        assertEquals(Sort.by(Sort.Direction.DESC, "createdAt"), capturedPageable.getSort());
+    }
+
+    @Test
+    @DisplayName("TC-08: getPublicProducts_SortByPriceAsc_Success")
+    void getPublicProducts_SortByPriceAsc_Success() {
+        Page<Product> page = new PageImpl<>(List.of(product3, product1, product2), PageRequest.of(0, 20), 3);
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
+        when(productRepository.findAll(any(Specification.class), pageableCaptor.capture())).thenReturn(page);
+        when(productImageRepository.findCoverImagesByProductIds(anyList())).thenReturn(Collections.emptyList());
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList())).thenReturn(Collections.emptyList());
+
+        productService.getPublicProducts(null, null, null, null, null, false, "price_asc", 0, 20);
+
+        Pageable capturedPageable = pageableCaptor.getValue();
+        assertTrue(capturedPageable.getSort().isUnsorted()); // Sorted via CriteriaBuilder subquery
+    }
+
+    @Test
+    @DisplayName("TC-09: getPublicProducts_SortByPriceDesc_Success")
+    void getPublicProducts_SortByPriceDesc_Success() {
+        Page<Product> page = new PageImpl<>(List.of(product2, product1, product3), PageRequest.of(0, 20), 3);
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
+        when(productRepository.findAll(any(Specification.class), pageableCaptor.capture())).thenReturn(page);
+        when(productImageRepository.findCoverImagesByProductIds(anyList())).thenReturn(Collections.emptyList());
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList())).thenReturn(Collections.emptyList());
+
+        productService.getPublicProducts(null, null, null, null, null, false, "price_desc", 0, 20);
+
+        Pageable capturedPageable = pageableCaptor.getValue();
+        assertTrue(capturedPageable.getSort().isUnsorted()); // Sorted via CriteriaBuilder subquery
+    }
+
+    @Test
+    @DisplayName("TC-10: getPublicProducts_Gatekeeper_ExcludesUnapproved")
+    void getPublicProducts_Gatekeeper_ExcludesUnapproved() {
+        // Only APPROVED products returned by repo
+        Page<Product> page = new PageImpl<>(List.of(product1), PageRequest.of(0, 20), 1);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(productImageRepository.findCoverImagesByProductIds(anyList())).thenReturn(Collections.emptyList());
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList())).thenReturn(Collections.emptyList());
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, null, null, null, null, false, "newest", 0, 20
+        );
+
+        assertEquals(1, response.content().size());
+        assertEquals(ProductApprovalStatus.APPROVED, product1.getApprovalStatus());
+    }
+
+    @Test
+    @DisplayName("TC-11: getPublicProducts_Gatekeeper_ExcludesUnpublished")
+    void getPublicProducts_Gatekeeper_ExcludesUnpublished() {
+        Page<Product> page = new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 20), 0);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, null, null, null, null, false, "newest", 0, 20
+        );
+
+        assertTrue(response.content().isEmpty());
+    }
+
+    @Test
+    @DisplayName("TC-12: getPublicProducts_Gatekeeper_ExcludesSuspendedOrDeleted")
+    void getPublicProducts_Gatekeeper_ExcludesSuspendedOrDeleted() {
+        Page<Product> page = new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 20), 0);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, null, null, null, null, false, "newest", 0, 20
+        );
+
+        assertEquals(0, response.totalElements());
+    }
+
+    @Test
+    @DisplayName("TC-13: getPublicProducts_Gatekeeper_ExcludesInactiveCategory")
+    void getPublicProducts_Gatekeeper_ExcludesInactiveCategory() {
+        Page<Product> page = new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 20), 0);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, null, null, null, null, false, "newest", 0, 20
+        );
+
+        assertEquals(0, response.totalElements());
+    }
+
+    @Test
+    @DisplayName("TC-14: getPublicProducts_Gatekeeper_ExcludesSuspendedOrBannedShop")
+    void getPublicProducts_Gatekeeper_ExcludesSuspendedOrBannedShop() {
+        Page<Product> page = new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 20), 0);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, null, null, null, null, false, "newest", 0, 20
+        );
+
+        assertTrue(response.content().isEmpty());
+    }
+
+    @Test
+    @DisplayName("TC-15: getPublicProducts_Gatekeeper_ShopPaused_IncludedWithFlag")
+    void getPublicProducts_Gatekeeper_ShopPaused_IncludedWithFlag() {
+        Shop pausedShop = Shop.builder()
+                .id(UUID.randomUUID())
+                .name("Paused Shop")
+                .status(ShopStatus.PAUSED)
+                .build();
+
+        Product productPaused = Product.builder()
+                .id(UUID.randomUUID())
+                .name("Keyboard Custom")
+                .slug("keyboard-custom")
+                .brandName("Keychron")
+                .category(category)
+                .shop(pausedShop)
+                .approvalStatus(ProductApprovalStatus.APPROVED)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isSuspended(false)
+                .isDeleted(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        Page<Product> page = new PageImpl<>(List.of(productPaused), PageRequest.of(0, 20), 1);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(productImageRepository.findCoverImagesByProductIds(anyList())).thenReturn(Collections.emptyList());
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList())).thenReturn(Collections.singletonList(
+                new Object[]{productPaused.getId(), 1L, new BigDecimal("3500000"), new BigDecimal("3500000"), 5L}
+        ));
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, null, null, null, null, false, "newest", 0, 20
+        );
+
+        assertEquals(1, response.content().size());
+        ProductSummaryResponse result = response.content().get(0);
+        assertTrue(result.isShopPaused());
+        assertEquals("Paused Shop", result.shopName());
+    }
+
+    @Test
+    @DisplayName("TC-16: getPublicProducts_Gatekeeper_ExcludesBannedOrDeletedUser")
+    void getPublicProducts_Gatekeeper_ExcludesBannedOrDeletedUser() {
+        Page<Product> page = new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 20), 0);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, null, null, null, null, false, "newest", 0, 20
+        );
+
+        assertEquals(0, response.totalElements());
+    }
+
+    @Test
+    @DisplayName("TC-17: getPublicProducts_Gatekeeper_ExcludesProductWithNoActiveVariants")
+    void getPublicProducts_Gatekeeper_ExcludesProductWithNoActiveVariants() {
+        Page<Product> page = new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 20), 0);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                null, null, null, null, null, false, "newest", 0, 20
+        );
+
+        assertTrue(response.content().isEmpty());
+    }
+
+    @Test
+    @DisplayName("TC-18: getPublicProducts_InvalidPriceRange_MinGreaterThanMax_Throws400")
+    void getPublicProducts_InvalidPriceRange_MinGreaterThanMax_Throws400() {
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                productService.getPublicProducts(
+                        null, null, null, new BigDecimal("30000000"), new BigDecimal("10000000"), false, "newest", 0, 20
+                )
+        );
+
+        assertEquals(ErrorCode.INVALID_PRICE_RANGE, ex.getErrorCode());
+        verifyNoInteractions(productRepository);
+    }
+
+    @Test
+    @DisplayName("TC-19: getPublicProducts_NegativePrice_Throws400")
+    void getPublicProducts_NegativePrice_Throws400() {
+        BusinessException ex1 = assertThrows(BusinessException.class, () ->
+                productService.getPublicProducts(
+                        null, null, null, new BigDecimal("-1000"), new BigDecimal("10000000"), false, "newest", 0, 20
+                )
+        );
+        assertEquals(ErrorCode.INVALID_PRICE_RANGE, ex1.getErrorCode());
+
+        BusinessException ex2 = assertThrows(BusinessException.class, () ->
+                productService.getPublicProducts(
+                        null, null, null, new BigDecimal("1000"), new BigDecimal("-500"), false, "newest", 0, 20
+                )
+        );
+        assertEquals(ErrorCode.INVALID_PRICE_RANGE, ex2.getErrorCode());
+
+        verifyNoInteractions(productRepository);
+    }
+
+    @Test
+    @DisplayName("TC-20: getPublicProducts_EmptyPage_ReturnsEmptyContent")
+    void getPublicProducts_EmptyPage_ReturnsEmptyContent() {
+        Page<Product> emptyPage = new PageImpl<>(Collections.emptyList(), PageRequest.of(0, 20), 0);
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(emptyPage);
+
+        PageResponse<ProductSummaryResponse> response = productService.getPublicProducts(
+                "non_existing_keyword", null, null, null, null, false, "newest", 0, 20
+        );
+
+        assertNotNull(response);
+        assertTrue(response.content().isEmpty());
+        assertEquals(0, response.totalElements());
+        assertEquals(0, response.totalPages());
+        verifyNoInteractions(productImageRepository);
+        verifyNoInteractions(productVariantRepository);
+    }
+
+    @Test
+    @DisplayName("TC-21: getPublicProducts_ZeroNPlusOne_QueryCountVerified")
+    void getPublicProducts_ZeroNPlusOne_QueryCountVerified() {
+        List<Product> products = List.of(product1, product2);
+        Page<Product> page = new PageImpl<>(products, PageRequest.of(0, 20), 2);
+
+        when(productRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+        when(productImageRepository.findCoverImagesByProductIds(anyList())).thenReturn(Collections.emptyList());
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList())).thenReturn(Collections.emptyList());
+
+        productService.getPublicProducts(null, null, null, null, null, false, "newest", 0, 20);
+
+        // Verify exactly 1 call to findAll (with eager fetch), 1 call to cover images, 1 call to active metrics
+        verify(productRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
+        verify(productImageRepository, times(1)).findCoverImagesByProductIds(anyList());
+        verify(productVariantRepository, times(1)).aggregateActiveVariantMetricsByProductIds(anyList());
+    }
+
+    // =========================================================================
+    // TESTS FOR GET /api/products/{id}/similar (ProductServiceImpl)
+    // =========================================================================
+
+    @Test
+    @DisplayName("TC-22: getSimilarProducts_Success_SameBrand_RankedFirst - Sản phẩm cùng brand được ưu tiên xếp đầu")
+    void getSimilarProducts_Success_SameBrand_RankedFirst() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .name("MacBook Air M3")
+                .slug("macbook-air-m3")
+                .brandName("Apple")
+                .category(category)
+                .shop(shop)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .approvalStatus(ProductApprovalStatus.APPROVED)
+                .isSuspended(false)
+                .isDeleted(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        Product simApple = Product.builder()
+                .id(UUID.randomUUID())
+                .name("MacBook Pro M3")
+                .slug("macbook-pro-m3")
+                .brandName("Apple")
+                .category(category)
+                .shop(shop)
+                .createdAt(LocalDateTime.now().minusDays(1))
+                .build();
+
+        Product simDell = Product.builder()
+                .id(UUID.randomUUID())
+                .name("Dell XPS 13")
+                .slug("dell-xps-13")
+                .brandName("Dell")
+                .category(category)
+                .shop(shop)
+                .createdAt(LocalDateTime.now().minusDays(2))
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(eq(categoryId), eq(targetId), eq("Apple"), any(Pageable.class)))
+                .thenReturn(List.of(simApple, simDell));
+
+        Object[] metricRow1 = new Object[]{simApple.getId(), 2L, new BigDecimal("45000000.00"), new BigDecimal("55000000.00"), 10L};
+        Object[] metricRow2 = new Object[]{simDell.getId(), 1L, new BigDecimal("35000000.00"), new BigDecimal("35000000.00"), 5L};
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(List.of(simApple.getId(), simDell.getId())))
+                .thenReturn(List.of(metricRow1, metricRow2));
+
+        Object[] imgRow1 = new Object[]{simApple.getId(), "https://cdn.techhub.com/mbp.jpg"};
+        Object[] imgRow2 = new Object[]{simDell.getId(), "https://cdn.techhub.com/dell.jpg"};
+        when(productImageRepository.findCoverImagesByProductIds(List.of(simApple.getId(), simDell.getId())))
+                .thenReturn(List.of(imgRow1, imgRow2));
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals("MacBook Pro M3", result.get(0).name());
+        assertEquals("Apple", result.get(0).brandName());
+        assertEquals(new BigDecimal("45000000.00"), result.get(0).price());
+        assertTrue(result.get(0).inStock());
+        assertEquals("https://cdn.techhub.com/mbp.jpg", result.get(0).coverImageUrl());
+
+        assertEquals("Dell XPS 13", result.get(1).name());
+        assertEquals("Dell", result.get(1).brandName());
+    }
+
+    @Test
+    @DisplayName("TC-23: getSimilarProducts_Success_FallbackOtherBrands_WhenFewerThanSix - Đủ 6 sản phẩm dù cùng brand ít hơn 6")
+    void getSimilarProducts_Success_FallbackOtherBrands_WhenFewerThanSix() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .name("MacBook Air M3")
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        List<Product> simList = new ArrayList<>();
+        List<UUID> simIds = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            UUID pId = UUID.randomUUID();
+            simIds.add(pId);
+            simList.add(Product.builder()
+                    .id(pId)
+                    .name("Laptop " + i)
+                    .slug("laptop-" + i)
+                    .brandName(i < 2 ? "Apple" : "Asus")
+                    .category(category)
+                    .shop(shop)
+                    .createdAt(LocalDateTime.now())
+                    .build());
+        }
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(eq(categoryId), eq(targetId), eq("Apple"), any(Pageable.class)))
+                .thenReturn(simList);
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(simIds))
+                .thenReturn(Collections.emptyList());
+        when(productImageRepository.findCoverImagesByProductIds(simIds))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertEquals(6, result.size());
+    }
+
+    @Test
+    @DisplayName("TC-24: getSimilarProducts_Success_ExcludesTargetProductItself - Loại trừ chính sản phẩm mục tiêu")
+    void getSimilarProducts_Success_ExcludesTargetProductItself() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .name("MacBook Air M3")
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(eq(categoryId), eq(targetId), eq("Apple"), any(Pageable.class)))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(productRepository).findSimilarProducts(eq(categoryId), eq(targetId), eq("Apple"), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("TC-25: getSimilarProducts_Success_UnderSixItems_ReturnsAll - Trả về toàn bộ khi có ít hơn 6 sản phẩm")
+    void getSimilarProducts_Success_UnderSixItems_ReturnsAll() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .name("MacBook Air M3")
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        Product sim = Product.builder()
+                .id(UUID.randomUUID())
+                .name("MacBook Pro M2")
+                .slug("macbook-pro-m2")
+                .brandName("Apple")
+                .category(category)
+                .shop(shop)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(eq(categoryId), eq(targetId), eq("Apple"), any(Pageable.class)))
+                .thenReturn(List.of(sim));
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList()))
+                .thenReturn(Collections.emptyList());
+        when(productImageRepository.findCoverImagesByProductIds(anyList()))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    @DisplayName("TC-26: getSimilarProducts_Success_SparseCategory_ReturnsEmptyList - Thoát sớm trả về [] khi danh mục rỗng")
+    void getSimilarProducts_Success_SparseCategory_ReturnsEmptyList() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .name("MacBook Air M3")
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(eq(categoryId), eq(targetId), eq("Apple"), any(Pageable.class)))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(productVariantRepository, never()).aggregateActiveVariantMetricsByProductIds(any());
+        verify(productImageRepository, never()).findCoverImagesByProductIds(any());
+    }
+
+    @Test
+    @DisplayName("TC-27: getSimilarProducts_TargetProductNotFound - Ném 404 khi sản phẩm gốc không tồn tại")
+    void getSimilarProducts_TargetProductNotFound() {
+        UUID nonExistingId = UUID.randomUUID();
+        when(productRepository.findById(nonExistingId)).thenReturn(Optional.empty());
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> productService.getSimilarProducts(nonExistingId));
+
+        assertEquals(ErrorCode.PRODUCT_NOT_FOUND, ex.getErrorCode());
+        verify(productRepository, never()).findSimilarProducts(any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("TC-28: getSimilarProducts_TargetProductSoftDeleted - Ném 404 khi sản phẩm gốc đã bị xóa mềm")
+    void getSimilarProducts_TargetProductSoftDeleted() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .isDeleted(true)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> productService.getSimilarProducts(targetId));
+
+        assertEquals(ErrorCode.PRODUCT_NOT_FOUND, ex.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("TC-29: getSimilarProducts_TargetProductUnpublished - Ném 404 khi sản phẩm gốc chưa xuất bản")
+    void getSimilarProducts_TargetProductUnpublished() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .isDeleted(false)
+                .visibilityStatus(ProductVisibilityStatus.UNPUBLISHED)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> productService.getSimilarProducts(targetId));
+
+        assertEquals(ErrorCode.PRODUCT_NOT_FOUND, ex.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("TC-30: getSimilarProducts_FastFail_NullOrNilUUID - Ném 400 khi id null hoặc Nil UUID")
+    void getSimilarProducts_FastFail_NullOrNilUUID() {
+        BusinessException exNull = assertThrows(BusinessException.class,
+                () -> productService.getSimilarProducts(null));
+        assertEquals(ErrorCode.INVALID_INPUT_DATA, exNull.getErrorCode());
+
+        UUID nilUUID = new UUID(0L, 0L);
+        BusinessException exNil = assertThrows(BusinessException.class,
+                () -> productService.getSimilarProducts(nilUUID));
+        assertEquals(ErrorCode.INVALID_INPUT_DATA, exNil.getErrorCode());
+
+        verify(productRepository, never()).findById(any());
+    }
+
+    @Test
+    @DisplayName("TC-31: getSimilarProducts_FiltersOut_SoftDeletedSimilarProducts - Lọc bỏ sản phẩm tương tự bị xóa mềm")
+    void getSimilarProducts_FiltersOut_SoftDeletedSimilarProducts() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(any(), any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("TC-32: getSimilarProducts_FiltersOut_UnpublishedOrUnapprovedSimilarProducts - Lọc bỏ sản phẩm chưa duyệt/ẩn")
+    void getSimilarProducts_FiltersOut_UnpublishedOrUnapprovedSimilarProducts() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(any(), any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("TC-33: getSimilarProducts_FiltersOut_BannedShopSimilarProducts - Lọc bỏ sản phẩm của shop bị cấm")
+    void getSimilarProducts_FiltersOut_BannedShopSimilarProducts() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(any(), any(), any(), any()))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    @DisplayName("TC-34: getSimilarProducts_FallbackMetrics_WhenNoActiveVariants - Fallback giá 0 và hết hàng")
+    void getSimilarProducts_FallbackMetrics_WhenNoActiveVariants() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        Product sim = Product.builder()
+                .id(UUID.randomUUID())
+                .name("MacBook M1")
+                .category(category)
+                .shop(shop)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(any(), any(), any(), any()))
+                .thenReturn(List.of(sim));
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList()))
+                .thenReturn(Collections.emptyList());
+        when(productImageRepository.findCoverImagesByProductIds(anyList()))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(BigDecimal.ZERO, result.get(0).price());
+        assertFalse(result.get(0).inStock());
+    }
+
+    @Test
+    @DisplayName("TC-35: getSimilarProducts_FallbackImage_WhenNoCoverImage - Fallback coverImageUrl null an toàn")
+    void getSimilarProducts_FallbackImage_WhenNoCoverImage() {
+        UUID targetId = UUID.randomUUID();
+        Product target = Product.builder()
+                .id(targetId)
+                .brandName("Apple")
+                .category(category)
+                .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
+                .isDeleted(false)
+                .build();
+
+        Product sim = Product.builder()
+                .id(UUID.randomUUID())
+                .name("MacBook M1")
+                .category(category)
+                .shop(shop)
+                .build();
+
+        when(productRepository.findById(targetId)).thenReturn(Optional.of(target));
+        when(productRepository.findSimilarProducts(any(), any(), any(), any()))
+                .thenReturn(List.of(sim));
+        when(productVariantRepository.aggregateActiveVariantMetricsByProductIds(anyList()))
+                .thenReturn(Collections.emptyList());
+        when(productImageRepository.findCoverImagesByProductIds(anyList()))
+                .thenReturn(Collections.emptyList());
+
+        List<ProductSummaryResponse> result = productService.getSimilarProducts(targetId);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertNull(result.get(0).coverImageUrl());
+    }
+}

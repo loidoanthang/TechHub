@@ -1,0 +1,18 @@
+package com.techhub.modules.user.service;
+
+import com.techhub.modules.payment.dto.request.CreatePaymentInfoRequest;
+import com.techhub.modules.payment.dto.response.PaymentInfoResponse;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface UserPaymentInfoService {
+
+    PaymentInfoResponse createPaymentInfo(UUID userId, CreatePaymentInfoRequest request);
+
+    List<PaymentInfoResponse> getPaymentInfos(UUID userId);
+
+    PaymentInfoResponse setDefaultPaymentInfo(UUID userId, UUID paymentInfoId);
+
+    void deletePaymentInfo(UUID userId, UUID paymentInfoId);
+}

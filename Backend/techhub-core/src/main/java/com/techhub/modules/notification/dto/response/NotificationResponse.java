@@ -1,0 +1,31 @@
+package com.techhub.modules.notification.dto.response;
+
+import com.techhub.modules.notification.entity.Notification;
+import com.techhub.modules.notification.enums.NotificationType;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+public record NotificationResponse(
+        UUID id,
+        NotificationType type,
+        String title,
+        String content,
+        boolean isRead,
+        String referenceType,
+        UUID referenceId,
+        LocalDateTime createdAt
+) {
+    public static NotificationResponse from(Notification notification) {
+        return new NotificationResponse(
+                notification.getId(),
+                notification.getType(),
+                notification.getTitle(),
+                notification.getContent(),
+                notification.isRead(),
+                notification.getReferenceType(),
+                notification.getReferenceId(),
+                notification.getCreatedAt()
+        );
+    }
+}

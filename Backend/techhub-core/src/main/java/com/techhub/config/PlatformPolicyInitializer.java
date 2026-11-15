@@ -1,7 +1,7 @@
 package com.techhub.config;
 
-import com.techhub.model.entity.TransactionPolicy;
-import com.techhub.repository.TransactionPolicyRepository;
+import com.techhub.modules.policy.entity.TransactionPolicy;
+import com.techhub.modules.policy.repository.TransactionPolicyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;

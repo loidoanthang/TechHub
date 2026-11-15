@@ -1,0 +1,92 @@
+package com.techhub.modules.auth.controller;
+
+import com.techhub.common.ApiResponse;
+import com.techhub.modules.auth.dto.response.LoginResponse;
+import com.techhub.modules.auth.dto.response.TokenResponse;
+import com.techhub.modules.auth.service.AuthService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import com.techhub.modules.auth.dto.request.ChangePasswordRequest;
+import com.techhub.modules.auth.dto.request.DeleteAccountRequest;
+import com.techhub.modules.auth.dto.request.ForgotPasswordRequest;
+import com.techhub.modules.auth.dto.request.LoginRequest;
+import com.techhub.modules.auth.dto.request.LogoutRequest;
+import com.techhub.modules.auth.dto.request.RefreshTokenRequest;
+import com.techhub.modules.auth.dto.request.RegisterRequest;
+import com.techhub.modules.auth.dto.request.ResendVerificationRequest;
+import com.techhub.modules.auth.dto.request.ResetPasswordRequest;
+import com.techhub.modules.auth.dto.request.VerifyEmailRequest;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/auth")
+@Validated
+public class AuthController {
+
+    private final AuthService authService;
+
+
+    @PostMapping("/register")
+    public ApiResponse<Void> register(@Valid @RequestBody RegisterRequest request) {
+        authService.register(request);
+        return ApiResponse.success(null, "Registration successful. Please check your email for verification instructions.", null);
+    }
+
+    @PostMapping("/verify-email")
+    public ApiResponse<Void> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        authService.verifyEmail(request);
+        return ApiResponse.success(null, "Email verified successfully.", null);
+    }
+
+    @PostMapping("/login")
+    public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ApiResponse.success(authService.login(request), "Login successful.", null);
+    }
+
+
+    @PostMapping("/refresh")
+    public ApiResponse<TokenResponse> refreshToken(
+            @Valid @RequestBody RefreshTokenRequest request) {
+        return ApiResponse.success(authService.refreshToken(request), "Token refreshed successfully.", null);
+
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(@Valid @RequestBody LogoutRequest request) {
+        authService.logout(request);
+        return ApiResponse.success(null, "Logout successful.", null);
+    }
+
+    @PostMapping("/forgot-password")
+    public ApiResponse<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ApiResponse.success(null, "Password reset instructions sent to your email.", null);
+
+    }
+
+    @PostMapping("/reset-password")
+    public ApiResponse<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ApiResponse.success(null, "Password reset successfully.", null);
+    }
+
+    @PostMapping("/change-password")
+    public ApiResponse<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
+        authService.changePassword(request);
+        return ApiResponse.success(null, "Password changed successfully.", null);
+    }
+
+    @PostMapping("/resend-verification")
+    public ApiResponse<Void> resendVerificationEmail(@Valid @RequestBody ResendVerificationRequest request) {
+        authService.resendVerificationEmail(request);
+        return ApiResponse.success(null, "Verification email resent successfully.", null);
+    }
+
+    @PostMapping("/delete-account")
+    public ApiResponse<Void> deleteAccount(@Valid @RequestBody DeleteAccountRequest request) {
+        authService.deleteAccount(request);
+        return ApiResponse.success(null, "Account deleted successfully.", null);
+    }
+}

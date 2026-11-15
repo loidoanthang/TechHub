@@ -1,13 +1,13 @@
 package com.techhub.security.websocket;
 
-import com.techhub.model.entity.User;
-import com.techhub.model.enums.UserStatus;
-import com.techhub.repository.ConversationParticipantRepository;
-import com.techhub.repository.ConversationRepository;
-import com.techhub.repository.UserRepository;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.conversation.repository.ConversationParticipantRepository;
+import com.techhub.modules.conversation.repository.ConversationRepository;
+import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.security.CustomUserDetailsService;
-import com.techhub.service.auth.JwtService;
+import com.techhub.modules.auth.service.JwtService;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

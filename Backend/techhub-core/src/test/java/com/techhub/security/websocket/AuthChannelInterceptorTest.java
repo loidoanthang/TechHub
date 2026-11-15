@@ -1,17 +1,17 @@
 package com.techhub.security.websocket;
 
-import com.techhub.model.entity.Conversation;
-import com.techhub.model.entity.ConversationParticipant;
-import com.techhub.model.entity.User;
-import com.techhub.model.enums.ConversationType;
-import com.techhub.model.enums.Role;
-import com.techhub.model.enums.UserStatus;
-import com.techhub.repository.ConversationParticipantRepository;
-import com.techhub.repository.ConversationRepository;
-import com.techhub.repository.UserRepository;
+import com.techhub.modules.conversation.entity.Conversation;
+import com.techhub.modules.conversation.entity.ConversationParticipant;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.conversation.enums.ConversationType;
+import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.conversation.repository.ConversationParticipantRepository;
+import com.techhub.modules.conversation.repository.ConversationRepository;
+import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.security.CustomUserDetailsService;
-import com.techhub.service.auth.JwtService;
+import com.techhub.modules.auth.service.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

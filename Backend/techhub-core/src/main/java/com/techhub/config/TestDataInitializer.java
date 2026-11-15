@@ -1,8 +1,5 @@
 package com.techhub.config;
 
-import com.techhub.model.entity.*;
-import com.techhub.model.enums.*;
-import com.techhub.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -14,6 +11,46 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import com.techhub.modules.category.enums.CategoryAttributeDataType;
+import com.techhub.modules.category.enums.CategoryStatus;
+import com.techhub.modules.product.enums.ProductApprovalStatus;
+import com.techhub.modules.product.enums.ProductVariantStatus;
+import com.techhub.modules.product.enums.ProductVisibilityStatus;
+import com.techhub.modules.seller.enums.SellerVerificationStatus;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.user.enums.AddressLabel;
+import com.techhub.modules.user.enums.Role;
+import com.techhub.modules.user.enums.UserStatus;
+import com.techhub.modules.voucher.enums.DiscountType;
+import com.techhub.modules.voucher.enums.VoucherAppliesTo;
+import com.techhub.modules.voucher.enums.VoucherType;
+import com.techhub.modules.cart.entity.Cart;
+import com.techhub.modules.cart.entity.CartItem;
+import com.techhub.modules.cart.repository.CartItemRepository;
+import com.techhub.modules.cart.repository.CartRepository;
+import com.techhub.modules.category.entity.Category;
+import com.techhub.modules.category.entity.CategoryAttribute;
+import com.techhub.modules.category.repository.CategoryAttributeRepository;
+import com.techhub.modules.category.repository.CategoryRepository;
+import com.techhub.modules.payment.entity.Payment;
+import com.techhub.modules.product.entity.Product;
+import com.techhub.modules.product.entity.ProductImage;
+import com.techhub.modules.product.entity.ProductVariant;
+import com.techhub.modules.product.repository.ProductImageRepository;
+import com.techhub.modules.product.repository.ProductRepository;
+import com.techhub.modules.product.repository.ProductVariantRepository;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.shipping.entity.ShippingOption;
+import com.techhub.modules.shipping.repository.ShippingOptionRepository;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.shop.repository.ShopRepository;
+import com.techhub.modules.user.entity.Address;
+import com.techhub.modules.user.entity.User;
+import com.techhub.modules.user.repository.AddressRepository;
+import com.techhub.modules.user.repository.UserRepository;
+import com.techhub.modules.voucher.entity.Voucher;
+import com.techhub.modules.voucher.repository.VoucherRepository;
 
 @Slf4j
 @Component
