@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/lib/toast";
 import type { ChatProductContext } from "../types/chat";
 import { ChatRuntime } from "../components/ChatRuntime";
 
@@ -134,8 +135,16 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           openChat(conversationId);
         }
         return conversationId;
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("[chat] Failed to create conversation:", err);
+        const axiosErr = err as {
+          response?: { data?: { message?: string } };
+          message?: string;
+        };
+        const errorMsg =
+          axiosErr?.response?.data?.message ||
+          "Không thể tạo cuộc trò chuyện với người bán.";
+        toast.error(errorMsg);
         return null;
       }
     },

@@ -16,6 +16,7 @@ interface ProductPageProps {
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  await connection();
   const { productId } = await params;
   return resolveProductMetadata(productId);
 }

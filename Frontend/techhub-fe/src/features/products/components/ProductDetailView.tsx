@@ -101,7 +101,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
   }, [ratingSummary, totalReviewsCount]);
   const router = useRouter();
   const { openCart, addToCart, isAddingToCart } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { openChatWithSeller } = useChat();
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
@@ -154,6 +154,10 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
       realShop?.sellerUserId ?? product.merchant.sellerUserId;
     if (!sellerUserId) {
       toast.error("Không thể xác định người bán cho sản phẩm này.");
+      return;
+    }
+    if (user?.id && user.id === sellerUserId) {
+      toast.error("Bạn không thể tự chat với gian hàng của chính mình.");
       return;
     }
     await openChatWithSeller(sellerUserId, {

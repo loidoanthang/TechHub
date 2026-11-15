@@ -13,6 +13,7 @@ public record ProductSummaryResponse(
         String categoryName,
         UUID shopId,
         String shopName,
+        String sellerName,
         boolean isShopPaused,
         String coverImageUrl,
         BigDecimal price,

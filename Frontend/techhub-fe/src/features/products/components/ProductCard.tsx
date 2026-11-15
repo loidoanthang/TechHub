@@ -20,7 +20,7 @@ export function ProductCard({ product }: ProductCardProps) {
     ? formatPrice(product.originalPrice)
     : null;
 
-  const productUrl = `/products/${product.slug || product.id}`;
+  const productUrl = `/products/${product.slug}`;
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group relative border border-[#eff4ff]">

@@ -75,7 +75,7 @@ class SellerDashboardControllerTest {
                 LocalDate.now().minusDays(6),
                 LocalDate.now(),
                 new SellerDashboardSummaryDto(new BigDecimal("10000000.00"), 5L, 5L, 10L, new BigDecimal("15000000.00"), BigDecimal.ZERO, new BigDecimal("2000000.00")),
-                new SellerOrderStatusBreakdownDto(0, 0, 0, 0, 0, 5, 0, 0, 0),
+                new SellerOrderStatusBreakdownDto(0, 0, 0, 0, 0, 5, 0, 0, 0, 0),
                 Collections.emptyList(),
                 Collections.emptyList()
         );

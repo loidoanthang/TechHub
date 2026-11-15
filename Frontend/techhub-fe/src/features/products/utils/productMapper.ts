@@ -17,7 +17,7 @@ export function mapProductSummaryToProduct(summary: ProductSummaryResponse): Pro
     title: summary.name,
     price: Number(summary.price),
     vendorName: summary.shopName,
-    vendorSlug: summary.shopName,
+    vendorSlug: summary.sellerName,
     isVerifiedVendor: !summary.isShopPaused,
     imageUrl: summary.coverImageUrl || "",
     rating: 5.0,

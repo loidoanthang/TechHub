@@ -16,6 +16,7 @@ import com.techhub.modules.product.repository.ProductRepository;
 import com.techhub.modules.product.repository.ProductVariantRepository;
 import com.techhub.modules.product.service.ProductService;
 import com.techhub.modules.product.specification.ProductSpecification;
+import com.techhub.modules.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -141,6 +142,9 @@ public class ProductServiceImpl implements ProductService {
                     BigDecimal displayPrice = metrics != null ? metrics.minPrice() : BigDecimal.ZERO;
                     boolean inStock = metrics != null && metrics.totalStock() > 0;
                     boolean isShopPaused = product.getShop() != null && product.getShop().getStatus() == ShopStatus.PAUSED;
+                    String sellerName = (product.getShop() != null && product.getShop().getSeller() != null)
+                            ? product.getShop().getSeller().getSellerName()
+                            : null;
 
                     return new ProductSummaryResponse(
                             product.getId(),
@@ -151,6 +155,7 @@ public class ProductServiceImpl implements ProductService {
                             product.getCategory() != null ? product.getCategory().getName() : null,
                             product.getShop() != null ? product.getShop().getId() : null,
                             product.getShop() != null ? product.getShop().getName() : null,
+                            sellerName,
                             isShopPaused,
                             coverImageMap.get(product.getId()),
                             displayPrice,
@@ -352,6 +357,9 @@ public class ProductServiceImpl implements ProductService {
                     BigDecimal displayPrice = metrics != null ? metrics.minPrice() : BigDecimal.ZERO;
                     boolean inStock = metrics != null && metrics.totalStock() > 0;
                     boolean isShopPaused = product.getShop() != null && product.getShop().getStatus() == ShopStatus.PAUSED;
+                    String sellerName = (product.getShop() != null && product.getShop().getSeller() != null)
+                            ? product.getShop().getSeller().getSellerName()
+                            : null;
 
                     return new ProductSummaryResponse(
                             product.getId(),
@@ -362,6 +370,7 @@ public class ProductServiceImpl implements ProductService {
                             product.getCategory().getName(),
                             product.getShop().getId(),
                             product.getShop().getName(),
+                            sellerName,
                             isShopPaused,
                             coverImageMap.get(product.getId()),
                             displayPrice,

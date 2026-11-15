@@ -1,5 +1,20 @@
 package com.techhub.config;
 
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.entity.OrderItem;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.order.repository.OrderItemRepository;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.payment.enums.PaymentMethod;
+import com.techhub.modules.payment.enums.PaymentStatus;
+import com.techhub.modules.payment.repository.PaymentRepository;
+import com.techhub.modules.review.entity.Review;
+import com.techhub.modules.review.entity.ReviewHelpful;
+import com.techhub.modules.review.entity.ReviewMedia;
+import com.techhub.modules.review.enums.ReviewMediaType;
+import com.techhub.modules.review.repository.ReviewHelpfulRepository;
+import com.techhub.modules.review.repository.ReviewMediaRepository;
+import com.techhub.modules.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
