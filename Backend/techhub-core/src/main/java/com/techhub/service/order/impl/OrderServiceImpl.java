@@ -725,10 +725,29 @@ public class OrderServiceImpl implements OrderService {
         }
 
         boolean isPendingPayment = status == OrderStatus.PENDING_PAYMENT;
-        boolean isConfirmedOrLater = status != OrderStatus.PENDING_PAYMENT;
-        boolean isPreparingOrLater = isConfirmedOrLater && status != OrderStatus.CONFIRMED;
-        boolean isShippingOrLater = isPreparingOrLater && status != OrderStatus.PREPARING && status != OrderStatus.WAITING_FOR_PICKUP;
-        boolean isDeliveredOrLater = status == OrderStatus.DELIVERED || status == OrderStatus.COMPLETED;
+
+        // Rank each status on the delivery progress track (PENDING_PAYMENT = 0 ... COMPLETED = 7).
+        // Terminal/abnormal statuses (CANCELLED, RETURNED, REFUNDED) map to the
+        // highest non-completed rank so every pre-completed step stays "done".
+        Map<OrderStatus, Integer> progressRank = Map.ofEntries(
+                Map.entry(OrderStatus.PENDING_PAYMENT, 0),
+                Map.entry(OrderStatus.PENDING_CONFIRMATION, 1),
+                Map.entry(OrderStatus.CONFIRMED, 2),
+                Map.entry(OrderStatus.PREPARING, 3),
+                Map.entry(OrderStatus.WAITING_FOR_PICKUP, 3),
+                Map.entry(OrderStatus.SHIPPING, 4),
+                Map.entry(OrderStatus.DELIVERED, 5),
+                Map.entry(OrderStatus.RETURN_REQUESTED, 5),
+                Map.entry(OrderStatus.COMPLETED, 6),
+                Map.entry(OrderStatus.CANCELLED, 5),
+                Map.entry(OrderStatus.REFUNDED, 5)
+        );
+        int rank = progressRank.getOrDefault(status, 0);
+
+        boolean isConfirmedOrLater = rank >= 2;
+        boolean isPreparingOrLater = rank >= 3;
+        boolean isShippingOrLater = rank >= 4;
+        boolean isDeliveredOrLater = rank >= 5;
         boolean isCompleted = status == OrderStatus.COMPLETED;
 
         List<OrderTimelineStepResponse> steps = new ArrayList<>();
