@@ -13,6 +13,7 @@ import {
 import { formatPrice } from "@/lib/utils";
 import type { SellerOrderResponse } from "@/types/sellerOrders";
 import type { OrderStatus, CancellationReasonCode } from "@/types/enums";
+import { SELLER_CANCELLATION_REASONS } from "@/lib/constants";
 
 // Helper hook for Accessible Dialogs (Escape key + body scroll lock)
 function useModalAccessibility(isOpen: boolean, onClose: () => void) {
@@ -198,6 +199,8 @@ interface CancelOrderModalProps {
   isLoading?: boolean;
 }
 
+const DEFAULT_REASON = SELLER_CANCELLATION_REASONS[0].code;
+
 export function CancelOrderModal({
   order,
   isOpen,
@@ -205,7 +208,7 @@ export function CancelOrderModal({
   onConfirm,
   isLoading,
 }: CancelOrderModalProps) {
-  const [reasonCode, setReasonCode] = useState<CancellationReasonCode>("KHAC");
+  const [reasonCode, setReasonCode] = useState<CancellationReasonCode>(DEFAULT_REASON);
   const [reasonDetail, setReasonDetail] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -213,7 +216,7 @@ export function CancelOrderModal({
 
   useEffect(() => {
     if (isOpen) {
-      setReasonCode("KHAC");
+      setReasonCode(DEFAULT_REASON);
       setReasonDetail("");
       setErrorMessage(null);
     }
@@ -287,10 +290,11 @@ export function CancelOrderModal({
               onChange={(e) => setReasonCode(e.target.value as CancellationReasonCode)}
               className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-primary text-on-surface font-medium cursor-pointer"
             >
-              <option value="KHAC">Sản phẩm tạm hết hàng trong kho</option>
-              <option value="DON_MUON_MUA_NUA">Khách hàng yêu cầu hủy qua điện thoại</option>
-              <option value="THAY_DOI_Y_DINH">Thông tin địa chỉ giao hàng không hợp lệ</option>
-              <option value="TIM_THAY_GIA_TOT_HON">Sự cố niêm yết sai giá linh kiện</option>
+              {SELLER_CANCELLATION_REASONS.map((opt) => (
+                <option key={opt.code} value={opt.code}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           </div>
 

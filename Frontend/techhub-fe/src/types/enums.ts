@@ -38,12 +38,13 @@ export type PaymentStatus = "PENDING" | "COMPLETED" | "FAILED" | "EXPIRED" | "RE
 
 // Cancellation & Return
 export type CancellationReasonCode =
-  | "CHANGE_SHIPPING_ADDRESS"
-  | "CHANGE_PAYMENT_METHOD"
-  | "DON_MUON_MUA_NUA"
-  | "THAY_DOI_Y_DINH"
-  | "TIM_THAY_GIA_TOT_HON"
-  | "KHAC";
+  | "BUYER_CHANGED_MIND"
+  | "BUYER_FOUND_CHEAPER_PRICE"
+  | "BUYER_INCORRECT_ADDRESS"
+  | "BUYER_PAYMENT_ISSUE"
+  | "SELLER_OUT_OF_STOCK"
+  | "SELLER_FORCE_MAJEURE"
+  | "OTHER";
 
 export type CancellationRequestStatus = "PENDING" | "APPROVED" | "REJECTED";
 export type ReturnRequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";

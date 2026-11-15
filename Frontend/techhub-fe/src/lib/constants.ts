@@ -224,3 +224,52 @@ export const ROUTES = {
   },
   SHOPS: (sellerName: string) => `/shops/${sellerName}`,
 } as const;
+
+import type { CancellationReasonCode } from "@/types/enums";
+
+export interface CancellationReasonOption {
+  code: CancellationReasonCode;
+  label: string;
+}
+
+export const BUYER_CANCELLATION_REASONS: CancellationReasonOption[] = [
+  {
+    code: "BUYER_CHANGED_MIND",
+    label: "Tôi thay đổi ý định / Không có nhu cầu mua nữa",
+  },
+  {
+    code: "BUYER_FOUND_CHEAPER_PRICE",
+    label: "Tìm thấy sản phẩm với mức giá tốt hơn ở nơi khác",
+  },
+  {
+    code: "BUYER_INCORRECT_ADDRESS",
+    label: "Thông tin địa chỉ nhận hàng chưa chính xác / Cần cập nhật",
+  },
+  {
+    code: "BUYER_PAYMENT_ISSUE",
+    label: "Gặp sự cố khi thanh toán / Muốn đổi phương thức thanh toán",
+  },
+  {
+    code: "OTHER",
+    label: "Lý do khác",
+  },
+];
+
+export const SELLER_CANCELLATION_REASONS: CancellationReasonOption[] = [
+  {
+    code: "SELLER_OUT_OF_STOCK",
+    label: "Sản phẩm tạm hết hàng trong kho",
+  },
+  {
+    code: "SELLER_FORCE_MAJEURE",
+    label: "Sự cố bất khả kháng từ cửa hàng / Vận hành gian hàng",
+  },
+  {
+    code: "BUYER_INCORRECT_ADDRESS",
+    label: "Không liên lạc được hoặc thông tin địa chỉ người mua không hợp lệ",
+  },
+  {
+    code: "OTHER",
+    label: "Lý do khác",
+  },
+];

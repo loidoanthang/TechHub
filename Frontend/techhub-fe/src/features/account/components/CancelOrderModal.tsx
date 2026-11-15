@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, AlertTriangle, Loader2 } from "lucide-react";
 import { useCancelOrderMutation, useRequestCancellationMutation } from "@/features/orders/hooks/useOrderQueries";
 import type { CancellationReasonCode, OrderStatus } from "@/types/enums";
+import { BUYER_CANCELLATION_REASONS } from "@/lib/constants";
 
 interface CancelOrderModalProps {
   orderId: string;
@@ -15,14 +16,6 @@ interface CancelOrderModalProps {
   onSuccess: (isDirect: boolean) => void;
 }
 
-const REASON_OPTIONS: { code: CancellationReasonCode; label: string }[] = [
-  { code: "THAY_DOI_Y_DINH", label: "Changed my mind / Need to update delivery address" },
-  { code: "TIM_THAY_GIA_TOT_HON", label: "Found a cheaper price elsewhere" },
-  { code: "CHANGE_PAYMENT_METHOD", label: "Payment method issue / Want to change payment" },
-  { code: "CHANGE_SHIPPING_ADDRESS", label: "Need to change shipping address" },
-  { code: "KHAC", label: "Other reason" },
-];
-
 export function CancelOrderModal({
   orderId,
   orderNumber,
@@ -32,7 +25,7 @@ export function CancelOrderModal({
   onClose,
   onSuccess,
 }: CancelOrderModalProps) {
-  const [selectedReasonCode, setSelectedReasonCode] = useState<CancellationReasonCode>("THAY_DOI_Y_DINH");
+  const [selectedReasonCode, setSelectedReasonCode] = useState<CancellationReasonCode>("BUYER_CHANGED_MIND");
   const [customReason, setCustomReason] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -49,7 +42,7 @@ export function CancelOrderModal({
     e.preventDefault();
     setErrorMessage(null);
 
-    const reasonNote = selectedReasonCode === "KHAC" ? customReason.trim() : undefined;
+    const reasonNote = selectedReasonCode === "OTHER" ? customReason.trim() : undefined;
 
     try {
       if (isDirectCancel) {
@@ -134,7 +127,7 @@ export function CancelOrderModal({
               Reason for Cancellation <span className="text-[#ba1a1a]">*</span>
             </label>
             <div className="flex flex-col gap-2">
-              {REASON_OPTIONS.map((opt) => (
+              {BUYER_CANCELLATION_REASONS.map((opt) => (
                 <label
                   key={opt.code}
                   className={`flex items-center gap-3 p-3 rounded-2xl border text-xs cursor-pointer transition-all ${
@@ -157,7 +150,7 @@ export function CancelOrderModal({
             </div>
           </div>
 
-          {selectedReasonCode === "KHAC" && (
+          {selectedReasonCode === "OTHER" && (
             <div className="flex flex-col gap-1.5 animate-in fade-in duration-150">
               <label className="text-xs font-semibold text-[#0b1c30]">
                 Please describe the specific reason:
@@ -194,7 +187,7 @@ export function CancelOrderModal({
                   <span>Processing...</span>
                 </>
               ) : isDirectCancel ? (
-                "Confirm Immediate Cancellation"
+                "Confirm Cancellation"
               ) : (
                 "Submit Request to Merchant"
               )}
