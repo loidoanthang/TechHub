@@ -172,6 +172,7 @@ public class SellerDashboardServiceImpl implements SellerDashboardService {
         // 8. Build Order Status Breakdown DTO
         SellerOrderStatusBreakdownDto breakdown = new SellerOrderStatusBreakdownDto(
                 statusCountMap.getOrDefault(OrderStatus.PENDING_CONFIRMATION, 0L),
+                statusCountMap.getOrDefault(OrderStatus.CONFIRMED, 0L),
                 statusCountMap.getOrDefault(OrderStatus.PREPARING, 0L),
                 statusCountMap.getOrDefault(OrderStatus.WAITING_FOR_PICKUP, 0L),
                 statusCountMap.getOrDefault(OrderStatus.SHIPPING, 0L),

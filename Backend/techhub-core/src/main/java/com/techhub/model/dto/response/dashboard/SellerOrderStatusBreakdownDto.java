@@ -2,6 +2,7 @@ package com.techhub.model.dto.response.dashboard;
 
 public record SellerOrderStatusBreakdownDto(
         long pendingConfirmation,
+        long confirmed,
         long preparing,
         long waitingForPickup,
         long shipping,

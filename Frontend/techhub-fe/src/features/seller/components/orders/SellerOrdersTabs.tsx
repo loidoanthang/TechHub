@@ -9,11 +9,8 @@ export type SellerOrderTabKey =
   | "PREPARING"
   | "WAITING_FOR_PICKUP"
   | "SHIPPING"
-  | "DELIVERED"
-  | "COMPLETED"
-  | "CANCELLED"
-  | "CANCELLATIONS"
-  | "RETURNS";
+  | "PROCESSED"
+  | "REQUESTS";
 
 interface SellerOrdersTabsProps {
   activeTab: SellerOrderTabKey;
@@ -33,11 +30,8 @@ export function SellerOrdersTabs({
     { key: "PREPARING", label: "Đang đóng gói" },
     { key: "WAITING_FOR_PICKUP", label: "Chờ lấy hàng" },
     { key: "SHIPPING", label: "Đang giao" },
-    { key: "DELIVERED", label: "Đã giao" },
-    { key: "COMPLETED", label: "Hoàn tất" },
-    { key: "CANCELLED", label: "Đã hủy" },
-    { key: "CANCELLATIONS", label: "Yêu cầu hủy", badgeVariant: "amber" },
-    { key: "RETURNS", label: "Yêu cầu trả hàng", badgeVariant: "red" },
+    { key: "PROCESSED", label: "Đã xử lý xong" },
+    { key: "REQUESTS", label: "Yêu cầu", badgeVariant: "amber" },
   ];
 
   return (

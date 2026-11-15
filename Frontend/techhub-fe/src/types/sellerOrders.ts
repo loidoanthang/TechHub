@@ -96,36 +96,41 @@ export interface CancellationRequestResponse {
   id: string;
   orderId: string;
   orderNumber: string;
-  requestedBy: string;
-  reasonCode: CancellationReasonCode;
-  reasonDetail?: string | null;
   status: CancellationRequestStatus;
-  sellerResponseNote?: string | null;
+  statusDescription?: string;
+  reason?: string | null;
+  sellerResponse?: string | null;
   requestedAt: string;
-  processedAt?: string | null;
+  respondedAt?: string | null;
 }
 
 export interface ProcessCancellationRequest {
-  approved: boolean;
-  note?: string;
+  decision: "APPROVED" | "REJECTED";
+  sellerResponse?: string;
 }
 
 export interface ReturnRequestResponse {
   id: string;
   orderId: string;
   orderNumber: string;
-  reasonCode: string;
-  reasonDetail?: string | null;
-  evidenceImages?: string[];
+  shopId: string;
+  shopName: string;
   status: ReturnRequestStatus;
-  sellerResponseNote?: string | null;
-  requestedAt: string;
-  processedAt?: string | null;
+  statusDescription?: string;
+  reason?: string | null;
+  proofImages?: string | null;
+  refundAmount?: number;
+  sellerNote?: string | null;
+  bankName?: string | null;
+  bankAccountNumber?: string | null;
+  bankAccountHolder?: string | null;
+  createdAt: string;
+  respondedAt?: string | null;
 }
 
 export interface ProcessReturnRequest {
-  approved: boolean;
-  note?: string;
+  decision: "APPROVED" | "REJECTED";
+  sellerNote?: string;
 }
 
 export interface SellerOrderFilterParams {

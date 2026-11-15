@@ -18,8 +18,6 @@ import {
   LogOut,
   ArrowLeft,
   AlertTriangle,
-  CheckCircle2,
-  HelpCircle,
   ShieldAlert,
   Loader2,
   FileX,
@@ -194,16 +192,16 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
           href: ROUTES.SELLER.WALLET,
           icon: Wallet,
         },
-        {
-          label: "Yêu cầu hủy đơn",
-          href: "/seller/orders?tab=cancellations",
-          icon: FileX,
-        },
-        {
-          label: "Yêu cầu trả hàng",
-          href: "/seller/orders?tab=returns",
-          icon: RotateCcw,
-        },
+        // {
+        //   label: "Yêu cầu hủy đơn",
+        //   href: "/seller/orders?tab=cancellations",
+        //   icon: FileX,
+        // },
+        // {
+        //   label: "Yêu cầu trả hàng",
+        //   href: "/seller/orders?tab=returns",
+        //   icon: RotateCcw,
+        // },
         {
           label: "Đánh giá & Phản hồi",
           href: "/seller/reviews",
@@ -385,23 +383,6 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
         {/* DESKTOP SIDEBAR */}
         <aside className="hidden lg:block w-56 bg-white border-r border-[#e2e8f0] shrink-0 p-3">
           <div className="sticky top-20 flex flex-col gap-5">
-            {/* Shop Summary Card */}
-            <div className="bg-[#eff4ff]/60 rounded-xl p-3 border border-[#0045cc]/10 flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-white text-[#0045cc] font-bold text-xs flex items-center justify-center shadow-2xs">
-                  <Store className="w-3.5 h-3.5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-xs font-bold text-[#0b1c30] truncate">
-                    {shop?.shopName || "TechHub Shop"}
-                  </h3>
-                  <p className="text-[10px] text-[#737688]">
-                    {shop?.rating ? `⭐ ${shop.rating.toFixed(1)}/5` : "Đối tác chính thức"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Navigation Groups */}
             <nav className="flex flex-col gap-4">
               {navSections.map((section) => (

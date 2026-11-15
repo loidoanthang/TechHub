@@ -39,12 +39,31 @@ export function SellerOrdersListView() {
   const initialStatus = searchParams.get("status") as OrderStatus | null;
   const initialTab = searchParams.get("tab") as string | null;
 
+  type ProcessedSub = "DELIVERED" | "COMPLETED" | "CANCELLED";
+  type RequestSub = "CANCELLATIONS" | "RETURNS";
+
   const [activeTab, setActiveTab] = useState<SellerOrderTabKey>(() => {
-    if (initialTab === "cancellations") return "CANCELLATIONS";
-    if (initialTab === "returns") return "RETURNS";
+    if (initialTab === "cancellations" || initialTab === "returns") return "REQUESTS";
+    if (
+      initialStatus === "DELIVERED" ||
+      initialStatus === "COMPLETED" ||
+      initialStatus === "CANCELLED"
+    ) {
+      return "PROCESSED";
+    }
     if (initialStatus) return initialStatus as SellerOrderTabKey;
     return "ALL";
   });
+  // Sub-filter inside the merged "Đã xử lý xong" tab
+  const [processedSub, setProcessedSub] = useState<ProcessedSub>(() => {
+    return initialStatus === "COMPLETED" || initialStatus === "CANCELLED"
+      ? (initialStatus as ProcessedSub)
+      : "DELIVERED";
+  });
+  // Sub-filter inside the merged "Yêu cầu" tab (deep links ?tab=cancellations|returns stay compatible)
+  const [requestSub, setRequestSub] = useState<RequestSub>(() =>
+    initialTab === "returns" ? "RETURNS" : "CANCELLATIONS"
+  );
 
   const [keyword, setKeyword] = useState("");
   const [debouncedKeyword, setDebouncedKeyword] = useState("");
@@ -66,9 +85,13 @@ export function SellerOrdersListView() {
   const breakdown = dashboardMetrics?.orderStatusBreakdown;
 
   // 1. ORDERS QUERY
-  const isOrdersTab = activeTab !== "CANCELLATIONS" && activeTab !== "RETURNS";
+  const isOrdersTab = activeTab !== "REQUESTS";
   const orderStatusParam =
-    activeTab === "ALL" ? undefined : (activeTab as OrderStatus);
+    activeTab === "ALL"
+      ? undefined
+      : activeTab === "PROCESSED"
+      ? processedSub
+      : (activeTab as OrderStatus);
 
   const {
     data: ordersData,
@@ -100,16 +123,19 @@ export function SellerOrdersListView() {
   } = useSellerReturnRequestsQuery(page, 10);
 
   // Map real-time counts into tab badges
+  const processedCount =
+    (breakdown?.delivered ?? 0) + (breakdown?.completed ?? 0) + (breakdown?.cancelled ?? 0);
+  const requestsCount =
+    (cancellationsData?.totalElements ?? 0) + (returnsData?.totalElements ?? 0);
+
   const tabCounts: Partial<Record<SellerOrderTabKey, number>> = {
     PENDING_CONFIRMATION: breakdown?.pendingConfirmation,
+    CONFIRMED: breakdown?.confirmed,
     PREPARING: breakdown?.preparing,
     WAITING_FOR_PICKUP: breakdown?.waitingForPickup,
     SHIPPING: breakdown?.shipping,
-    DELIVERED: breakdown?.delivered,
-    COMPLETED: breakdown?.completed,
-    CANCELLED: breakdown?.cancelled,
-    CANCELLATIONS: cancellationsData?.totalElements,
-    RETURNS: returnsData?.totalElements,
+    PROCESSED: processedCount > 0 ? processedCount : undefined,
+    REQUESTS: requestsCount > 0 ? requestsCount : undefined,
   };
 
   // MUTATIONS
@@ -205,12 +231,12 @@ export function SellerOrdersListView() {
       if (rejectModalState.type === "CANCELLATION") {
         await processCancellationMutation.mutateAsync({
           requestId: rejectModalState.requestId,
-          data: { approved: false, note },
+          data: { decision: "REJECTED", sellerResponse: note },
         });
       } else {
         await processReturnMutation.mutateAsync({
           requestId: rejectModalState.requestId,
-          data: { approved: false, note },
+          data: { decision: "REJECTED", sellerNote: note },
         });
       }
     },
@@ -220,15 +246,23 @@ export function SellerOrdersListView() {
   // Pagination calculation
   const totalElements = isOrdersTab
     ? ordersData?.totalElements ?? 0
-    : activeTab === "CANCELLATIONS"
+    : requestSub === "CANCELLATIONS"
     ? cancellationsData?.totalElements ?? 0
     : returnsData?.totalElements ?? 0;
 
   const totalPages = isOrdersTab
     ? ordersData?.totalPages ?? 1
-    : activeTab === "CANCELLATIONS"
+    : requestSub === "CANCELLATIONS"
     ? cancellationsData?.totalPages ?? 1
     : returnsData?.totalPages ?? 1;
+
+  // Shared segmented-control styles for sub-filters
+  const segmentedBtn = (active: boolean) =>
+    `min-h-[34px] px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+      active
+        ? "bg-primary text-white shadow-2xs"
+        : "text-on-surface-variant hover:text-on-surface hover:bg-slate-100"
+    }`;
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto">
@@ -259,7 +293,7 @@ export function SellerOrdersListView() {
         counts={tabCounts}
       />
 
-      {/* Hint when on dispute tabs that search/dates don't apply */}
+      {/* Hint when on dispute tab that search/dates don't apply */}
       {!isOrdersTab && (debouncedKeyword || startDate || endDate) && (
         <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center gap-2">
           <Info className="w-4 h-4 text-primary shrink-0" />
@@ -282,6 +316,81 @@ export function SellerOrdersListView() {
 
       {/* 4. CONTENT AREA (WAI-ARIA Tabpanel) */}
       <div id="seller-orders-tab-content" role="tabpanel" aria-labelledby={`tab-${activeTab}`}>
+        {/* Sub-filter: merged "Đã xử lý xong" tab */}
+        {activeTab === "PROCESSED" && (
+          <div
+            role="group"
+            aria-label="Bộ lọc trạng thái đã xử lý xong"
+            className="inline-flex items-center gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200 max-w-full overflow-x-auto scrollbar-thin"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setProcessedSub("DELIVERED");
+                setPage(0);
+              }}
+              aria-pressed={processedSub === "DELIVERED"}
+              className={segmentedBtn(processedSub === "DELIVERED")}
+            >
+              Đã giao ({breakdown?.delivered ?? 0})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setProcessedSub("COMPLETED");
+                setPage(0);
+              }}
+              aria-pressed={processedSub === "COMPLETED"}
+              className={segmentedBtn(processedSub === "COMPLETED")}
+            >
+              Hoàn tất ({breakdown?.completed ?? 0})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setProcessedSub("CANCELLED");
+                setPage(0);
+              }}
+              aria-pressed={processedSub === "CANCELLED"}
+              className={segmentedBtn(processedSub === "CANCELLED")}
+            >
+              Đã hủy ({breakdown?.cancelled ?? 0})
+            </button>
+          </div>
+        )}
+
+        {/* Sub-filter: merged "Yêu cầu" tab */}
+        {activeTab === "REQUESTS" && (
+          <div
+            role="group"
+            aria-label="Bộ lọc loại yêu cầu"
+            className="inline-flex items-center gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200 max-w-full overflow-x-auto scrollbar-thin"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setRequestSub("CANCELLATIONS");
+                setPage(0);
+              }}
+              aria-pressed={requestSub === "CANCELLATIONS"}
+              className={segmentedBtn(requestSub === "CANCELLATIONS")}
+            >
+              Yêu cầu hủy ({cancellationsData?.totalElements ?? 0})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setRequestSub("RETURNS");
+                setPage(0);
+              }}
+              aria-pressed={requestSub === "RETURNS"}
+              className={segmentedBtn(requestSub === "RETURNS")}
+            >
+              Yêu cầu trả hàng ({returnsData?.totalElements ?? 0})
+            </button>
+          </div>
+        )}
+
         {isOrdersTab && (
           <div className="flex flex-col gap-4">
             {isOrdersLoading ? (
@@ -337,17 +446,10 @@ export function SellerOrdersListView() {
           </div>
         )}
 
-        {/* TAB CANCELLATIONS: Yêu cầu hủy đơn */}
-        {activeTab === "CANCELLATIONS" && (
+        {/* TAB REQUESTS (sub: Yêu cầu hủy đơn) */}
+        {activeTab === "REQUESTS" && requestSub === "CANCELLATIONS" && (
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs flex flex-col gap-4">
-            <div className="border-b border-slate-100 pb-3">
-              <h3 className="font-heading text-base font-bold text-on-surface">
-                Yêu Cầu Hủy Đơn Từ Người Mua
-              </h3>
-              <p className="text-xs text-slate-600">
-                Xử lý phê duyệt hoặc từ chối các yêu cầu hủy đơn hàng trước khi bưu tá lấy hàng.
-              </p>
-            </div>
+            <div className="border-b border-slate-100 pb-3"/>
 
             {isCancellationsLoading ? (
               <div className="p-8 text-center text-xs text-slate-600">
@@ -376,11 +478,10 @@ export function SellerOrdersListView() {
                         </span>
                       </div>
                       <p className="text-xs text-on-surface-variant">
-                        Lý do: <strong>{req.reasonCode}</strong>{" "}
-                        {req.reasonDetail ? `(${req.reasonDetail})` : ""}
+                        Lý do: <strong>{req.reason || "—"}</strong>
                       </p>
                       <time className="text-[11px] text-slate-500 font-medium">
-                        Gửi lúc: {new Date(req.requestedAt).toLocaleString("vi-VN")}
+                        Gửi lúc: {req.requestedAt ? new Date(req.requestedAt).toLocaleString("vi-VN") : "—"}
                       </time>
                     </div>
 
@@ -391,7 +492,7 @@ export function SellerOrdersListView() {
                           onClick={() =>
                             processCancellationMutation.mutate({
                               requestId: req.id,
-                              data: { approved: true, note: "Shop đồng ý hủy đơn" },
+                              data: { decision: "APPROVED", sellerResponse: "Shop đồng ý hủy đơn" },
                             })
                           }
                           disabled={processCancellationMutation.isPending}
@@ -423,17 +524,10 @@ export function SellerOrdersListView() {
           </div>
         )}
 
-        {/* TAB RETURNS: Yêu cầu trả hàng */}
-        {activeTab === "RETURNS" && (
+        {/* TAB REQUESTS (sub: Yêu cầu trả hàng) */}
+        {activeTab === "REQUESTS" && requestSub === "RETURNS" && (
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-2xs flex flex-col gap-4">
-            <div className="border-b border-slate-100 pb-3">
-              <h3 className="font-heading text-base font-bold text-on-surface">
-                Yêu Cầu Trả Hàng &amp; Hoàn Tiền
-              </h3>
-              <p className="text-xs text-slate-600">
-                Khiếu nại về lỗi linh kiện, vỡ hỏng do vận chuyển hoặc không tương thích phần cứng.
-              </p>
-            </div>
+            <div className="border-b border-slate-100 pb-3"/>
 
             {isReturnsLoading ? (
               <div className="p-8 text-center text-xs text-slate-600">
@@ -462,11 +556,10 @@ export function SellerOrdersListView() {
                         </span>
                       </div>
                       <p className="text-xs text-on-surface-variant">
-                        Lý do: <strong>{ret.reasonCode}</strong>{" "}
-                        {ret.reasonDetail ? `(${ret.reasonDetail})` : ""}
+                        Lý do: <strong>{ret.reason || "—"}</strong>
                       </p>
                       <time className="text-[11px] text-slate-500 font-medium">
-                        Gửi lúc: {new Date(ret.requestedAt).toLocaleString("vi-VN")}
+                        Gửi lúc: {ret.createdAt ? new Date(ret.createdAt).toLocaleString("vi-VN") : "—"}
                       </time>
                     </div>
 
@@ -477,7 +570,7 @@ export function SellerOrdersListView() {
                           onClick={() =>
                             processReturnMutation.mutate({
                               requestId: ret.id,
-                              data: { approved: true, note: "Đồng ý nhận lại hàng" },
+                              data: { decision: "APPROVED", sellerNote: "Đồng ý nhận lại hàng" },
                             })
                           }
                           disabled={processReturnMutation.isPending}

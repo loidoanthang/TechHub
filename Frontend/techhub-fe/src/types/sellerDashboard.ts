@@ -12,6 +12,7 @@ export interface SellerDashboardSummaryDto {
 
 export interface SellerOrderStatusBreakdownDto {
   pendingConfirmation: number;
+  confirmed: number;
   preparing: number;
   waitingForPickup: number;
   shipping: number;
