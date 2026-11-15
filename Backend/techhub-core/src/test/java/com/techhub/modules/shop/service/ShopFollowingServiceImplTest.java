@@ -511,7 +511,7 @@ class ShopFollowingServiceImplTest {
     }
 
     // =========================================================================
-    // GET /api/buyer/followed-shops TESTS
+    // GET /api/followed-shops TESTS
     // =========================================================================
 
     @Test

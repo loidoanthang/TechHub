@@ -63,7 +63,7 @@ import static org.mockito.Mockito.*;
 import com.techhub.modules.order.service.OrderService;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Unit Tests cho OrderService (GET /api/buyer/orders & GET /api/buyer/orders/{id})")
+@DisplayName("Unit Tests cho OrderService (GET /api/orders & GET /api/orders/{id})")
 class OrderServiceImplTest {
 
     @Mock
@@ -745,7 +745,7 @@ class OrderServiceImplTest {
     }
 
     // =========================================================================
-    // GET /api/buyer/orders/{id} - Tests
+    // GET /api/orders/{id} - Tests
     // =========================================================================
 
     @Test
@@ -1047,7 +1047,7 @@ class OrderServiceImplTest {
     }
 
     // =========================================================================
-    // UNIT TESTS CHO completeOrder (PATCH /api/buyer/orders/{id}/complete)
+    // UNIT TESTS CHO completeOrder (PATCH /api/orders/{id}/complete)
     // =========================================================================
 
     @Test
@@ -1270,7 +1270,7 @@ class OrderServiceImplTest {
     }
 
     // =========================================================================
-    // Unit Tests cho requestOrderCancellation (POST /api/buyer/orders/{id}/cancellation-request)
+    // Unit Tests cho requestOrderCancellation (POST /api/orders/{id}/cancellation-request)
     // =========================================================================
 
     @Test
@@ -1531,7 +1531,7 @@ class OrderServiceImplTest {
     }
 
     // ==========================================
-    // POST /api/buyer/orders/{id}/reorder (API 12)
+    // POST /api/orders/{id}/reorder (API 12)
     // ==========================================
 
     @Test

@@ -33,17 +33,17 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import com.techhub.modules.review.controller.BuyerReviewController;
+import com.techhub.modules.review.controller.ReviewController;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Unit Tests cho BuyerReviewController (POST /api/buyer/reviews)")
-class BuyerReviewControllerTest {
+@DisplayName("Unit Tests cho ReviewController (POST /api/reviews)")
+class ReviewWriteControllerTest {
 
     @Mock
     private ReviewService reviewService;
 
     @InjectMocks
-    private BuyerReviewController controller;
+    private ReviewController controller;
 
     @BeforeEach
     void setUp() {
@@ -58,7 +58,7 @@ class BuyerReviewControllerTest {
     @Test
     @DisplayName("TC-14: controller_createReview_PreAuthorize_RequiresRoleBuyer - Bắt buộc quyền ROLE_BUYER")
     void controller_createReview_PreAuthorize_RequiresRoleBuyer() throws NoSuchMethodException {
-        Method method = BuyerReviewController.class.getMethod("createReview", CreateReviewRequest.class);
+        Method method = ReviewController.class.getMethod("createReview", CreateReviewRequest.class);
         PreAuthorize preAuthorize = method.getAnnotation(PreAuthorize.class);
 
         assertNotNull(preAuthorize, "Method createReview phải có annotation @PreAuthorize");
@@ -121,23 +121,23 @@ class BuyerReviewControllerTest {
     @Test
     @DisplayName("TC-16: controller_createReview_EndpointMapping_IsCorrect - Kiểm tra đúng @RequestMapping và @PostMapping")
     void controller_createReview_EndpointMapping_IsCorrect() throws NoSuchMethodException {
-        RequestMapping classMapping = BuyerReviewController.class.getAnnotation(RequestMapping.class);
+        RequestMapping classMapping = ReviewController.class.getAnnotation(RequestMapping.class);
         assertNotNull(classMapping);
-        assertArrayEquals(new String[]{"/api/buyer/reviews"}, classMapping.value());
+        assertArrayEquals(new String[]{"/api/reviews"}, classMapping.value());
 
-        Method method = BuyerReviewController.class.getMethod("createReview", CreateReviewRequest.class);
+        Method method = ReviewController.class.getMethod("createReview", CreateReviewRequest.class);
         PostMapping methodMapping = method.getAnnotation(PostMapping.class);
         assertNotNull(methodMapping);
     }
 
     // =========================================================================
-    // API 2: PUT /api/buyer/reviews/{id} Unit Tests (TC-30 -> TC-31)
+    // API 2: PUT /api/reviews/{id} Unit Tests (TC-30 -> TC-31)
     // =========================================================================
 
     @Test
     @DisplayName("TC-30: controller_updateReview_PreAuthorize_RequiresRoleBuyer - Bắt buộc quyền ROLE_BUYER cho endpoint PUT")
     void controller_updateReview_PreAuthorize_RequiresRoleBuyer() throws NoSuchMethodException {
-        Method method = BuyerReviewController.class.getMethod("updateReview", UUID.class, UpdateReviewRequest.class);
+        Method method = ReviewController.class.getMethod("updateReview", UUID.class, UpdateReviewRequest.class);
         PreAuthorize preAuthorize = method.getAnnotation(PreAuthorize.class);
 
         assertNotNull(preAuthorize, "Method updateReview phải có annotation @PreAuthorize");

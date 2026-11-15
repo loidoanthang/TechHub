@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/buyer/followed-shops")
+@RequestMapping("/api/followed-shops")
 @RequiredArgsConstructor
-public class BuyerShopFollowingController {
+public class ShopFollowingController {
 
     private final ShopFollowingService shopFollowingService;
 

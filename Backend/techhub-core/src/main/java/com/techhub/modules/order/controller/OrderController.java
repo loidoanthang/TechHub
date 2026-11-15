@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/buyer/orders")
+@RequestMapping("/api/orders")
 @RequiredArgsConstructor
-public class BuyerOrderController {
+public class OrderController {
 
     private final OrderService orderService;
 

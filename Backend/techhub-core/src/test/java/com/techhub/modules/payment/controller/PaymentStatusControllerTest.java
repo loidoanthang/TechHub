@@ -37,17 +37,17 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import com.techhub.modules.payment.controller.BuyerPaymentController;
+import com.techhub.modules.payment.controller.PaymentStatusController;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Unit Tests cho BuyerPaymentController (/api/buyer)")
-class BuyerPaymentControllerTest {
+@DisplayName("Unit Tests cho PaymentStatusController (/api)")
+class PaymentStatusControllerTest {
 
     @Mock
     private PaymentService paymentService;
 
     @InjectMocks
-    private BuyerPaymentController buyerPaymentController;
+    private PaymentStatusController PaymentStatusController;
 
     private UUID userId;
 
@@ -93,7 +93,7 @@ class BuyerPaymentControllerTest {
 
         when(paymentService.getAvailablePaymentMethods()).thenReturn(List.of(cod, vnpay));
 
-        ApiResponse<List<PaymentMethodResponse>> result = buyerPaymentController.getAvailablePaymentMethods();
+        ApiResponse<List<PaymentMethodResponse>> result = PaymentStatusController.getAvailablePaymentMethods();
 
         assertThat(result).isNotNull();
         assertThat(result.isSuccess()).isTrue();
@@ -123,7 +123,7 @@ class BuyerPaymentControllerTest {
 
         when(paymentService.getBuyerPaymentStatus(userId, paymentId)).thenReturn(expectedResponse);
 
-        ApiResponse<BuyerPaymentStatusResponse> result = buyerPaymentController.getBuyerPaymentStatus(paymentId);
+        ApiResponse<BuyerPaymentStatusResponse> result = PaymentStatusController.getBuyerPaymentStatus(paymentId);
 
         assertThat(result).isNotNull();
         assertThat(result.isSuccess()).isTrue();
@@ -132,23 +132,23 @@ class BuyerPaymentControllerTest {
     }
 
     @Test
-    @DisplayName("Verify Spring Web and Security annotations on BuyerPaymentController")
+    @DisplayName("Verify Spring Web and Security annotations on PaymentStatusController")
     void testAnnotations() throws NoSuchMethodException {
         // Controller annotations
-        assertTrue(BuyerPaymentController.class.isAnnotationPresent(RestController.class));
-        RequestMapping reqMapping = BuyerPaymentController.class.getAnnotation(RequestMapping.class);
+        assertTrue(PaymentStatusController.class.isAnnotationPresent(RestController.class));
+        RequestMapping reqMapping = PaymentStatusController.class.getAnnotation(RequestMapping.class);
         assertNotNull(reqMapping);
-        assertArrayEquals(new String[]{"/api/buyer"}, reqMapping.value());
+        assertArrayEquals(new String[]{"/api"}, reqMapping.value());
 
         // getAvailablePaymentMethods annotations
-        Method getMethods = BuyerPaymentController.class.getMethod("getAvailablePaymentMethods");
+        Method getMethods = PaymentStatusController.class.getMethod("getAvailablePaymentMethods");
         assertTrue(getMethods.isAnnotationPresent(GetMapping.class));
         assertArrayEquals(new String[]{"/payment-methods"}, getMethods.getAnnotation(GetMapping.class).value());
         assertTrue(getMethods.isAnnotationPresent(PreAuthorize.class));
         assertEquals("hasRole('BUYER')", getMethods.getAnnotation(PreAuthorize.class).value());
 
         // getBuyerPaymentStatus annotations
-        Method getStatus = BuyerPaymentController.class.getMethod("getBuyerPaymentStatus", UUID.class);
+        Method getStatus = PaymentStatusController.class.getMethod("getBuyerPaymentStatus", UUID.class);
         assertTrue(getStatus.isAnnotationPresent(GetMapping.class));
         assertArrayEquals(new String[]{"/payments/{id}/status"}, getStatus.getAnnotation(GetMapping.class).value());
         assertTrue(getStatus.isAnnotationPresent(PreAuthorize.class));

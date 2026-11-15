@@ -1,4 +1,4 @@
-package com.techhub.modules.seller.controller;
+package com.techhub.modules.dashboard.controller;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.exception.BusinessException;
@@ -32,7 +32,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import com.techhub.modules.seller.controller.SellerDashboardController;
+import com.techhub.modules.dashboard.controller.SellerDashboardController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho SellerDashboardController (GET /api/seller/dashboard/metrics)")

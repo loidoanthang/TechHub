@@ -20,17 +20,17 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import com.techhub.modules.voucher.controller.BuyerVoucherController;
+import com.techhub.modules.voucher.controller.VoucherController;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Unit Tests cho BuyerVoucherController - Endpoint công khai xem voucher toàn sàn trong giỏ hàng (GET /api/vouchers/platform)")
-class BuyerVoucherControllerTest {
+@DisplayName("Unit Tests cho VoucherController - Endpoint công khai xem voucher toàn sàn trong giỏ hàng (GET /api/vouchers/platform)")
+class VoucherControllerTest {
 
     @Mock
     private BuyerVoucherService buyerVoucherService;
 
     @InjectMocks
-    private BuyerVoucherController buyerVoucherController;
+    private VoucherController VoucherController;
 
     @Test
     @DisplayName("getPlatformVouchersForCart: Lấy danh sách voucher toàn sàn thành công trả về HTTP 200 OK")
@@ -58,7 +58,7 @@ class BuyerVoucherControllerTest {
                 .thenReturn(List.of(responseDto));
 
         ApiResponse<List<CartPlatformVoucherResponse>> response =
-                buyerVoucherController.getPlatformVouchersForCart(
+                VoucherController.getPlatformVouchersForCart(
                         BigDecimal.valueOf(500000), BigDecimal.valueOf(30000), null);
 
         assertNotNull(response);
@@ -75,7 +75,7 @@ class BuyerVoucherControllerTest {
     @Test
     @DisplayName("getPlatformVouchersForCart: Endpoint công khai không yêu cầu @PreAuthorize (PermitAll)")
     void getPlatformVouchersForCart_NoPreAuthorizeAnnotation() throws NoSuchMethodException {
-        var method = BuyerVoucherController.class.getMethod(
+        var method = VoucherController.class.getMethod(
                 "getPlatformVouchersForCart", BigDecimal.class, BigDecimal.class, VoucherAppliesTo.class);
         var preAuthorize = method.getAnnotation(org.springframework.security.access.prepost.PreAuthorize.class);
 

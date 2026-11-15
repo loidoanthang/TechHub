@@ -48,7 +48,7 @@ import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Unit Tests cho ReviewServiceImpl (POST /api/buyer/reviews)")
+@DisplayName("Unit Tests cho ReviewServiceImpl (POST /api/reviews)")
 class ReviewServiceImplTest {
 
     @Mock
@@ -435,7 +435,7 @@ class ReviewServiceImplTest {
     }
 
     // =========================================================================
-    // API 2: PUT /api/buyer/reviews/{id} Unit Tests (TC-17 -> TC-29)
+    // API 2: PUT /api/reviews/{id} Unit Tests (TC-17 -> TC-29)
     // =========================================================================
 
     @Test

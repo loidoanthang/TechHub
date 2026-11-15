@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/buyer")
+@RequestMapping("/api")
 @RequiredArgsConstructor
-public class BuyerReturnRequestController {
+public class ReturnRequestController {
 
     private final ReturnRequestService returnRequestService;
 

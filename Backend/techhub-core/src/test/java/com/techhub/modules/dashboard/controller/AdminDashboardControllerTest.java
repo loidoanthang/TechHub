@@ -1,4 +1,4 @@
-package com.techhub.modules.admin.controller;
+package com.techhub.modules.dashboard.controller;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.exception.BusinessException;
@@ -33,7 +33,7 @@ import com.techhub.modules.dashboard.dto.response.AdminDashboardMetricsResponse;
 import com.techhub.modules.dashboard.dto.response.AdminDashboardSummaryDto;
 import com.techhub.modules.dashboard.dto.response.AdminOrderStatusBreakdownDto;
 import com.techhub.modules.dashboard.dto.response.PlatformGrowthDto;
-import com.techhub.modules.admin.controller.AdminDashboardController;
+import com.techhub.modules.dashboard.controller.AdminDashboardController;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Unit Tests cho AdminDashboardController (GET /api/admin/dashboard/metrics)")

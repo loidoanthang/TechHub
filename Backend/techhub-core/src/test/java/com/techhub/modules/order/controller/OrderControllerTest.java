@@ -50,17 +50,17 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import com.techhub.modules.order.controller.BuyerOrderController;
+import com.techhub.modules.order.controller.OrderController;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Unit Tests cho BuyerOrderController (GET /api/buyer/orders)")
-class BuyerOrderControllerTest {
+@DisplayName("Unit Tests cho OrderController (GET /api/orders)")
+class OrderControllerTest {
 
     @Mock
     private OrderService orderService;
 
     @InjectMocks
-    private BuyerOrderController buyerOrderController;
+    private OrderController OrderController;
 
     private UUID userId;
 
@@ -86,21 +86,21 @@ class BuyerOrderControllerTest {
     }
 
     @Test
-    @DisplayName("Kiểm tra annotation cấp lớp của BuyerOrderController (@RestController, @RequestMapping)")
+    @DisplayName("Kiểm tra annotation cấp lớp của OrderController (@RestController, @RequestMapping)")
     void controller_classAnnotations_Correct() {
-        assertTrue(BuyerOrderController.class.isAnnotationPresent(RestController.class),
-                "BuyerOrderController phải có annotation @RestController");
+        assertTrue(OrderController.class.isAnnotationPresent(RestController.class),
+                "OrderController phải có annotation @RestController");
 
-        RequestMapping requestMapping = BuyerOrderController.class.getAnnotation(RequestMapping.class);
-        assertNotNull(requestMapping, "BuyerOrderController phải có annotation @RequestMapping");
-        assertArrayEquals(new String[]{"/api/buyer/orders"}, requestMapping.value(),
-                "Endpoint phải là /api/buyer/orders");
+        RequestMapping requestMapping = OrderController.class.getAnnotation(RequestMapping.class);
+        assertNotNull(requestMapping, "OrderController phải có annotation @RequestMapping");
+        assertArrayEquals(new String[]{"/api/orders"}, requestMapping.value(),
+                "Endpoint phải là /api/orders");
     }
 
     @Test
     @DisplayName("Kiểm tra annotation cấp phương thức getBuyerOrders (@GetMapping, @PreAuthorize)")
     void getBuyerOrders_methodAnnotations_Correct() throws NoSuchMethodException {
-        Method method = BuyerOrderController.class.getMethod("getBuyerOrders",
+        Method method = OrderController.class.getMethod("getBuyerOrders",
                 OrderStatus.class, String.class, int.class, int.class, String.class, String.class);
 
         assertTrue(method.isAnnotationPresent(GetMapping.class),
@@ -140,7 +140,7 @@ class BuyerOrderControllerTest {
         when(orderService.getBuyerOrders(eq(userId), eq(OrderStatus.CONFIRMED), eq("Apple"), eq(0), eq(10), eq("createdAt"), eq("desc")))
                 .thenReturn(pageResponse);
 
-        ApiResponse<PageResponse<BuyerOrderResponse>> response = buyerOrderController.getBuyerOrders(
+        ApiResponse<PageResponse<BuyerOrderResponse>> response = OrderController.getBuyerOrders(
                 OrderStatus.CONFIRMED, "Apple", 0, 10, "createdAt", "desc"
         );
 
@@ -166,7 +166,7 @@ class BuyerOrderControllerTest {
         when(orderService.getBuyerOrders(eq(userId), isNull(), isNull(), eq(0), eq(10), eq("createdAt"), eq("desc")))
                 .thenReturn(emptyPage);
 
-        ApiResponse<PageResponse<BuyerOrderResponse>> response = buyerOrderController.getBuyerOrders(
+        ApiResponse<PageResponse<BuyerOrderResponse>> response = OrderController.getBuyerOrders(
                 null, null, 0, 10, "createdAt", "desc"
         );
 
@@ -185,7 +185,7 @@ class BuyerOrderControllerTest {
         SecurityContextHolder.clearContext();
 
         BusinessException exception = assertThrows(BusinessException.class, () ->
-                buyerOrderController.getBuyerOrders(null, null, 0, 10, "createdAt", "desc")
+                OrderController.getBuyerOrders(null, null, 0, 10, "createdAt", "desc")
         );
 
         assertEquals(ErrorCode.UNAUTHENTICATED, exception.getErrorCode());
@@ -195,7 +195,7 @@ class BuyerOrderControllerTest {
     @Test
     @DisplayName("Kiểm tra annotation cấp phương thức getBuyerOrderDetail (@GetMapping, @PreAuthorize)")
     void getBuyerOrderDetail_methodAnnotations_Correct() throws NoSuchMethodException {
-        Method method = BuyerOrderController.class.getMethod("getBuyerOrderDetail", UUID.class);
+        Method method = OrderController.class.getMethod("getBuyerOrderDetail", UUID.class);
 
         assertTrue(method.isAnnotationPresent(GetMapping.class),
                 "Method getBuyerOrderDetail phải có annotation @GetMapping");
@@ -240,7 +240,7 @@ class BuyerOrderControllerTest {
 
         when(orderService.getBuyerOrderDetail(eq(userId), eq(orderId))).thenReturn(detailResponse);
 
-        ApiResponse<com.techhub.modules.order.dto.response.BuyerOrderDetailResponse> response = buyerOrderController.getBuyerOrderDetail(orderId);
+        ApiResponse<com.techhub.modules.order.dto.response.BuyerOrderDetailResponse> response = OrderController.getBuyerOrderDetail(orderId);
 
         assertNotNull(response);
         assertTrue(response.isSuccess());
@@ -262,7 +262,7 @@ class BuyerOrderControllerTest {
         UUID orderId = UUID.randomUUID();
 
         BusinessException exception = assertThrows(BusinessException.class, () ->
-                buyerOrderController.getBuyerOrderDetail(orderId)
+                OrderController.getBuyerOrderDetail(orderId)
         );
 
         assertEquals(ErrorCode.UNAUTHENTICATED, exception.getErrorCode());
@@ -300,7 +300,7 @@ class BuyerOrderControllerTest {
 
         when(orderService.completeOrder(eq(userId), eq(orderId))).thenReturn(completedResponse);
 
-        ApiResponse<BuyerOrderDetailResponse> response = buyerOrderController.completeOrder(orderId);
+        ApiResponse<BuyerOrderDetailResponse> response = OrderController.completeOrder(orderId);
 
         assertNotNull(response);
         assertTrue(response.isSuccess());
@@ -322,7 +322,7 @@ class BuyerOrderControllerTest {
                 .thenThrow(new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
         BusinessException exception = assertThrows(BusinessException.class, () ->
-                buyerOrderController.completeOrder(orderId)
+                OrderController.completeOrder(orderId)
         );
 
         assertEquals(ErrorCode.ORDER_NOT_FOUND, exception.getErrorCode());
@@ -337,7 +337,7 @@ class BuyerOrderControllerTest {
                 .thenThrow(new BusinessException(ErrorCode.INVALID_STATUS_TRANSITION));
 
         BusinessException exception = assertThrows(BusinessException.class, () ->
-                buyerOrderController.completeOrder(orderId)
+                OrderController.completeOrder(orderId)
         );
 
         assertEquals(ErrorCode.INVALID_STATUS_TRANSITION, exception.getErrorCode());
@@ -347,7 +347,7 @@ class BuyerOrderControllerTest {
     @Test
     @DisplayName("TC-CTRL-04: completeOrder kiểm tra cấu hình @PreAuthorize('hasRole(\\'BUYER\\')') và @PatchMapping")
     void tc04_completeOrder_AnnotationCheck() throws NoSuchMethodException {
-        Method method = BuyerOrderController.class.getMethod("completeOrder", UUID.class);
+        Method method = OrderController.class.getMethod("completeOrder", UUID.class);
 
         assertTrue(method.isAnnotationPresent(PatchMapping.class), "Endpoint completeOrder phải có @PatchMapping");
         PatchMapping patchMapping = method.getAnnotation(PatchMapping.class);
@@ -372,7 +372,7 @@ class BuyerOrderControllerTest {
         when(orderService.requestOrderCancellation(eq(userId), eq(orderId), eq(request)))
                 .thenReturn(mockResponse);
 
-        ApiResponse<CancellationRequestResponse> response = buyerOrderController.requestOrderCancellation(orderId, request);
+        ApiResponse<CancellationRequestResponse> response = OrderController.requestOrderCancellation(orderId, request);
 
         assertNotNull(response);
         assertTrue(response.isSuccess());
@@ -393,7 +393,7 @@ class BuyerOrderControllerTest {
                 .thenThrow(new BusinessException(ErrorCode.INVALID_INPUT_DATA));
 
         BusinessException exception = assertThrows(BusinessException.class, () ->
-                buyerOrderController.requestOrderCancellation(orderId, request)
+                OrderController.requestOrderCancellation(orderId, request)
         );
 
         assertEquals(ErrorCode.INVALID_INPUT_DATA, exception.getErrorCode());
@@ -410,7 +410,7 @@ class BuyerOrderControllerTest {
                 .thenThrow(new BusinessException(ErrorCode.CANCELLATION_REQUEST_ALREADY_EXISTS));
 
         BusinessException exception = assertThrows(BusinessException.class, () ->
-                buyerOrderController.requestOrderCancellation(orderId, request)
+                OrderController.requestOrderCancellation(orderId, request)
         );
 
         assertEquals(ErrorCode.CANCELLATION_REQUEST_ALREADY_EXISTS, exception.getErrorCode());
@@ -420,7 +420,7 @@ class BuyerOrderControllerTest {
     @Test
     @DisplayName("TC-CTRL-04: requestOrderCancellation kiểm tra cấu hình @PostMapping, @ResponseStatus(CREATED) và @PreAuthorize")
     void tc04_requestCancellation_AnnotationCheck() throws NoSuchMethodException {
-        Method method = BuyerOrderController.class.getMethod("requestOrderCancellation", UUID.class, CreateCancellationRequest.class);
+        Method method = OrderController.class.getMethod("requestOrderCancellation", UUID.class, CreateCancellationRequest.class);
 
         assertTrue(method.isAnnotationPresent(PostMapping.class), "Endpoint phải có @PostMapping");
         PostMapping postMapping = method.getAnnotation(PostMapping.class);
@@ -436,7 +436,7 @@ class BuyerOrderControllerTest {
     }
 
     // ==========================================
-    // POST /api/buyer/orders/{id}/reorder (API 12)
+    // POST /api/orders/{id}/reorder (API 12)
     // ==========================================
 
     @Test
@@ -451,7 +451,7 @@ class BuyerOrderControllerTest {
         when(orderService.reorder(eq(userId), eq(orderId))).thenReturn(mockResponse);
 
         // Act
-        ApiResponse<ReorderResponse> response = buyerOrderController.reorder(orderId);
+        ApiResponse<ReorderResponse> response = OrderController.reorder(orderId);
 
         // Assert
         assertNotNull(response);
@@ -465,7 +465,7 @@ class BuyerOrderControllerTest {
     @DisplayName("TC-17: controller_reorder_HasPostMappingAnnotation - Xác nhận endpoint có @PostMapping(\"/{id}/reorder\")")
     void controller_reorder_HasPostMappingAnnotation() throws NoSuchMethodException {
         // Act
-        Method method = BuyerOrderController.class.getMethod("reorder", UUID.class);
+        Method method = OrderController.class.getMethod("reorder", UUID.class);
 
         // Assert
         assertTrue(method.isAnnotationPresent(PostMapping.class), "Endpoint phải có @PostMapping");
@@ -477,7 +477,7 @@ class BuyerOrderControllerTest {
     @DisplayName("TC-18: controller_reorder_ProtectedByPreAuthorizeBuyer - Xác nhận phân quyền @PreAuthorize(\"hasRole('BUYER')\")")
     void controller_reorder_ProtectedByPreAuthorizeBuyer() throws NoSuchMethodException {
         // Act
-        Method method = BuyerOrderController.class.getMethod("reorder", UUID.class);
+        Method method = OrderController.class.getMethod("reorder", UUID.class);
 
         // Assert
         assertTrue(method.isAnnotationPresent(PreAuthorize.class), "Endpoint phải có @PreAuthorize");

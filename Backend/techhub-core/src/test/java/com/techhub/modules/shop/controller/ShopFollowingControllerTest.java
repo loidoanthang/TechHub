@@ -28,17 +28,17 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import com.techhub.modules.shop.controller.BuyerShopFollowingController;
+import com.techhub.modules.shop.controller.ShopFollowingController;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Unit Tests cho BuyerShopFollowingController (GET /api/buyer/followed-shops)")
-class BuyerShopFollowingControllerTest {
+@DisplayName("Unit Tests cho ShopFollowingController (GET /api/followed-shops)")
+class ShopFollowingControllerTest {
 
     @Mock
     private ShopFollowingService shopFollowingService;
 
     @InjectMocks
-    private BuyerShopFollowingController controller;
+    private ShopFollowingController controller;
 
     @AfterEach
     void tearDown() {
@@ -48,7 +48,7 @@ class BuyerShopFollowingControllerTest {
     @Test
     @DisplayName("TC-13: controller_getFollowedShops_PreAuthorize_RequiresRoleBuyer - Bắt buộc quyền ROLE_BUYER")
     void controller_getFollowedShops_PreAuthorize_RequiresRoleBuyer() throws NoSuchMethodException {
-        Method method = BuyerShopFollowingController.class.getMethod("getFollowedShops", int.class, int.class);
+        Method method = ShopFollowingController.class.getMethod("getFollowedShops", int.class, int.class);
         PreAuthorize preAuthorize = method.getAnnotation(PreAuthorize.class);
 
         assertNotNull(preAuthorize, "Method getFollowedShops phải có annotation @PreAuthorize");
