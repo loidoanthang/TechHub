@@ -11,7 +11,30 @@ export const ORDER_KEYS = {
   list: (params?: BuyerOrderQueryParams) => ["orders", "list", params] as const,
   detail: (id: string) => ["orders", "detail", id] as const,
   returnRequest: (orderId: string) => ["orders", "return-request", orderId] as const,
+  returnStatuses: (ids: string) => ["orders", "return-statuses", ids] as const,
 };
+
+// Probe return outcomes for completed cards (list API has no return data)
+export function useReturnRequestStatusesQuery(ids: string[]) {
+  return useQuery({
+    queryKey: ORDER_KEYS.returnStatuses(ids.join(",")),
+    queryFn: async () => {
+      const entries = await Promise.all(
+        ids.map(async (id) => {
+          try {
+            const res = await orderApi.getReturnRequestByOrderId(id);
+            return [id, (res.data?.status as string) ?? null] as const;
+          } catch {
+            return [id, null] as const;
+          }
+        })
+      );
+      return Object.fromEntries(entries) as Record<string, string | null>;
+    },
+    enabled: ids.length > 0,
+    retry: false,
+  });
+}
 
 export function useBuyerOrdersQuery(params?: BuyerOrderQueryParams) {
   return useQuery({
@@ -74,6 +97,23 @@ export function useRequestCancellationMutation() {
   });
 }
 
+export function useReturnRequestQuery(orderId: string) {
+  return useQuery({
+    queryKey: ORDER_KEYS.returnRequest(orderId),
+    queryFn: async () => {
+      try {
+        const res = await orderApi.getReturnRequestByOrderId(orderId);
+        return res.data ?? null;
+      } catch {
+        // 404 = no return request for this order
+        return null;
+      }
+    },
+    enabled: Boolean(orderId),
+    retry: false,
+  });
+}
+
 export function useCreateReturnRequestMutation() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -87,6 +127,7 @@ export function useCreateReturnRequestMutation() {
     onSuccess: (_, { orderId }) => {
       queryClient.invalidateQueries({ queryKey: ORDER_KEYS.all });
       queryClient.invalidateQueries({ queryKey: ORDER_KEYS.detail(orderId) });
+      queryClient.invalidateQueries({ queryKey: ORDER_KEYS.returnRequest(orderId) });
     },
   });
 }

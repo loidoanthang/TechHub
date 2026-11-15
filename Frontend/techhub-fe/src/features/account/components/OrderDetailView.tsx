@@ -20,7 +20,7 @@ import {
   AlertCircle,
   Star,
 } from "lucide-react";
-import { useBuyerOrderDetailQuery, useCompleteOrderMutation } from "@/features/orders/hooks/useOrderQueries";
+import { useBuyerOrderDetailQuery, useCompleteOrderMutation, useReturnRequestQuery } from "@/features/orders/hooks/useOrderQueries";
 import type { OrderStatus } from "@/types/enums";
 import type { BuyerOrderItemResponse } from "@/types/order";
 import { CancelOrderModal } from "./CancelOrderModal";
@@ -36,6 +36,7 @@ interface OrderDetailViewProps {
 
 export function OrderDetailView({ orderId }: OrderDetailViewProps) {
   const { data: order, isLoading, error, refetch } = useBuyerOrderDetailQuery(orderId);
+  const { data: returnRequest } = useReturnRequestQuery(orderId);
   const completeOrderMutation = useCompleteOrderMutation();
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -98,7 +99,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
   const canCancelOrRequest =
     order.status === "PENDING_PAYMENT" ||
     order.status === "CONFIRMED" ||
-    order.status === "PROCESSING";
+    order.status === "PREPARING";
 
   const normalizedTimeline = buildNormalizedTimeline(order.timeline, order.status);
 
@@ -122,10 +123,14 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
                 className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase ${
                   order.status === "COMPLETED"
                     ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    : order.status === "SHIPPED" || order.status === "DELIVERED"
+                    : order.status === "SHIPPING" || order.status === "DELIVERED"
                     ? "bg-blue-50 text-blue-700 border border-blue-200"
                     : order.status === "CANCELLED"
                     ? "bg-rose-50 text-rose-700 border border-rose-200"
+                    : order.status === "RETURN_REQUESTED"
+                    ? "bg-orange-100 text-orange-900 border border-orange-300"
+                    : order.status === "REFUNDED"
+                    ? "bg-violet-50 text-violet-700 border border-violet-200"
                     : "bg-amber-50 text-amber-700 border border-amber-200"
                 }`}
               >
@@ -152,6 +157,61 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
           </span>
         </Link>
       </div>
+
+      {/* Return / Refund request outcome banner */}
+      {returnRequest && (
+        <div
+          className={`rounded-2xl p-4 border flex flex-col sm:flex-row sm:items-start gap-3 ${
+            returnRequest.status === "REJECTED"
+              ? "bg-rose-50 border-rose-200"
+              : returnRequest.status === "APPROVED"
+              ? "bg-emerald-50 border-emerald-200"
+              : "bg-amber-50 border-amber-200"
+          }`}
+        >
+          <RotateCcw
+            className={`w-5 h-5 shrink-0 mt-0.5 ${
+              returnRequest.status === "REJECTED"
+                ? "text-rose-600"
+                : returnRequest.status === "APPROVED"
+                ? "text-emerald-600"
+                : "text-amber-600"
+            }`}
+          />
+          <div className="min-w-0">
+            <p
+              className={`text-sm font-bold ${
+                returnRequest.status === "REJECTED"
+                  ? "text-rose-900"
+                  : returnRequest.status === "APPROVED"
+                  ? "text-emerald-900"
+                  : "text-amber-900"
+              }`}
+            >
+              {returnRequest.status === "REJECTED"
+                ? "Yêu cầu trả hàng / hoàn tiền đã bị từ chối"
+                : returnRequest.status === "APPROVED"
+                ? "Yêu cầu trả hàng đã được chấp thuận — tiền đang được hoàn"
+                : "Yêu cầu trả hàng đang chờ shop phản hồi"}
+            </p>
+            {returnRequest.reason && (
+              <p className="text-xs text-[#434656] mt-1 break-words">
+                Lý do bạn gửi: {returnRequest.reason}
+              </p>
+            )}
+            {returnRequest.sellerNote && (
+              <p className="text-xs text-[#434656] mt-1 break-words">
+                <strong>Phản hồi từ shop:</strong> {returnRequest.sellerNote}
+              </p>
+            )}
+            {returnRequest.respondedAt && (
+              <p className="text-[11px] text-[#737688] mt-1">
+                Shop phản hồi lúc {new Date(returnRequest.respondedAt).toLocaleString("vi-VN")}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Tracking Timeline Bento */}
       {normalizedTimeline.length > 0 && (

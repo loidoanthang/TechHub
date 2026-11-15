@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ProductThumbnail } from "@/components/shared";
@@ -17,7 +17,7 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import { useBuyerOrdersQuery, useCompleteOrderMutation } from "@/features/orders/hooks/useOrderQueries";
+import { useBuyerOrdersQuery, useCompleteOrderMutation, useReturnRequestStatusesQuery } from "@/features/orders/hooks/useOrderQueries";
 import type { OrderStatus } from "@/types/enums";
 import type { BuyerOrderResponse, BuyerOrderItemResponse } from "@/types/order";
 import { CancelOrderModal } from "./CancelOrderModal";
@@ -26,8 +26,9 @@ import { ReturnRefundModal } from "./ReturnRefundModal";
 const TABS: { label: string; status: OrderStatus | "ALL" }[] = [
   { label: "All Orders", status: "ALL" },
   { label: "To Pay", status: "PENDING_PAYMENT" },
-  { label: "Processing", status: "PROCESSING" },
-  { label: "Shipping", status: "SHIPPED" },
+  { label: "To Confirm", status: "PENDING_CONFIRMATION" },
+  { label: "Processing", status: "CONFIRMED" },
+  { label: "Shipping", status: "SHIPPING" },
   { label: "Delivered", status: "DELIVERED" },
   { label: "Completed", status: "COMPLETED" },
   { label: "Cancelled", status: "CANCELLED" },
@@ -43,6 +44,13 @@ export function OrdersListView() {
     status: activeTab,
     keyword: debouncedKeyword || undefined,
   });
+
+  // Probe return outcomes for completed cards
+  const completedOrderIds = useMemo(
+    () => (pageData?.content ?? []).filter((o) => o.status === "COMPLETED").map((o) => o.orderId),
+    [pageData]
+  );
+  const { data: returnStatuses } = useReturnRequestStatusesQuery(completedOrderIds);
 
   const completeOrderMutation = useCompleteOrderMutation();
 
@@ -158,7 +166,7 @@ export function OrdersListView() {
             const canCancelOrRequest =
               order.status === "PENDING_PAYMENT" ||
               order.status === "CONFIRMED" ||
-              order.status === "PROCESSING";
+              order.status === "PREPARING";
 
             return (
               <div
@@ -189,10 +197,14 @@ export function OrdersListView() {
                       className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
                         order.status === "COMPLETED"
                           ? "bg-[#006b5b]/10 text-[#006b5b]"
-                          : order.status === "SHIPPED" || order.status === "DELIVERED"
+                          : order.status === "SHIPPING" || order.status === "DELIVERED"
                           ? "bg-[#0045cc]/10 text-[#0045cc]"
                           : order.status === "CANCELLED"
                           ? "bg-[#ba1a1a]/10 text-[#ba1a1a]"
+                          : order.status === "RETURN_REQUESTED"
+                          ? "bg-[#7c2d12]/10 text-[#7c2d12]"
+                          : order.status === "REFUNDED"
+                          ? "bg-[#6d28d9]/10 text-[#6d28d9]"
                           : "bg-[#f59e0b]/10 text-[#b45309]"
                       }`}
                     >
@@ -200,6 +212,17 @@ export function OrdersListView() {
                     </span>
                   </div>
                 </div>
+
+                {/* Flag completed orders with rejected returns */}
+                {order.status === "COMPLETED" &&
+                  returnStatuses?.[order.orderId] === "REJECTED" && (
+                    <div className="px-5 py-2 bg-rose-50 border-y border-rose-100 flex items-center gap-2">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0 text-rose-600" />
+                      <span className="text-[11px] font-semibold text-rose-800 break-words">
+                        Yêu cầu trả hàng / hoàn tiền đã bị từ chối — xem chi tiết
+                      </span>
+                    </div>
+                  )}
 
                 {/* Items List */}
                 <div className="divide-y divide-[#eff4ff]">
