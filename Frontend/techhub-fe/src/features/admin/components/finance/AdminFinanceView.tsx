@@ -191,12 +191,9 @@ export function AdminFinanceView() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="font-heading text-lg font-bold text-on-surface">
+          <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
             Tài chính, Payouts &amp; Voucher Toàn sàn
           </h1>
-          <p className="text-[11px] text-slate-600">
-            Quản lý mã khuyến mãi toàn sàn do TechHub tài trợ và phê duyệt giải ngân doanh thu về ví Seller.
-          </p>
         </div>
 
         {activeTab === "VOUCHERS" && (
@@ -252,7 +249,7 @@ export function AdminFinanceView() {
               }}
               className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 activeTab === "VOUCHERS"
-                  ? "bg-on-surface text-white"
+                  ? "bg-[#0045cc] text-white"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -270,7 +267,7 @@ export function AdminFinanceView() {
               }}
               className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 activeTab === "PAYOUTS"
-                  ? "bg-on-surface text-white"
+                  ? "bg-[#0045cc] text-white"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >

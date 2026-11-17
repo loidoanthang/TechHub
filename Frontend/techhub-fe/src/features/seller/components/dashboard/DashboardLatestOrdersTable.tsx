@@ -6,9 +6,6 @@ import { formatPrice } from "@/lib/utils";
 import { useSellerOrdersQuery } from "../../hooks/useSellerOrders";
 import {
   MoreHorizontal,
-  SlidersHorizontal,
-  Filter,
-  Download,
   ShoppingBag,
   ExternalLink,
 } from "lucide-react";
@@ -61,44 +58,24 @@ export function DashboardLatestOrdersTable() {
 
   const orders: SellerOrderResponse[] = pageData?.content || [];
 
+  function formatDisplayPaymentMethod(rawMethod?: string | null): string {
+    if (!rawMethod) return "COD";
+    if (rawMethod.includes("VNPAY") || rawMethod.toLowerCase().includes("vnpay")) {
+      return "Chuyển Khoản";
+    }
+    if (rawMethod.includes("COD") || rawMethod.toLowerCase().includes("cod")) {
+      return "COD";
+    }
+    return rawMethod;
+  }
+
   return (
     <div className="bg-white rounded-3xl p-5 sm:p-6 border border-[#e2e8f0] shadow-2xs flex flex-col gap-4">
-      {/* Table Header Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
-        <div>
-          <h3 className="font-heading text-base font-bold text-[#0b1c30]">
-            Latest Orders
-          </h3>
-          <p className="text-[11px] text-[#737688]">
-            Đơn hàng mới nhất phát sinh từ khách hàng
-          </p>
-        </div>
-
-        {/* Action buttons (Customize, Filter, Export) */}
-        <div className="flex items-center gap-2">
-          <Link
-            href="/seller/orders"
-            className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors inline-flex items-center gap-1.5"
-          >
-            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
-            <span>Customize</span>
-          </Link>
-          <Link
-            href="/seller/orders"
-            className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors inline-flex items-center gap-1.5"
-          >
-            <Filter className="w-3.5 h-3.5 text-slate-500" />
-            <span>Filter</span>
-          </Link>
-          <button
-            type="button"
-            onClick={() => alert("Xuất danh sách đơn hàng ra file Excel")}
-            className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors inline-flex items-center gap-1.5"
-          >
-            <Download className="w-3.5 h-3.5 text-slate-500" />
-            <span>Export</span>
-          </button>
-        </div>
+      {/* Table Header */}
+      <div className="border-b border-slate-100 pb-3">
+        <h3 className="font-heading text-base font-bold text-[#0b1c30]">
+          Đơn Hàng Mới Nhất
+        </h3>
       </div>
 
       {/* Table Content */}
@@ -106,13 +83,13 @@ export function DashboardLatestOrdersTable() {
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="border-b border-slate-100 text-slate-400 font-semibold text-[11px] tracking-wider uppercase">
-              <th className="py-2.5 px-3">Order ID</th>
-              <th className="py-2.5 px-3">Customer / Product</th>
-              <th className="py-2.5 px-3">Order Date</th>
-              <th className="py-2.5 px-3">Price</th>
-              <th className="py-2.5 px-3">Payment</th>
-              <th className="py-2.5 px-3">Status</th>
-              <th className="py-2.5 px-3 text-right">Action</th>
+              <th className="py-2.5 px-3">Mã đơn</th>
+              <th className="py-2.5 px-3">Khách hàng</th>
+              <th className="py-2.5 px-3">Ngày đặt</th>
+              <th className="py-2.5 px-3 text-right">Tổng tiền</th>
+              <th className="py-2.5 px-3">Thanh toán</th>
+              <th className="py-2.5 px-3">Trạng thái</th>
+              <th className="py-2.5 px-3 text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -161,7 +138,9 @@ export function DashboardLatestOrdersTable() {
                     })
                   : "Vừa xong";
 
-                const paymentMethod = order.paymentMethodName || order.paymentMethod || "COD / Chuyển khoản";
+                const paymentMethod = formatDisplayPaymentMethod(
+                  order.paymentMethodName || order.paymentMethod
+                );
                 const customerName =
                   order.buyerInfo?.recipientName ||
                   order.buyerInfo?.buyerName ||
@@ -190,7 +169,7 @@ export function DashboardLatestOrdersTable() {
                     <td className="py-3.5 px-3 text-slate-500 text-[11px]">
                       {createdDate}
                     </td>
-                    <td className="py-3.5 px-3 font-bold text-[#0b1c30]">
+                    <td className="py-3.5 px-3 font-bold text-[#0b1c30] text-right">
                       {formatPrice(order.buyerTotalAmount ?? order.totalSellerEarnings ?? 0)}
                     </td>
                     <td className="py-3.5 px-3 text-slate-500">

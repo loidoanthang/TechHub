@@ -137,12 +137,9 @@ export function AdminCategoriesView() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="font-heading text-lg font-bold text-[#0b1c30]">
+          <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
             Quản lý Danh mục & Thuộc tính
           </h1>
-          <p className="text-[11px] text-slate-500">
-            Quản lý cây danh mục và bộ thông số kỹ thuật động cho từng nhóm linh kiện.
-          </p>
         </div>
 
         <button

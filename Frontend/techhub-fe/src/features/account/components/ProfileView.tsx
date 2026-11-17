@@ -126,7 +126,7 @@ export function ProfileView() {
       >
         {/* Header Title & Description */}
         <div className="flex flex-col gap-1 border-b border-[#eff4ff] pb-4">
-          <h1 className="font-heading text-xl font-bold text-[#0b1c30]">
+          <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
             Personal Profile &amp; Contact Credentials
           </h1>
           <p className="text-xs text-[#737688]">

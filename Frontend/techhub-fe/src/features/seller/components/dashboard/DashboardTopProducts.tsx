@@ -27,17 +27,14 @@ export function DashboardTopProducts({
       <div className="flex items-center justify-between pb-3 border-b border-slate-100">
         <div>
           <h3 className="font-heading text-base font-bold text-[#0b1c30]">
-            Top Selling Product
+            Sản Phẩm Bán Chạy Nhất
           </h3>
-          <p className="text-[11px] text-[#737688]">
-            Sản phẩm có lượng bán & doanh thu cao nhất
-          </p>
         </div>
         <Link
           href="/seller/products"
           className="text-xs font-bold text-[#0045cc] hover:text-[#0d5bff] flex items-center gap-1 transition-colors"
         >
-          <span>See All Product</span>
+          <span>Xem tất cả</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
@@ -94,7 +91,7 @@ export function DashboardTopProducts({
                       {product.productName}
                     </h4>
                     <p className="text-[11px] text-[#737688] font-medium mt-0.5">
-                      {product.unitsSold.toLocaleString("vi-VN")} Sales •{" "}
+                      {product.unitsSold.toLocaleString("vi-VN")} đã bán •{" "}
                       {formatPrice(product.totalRevenue)}
                     </p>
                   </div>

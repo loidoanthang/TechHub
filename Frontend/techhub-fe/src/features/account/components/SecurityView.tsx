@@ -144,7 +144,7 @@ export function SecurityView() {
     <main className="w-full flex flex-col gap-6">
       {/* Top Header */}
       <div className="flex flex-col gap-1">
-        <h1 className="font-heading text-xl font-bold text-[#0b1c30]">
+        <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
           Bảo mật &amp; Mật khẩu
         </h1>
         <p className="text-xs text-[#737688]">

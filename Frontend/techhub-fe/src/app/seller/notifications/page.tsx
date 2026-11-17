@@ -14,7 +14,6 @@ export default function SellerNotificationsPage() {
     <NotificationsPageView
       portalContext="seller"
       title="Thông báo gian hàng"
-      description="Quản lý và theo dõi đơn bán mới, đánh giá khách hàng và thông báo vận hành Shop"
     />
   );
 }

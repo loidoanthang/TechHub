@@ -44,7 +44,7 @@ export function ShopProfileView({ sellerName }: ShopProfileViewProps) {
         <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center">
           <Store className="w-8 h-8" />
         </div>
-        <h1 className="text-xl font-bold text-[#0b1c30] font-heading">
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
           Không tìm thấy Cửa hàng
         </h1>
         <p className="text-xs text-[#737688] max-w-md leading-relaxed">

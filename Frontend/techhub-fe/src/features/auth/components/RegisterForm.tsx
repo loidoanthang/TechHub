@@ -108,7 +108,7 @@ export function RegisterForm() {
       {/* Main Register Card */}
       <div className="relative w-full bg-white rounded-2xl shadow-[0_12px_40px_-10px_rgba(11,28,48,0.08)] p-8 sm:p-10 flex flex-col gap-6">
         <div className="flex flex-col items-center text-center gap-1.5">
-          <h1 className="font-heading text-2xl sm:text-[28px] font-bold text-[#0b1c30] tracking-tight">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
             Create new account
           </h1>
           <p className="text-sm text-[#434656] max-w-xs">

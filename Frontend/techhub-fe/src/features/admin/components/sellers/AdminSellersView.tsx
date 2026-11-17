@@ -96,12 +96,9 @@ export function AdminSellersView() {
     <div className="flex-1 w-full p-4 sm:p-6 flex flex-col gap-4 max-w-[1440px] mx-auto">
       {/* Header */}
       <div>
-        <h1 className="font-heading text-lg font-bold text-[#0b1c30]">
+        <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
           Đối tác Seller & Quản lý Gian hàng
         </h1>
-        <p className="text-[11px] text-slate-500">
-          Thẩm định hồ sơ đăng ký mở Shop và giám sát trạng thái vận hành các gian hàng trên sàn.
-        </p>
       </div>
 
       {/* Toast */}
@@ -131,7 +128,7 @@ export function AdminSellersView() {
               }}
               className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors duration-150 whitespace-nowrap cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 mainTab === "APPLICATIONS"
-                  ? "bg-on-surface text-white"
+                  ? "bg-[#0045cc] text-white"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -149,7 +146,7 @@ export function AdminSellersView() {
               }}
               className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors duration-150 whitespace-nowrap cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 mainTab === "SHOPS"
-                  ? "bg-on-surface text-white"
+                  ? "bg-[#0045cc] text-white"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >

@@ -33,7 +33,7 @@ type TabType = "ALL" | NotificationType;
 export function NotificationsPageView({
   portalContext = "buyer",
   title = "Thông báo của tôi",
-  description = "Theo dõi cập nhật đơn hàng, đánh giá, mã giảm giá và tin tức hệ thống",
+  description = "Theo dõi cập nhật đơn hàng, khuyến mãi và thông báo tài khoản TechHub",
 }: NotificationsPageViewProps) {
   const [selectedTab, setSelectedTab] = useState<TabType>("ALL");
   const [readFilter, setReadFilter] = useState<"ALL" | "UNREAD" | "READ">("ALL");
@@ -124,16 +124,16 @@ export function NotificationsPageView({
       {/* 1. Header with Title & Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold font-heading text-slate-900 tracking-tight flex items-center gap-2.5">
-            <Bell className="w-6 h-6 text-primary" />
-            <span>{title}</span>
+          <div className="flex items-center gap-2.5">
+            <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
+              {title}
+            </h1>
             {unreadCount > 0 && (
               <span className="px-2.5 py-0.5 text-xs font-extrabold rounded-full bg-primary/10 text-primary">
                 {unreadCount > 99 ? "99+" : unreadCount} chưa đọc
               </span>
             )}
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">{description}</p>
+          </div>
         </div>
 
         <button

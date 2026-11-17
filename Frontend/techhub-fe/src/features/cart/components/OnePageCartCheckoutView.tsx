@@ -273,7 +273,7 @@ export function OnePageCartCheckoutView() {
           <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
             <CheckCircle2 className="w-10 h-10" />
           </div>
-          <h1 className="font-heading text-2xl font-bold text-[#0b1c30]">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
             Đặt hàng thành công!
           </h1>
           <p className="text-sm text-[#434656] leading-relaxed">

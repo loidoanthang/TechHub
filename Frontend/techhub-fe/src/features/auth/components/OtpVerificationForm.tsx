@@ -231,7 +231,7 @@ export function OtpVerificationForm() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#eff4ff] text-[#0045cc] mb-3">
             {isResetPassword ? <KeyRound className="w-6 h-6" /> : <CheckCircle2 className="w-6 h-6" />}
           </div>
-          <h1 className="font-heading text-2xl sm:text-[28px] font-bold text-[#0b1c30] tracking-tight mb-2">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight mb-2">
             {isResetPassword ? "Verify Reset Code" : "Verify Email"}
           </h1>
           <p className="text-sm text-[#434656] max-w-[280px] mx-auto">

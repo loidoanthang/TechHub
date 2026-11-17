@@ -77,12 +77,9 @@ export function AdminOrdersView() {
     <div className="flex-1 w-full p-4 sm:p-6 flex flex-col gap-4 max-w-[1440px] mx-auto">
       {/* Header */}
       <div>
-        <h1 className="font-heading text-lg font-bold text-[#0b1c30]">
+        <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
           Giám sát Đơn hàng Toàn sàn
         </h1>
-        <p className="text-[11px] text-slate-500">
-          Theo dõi toàn bộ đơn hàng phát sinh trên TechHub, kiểm tra dòng tiền hoa hồng và can thiệp hủy đơn tranh chấp.
-        </p>
       </div>
 
       {/* Toast */}
@@ -113,7 +110,7 @@ export function AdminOrdersView() {
                 }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer transition-colors duration-150 min-h-[34px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   statusFilter === tab.id
-                    ? "bg-on-surface text-white"
+                    ? "bg-[#0045cc] text-white"
                     : "text-slate-600 hover:bg-slate-100"
                 }`}
               >

@@ -210,7 +210,7 @@ export function SellerOrderDetailView({ orderId }: SellerOrderDetailViewProps) {
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-heading text-xl font-extrabold text-on-surface">
+              <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
                 Đơn Hàng #{order.orderNumber}
               </h1>
               <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">

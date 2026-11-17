@@ -55,7 +55,7 @@ export function SellerProductsHeader({
       {/* 1. Title & Primary CTA row (matching SellerOrdersHeader) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-on-surface tracking-tight">
+          <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
             Quản Lý Sản Phẩm
           </h1>
           <span className="px-3 py-1 rounded-full bg-primary/10 text-primary font-heading font-extrabold text-xs">

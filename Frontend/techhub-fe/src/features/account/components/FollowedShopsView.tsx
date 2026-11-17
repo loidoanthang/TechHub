@@ -48,7 +48,7 @@ export function FollowedShopsView() {
       <div className="bg-white rounded-2xl p-6 border border-[#c3c5d9]/30 shadow-sm relative overflow-hidden flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col gap-1 z-10">
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl sm:text-2xl font-bold text-[#0b1c30] font-heading">
+            <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
               Gian hàng đang theo dõi
             </h1>
             <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#0045cc] border border-blue-200">

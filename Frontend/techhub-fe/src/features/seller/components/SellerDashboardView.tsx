@@ -53,12 +53,9 @@ export function SellerDashboardView() {
       {/* 1. Header Greeting & Period Selector */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0b1c30] tracking-tight">
-            Welcome back , {sellerDisplayName} !
+          <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
+            Chào mừng , {sellerDisplayName} !
           </h1>
-          <p className="text-xs sm:text-sm text-[#737688] mt-0.5">
-            Here&apos;s Your Current Sales Overview
-          </p>
         </div>
 
         <DashboardPeriodFilter
@@ -113,6 +110,7 @@ export function SellerDashboardView() {
           <DashboardSalesOvertimeChart
             totalRevenue={metrics?.summary?.netRevenue}
             totalOrders={metrics?.summary?.totalOrders}
+            period={period}
             isLoading={isLoading}
           />
         </div>

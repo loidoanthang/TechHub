@@ -9,9 +9,10 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { MoreHorizontal } from "lucide-react";
+import type { DashboardPeriod } from "@/types/sellerDashboard";
 
 interface SalesDataPoint {
-  month: string;
+  timeLabel: string;
   revenue: number;
   order: number;
 }
@@ -19,32 +20,84 @@ interface SalesDataPoint {
 interface DashboardSalesOvertimeChartProps {
   totalRevenue?: number;
   totalOrders?: number;
+  period?: DashboardPeriod;
   isLoading?: boolean;
 }
 
-// Generate realistic trending points based on total metrics or seasonal baseline
-function generateMonthlyData(totalRev = 0, totalOrd = 0): SalesDataPoint[] {
-  const months = ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"];
-  const revenueWeights = [0.08, 0.1, 0.12, 0.11, 0.15, 0.13, 0.19, 0.12];
-  const orderWeights = [0.09, 0.11, 0.08, 0.13, 0.12, 0.14, 0.18, 0.15];
-
+// Generate realistic trending points based on the active period filter
+function generateTimelineData(
+  period: DashboardPeriod = "TODAY",
+  totalRev = 0,
+  totalOrd = 0
+): SalesDataPoint[] {
   const baseRev = totalRev > 0 ? totalRev : 50000000;
   const baseOrd = totalOrd > 0 ? totalOrd : 120;
 
-  return months.map((month, idx) => ({
-    month,
-    revenue: Math.round(baseRev * revenueWeights[idx]),
-    order: Math.round(baseOrd * orderWeights[idx]),
-  }));
+  switch (period) {
+    case "TODAY": {
+      // Chia theo các khung giờ chính trong ngày
+      const slots = ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"];
+      const revWeights = [0.05, 0.03, 0.18, 0.28, 0.22, 0.24];
+      const ordWeights = [0.04, 0.02, 0.20, 0.30, 0.22, 0.22];
+      return slots.map((timeLabel, idx) => ({
+        timeLabel,
+        revenue: Math.round(baseRev * revWeights[idx]),
+        order: Math.round(baseOrd * ordWeights[idx]),
+      }));
+    }
+
+    case "LAST_7_DAYS": {
+      // 7 ngày gần nhất tính ngược từ hôm nay
+      const days: string[] = [];
+      const now = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        days.push(`${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}`);
+      }
+      const revWeights = [0.11, 0.13, 0.16, 0.12, 0.18, 0.15, 0.15];
+      const ordWeights = [0.12, 0.14, 0.15, 0.11, 0.19, 0.14, 0.15];
+      return days.map((timeLabel, idx) => ({
+        timeLabel,
+        revenue: Math.round(baseRev * revWeights[idx]),
+        order: Math.round(baseOrd * ordWeights[idx]),
+      }));
+    }
+
+    case "THIS_MONTH": {
+      // 4 tuần trong tháng
+      const weeks = ["Tuần 1", "Tuần 2", "Tuần 3", "Tuần 4"];
+      const revWeights = [0.22, 0.26, 0.28, 0.24];
+      const ordWeights = [0.21, 0.27, 0.29, 0.23];
+      return weeks.map((timeLabel, idx) => ({
+        timeLabel,
+        revenue: Math.round(baseRev * revWeights[idx]),
+        order: Math.round(baseOrd * ordWeights[idx]),
+      }));
+    }
+
+    case "CUSTOM":
+    default: {
+      // Chu kỳ dài: 6 tháng gần nhất bằng tiếng Việt
+      const months = ["T6", "T7", "T8", "T9", "T10", "T11"];
+      const revWeights = [0.12, 0.14, 0.18, 0.16, 0.22, 0.18];
+      const ordWeights = [0.11, 0.15, 0.17, 0.16, 0.23, 0.18];
+      return months.map((timeLabel, idx) => ({
+        timeLabel,
+        revenue: Math.round(baseRev * revWeights[idx]),
+        order: Math.round(baseOrd * ordWeights[idx]),
+      }));
+    }
+  }
 }
 
 const chartConfig = {
   revenue: {
-    label: "Revenue (₫)",
+    label: "Doanh thu (₫)",
     color: "#0045cc", // TechHub Primary Blue
   },
   order: {
-    label: "Orders",
+    label: "Số đơn hàng",
     color: "#06b6d4", // Cyan Accent for clear distinction
   },
 } satisfies ChartConfig;
@@ -52,11 +105,12 @@ const chartConfig = {
 export function DashboardSalesOvertimeChart({
   totalRevenue = 0,
   totalOrders = 0,
+  period = "TODAY",
   isLoading,
 }: DashboardSalesOvertimeChartProps) {
   const data = React.useMemo(
-    () => generateMonthlyData(totalRevenue, totalOrders),
-    [totalRevenue, totalOrders]
+    () => generateTimelineData(period, totalRevenue, totalOrders),
+    [period, totalRevenue, totalOrders]
   );
 
   return (
@@ -65,11 +119,8 @@ export function DashboardSalesOvertimeChart({
       <div className="flex items-center justify-between pb-2 border-b border-slate-100">
         <div>
           <h3 className="font-heading text-base font-bold text-[#0b1c30]">
-            Sales Overtime
+            Biểu Đồ Doanh Thu &amp; Đơn Hàng
           </h3>
-          <p className="text-[11px] text-[#737688]">
-            Tương quan doanh thu và số lượng đơn hàng theo tháng
-          </p>
         </div>
 
         {/* Legend pills & options */}
@@ -77,11 +128,11 @@ export function DashboardSalesOvertimeChart({
           <div className="flex items-center gap-3 text-xs font-semibold">
             <span className="flex items-center gap-1.5 text-slate-600">
               <span className="w-2.5 h-2.5 rounded-full bg-[#0045cc]" />
-              Revenue
+              Doanh thu
             </span>
             <span className="flex items-center gap-1.5 text-slate-600">
               <span className="w-2.5 h-2.5 rounded-full bg-[#06b6d4]" />
-              Order
+              Đơn hàng
             </span>
           </div>
 
@@ -113,7 +164,7 @@ export function DashboardSalesOvertimeChart({
                 stroke="#f1f5f9"
               />
               <XAxis
-                dataKey="month"
+                dataKey="timeLabel"
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
@@ -138,7 +189,7 @@ export function DashboardSalesOvertimeChart({
               <ChartTooltip
                 content={
                   <ChartTooltipContent
-                    labelFormatter={(val: unknown) => `Tháng ${val}`}
+                    labelFormatter={(val: unknown) => `${val}`}
                   />
                 }
               />

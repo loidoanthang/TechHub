@@ -40,7 +40,7 @@ export function SuspendedView() {
         </div>
 
         {/* Title */}
-        <h1 className="font-heading text-2xl sm:text-[28px] font-bold text-[#0b1c30] tracking-tight mb-2">
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight mb-2">
           Account Suspended
         </h1>
 

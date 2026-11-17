@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { AdminDashboardView } from "@/features/admin/components/dashboard/AdminDashboardView";
 import { Loader2 } from "lucide-react";
 
+export const instant = false
+
 export const metadata: Metadata = {
   title: "Admin Dashboard | TechHub Admin Portal",
   description: "Tổng quan doanh thu, GMV, hoa hồng và chỉ số kiểm duyệt toàn sàn TechHub.",

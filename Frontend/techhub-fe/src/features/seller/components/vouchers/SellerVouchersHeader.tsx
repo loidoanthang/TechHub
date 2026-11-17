@@ -32,7 +32,7 @@ export function SellerVouchersHeader({
     <div className="flex flex-col gap-5 w-full">
       {/* Breadcrumb & Main Action Bar */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 text-xs text-slate-500">
+        {/* <div className="flex items-center gap-2 text-xs text-slate-500">
           <Link
             href={ROUTES.SELLER.DASHBOARD}
             className="hover:text-[#0045cc] transition-colors"
@@ -41,17 +41,13 @@ export function SellerVouchersHeader({
           </Link>
           <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
           <span className="text-slate-900 font-semibold">Mã giảm giá Shop</span>
-        </div>
+        </div> */}
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="font-headline font-bold text-xl text-slate-900 tracking-tight flex items-center gap-2">
-              <Ticket className="w-6 h-6 text-[#0045cc]" />
-              <span>Quản Lý Mã Giảm Giá Shop</span>
+            <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
+              Quản Lý Mã Giảm Giá Shop
             </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Thiết lập mã coupon khuyến mãi kích cầu mua sắm và gia tăng tỷ lệ chốt đơn cho gian hàng
-            </p>
           </div>
 
           <button

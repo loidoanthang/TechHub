@@ -120,15 +120,12 @@ export function SellerReviewsView() {
   const totalElements = data?.data?.totalElements || 0;
 
   return (
-    <div className="flex-1 w-full p-4 sm:p-6 flex flex-col gap-4 max-w-[1440px] mx-auto">
+    <div className="flex-1 w-full flex flex-col gap-4 max-w-[1440px] mx-auto">
       {/* 1. Header */}
       <div>
-        <h1 className="font-heading text-lg font-bold text-[#0b1c30]">
+        <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
           Quản lý Đánh giá & Phản hồi Khách hàng
         </h1>
-        <p className="text-[11px] text-slate-500">
-          Theo dõi nhận xét thực tế từ người mua đã nhận hàng và gửi phản hồi chăm sóc khách hàng
-        </p>
       </div>
 
       {/* Feedbacks */}

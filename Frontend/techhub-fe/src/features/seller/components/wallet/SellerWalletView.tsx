@@ -134,13 +134,9 @@ export function SellerWalletView() {
       {/* 1. Header with Title & Refresh Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold font-heading text-slate-900 tracking-tight flex items-center gap-2.5">
-            <Wallet className="w-6 h-6 text-[#0045cc]" />
-            <span>Ví &amp; Doanh thu Người Bán</span>
+          <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
+            Ví &amp; Doanh thu Người Bán
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Theo dõi số dư khả dụng, quản lý rút tiền và đối soát giao dịch bán hàng
-          </p>
         </div>
 
         <div className="flex items-center gap-2.5">
@@ -181,9 +177,6 @@ export function SellerWalletView() {
             <h2 className="text-base font-bold font-heading text-slate-900">
               Lịch sử biến động số dư
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Danh sách các khoản quyết toán đơn bán, lệnh rút tiền và hoàn tiền ví
-            </p>
           </div>
         </div>
 

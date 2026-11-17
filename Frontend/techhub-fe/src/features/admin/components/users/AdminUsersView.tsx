@@ -74,12 +74,9 @@ export function AdminUsersView() {
     <div className="flex-1 w-full p-4 sm:p-6 flex flex-col gap-4 max-w-[1440px] mx-auto">
       {/* Header */}
       <div>
-        <h1 className="font-heading text-lg font-bold text-[#0b1c30]">
+        <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
           Quản lý Người dùng Hệ thống
         </h1>
-        <p className="text-[11px] text-slate-500">
-          Tra cứu tài khoản Buyer/Seller, kiểm tra xác thực email và thực thi chế tài tạm khóa hoặc cấm vĩnh viễn.
-        </p>
       </div>
 
       {/* Toast */}

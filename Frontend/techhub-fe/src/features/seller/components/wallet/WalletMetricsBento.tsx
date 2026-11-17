@@ -117,9 +117,6 @@ export function WalletMetricsBento({
             <h3 className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-slate-900">
               {formatPrice(pendingPayoutAmount)}
             </h3>
-            <p className="text-[11px] text-slate-500 mt-1">
-              Lệnh rút đang chờ TechHub phê duyệt &amp; giải ngân
-            </p>
           </div>
         </div>
 
@@ -143,10 +140,7 @@ export function WalletMetricsBento({
           <div className="mt-3">
             <h3 className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-slate-900">
               {formatPrice(netRevenue)}
-            </h3>
-            <p className="text-[11px] text-slate-500 mt-1">
-              Tổng số tiền đã quyết toán từ các đơn giao thành công
-            </p>
+            </h3> 
           </div>
         </div>
 

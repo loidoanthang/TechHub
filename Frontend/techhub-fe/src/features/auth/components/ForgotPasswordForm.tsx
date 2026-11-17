@@ -67,7 +67,7 @@ export function ForgotPasswordForm() {
         {!isSent ? (
           <>
             <div className="text-center w-full mb-8">
-              <h1 className="font-heading text-2xl sm:text-[28px] font-bold text-[#0b1c30] tracking-tight mb-2">
+              <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight mb-2">
                 Forgot password
               </h1>
               <p className="text-sm text-[#434656] leading-relaxed">

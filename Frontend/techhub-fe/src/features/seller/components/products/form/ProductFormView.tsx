@@ -543,14 +543,7 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
     <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full pb-24">
       {/* Top Breadcrumb & Page Header */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 text-xs text-slate-500">
-          <Link
-            href={ROUTES.SELLER.DASHBOARD}
-            className="hover:text-[#0045cc] transition-colors"
-          >
-            Kênh Người Bán
-          </Link>
-          <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+        {isEditMode && (<div className="flex items-center gap-2 text-xs text-slate-500">
           <Link
             href={ROUTES.SELLER.PRODUCTS}
             className="hover:text-[#0045cc] transition-colors"
@@ -559,28 +552,23 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
           </Link>
           <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
           <span className="text-slate-900 font-semibold">
-            {isEditMode ? "Chỉnh sửa sản phẩm" : "Đăng bán sản phẩm mới"}
+            Chỉnh sửa sản phẩm
           </span>
-        </div>
-
+        </div>)}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            {isEditMode && 
             <Link
               href={ROUTES.SELLER.PRODUCTS}
               className="p-2 rounded-xl bg-white border border-slate-200/90 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors shadow-2xs"
               title="Quay lại danh sách"
             >
               <ArrowLeft className="w-4 h-4" />
-            </Link>
+            </Link>}
             <div>
-              <h1 className="font-headline font-bold text-xl text-slate-900 tracking-tight">
+              <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
                 {isEditMode ? "Chỉnh Sửa Sản Phẩm" : "Đăng Bán Sản Phẩm Mới"}
               </h1>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {isEditMode
-                  ? "Cập nhật thông tin chi tiết, hình ảnh và thuộc tính kỹ thuật linh kiện"
-                  : "Thiết lập thông tin linh kiện, thư viện hình ảnh và bảng giá phân loại cấu hình"}
-              </p>
             </div>
           </div>
         </div>

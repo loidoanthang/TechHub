@@ -53,7 +53,9 @@ export function AccountMessagesPageView() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6">
-      <h1 className="mb-4 text-lg font-bold text-slate-900">Tin nhắn</h1>
+      <h1 className="mb-4 font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
+        Tin nhắn
+      </h1>
 
       <div className="flex flex-col gap-4 lg:flex-row">
         <aside className="w-full shrink-0 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm lg:w-80">

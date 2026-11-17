@@ -74,7 +74,7 @@ export function SellerSettingsView() {
   };
 
   return (
-    <div className="flex-1 w-full p-4 sm:p-6 lg:p-8 flex flex-col gap-6 max-w-[1400px] mx-auto animate-in fade-in duration-300">
+    <div className="flex-1 w-full flex flex-col gap-6 max-w-[1400px] mx-auto animate-in fade-in duration-300">
       {/* 1. BREADCRUMBS & HEADER */}
       <div className="flex flex-col gap-2">
         <nav className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -96,7 +96,7 @@ export function SellerSettingsView() {
               <Settings className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="font-heading text-lg sm:text-xl font-extrabold text-[#0b1c30]">
+              <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
                 Kho hàng & Cài đặt Gian hàng
               </h1>
               <p className="text-xs text-slate-500">

@@ -89,12 +89,9 @@ export function AdminProductsView() {
     <div className="flex-1 w-full p-4 sm:p-6 flex flex-col gap-4 max-w-[1440px] mx-auto">
       {/* Header */}
       <div>
-        <h1 className="font-heading text-lg font-bold text-[#0b1c30]">
+        <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
           Kiểm duyệt Sản phẩm Toàn sàn
         </h1>
-        <p className="text-[11px] text-slate-500">
-          Thẩm định chất lượng, thông số kỹ thuật và phê duyệt sản phẩm từ các Shop lên sàn.
-        </p>
       </div>
 
       {/* Toast Feedback */}
@@ -126,7 +123,7 @@ export function AdminProductsView() {
                 }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer min-h-[34px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   activeTab === t.id
-                    ? "bg-on-surface text-white"
+                    ? "bg-[#0045cc] text-white"
                     : "text-slate-600 hover:bg-slate-100"
                 }`}
               >

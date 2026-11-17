@@ -41,7 +41,7 @@ export function DashboardStatsCards({ summary, isLoading }: DashboardStatsCardsP
       <div className="relative overflow-hidden rounded-3xl bg-[#0b1c30] text-white p-6 shadow-sm flex flex-col justify-between group transition-all duration-300 hover:shadow-md">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-slate-300 tracking-wide uppercase">
-            AVG . Order Value
+            Giá Trị Đơn Trung Bình
           </span>
           <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-white backdrop-blur-sm border border-white/10">
             <TrendingUp className="w-5 h-5 text-[#b6c4ff]" />
@@ -69,7 +69,7 @@ export function DashboardStatsCards({ summary, isLoading }: DashboardStatsCardsP
       <div className="rounded-3xl bg-white border border-[#e2e8f0] p-6 shadow-2xs flex flex-col justify-between transition-all duration-300 hover:shadow-sm hover:border-[#cbd5e1]">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-[#737688] tracking-wide uppercase">
-            Total Orders
+            Tổng Số Đơn Hàng
           </span>
           <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-[#0045cc]">
             <ShoppingBag className="w-5 h-5" />
@@ -99,7 +99,7 @@ export function DashboardStatsCards({ summary, isLoading }: DashboardStatsCardsP
       <div className="rounded-3xl bg-white border border-[#e2e8f0] p-6 shadow-2xs flex flex-col justify-between transition-all duration-300 hover:shadow-sm hover:border-[#cbd5e1]">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold text-[#737688] tracking-wide uppercase">
-            Lifetime Value / Doanh Thu
+            Doanh Thu Thuần
           </span>
           <div className="w-10 h-10 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
             <DollarSign className="w-5 h-5" />
