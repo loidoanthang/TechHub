@@ -64,9 +64,10 @@ export function DashboardPeriodFilter({
         {period === "CUSTOM" && (
           <div className="flex items-center gap-2 animate-in fade-in slide-in-from-left-2">
             <div className="flex items-center gap-1.5 bg-[#f8f9fc] border border-[#e2e8f0] rounded-xl px-2.5 py-1.5">
-              <Calendar className="w-3.5 h-3.5 text-[#737688]" />
+              <Calendar className="w-3.5 h-3.5 text-[#737688]" aria-hidden="true" />
               <input
                 type="date"
+                aria-label="Từ ngày"
                 value={startDate}
                 max={endDate || todayStr}
                 onChange={(e) => onStartDateChange(e.target.value)}
@@ -75,9 +76,10 @@ export function DashboardPeriodFilter({
             </div>
             <span className="text-xs text-[#737688] font-bold">đến</span>
             <div className="flex items-center gap-1.5 bg-[#f8f9fc] border border-[#e2e8f0] rounded-xl px-2.5 py-1.5">
-              <Calendar className="w-3.5 h-3.5 text-[#737688]" />
+              <Calendar className="w-3.5 h-3.5 text-[#737688]" aria-hidden="true" />
               <input
                 type="date"
+                aria-label="Đến ngày"
                 value={endDate}
                 min={startDate}
                 max={todayStr}

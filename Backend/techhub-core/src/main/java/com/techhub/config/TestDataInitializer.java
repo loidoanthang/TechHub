@@ -102,9 +102,11 @@ public class TestDataInitializer implements CommandLineRunner {
         log.info("Checking initial test dataset for Postman testing...");
 
         if (userRepository.existsByEmail("buyer@techhub.vn")) {
-            log.info("Test dataset already exists in database. Ensuring seller roles, products, and full order dataset exist...");
+            log.info("Test dataset already exists in database. Ensuring seller roles, categories, attributes, and full order dataset exist...");
             ensureSellerRolesExist();
             ensureAdditionalCategoriesAndProductsExist();
+            ensureAllCategoryAttributesExist();
+            ensureProductAndVariantAttributesPopulated();
             ensureComprehensiveOrdersAndReviewsExist();
             printSummaryLog();
             return;
@@ -260,20 +262,20 @@ public class TestDataInitializer implements CommandLineRunner {
 
         // 5. CATEGORIES
         Category categoryPhone = Category.builder()
-                .name("Điện thoại & Phụ kiện")
-                .description("Điện thoại thông minh, củ sạc, cáp sạc, phụ kiện cao cấp")
+                .name("Điện thoại thông minh")
+                .description("Điện thoại thông minh, flagship cao cấp iOS và Android")
                 .status(CategoryStatus.ACTIVE)
                 .isDeleted(false)
                 .build();
         categoryRepository.save(categoryPhone);
 
-        CategoryAttribute attrColor = CategoryAttribute.builder()
-                .category(categoryPhone)
-                .name("Màu sắc")
-                .dataType(CategoryAttributeDataType.SELECT)
-                .options(List.of("Titan Tự Nhiên", "Titan Xanh", "Trắng", "Đen"))
+        Category categoryCharger = Category.builder()
+                .name("Củ cáp & Phụ kiện sạc")
+                .description("Củ sạc nhanh GaN, cáp sạc siêu bền, trạm sạc và pin dự phòng")
+                .status(CategoryStatus.ACTIVE)
+                .isDeleted(false)
                 .build();
-        categoryAttributeRepository.save(attrColor);
+        categoryRepository.save(categoryCharger);
 
         Category categoryLaptop = Category.builder()
                 .name("Laptop & Máy tính")
@@ -292,6 +294,16 @@ public class TestDataInitializer implements CommandLineRunner {
                 .name("iPhone 15 Pro Max 256GB Chính Hãng VN/A")
                 .slug("iphone-15-pro-max-256gb-vn-a")
                 .description("iPhone 15 Pro Max thiết kế Titan chuẩn hàng không vũ trụ, chip A17 Pro mạnh mẽ vượt trội.")
+                .attributes(Map.of(
+                        "Màn hình", "Super Retina XDR OLED 6.7 inch 120Hz ProMotion",
+                        "Chipset", "Apple A17 Pro (3nm)",
+                        "RAM", "8GB",
+                        "Bộ nhớ trong", "256GB",
+                        "Camera chính", "Chính 48MP + Góc siêu rộng 12MP + Telephoto 5x 12MP",
+                        "Pin & Sạc", "4422 mAh, Sạc nhanh PD 20W, MagSafe 15W",
+                        "Chất liệu khung", "Titan chuẩn hàng không vũ trụ",
+                        "Kháng nước", "IP68"
+                ))
                 .approvalStatus(ProductApprovalStatus.APPROVED)
                 .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
                 .isSuspended(false)
@@ -301,7 +313,7 @@ public class TestDataInitializer implements CommandLineRunner {
 
         ProductImage imgIphone = ProductImage.builder()
                 .product(productIphone)
-                .imageUrl("https://images.unsplash.com/photo-1695048133142-1a20484d2569")
+                .imageUrl("https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=800&q=80")
                 .displayOrder(0)
                 .build();
         productImageRepository.save(imgIphone);
@@ -313,7 +325,8 @@ public class TestDataInitializer implements CommandLineRunner {
                 .price(BigDecimal.valueOf(29490000))
                 .stockQuantity(100)
                 .status(ProductVariantStatus.ACTIVE)
-                .imageUrl("https://images.unsplash.com/photo-1695048133142-1a20484d2569")
+                .imageUrl("https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=800&q=80")
+                .attributes(Map.of("Màu sắc", "Titan Tự Nhiên", "Dung lượng", "256GB"))
                 .isDeleted(false)
                 .build();
         productVariantRepository.save(variantIphoneNat);
@@ -325,7 +338,8 @@ public class TestDataInitializer implements CommandLineRunner {
                 .price(BigDecimal.valueOf(28990000))
                 .stockQuantity(100)
                 .status(ProductVariantStatus.ACTIVE)
-                .imageUrl("https://images.unsplash.com/photo-1695048133142-1a20484d2569")
+                .imageUrl("https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=800&q=80")
+                .attributes(Map.of("Màu sắc", "Titan Xanh", "Dung lượng", "256GB"))
                 .isDeleted(false)
                 .build();
         productVariantRepository.save(variantIphoneBlue);
@@ -333,11 +347,18 @@ public class TestDataInitializer implements CommandLineRunner {
         // Product 2: Củ sạc Apple 20W (Shop 1 - Apple)
         Product productCharger = Product.builder()
                 .shop(shop1)
-                .category(categoryPhone)
+                .category(categoryCharger)
                 .brandName("Apple")
                 .name("Củ Sạc Nhanh Apple 20W Type-C Chính Hãng")
                 .slug("cu-sac-nhanh-apple-20w-type-c")
                 .description("Củ sạc nhanh Apple 20W cổng USB-C tương thích iPhone, iPad.")
+                .attributes(Map.of(
+                        "Công suất tối đa", "20W",
+                        "Số cổng kết nối", "1 cổng USB-C",
+                        "Công nghệ sạc", "Power Delivery (PD 3.0)",
+                        "Chuẩn tương thích", "iPhone 8 đến iPhone 16 series, iPad Pro/Air/Mini",
+                        "Đặc điểm nổi bật", "Chính hãng Apple, bảo vệ chống quá nhiệt"
+                ))
                 .approvalStatus(ProductApprovalStatus.APPROVED)
                 .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
                 .isSuspended(false)
@@ -360,6 +381,7 @@ public class TestDataInitializer implements CommandLineRunner {
                 .stockQuantity(500)
                 .status(ProductVariantStatus.ACTIVE)
                 .imageUrl("https://images.unsplash.com/photo-1622445268048-c89b38e07a60")
+                .attributes(Map.of("Màu sắc", "Trắng", "Cổng kết nối", "Type-C"))
                 .isDeleted(false)
                 .build();
         productVariantRepository.save(variantCharger);
@@ -367,11 +389,18 @@ public class TestDataInitializer implements CommandLineRunner {
         // Product 3: Cáp sạc Anker PowerLine (Shop 2 - Anker)
         Product productAnkerCable = Product.builder()
                 .shop(shop2)
-                .category(categoryPhone)
+                .category(categoryCharger)
                 .brandName("Anker")
                 .name("Cáp Sạc Anker PowerLine III USB-C to Lightning 0.9m")
                 .slug("cap-sac-anker-powerline-iii-usb-c-to-lightning-0-9m")
                 .description("Cáp sạc siêu bền Anker chuẩn MFi chứng nhận bởi Apple.")
+                .attributes(Map.of(
+                        "Công suất tối đa", "Sạc nhanh Power Delivery 60W (3A)",
+                        "Số cổng kết nối", "Đầu cắm USB-C to Lightning (0.9 mét)",
+                        "Công nghệ sạc", "Hỗ trợ sạc nhanh Power Delivery cho iPhone/iPad",
+                        "Chuẩn tương thích", "iPhone, iPad có cổng sạc Lightning",
+                        "Đặc điểm nổi bật", "Chứng nhận Apple MFi, vỏ sợi Kevlar chịu uốn cong 25.000 lần"
+                ))
                 .approvalStatus(ProductApprovalStatus.APPROVED)
                 .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
                 .isSuspended(false)
@@ -394,6 +423,7 @@ public class TestDataInitializer implements CommandLineRunner {
                 .stockQuantity(300)
                 .status(ProductVariantStatus.ACTIVE)
                 .imageUrl("https://images.unsplash.com/photo-1583863788434-e58a36330cf0")
+                .attributes(Map.of("Màu sắc", "Đen", "Chiều dài", "0.9m"))
                 .isDeleted(false)
                 .build();
         productVariantRepository.save(variantAnkerBlack);
@@ -510,6 +540,8 @@ public class TestDataInitializer implements CommandLineRunner {
         // 9. ENSURE SELLER ROLES, EXTENDED PRODUCTS & FULL ORDERS/REVIEWS DATASET
         ensureSellerRolesExist();
         ensureAdditionalCategoriesAndProductsExist();
+        ensureAllCategoryAttributesExist();
+        ensureProductAndVariantAttributesPopulated();
         ensureComprehensiveOrdersAndReviewsExist();
 
         log.info("Comprehensive test dataset created successfully!");
@@ -608,10 +640,27 @@ public class TestDataInitializer implements CommandLineRunner {
         }
 
         // 2. Ensure Categories exist
-        Category categoryPhone = categoryRepository.findByNameIgnoreCase("Điện thoại & Phụ kiện")
+        Category categoryPhone = categoryRepository.findByNameIgnoreCase("Điện thoại thông minh")
+                .or(() -> categoryRepository.findByNameIgnoreCase("Điện thoại & Phụ kiện"))
+                .map(c -> {
+                    if (!"Điện thoại thông minh".equalsIgnoreCase(c.getName())) {
+                        c.setName("Điện thoại thông minh");
+                        c.setDescription("Điện thoại thông minh, flagship cao cấp iOS và Android");
+                        return categoryRepository.save(c);
+                    }
+                    return c;
+                })
                 .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name("Điện thoại & Phụ kiện")
-                        .description("Điện thoại thông minh, củ cáp sạc, pin dự phòng")
+                        .name("Điện thoại thông minh")
+                        .description("Điện thoại thông minh, flagship cao cấp iOS và Android")
+                        .status(CategoryStatus.ACTIVE)
+                        .isDeleted(false)
+                        .build()));
+
+        Category categoryCharger = categoryRepository.findByNameIgnoreCase("Củ cáp & Phụ kiện sạc")
+                .orElseGet(() -> categoryRepository.save(Category.builder()
+                        .name("Củ cáp & Phụ kiện sạc")
+                        .description("Củ sạc nhanh GaN, cáp sạc siêu bền, trạm sạc và pin dự phòng")
                         .status(CategoryStatus.ACTIVE)
                         .isDeleted(false)
                         .build()));
@@ -640,10 +689,27 @@ public class TestDataInitializer implements CommandLineRunner {
                         .isDeleted(false)
                         .build()));
 
-        Category categoryPeripherals = categoryRepository.findByNameIgnoreCase("Bàn phím & Chuột công nghệ")
+        Category categoryKeyboard = categoryRepository.findByNameIgnoreCase("Bàn phím máy tính")
+                .or(() -> categoryRepository.findByNameIgnoreCase("Bàn phím & Chuột công nghệ"))
+                .map(c -> {
+                    if (!"Bàn phím máy tính".equalsIgnoreCase(c.getName())) {
+                        c.setName("Bàn phím máy tính");
+                        c.setDescription("Bàn phím cơ Custom, bàn phím không dây, phụ kiện phím cơ");
+                        return categoryRepository.save(c);
+                    }
+                    return c;
+                })
                 .orElseGet(() -> categoryRepository.save(Category.builder()
-                        .name("Bàn phím & Chuột công nghệ")
-                        .description("Bàn phím cơ Custom, chuột công thái học, phụ kiện gaming")
+                        .name("Bàn phím máy tính")
+                        .description("Bàn phím cơ Custom, bàn phím không dây, phụ kiện phím cơ")
+                        .status(CategoryStatus.ACTIVE)
+                        .isDeleted(false)
+                        .build()));
+
+        Category categoryMouse = categoryRepository.findByNameIgnoreCase("Chuột máy tính")
+                .orElseGet(() -> categoryRepository.save(Category.builder()
+                        .name("Chuột máy tính")
+                        .description("Chuột không dây công thái học, chuột gaming cao cấp")
                         .status(CategoryStatus.ACTIVE)
                         .isDeleted(false)
                         .build()));
@@ -666,6 +732,16 @@ public class TestDataInitializer implements CommandLineRunner {
                     "MacBook Pro 14 M3 Pro 18GB/512GB Chính Hãng Apple VN",
                     "macbook-pro-14-m3-pro-512gb",
                     "MacBook Pro 14 inch trang bị chip Apple M3 Pro với CPU 11 lõi, GPU 14 lõi, màn hình Liquid Retina XDR 120Hz siêu sáng.",
+                    Map.of(
+                            "Màn hình", "14.2 inch Liquid Retina XDR (3024 x 1964) 120Hz ProMotion",
+                            "Chipset", "Apple M3 Pro (11-core CPU, 14-core GPU)",
+                            "RAM", "18GB Unified Memory",
+                            "Ổ cứng", "512GB SSD PCIe NVMe",
+                            "Cổng kết nối", "3 x Thunderbolt 4, HDMI, Jack 3.5mm, Khe thẻ SDXC, MagSafe 3",
+                            "Thời lượng pin", "Lên đến 18 giờ xem video",
+                            "Hệ điều hành", "macOS Sonoma",
+                            "Trọng lượng", "1.61 kg"
+                    ),
                     "https://images.unsplash.com/photo-1517336714731-489689fd1ca8",
                     List.of(
                             ProductVariant.builder()
@@ -675,6 +751,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(50)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1517336714731-489689fd1ca8")
+                                    .attributes(Map.of("Màu sắc", "Space Black", "Dung lượng", "512GB", "RAM", "18GB"))
                                     .isDeleted(false)
                                     .build(),
                             ProductVariant.builder()
@@ -684,6 +761,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(40)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1517336714731-489689fd1ca8")
+                                    .attributes(Map.of("Màu sắc", "Silver", "Dung lượng", "512GB", "RAM", "18GB"))
                                     .isDeleted(false)
                                     .build()
                     )
@@ -699,6 +777,14 @@ public class TestDataInitializer implements CommandLineRunner {
                     "Tai Nghe Apple AirPods Pro 2 USB-C Chính Hãng VN/A",
                     "airpods-pro-2-usb-c",
                     "Tai nghe True Wireless Apple AirPods Pro Gen 2 cổng USB-C, chip H2 khử tiếng ồn chủ động gấp 2 lần, chống bụi nước chuẩn IP54.",
+                    Map.of(
+                            "Kiểu tai nghe", "In-ear True Wireless",
+                            "Công nghệ âm thanh", "Spatial Audio cá nhân hóa, Adaptive EQ",
+                            "Chống ồn", "Chống ồn chủ động (ANC) 2X & Xuyên âm thích ứng",
+                            "Thời lượng pin", "Lên đến 6 giờ nghe (30 giờ kèm hộp sạc)",
+                            "Cổng sạc", "USB-C, Hỗ trợ sạc MagSafe & Qi không dây",
+                            "Kết nối", "Bluetooth 5.3, Chip Apple H2 & U1"
+                    ),
                     "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434",
                     List.of(
                             ProductVariant.builder()
@@ -708,6 +794,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(200)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1600294037681-c80b4cb5b434")
+                                    .attributes(Map.of("Màu sắc", "Trắng", "Cổng sạc", "USB-C"))
                                     .isDeleted(false)
                                     .build()
                     )
@@ -723,6 +810,16 @@ public class TestDataInitializer implements CommandLineRunner {
                     "iPad Air M2 11 inch Wi-Fi 128GB Chính Hãng",
                     "ipad-air-m2-11-inch-wifi-128gb",
                     "iPad Air M2 hoàn toàn mới với màn hình Liquid Retina 11 inch sắc nét, chip M2 đỉnh cao cho đồ họa và AI, hỗ trợ Apple Pencil Pro.",
+                    Map.of(
+                            "Màn hình", "Liquid Retina 11 inch (2360 x 1640) True Tone 500 nits",
+                            "Chipset", "Apple M2 (8-core CPU, 9-core GPU, 16-core Neural Engine)",
+                            "RAM", "8GB",
+                            "Bộ nhớ trong", "128GB",
+                            "Camera sau", "12MP Wide f/1.8 quay phim 4K",
+                            "Camera trước", "12MP Ultra Wide góc ngang hỗ trợ Center Stage",
+                            "Kết nối", "Wi-Fi 6E, Bluetooth 5.3, USB-C",
+                            "Phụ kiện tương thích", "Apple Pencil Pro, Apple Pencil USB-C, Magic Keyboard"
+                    ),
                     "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0",
                     List.of(
                             ProductVariant.builder()
@@ -732,6 +829,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(80)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0")
+                                    .attributes(Map.of("Màu sắc", "Space Gray", "Dung lượng", "128GB", "Kết nối", "Wi-Fi"))
                                     .isDeleted(false)
                                     .build(),
                             ProductVariant.builder()
@@ -741,6 +839,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(80)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0")
+                                    .attributes(Map.of("Màu sắc", "Starlight", "Dung lượng", "128GB", "Kết nối", "Wi-Fi"))
                                     .isDeleted(false)
                                     .build()
                     )
@@ -751,11 +850,18 @@ public class TestDataInitializer implements CommandLineRunner {
         if (!productRepository.existsBySlug("cu-sac-nhanh-anker-735-ganprime-65w")) {
             createProductWithVariants(
                     ankerShop,
-                    categoryPhone,
+                    categoryCharger,
                     "Anker",
                     "Củ Sạc Nhanh Anker 735 GaNPrime 65W 3 Cổng (2C1A)",
                     "cu-sac-nhanh-anker-735-ganprime-65w",
                     "Củ sạc nhanh Anker GaNPrime 65W công nghệ PowerIQ 4.0 với 2 cổng USB-C và 1 cổng USB-A sạc cùng lúc laptop, điện thoại và máy tính bảng.",
+                    Map.of(
+                            "Công suất tối đa", "65W Max",
+                            "Số cổng kết nối", "3 cổng (2 USB-C + 1 USB-A)",
+                            "Công nghệ sạc", "GaNPrime, PowerIQ 4.0, ActiveShield 2.0",
+                            "Chuẩn tương thích", "MacBook, Dell XPS, iPhone, iPad, Samsung",
+                            "Đặc điểm nổi bật", "Công nghệ GaN nhỏ hơn 53%, sạc đồng thời 3 thiết bị"
+                    ),
                     "https://images.unsplash.com/photo-1583863788434-e58a36330cf0",
                     List.of(
                             ProductVariant.builder()
@@ -765,6 +871,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(250)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1583863788434-e58a36330cf0")
+                                    .attributes(Map.of("Màu sắc", "Đen", "Công suất", "65W", "Số cổng", "2 Type-C + 1 Type-A"))
                                     .isDeleted(false)
                                     .build()
                     )
@@ -775,11 +882,18 @@ public class TestDataInitializer implements CommandLineRunner {
         if (!productRepository.existsBySlug("pin-du-phong-anker-737-powercore-24000mah-140w")) {
             createProductWithVariants(
                     ankerShop,
-                    categoryPhone,
+                    categoryCharger,
                     "Anker",
                     "Pin Dự Phòng Anker 737 PowerCore 24,000mAh 140W 3 Cổng",
                     "pin-du-phong-anker-737-powercore-24000mah-140w",
                     "Pin sạc dự phòng cao cấp Anker 737 hỗ trợ chuẩn Power Delivery 3.1 công suất siêu khủng 140W, màn hình kỹ thuật số hiển thị thông số sạc trực quan.",
+                    Map.of(
+                            "Công suất tối đa", "140W Two-Way Fast Charging (PD 3.1)",
+                            "Số cổng kết nối", "3 cổng (2 USB-C + 1 USB-A)",
+                            "Công nghệ sạc", "Power Delivery 3.1 hai chiều siêu tốc 140W",
+                            "Chuẩn tương thích", "MacBook Pro 16, Dell, iPhone, iPad, Steam Deck",
+                            "Đặc điểm nổi bật", "Dung lượng khủng 24.000mAh, màn hình OLED màu kỹ thuật số thông minh"
+                    ),
                     "https://images.unsplash.com/photo-1609592426507-cc09072a2e4e",
                     List.of(
                             ProductVariant.builder()
@@ -789,6 +903,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(120)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1609592426507-cc09072a2e4e")
+                                    .attributes(Map.of("Màu sắc", "Xám Đen", "Dung lượng", "24000mAh", "Công suất", "140W"))
                                     .isDeleted(false)
                                     .build()
                     )
@@ -804,6 +919,14 @@ public class TestDataInitializer implements CommandLineRunner {
                     "Tai Nghe Chụp Tai Bluetooth Anker Soundcore Space One Hi-Res LDAC",
                     "tai-nghe-chong-on-anker-soundcore-space-one",
                     "Tai nghe chụp tai Bluetooth Anker Soundcore Space One khử ồn chủ động 2X, chuẩn âm thanh Hi-Res Audio Wireless LDAC, pin 55 giờ.",
+                    Map.of(
+                            "Kiểu tai nghe", "Over-ear (Chụp tai)",
+                            "Công nghệ âm thanh", "Hi-Res Audio, Hi-Res Wireless, LDAC codec",
+                            "Chống ồn", "Chống ồn chủ động thích ứng (Adaptive ANC) khử giọng nói 2X",
+                            "Thời lượng pin", "40 giờ (bật ANC), 55 giờ (tắt ANC)",
+                            "Cổng sạc", "USB-C, Sạc nhanh 5 phút nghe 4 giờ",
+                            "Kết nối", "Bluetooth 5.3, Đa điểm Multipoint, Cáp AUX 3.5mm"
+                    ),
                     "https://images.unsplash.com/photo-1505740420928-5e560c06d30e",
                     List.of(
                             ProductVariant.builder()
@@ -813,6 +936,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(100)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1505740420928-5e560c06d30e")
+                                    .attributes(Map.of("Màu sắc", "Jet Black", "Kiểu dáng", "Over-ear"))
                                     .isDeleted(false)
                                     .build(),
                             ProductVariant.builder()
@@ -822,6 +946,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(80)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1505740420928-5e560c06d30e")
+                                    .attributes(Map.of("Màu sắc", "Sky Blue", "Kiểu dáng", "Over-ear"))
                                     .isDeleted(false)
                                     .build()
                     )
@@ -832,11 +957,21 @@ public class TestDataInitializer implements CommandLineRunner {
         if (!productRepository.existsBySlug("ban-phim-co-keychron-k2-pro")) {
             createProductWithVariants(
                     shop123,
-                    categoryPeripherals,
+                    categoryKeyboard,
                     "Keychron",
                     "Bàn Phím Cơ Không Dây Keychron K2 Pro QMK/VIA Hotswap RGB",
                     "ban-phim-co-keychron-k2-pro",
                     "Bàn phím cơ Custom không dây Keychron K2 Pro layout 75%, hỗ trợ QMK/VIA keymap tùy biến, mạch xuôi Hotswap, foam tiêu âm cao cấp.",
+                    Map.of(
+                            "Layout", "75% (84 phím)",
+                            "Switch", "Keychron K Pro (Hỗ trợ Hotswap 3-pin & 5-pin)",
+                            "Keycap", "OSA Profile PBT Double-shot xuyên led",
+                            "Khả năng tùy biến", "Hỗ trợ phần mềm QMK/VIA keymap và macro đầy đủ",
+                            "Đèn nền", "RGB 22 chế độ hiệu ứng, mạch xuôi South-facing",
+                            "Kết nối", "Bluetooth 5.1 (kết nối tối đa 3 thiết bị) & Type-C có dây",
+                            "Dung lượng pin", "4000 mAh (dùng đến 300 giờ khi tắt led)",
+                            "Hệ điều hành tương thích", "macOS / Windows / Linux / Android"
+                    ),
                     "https://images.unsplash.com/photo-1587829741301-dc798b83add3",
                     List.of(
                             ProductVariant.builder()
@@ -846,6 +981,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(150)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1587829741301-dc798b83add3")
+                                    .attributes(Map.of("Loại Switch", "Red Switch (Linear)", "Đèn LED", "RGB Hotswap", "Layout", "75%"))
                                     .isDeleted(false)
                                     .build(),
                             ProductVariant.builder()
@@ -855,6 +991,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(150)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1587829741301-dc798b83add3")
+                                    .attributes(Map.of("Loại Switch", "Brown Switch (Tactile)", "Đèn LED", "RGB Hotswap", "Layout", "75%"))
                                     .isDeleted(false)
                                     .build()
                     )
@@ -865,11 +1002,21 @@ public class TestDataInitializer implements CommandLineRunner {
         if (!productRepository.existsBySlug("chuot-logitech-mx-master-3s")) {
             createProductWithVariants(
                     shop123,
-                    categoryPeripherals,
+                    categoryMouse,
                     "Logitech",
                     "Chuột Không Dây Công Thái Học Logitech MX Master 3S 8000 DPI",
                     "chuot-logitech-mx-master-3s",
                     "Chuột công thái học hàng đầu cho dân văn phòng và lập trình viên Logitech MX Master 3S, cảm biến 8000 DPI trên mọi mặt phẳng kính, click chống ồn Quiet Click.",
+                    Map.of(
+                            "Độ phân giải cảm biến", "200 đến 8000 DPI (công nghệ Darkfield di chuyển trên mọi bề mặt kể cả kính)",
+                            "Nút bấm", "Quiet Click giảm 90% tiếng ồn click chuột",
+                            "Cuộn siêu tốc", "Con lăn MagSpeed điện từ cuộn 1000 dòng/giây",
+                            "Con lăn ngón cái", "Hỗ trợ cuộn ngang (Horizontal scroll)",
+                            "Kết nối", "Bluetooth Low Energy & Logi Bolt USB Receiver",
+                            "Phần mềm hỗ trợ", "Logi Options+ (Tùy biến theo từng ứng dụng, Logitech Flow chuyển dữ liệu giữa các máy)",
+                            "Thời lượng pin", "Lên đến 70 ngày sau một lần sạc đầy qua USB-C",
+                            "Trọng lượng", "141g"
+                    ),
                     "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7",
                     List.of(
                             ProductVariant.builder()
@@ -879,6 +1026,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(200)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7")
+                                    .attributes(Map.of("Màu sắc", "Graphite", "Độ nhạy", "8000 DPI", "Kết nối", "Bluetooth + Logi Bolt"))
                                     .isDeleted(false)
                                     .build(),
                             ProductVariant.builder()
@@ -888,6 +1036,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(150)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7")
+                                    .attributes(Map.of("Màu sắc", "Pale Gray", "Độ nhạy", "8000 DPI", "Kết nối", "Bluetooth + Logi Bolt"))
                                     .isDeleted(false)
                                     .build()
                     )
@@ -903,6 +1052,16 @@ public class TestDataInitializer implements CommandLineRunner {
                     "Màn Hình Đồ Họa Dell UltraSharp U2724D 27 inch 2K 120Hz IPS Black",
                     "man-hinh-dell-ultrasharp-u2724d-27-inch-2k",
                     "Màn hình Dell UltraSharp 27 inch độ phân giải 2K QHD, tấm nền IPS Black tương phản 2000:1, tần số quét 120Hz, đạt 100% sRGB và 98% DCI-P3.",
+                    Map.of(
+                            "Kích thước màn hình", "27 inch 16:9",
+                            "Độ phân giải", "2K QHD (2560 x 1440)",
+                            "Tấm nền & Tương phản", "IPS Black, Tương phản tĩnh 2000:1",
+                            "Tần số quét", "120Hz mượt mà",
+                            "Độ bao phủ màu", "100% sRGB, 100% BT.709, 98% Display P3, Delta E < 2",
+                            "Công nghệ bảo vệ mắt", "Cảm biến ánh sáng môi trường tự điều chỉnh nhiệt độ màu, ComfortView Plus",
+                            "Cổng kết nối", "DisplayPort 1.4, HDMI 2.1, USB-C (Data 10Gbps), USB-A Hub 10Gbps",
+                            "Chân đế", "Điều chỉnh độ cao, xoay dọc 90 độ, xoay trái phải, nghiêng"
+                    ),
                     "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf",
                     List.of(
                             ProductVariant.builder()
@@ -912,6 +1071,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(60)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1527443224154-c4a3942d3acf")
+                                    .attributes(Map.of("Màu sắc", "Silver", "Kích thước", "27 inch", "Độ phân giải", "2K QHD 120Hz"))
                                     .isDeleted(false)
                                     .build()
                     )
@@ -927,6 +1087,16 @@ public class TestDataInitializer implements CommandLineRunner {
                     "Samsung Galaxy S24 Ultra 12GB/256GB Khung Viền Titan",
                     "samsung-galaxy-s24-ultra-256gb",
                     "Samsung Galaxy S24 Ultra đỉnh cao quyền năng Galaxy AI, khung viền Titan bền bỉ, bút S-Pen tích hợp, camera mắt thần bóng đêm 200MP.",
+                    Map.of(
+                            "Màn hình", "Dynamic AMOLED 2X 6.8 inch QHD+, 1-120Hz LTPO, Kính Gorilla Armor chống chói",
+                            "Chipset", "Qualcomm Snapdragon 8 Gen 3 for Galaxy",
+                            "RAM", "12GB LPDDR5X",
+                            "Bộ nhớ trong", "256GB UFS 4.0",
+                            "Camera chính", "200MP f/1.7 OIS + 50MP Periscope 5x + 10MP Tele 3x + 12MP Ultra-wide",
+                            "Pin & Sạc", "5000 mAh, Sạc nhanh có dây 45W, Sạc không dây 15W",
+                            "Chất liệu khung", "Khung viền Titanium chuẩn hàng không vũ trụ",
+                            "Kháng nước", "IP68"
+                    ),
                     "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf",
                     List.of(
                             ProductVariant.builder()
@@ -936,6 +1106,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(90)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1610945265064-0e34e5519bbf")
+                                    .attributes(Map.of("Màu sắc", "Titanium Gray", "Dung lượng", "256GB", "RAM", "12GB"))
                                     .isDeleted(false)
                                     .build(),
                             ProductVariant.builder()
@@ -945,6 +1116,7 @@ public class TestDataInitializer implements CommandLineRunner {
                                     .stockQuantity(90)
                                     .status(ProductVariantStatus.ACTIVE)
                                     .imageUrl("https://images.unsplash.com/photo-1610945265064-0e34e5519bbf")
+                                    .attributes(Map.of("Màu sắc", "Titanium Black", "Dung lượng", "256GB", "RAM", "12GB"))
                                     .isDeleted(false)
                                     .build()
                     )
@@ -961,6 +1133,7 @@ public class TestDataInitializer implements CommandLineRunner {
             String name,
             String slug,
             String description,
+            Map<String, Object> attributes,
             String mainImageUrl,
             List<ProductVariant> variants
     ) {
@@ -971,6 +1144,7 @@ public class TestDataInitializer implements CommandLineRunner {
                 .name(name)
                 .slug(slug)
                 .description(description)
+                .attributes(attributes)
                 .approvalStatus(ProductApprovalStatus.APPROVED)
                 .visibilityStatus(ProductVisibilityStatus.PUBLISHED)
                 .isSuspended(false)
@@ -996,6 +1170,362 @@ public class TestDataInitializer implements CommandLineRunner {
         return productVariantRepository.findAll().stream()
                 .filter(v -> sku.equalsIgnoreCase(v.getSku()))
                 .findFirst().orElse(null);
+    }
+
+    private void ensureCategoryAttribute(
+            Category category,
+            String name,
+            CategoryAttributeDataType dataType,
+            List<String> options,
+            String sampleValue
+    ) {
+        if (!categoryAttributeRepository.existsByCategoryIdAndNameIgnoreCase(category.getId(), name)) {
+            CategoryAttribute attr = CategoryAttribute.builder()
+                    .category(category)
+                    .name(name)
+                    .dataType(dataType)
+                    .options(options)
+                    .sampleValue(sampleValue)
+                    .build();
+            categoryAttributeRepository.save(attr);
+            log.info("Created CategoryAttribute '{}' for category '{}'", name, category.getName());
+        }
+    }
+
+    private void ensureAllCategoryAttributesExist() {
+        log.info("Ensuring category attributes match product technical specifications schema...");
+
+        // 1. Điện thoại thông minh
+        Category categoryPhone = categoryRepository.findByNameIgnoreCase("Điện thoại thông minh")
+                .or(() -> categoryRepository.findByNameIgnoreCase("Điện thoại & Phụ kiện"))
+                .orElse(null);
+        if (categoryPhone != null) {
+            categoryAttributeRepository.findByCategoryId(categoryPhone.getId()).stream()
+                    .filter(a -> "Màu sắc".equalsIgnoreCase(a.getName()))
+                    .findFirst()
+                    .ifPresent(categoryAttributeRepository::delete);
+
+            ensureCategoryAttribute(categoryPhone, "Màn hình", CategoryAttributeDataType.TEXT, null, "6.7 inch Super Retina XDR OLED 120Hz ProMotion");
+            ensureCategoryAttribute(categoryPhone, "Chipset", CategoryAttributeDataType.TEXT, null, "Apple A17 Pro (3nm) / Snapdragon 8 Gen 3");
+            ensureCategoryAttribute(categoryPhone, "RAM", CategoryAttributeDataType.TEXT, null, "8GB / 12GB LPDDR5X");
+            ensureCategoryAttribute(categoryPhone, "Bộ nhớ trong", CategoryAttributeDataType.TEXT, null, "256GB / 512GB UFS 4.0");
+            ensureCategoryAttribute(categoryPhone, "Camera chính", CategoryAttributeDataType.TEXT, null, "Chính 48MP + 12MP Tele 5x / 200MP OIS");
+            ensureCategoryAttribute(categoryPhone, "Pin & Sạc", CategoryAttributeDataType.TEXT, null, "4422 mAh / 5000 mAh, sạc nhanh PD 20W/45W");
+            ensureCategoryAttribute(categoryPhone, "Chất liệu khung", CategoryAttributeDataType.TEXT, null, "Titan chuẩn hàng không vũ trụ");
+            ensureCategoryAttribute(categoryPhone, "Kháng nước", CategoryAttributeDataType.TEXT, null, "IP68");
+        }
+
+        // 2. Củ cáp & Phụ kiện sạc
+        Category categoryCharger = categoryRepository.findByNameIgnoreCase("Củ cáp & Phụ kiện sạc").orElse(null);
+        if (categoryCharger != null) {
+            ensureCategoryAttribute(categoryCharger, "Công suất tối đa", CategoryAttributeDataType.TEXT, null, "20W / 65W GaN / 140W PD 3.1");
+            ensureCategoryAttribute(categoryCharger, "Số cổng kết nối", CategoryAttributeDataType.TEXT, null, "1 USB-C / 3 cổng (2 Type-C + 1 Type-A)");
+            ensureCategoryAttribute(categoryCharger, "Công nghệ sạc", CategoryAttributeDataType.TEXT, null, "Power Delivery 3.0 / GaNPrime / PowerIQ 4.0");
+            ensureCategoryAttribute(categoryCharger, "Chuẩn tương thích", CategoryAttributeDataType.TEXT, null, "iPhone, iPad, MacBook, Android, Laptop");
+            ensureCategoryAttribute(categoryCharger, "Đặc điểm nổi bật", CategoryAttributeDataType.TEXT, null, "Chứng nhận Apple MFi / Màn hình màu OLED thông minh");
+        }
+
+        // 3. Laptop & Máy tính
+        Category categoryLaptop = categoryRepository.findByNameIgnoreCase("Laptop & Máy tính").orElse(null);
+        if (categoryLaptop != null) {
+            ensureCategoryAttribute(categoryLaptop, "Màn hình", CategoryAttributeDataType.TEXT, null, "14.2 inch Liquid Retina XDR (3024 x 1964) 120Hz");
+            ensureCategoryAttribute(categoryLaptop, "Chipset", CategoryAttributeDataType.TEXT, null, "Apple M3 Pro (11-core CPU, 14-core GPU)");
+            ensureCategoryAttribute(categoryLaptop, "RAM", CategoryAttributeDataType.TEXT, null, "18GB Unified Memory");
+            ensureCategoryAttribute(categoryLaptop, "Ổ cứng", CategoryAttributeDataType.TEXT, null, "512GB SSD PCIe NVMe");
+            ensureCategoryAttribute(categoryLaptop, "Cổng kết nối", CategoryAttributeDataType.TEXT, null, "3 x Thunderbolt 4, HDMI, Jack 3.5mm, MagSafe 3");
+            ensureCategoryAttribute(categoryLaptop, "Thời lượng pin", CategoryAttributeDataType.TEXT, null, "Lên đến 18 giờ xem video");
+            ensureCategoryAttribute(categoryLaptop, "Hệ điều hành", CategoryAttributeDataType.TEXT, null, "macOS Sonoma");
+            ensureCategoryAttribute(categoryLaptop, "Trọng lượng", CategoryAttributeDataType.TEXT, null, "1.61 kg");
+        }
+
+        // 4. Máy tính bảng
+        Category categoryTablet = categoryRepository.findByNameIgnoreCase("Máy tính bảng").orElse(null);
+        if (categoryTablet != null) {
+            ensureCategoryAttribute(categoryTablet, "Màn hình", CategoryAttributeDataType.TEXT, null, "Liquid Retina 11 inch (2360 x 1640) 500 nits");
+            ensureCategoryAttribute(categoryTablet, "Chipset", CategoryAttributeDataType.TEXT, null, "Apple M2 (8-core CPU, 9-core GPU)");
+            ensureCategoryAttribute(categoryTablet, "RAM", CategoryAttributeDataType.TEXT, null, "8GB");
+            ensureCategoryAttribute(categoryTablet, "Bộ nhớ trong", CategoryAttributeDataType.TEXT, null, "128GB");
+            ensureCategoryAttribute(categoryTablet, "Camera sau", CategoryAttributeDataType.TEXT, null, "12MP Wide f/1.8 quay phim 4K");
+            ensureCategoryAttribute(categoryTablet, "Camera trước", CategoryAttributeDataType.TEXT, null, "12MP Ultra Wide hỗ trợ Center Stage");
+            ensureCategoryAttribute(categoryTablet, "Kết nối", CategoryAttributeDataType.TEXT, null, "Wi-Fi 6E, Bluetooth 5.3, USB-C");
+            ensureCategoryAttribute(categoryTablet, "Phụ kiện tương thích", CategoryAttributeDataType.TEXT, null, "Apple Pencil Pro, Magic Keyboard");
+        }
+
+        // 5. Tai nghe & Âm thanh
+        Category categoryAudio = categoryRepository.findByNameIgnoreCase("Tai nghe & Âm thanh").orElse(null);
+        if (categoryAudio != null) {
+            ensureCategoryAttribute(categoryAudio, "Kiểu tai nghe", CategoryAttributeDataType.TEXT, null, "In-ear True Wireless / Over-ear");
+            ensureCategoryAttribute(categoryAudio, "Công nghệ âm thanh", CategoryAttributeDataType.TEXT, null, "Spatial Audio, Hi-Res Audio Wireless LDAC");
+            ensureCategoryAttribute(categoryAudio, "Chống ồn", CategoryAttributeDataType.TEXT, null, "Chống ồn chủ động (ANC) 2X thích ứng");
+            ensureCategoryAttribute(categoryAudio, "Thời lượng pin", CategoryAttributeDataType.TEXT, null, "6 giờ (30 giờ kèm hộp sạc) / 55 giờ");
+            ensureCategoryAttribute(categoryAudio, "Cổng sạc", CategoryAttributeDataType.TEXT, null, "USB-C, Hỗ trợ sạc MagSafe & Qi");
+            ensureCategoryAttribute(categoryAudio, "Kết nối", CategoryAttributeDataType.TEXT, null, "Bluetooth 5.3");
+        }
+
+        // 6. Bàn phím máy tính
+        Category categoryKeyboard = categoryRepository.findByNameIgnoreCase("Bàn phím máy tính")
+                .or(() -> categoryRepository.findByNameIgnoreCase("Bàn phím & Chuột công nghệ"))
+                .orElse(null);
+        if (categoryKeyboard != null) {
+            ensureCategoryAttribute(categoryKeyboard, "Layout", CategoryAttributeDataType.TEXT, null, "75% (84 phím)");
+            ensureCategoryAttribute(categoryKeyboard, "Switch", CategoryAttributeDataType.TEXT, null, "Keychron K Pro (Hotswap 3-pin & 5-pin)");
+            ensureCategoryAttribute(categoryKeyboard, "Keycap", CategoryAttributeDataType.TEXT, null, "OSA Profile PBT Double-shot");
+            ensureCategoryAttribute(categoryKeyboard, "Khả năng tùy biến", CategoryAttributeDataType.TEXT, null, "Hỗ trợ phần mềm QMK/VIA keymap và macro đầy đủ");
+            ensureCategoryAttribute(categoryKeyboard, "Đèn nền", CategoryAttributeDataType.TEXT, null, "RGB 22 chế độ hiệu ứng, mạch xuôi South-facing");
+            ensureCategoryAttribute(categoryKeyboard, "Kết nối", CategoryAttributeDataType.TEXT, null, "Bluetooth 5.1 & Type-C có dây");
+            ensureCategoryAttribute(categoryKeyboard, "Dung lượng pin", CategoryAttributeDataType.TEXT, null, "4000 mAh (dùng đến 300 giờ)");
+            ensureCategoryAttribute(categoryKeyboard, "Hệ điều hành tương thích", CategoryAttributeDataType.TEXT, null, "macOS / Windows / Linux / Android");
+        }
+
+        // 7. Chuột máy tính
+        Category categoryMouse = categoryRepository.findByNameIgnoreCase("Chuột máy tính").orElse(null);
+        if (categoryMouse != null) {
+            ensureCategoryAttribute(categoryMouse, "Độ phân giải cảm biến", CategoryAttributeDataType.TEXT, null, "200 đến 8000 DPI Darkfield");
+            ensureCategoryAttribute(categoryMouse, "Nút bấm", CategoryAttributeDataType.TEXT, null, "Quiet Click giảm 90% tiếng ồn click chuột");
+            ensureCategoryAttribute(categoryMouse, "Cuộn siêu tốc", CategoryAttributeDataType.TEXT, null, "Con lăn MagSpeed điện từ cuộn 1000 dòng/giây");
+            ensureCategoryAttribute(categoryMouse, "Con lăn ngón cái", CategoryAttributeDataType.TEXT, null, "Hỗ trợ cuộn ngang Horizontal scroll");
+            ensureCategoryAttribute(categoryMouse, "Kết nối", CategoryAttributeDataType.TEXT, null, "Bluetooth Low Energy & Logi Bolt USB Receiver");
+            ensureCategoryAttribute(categoryMouse, "Phần mềm hỗ trợ", CategoryAttributeDataType.TEXT, null, "Logi Options+ & Logitech Flow");
+            ensureCategoryAttribute(categoryMouse, "Thời lượng pin", CategoryAttributeDataType.TEXT, null, "Lên đến 70 ngày sau một lần sạc đầy qua USB-C");
+            ensureCategoryAttribute(categoryMouse, "Trọng lượng", CategoryAttributeDataType.TEXT, null, "141g");
+        }
+
+        // 8. Màn hình máy tính
+        Category categoryMonitor = categoryRepository.findByNameIgnoreCase("Màn hình máy tính").orElse(null);
+        if (categoryMonitor != null) {
+            ensureCategoryAttribute(categoryMonitor, "Kích thước màn hình", CategoryAttributeDataType.TEXT, null, "27 inch 16:9");
+            ensureCategoryAttribute(categoryMonitor, "Độ phân giải", CategoryAttributeDataType.TEXT, null, "2K QHD (2560 x 1440)");
+            ensureCategoryAttribute(categoryMonitor, "Tấm nền & Tương phản", CategoryAttributeDataType.TEXT, null, "IPS Black, Tương phản tĩnh 2000:1");
+            ensureCategoryAttribute(categoryMonitor, "Tần số quét", CategoryAttributeDataType.TEXT, null, "120Hz mượt mà");
+            ensureCategoryAttribute(categoryMonitor, "Độ bao phủ màu", CategoryAttributeDataType.TEXT, null, "100% sRGB, 100% BT.709, 98% Display P3, Delta E < 2");
+            ensureCategoryAttribute(categoryMonitor, "Công nghệ bảo vệ mắt", CategoryAttributeDataType.TEXT, null, "Cảm biến ánh sáng môi trường, ComfortView Plus");
+            ensureCategoryAttribute(categoryMonitor, "Cổng kết nối", CategoryAttributeDataType.TEXT, null, "DisplayPort 1.4, HDMI 2.1, USB-C 10Gbps");
+            ensureCategoryAttribute(categoryMonitor, "Chân đế", CategoryAttributeDataType.TEXT, null, "Điều chỉnh độ cao, xoay dọc 90 độ, nghiêng");
+        }
+    }
+
+    private void ensureProductAndVariantAttributesPopulated() {
+        log.info("Checking and populating dynamic attributes for products and variants...");
+
+        // Ensure product category mappings are clean and aligned with schemas
+        Map<String, String> productCategoryMap = Map.of(
+                "iphone-15-pro-max-256gb-vn-a", "Điện thoại thông minh",
+                "samsung-galaxy-s24-ultra-256gb", "Điện thoại thông minh",
+                "cu-sac-nhanh-apple-20w-type-c", "Củ cáp & Phụ kiện sạc",
+                "cap-sac-anker-powerline-iii-usb-c-to-lightning-0-9m", "Củ cáp & Phụ kiện sạc",
+                "cu-sac-nhanh-anker-735-ganprime-65w", "Củ cáp & Phụ kiện sạc",
+                "pin-du-phong-anker-737-powercore-24000mah-140w", "Củ cáp & Phụ kiện sạc",
+                "macbook-pro-14-m3-pro-512gb", "Laptop & Máy tính",
+                "ipad-air-m2-11-inch-wifi-128gb", "Máy tính bảng",
+                "airpods-pro-2-usb-c", "Tai nghe & Âm thanh",
+                "tai-nghe-chong-on-anker-soundcore-space-one", "Tai nghe & Âm thanh"
+        );
+        Map<String, String> productCategoryMap2 = Map.of(
+                "ban-phim-co-keychron-k2-pro", "Bàn phím máy tính",
+                "chuot-logitech-mx-master-3s", "Chuột máy tính",
+                "man-hinh-dell-ultrasharp-u2724d-27-inch-2k", "Màn hình máy tính"
+        );
+        Map<String, String> allProductCategoryMap = new HashMap<>(productCategoryMap);
+        allProductCategoryMap.putAll(productCategoryMap2);
+
+        for (Map.Entry<String, String> entry : allProductCategoryMap.entrySet()) {
+            productRepository.findAll().stream()
+                    .filter(p -> entry.getKey().equalsIgnoreCase(p.getSlug()))
+                    .findFirst()
+                    .ifPresent(p -> {
+                        Category targetCat = categoryRepository.findByNameIgnoreCase(entry.getValue())
+                                .or(() -> {
+                                    if ("Điện thoại thông minh".equalsIgnoreCase(entry.getValue())) {
+                                        return categoryRepository.findByNameIgnoreCase("Điện thoại & Phụ kiện");
+                                    } else if ("Bàn phím máy tính".equalsIgnoreCase(entry.getValue())) {
+                                        return categoryRepository.findByNameIgnoreCase("Bàn phím & Chuột công nghệ");
+                                    }
+                                    return Optional.empty();
+                                })
+                                .orElse(null);
+                        if (targetCat != null && (p.getCategory() == null || !targetCat.getId().equals(p.getCategory().getId()))) {
+                            p.setCategory(targetCat);
+                            productRepository.save(p);
+                            log.info("Reassigned product '{}' to category '{}'", p.getName(), targetCat.getName());
+                        }
+                    });
+        }
+
+        Map<String, Map<String, Object>> productSpecsMapPart1 = Map.of(
+                "iphone-15-pro-max-256gb-vn-a", Map.of(
+                        "Màn hình", "Super Retina XDR OLED 6.7 inch 120Hz ProMotion",
+                        "Chipset", "Apple A17 Pro (3nm)",
+                        "RAM", "8GB",
+                        "Bộ nhớ trong", "256GB",
+                        "Camera chính", "Chính 48MP + Góc siêu rộng 12MP + Telephoto 5x 12MP",
+                        "Pin & Sạc", "4422 mAh, Sạc nhanh PD 20W, MagSafe 15W",
+                        "Chất liệu khung", "Titan chuẩn hàng không vũ trụ",
+                        "Kháng nước", "IP68"
+                ),
+                "cu-sac-nhanh-apple-20w-type-c", Map.of(
+                        "Công suất tối đa", "20W",
+                        "Số cổng kết nối", "1 cổng USB-C",
+                        "Công nghệ sạc", "Power Delivery (PD 3.0)",
+                        "Chuẩn tương thích", "iPhone 8 đến iPhone 16 series, iPad Pro/Air/Mini",
+                        "Đặc điểm nổi bật", "Chính hãng Apple, bảo vệ chống quá nhiệt"
+                ),
+                "cap-sac-anker-powerline-iii-usb-c-to-lightning-0-9m", Map.of(
+                        "Công suất tối đa", "Sạc nhanh Power Delivery 60W (3A)",
+                        "Số cổng kết nối", "Đầu cắm USB-C to Lightning (0.9 mét)",
+                        "Công nghệ sạc", "Hỗ trợ sạc nhanh Power Delivery cho iPhone/iPad",
+                        "Chuẩn tương thích", "iPhone, iPad có cổng sạc Lightning",
+                        "Đặc điểm nổi bật", "Chứng nhận Apple MFi, vỏ sợi Kevlar chịu uốn cong 25.000 lần"
+                ),
+                "macbook-pro-14-m3-pro-512gb", Map.of(
+                        "Màn hình", "14.2 inch Liquid Retina XDR (3024 x 1964) 120Hz ProMotion",
+                        "Chipset", "Apple M3 Pro (11-core CPU, 14-core GPU)",
+                        "RAM", "18GB Unified Memory",
+                        "Ổ cứng", "512GB SSD PCIe NVMe",
+                        "Cổng kết nối", "3 x Thunderbolt 4, HDMI, Jack 3.5mm, Khe thẻ SDXC, MagSafe 3",
+                        "Thời lượng pin", "Lên đến 18 giờ xem video",
+                        "Hệ điều hành", "macOS Sonoma",
+                        "Trọng lượng", "1.61 kg"
+                ),
+                "airpods-pro-2-usb-c", Map.of(
+                        "Kiểu tai nghe", "In-ear True Wireless",
+                        "Công nghệ âm thanh", "Spatial Audio cá nhân hóa, Adaptive EQ",
+                        "Chống ồn", "Chống ồn chủ động (ANC) 2X & Xuyên âm thích ứng",
+                        "Thời lượng pin", "Lên đến 6 giờ nghe (30 giờ kèm hộp sạc)",
+                        "Cổng sạc", "USB-C, Hỗ trợ sạc MagSafe & Qi không dây",
+                        "Kết nối", "Bluetooth 5.3, Chip Apple H2 & U1"
+                ),
+                "ipad-air-m2-11-inch-wifi-128gb", Map.of(
+                        "Màn hình", "Liquid Retina 11 inch (2360 x 1640) True Tone 500 nits",
+                        "Chipset", "Apple M2 (8-core CPU, 9-core GPU, 16-core Neural Engine)",
+                        "RAM", "8GB",
+                        "Bộ nhớ trong", "128GB",
+                        "Camera sau", "12MP Wide f/1.8 quay phim 4K",
+                        "Camera trước", "12MP Ultra Wide góc ngang hỗ trợ Center Stage",
+                        "Kết nối", "Wi-Fi 6E, Bluetooth 5.3, USB-C",
+                        "Phụ kiện tương thích", "Apple Pencil Pro, Apple Pencil USB-C, Magic Keyboard"
+                ),
+                "cu-sac-nhanh-anker-735-ganprime-65w", Map.of(
+                        "Công suất tối đa", "65W Max",
+                        "Số cổng kết nối", "3 cổng (2 USB-C + 1 USB-A)",
+                        "Công nghệ sạc", "GaNPrime, PowerIQ 4.0, ActiveShield 2.0",
+                        "Chuẩn tương thích", "MacBook, Dell XPS, iPhone, iPad, Samsung",
+                        "Đặc điểm nổi bật", "Công nghệ GaN nhỏ hơn 53%, sạc đồng thời 3 thiết bị"
+                ),
+                "pin-du-phong-anker-737-powercore-24000mah-140w", Map.of(
+                        "Công suất tối đa", "140W Two-Way Fast Charging (PD 3.1)",
+                        "Số cổng kết nối", "3 cổng (2 USB-C + 1 USB-A)",
+                        "Công nghệ sạc", "Power Delivery 3.1 hai chiều siêu tốc 140W",
+                        "Chuẩn tương thích", "MacBook Pro 16, Dell, iPhone, iPad, Steam Deck",
+                        "Đặc điểm nổi bật", "Dung lượng khủng 24.000mAh, màn hình OLED màu kỹ thuật số thông minh"
+                ),
+                "tai-nghe-chong-on-anker-soundcore-space-one", Map.of(
+                        "Kiểu tai nghe", "Over-ear (Chụp tai)",
+                        "Công nghệ âm thanh", "Hi-Res Audio, Hi-Res Wireless, LDAC codec",
+                        "Chống ồn", "Chống ồn chủ động thích ứng (Adaptive ANC) khử giọng nói 2X",
+                        "Thời lượng pin", "40 giờ (bật ANC), 55 giờ (tắt ANC)",
+                        "Cổng sạc", "USB-C, Sạc nhanh 5 phút nghe 4 giờ",
+                        "Kết nối", "Bluetooth 5.3, Đa điểm Multipoint, Cáp AUX 3.5mm"
+                ),
+                "ban-phim-co-keychron-k2-pro", Map.of(
+                        "Layout", "75% (84 phím)",
+                        "Switch", "Keychron K Pro (Hỗ trợ Hotswap 3-pin & 5-pin)",
+                        "Keycap", "OSA Profile PBT Double-shot xuyên led",
+                        "Khả năng tùy biến", "Hỗ trợ phần mềm QMK/VIA keymap và macro đầy đủ",
+                        "Đèn nền", "RGB 22 chế độ hiệu ứng, mạch xuôi South-facing",
+                        "Kết nối", "Bluetooth 5.1 (kết nối tối đa 3 thiết bị) & Type-C có dây",
+                        "Dung lượng pin", "4000 mAh (dùng đến 300 giờ khi tắt led)",
+                        "Hệ điều hành tương thích", "macOS / Windows / Linux / Android"
+                )
+        );
+
+        Map<String, Map<String, Object>> productSpecsMapPart2 = Map.of(
+                "chuot-logitech-mx-master-3s", Map.of(
+                        "Độ phân giải cảm biến", "200 đến 8000 DPI (công nghệ Darkfield di chuyển trên mọi bề mặt kể cả kính)",
+                        "Nút bấm", "Quiet Click giảm 90% tiếng ồn click chuột",
+                        "Cuộn siêu tốc", "Con lăn MagSpeed điện từ cuộn 1000 dòng/giây",
+                        "Con lăn ngón cái", "Hỗ trợ cuộn ngang (Horizontal scroll)",
+                        "Kết nối", "Bluetooth Low Energy & Logi Bolt USB Receiver",
+                        "Phần mềm hỗ trợ", "Logi Options+ (Tùy biến theo từng ứng dụng, Logitech Flow chuyển dữ liệu giữa các máy)",
+                        "Thời lượng pin", "Lên đến 70 ngày sau một lần sạc đầy qua USB-C",
+                        "Trọng lượng", "141g"
+                ),
+                "man-hinh-dell-ultrasharp-u2724d-27-inch-2k", Map.of(
+                        "Kích thước màn hình", "27 inch 16:9",
+                        "Độ phân giải", "2K QHD (2560 x 1440)",
+                        "Tấm nền & Tương phản", "IPS Black, Tương phản tĩnh 2000:1",
+                        "Tần số quét", "120Hz mượt mà",
+                        "Độ bao phủ màu", "100% sRGB, 100% BT.709, 98% Display P3, Delta E < 2",
+                        "Công nghệ bảo vệ mắt", "Cảm biến ánh sáng môi trường tự điều chỉnh nhiệt độ màu, ComfortView Plus",
+                        "Cổng kết nối", "DisplayPort 1.4, HDMI 2.1, USB-C (Data 10Gbps), USB-A Hub 10Gbps",
+                        "Chân đế", "Điều chỉnh độ cao, xoay dọc 90 độ, xoay trái phải, nghiêng"
+                ),
+                "samsung-galaxy-s24-ultra-256gb", Map.of(
+                        "Màn hình", "Dynamic AMOLED 2X 6.8 inch QHD+, 1-120Hz LTPO, Kính Gorilla Armor chống chói",
+                        "Chipset", "Qualcomm Snapdragon 8 Gen 3 for Galaxy",
+                        "RAM", "12GB LPDDR5X",
+                        "Bộ nhớ trong", "256GB UFS 4.0",
+                        "Camera chính", "200MP f/1.7 OIS + 50MP Periscope 5x + 10MP Tele 3x + 12MP Ultra-wide",
+                        "Pin & Sạc", "5000 mAh, Sạc nhanh có dây 45W, Sạc không dây 15W",
+                        "Chất liệu khung", "Khung viền Titanium chuẩn hàng không vũ trụ",
+                        "Kháng nước", "IP68"
+                )
+        );
+
+        Map<String, Map<String, Object>> allProductSpecs = new HashMap<>(productSpecsMapPart1);
+        allProductSpecs.putAll(productSpecsMapPart2);
+
+        for (Map.Entry<String, Map<String, Object>> entry : allProductSpecs.entrySet()) {
+            productRepository.findAll().stream()
+                    .filter(p -> entry.getKey().equalsIgnoreCase(p.getSlug()))
+                    .findFirst()
+                    .ifPresent(p -> {
+                        p.setAttributes(entry.getValue());
+                        productRepository.save(p);
+                        log.info("Populated standardized specs for product: {}", p.getName());
+                    });
+        }
+
+        Map<String, Map<String, Object>> variantAttributesPart1 = Map.of(
+                "IP15PM-256GB-NAT", Map.of("Màu sắc", "Titan Tự Nhiên", "Dung lượng", "256GB"),
+                "IP15PM-256GB-BLU", Map.of("Màu sắc", "Titan Xanh", "Dung lượng", "256GB"),
+                "APPLE-20W-USB-C", Map.of("Màu sắc", "Trắng", "Cổng kết nối", "Type-C"),
+                "ANKER-A8832-BLK", Map.of("Màu sắc", "Đen", "Chiều dài", "0.9m"),
+                "MBP14-M3P-BLK", Map.of("Màu sắc", "Space Black", "Dung lượng", "512GB", "RAM", "18GB"),
+                "MBP14-M3P-SLV", Map.of("Màu sắc", "Silver", "Dung lượng", "512GB", "RAM", "18GB"),
+                "APP2-USBC-WHT", Map.of("Màu sắc", "Trắng", "Cổng sạc", "USB-C"),
+                "IPADAIR-M2-128-GRY", Map.of("Màu sắc", "Space Gray", "Dung lượng", "128GB", "Kết nối", "Wi-Fi"),
+                "IPADAIR-M2-128-STA", Map.of("Màu sắc", "Starlight", "Dung lượng", "128GB", "Kết nối", "Wi-Fi"),
+                "ANKER-A2668-BLK", Map.of("Màu sắc", "Đen", "Công suất", "65W", "Số cổng", "2 Type-C + 1 Type-A")
+        );
+
+        Map<String, Map<String, Object>> variantAttributesPart2 = Map.of(
+                "ANKER-A1289-GRY", Map.of("Màu sắc", "Xám Đen", "Dung lượng", "24000mAh", "Công suất", "140W"),
+                "ANKER-A3062-BLK", Map.of("Màu sắc", "Jet Black", "Kiểu dáng", "Over-ear"),
+                "ANKER-A3062-BLU", Map.of("Màu sắc", "Sky Blue", "Kiểu dáng", "Over-ear"),
+                "KEYCHRON-K2P-RED", Map.of("Loại Switch", "Red Switch (Linear)", "Đèn LED", "RGB Hotswap", "Layout", "75%"),
+                "KEYCHRON-K2P-BRN", Map.of("Loại Switch", "Brown Switch (Tactile)", "Đèn LED", "RGB Hotswap", "Layout", "75%"),
+                "LOGI-MXM3S-GRY", Map.of("Màu sắc", "Graphite", "Độ nhạy", "8000 DPI", "Kết nối", "Bluetooth + Logi Bolt"),
+                "LOGI-MXM3S-WHT", Map.of("Màu sắc", "Pale Gray", "Độ nhạy", "8000 DPI", "Kết nối", "Bluetooth + Logi Bolt"),
+                "DELL-U2724D-SLV", Map.of("Màu sắc", "Silver", "Kích thước", "27 inch", "Độ phân giải", "2K QHD 120Hz"),
+                "SS-S24U-256-GRY", Map.of("Màu sắc", "Titanium Gray", "Dung lượng", "256GB", "RAM", "12GB"),
+                "SS-S24U-256-BLK", Map.of("Màu sắc", "Titanium Black", "Dung lượng", "256GB", "RAM", "12GB")
+        );
+
+        Map<String, Map<String, Object>> allVariantAttributes = new HashMap<>(variantAttributesPart1);
+        allVariantAttributes.putAll(variantAttributesPart2);
+
+        for (Map.Entry<String, Map<String, Object>> entry : allVariantAttributes.entrySet()) {
+            productVariantRepository.findAll().stream()
+                    .filter(v -> entry.getKey().equalsIgnoreCase(v.getSku()))
+                    .findFirst()
+                    .ifPresent(v -> {
+                        if (v.getAttributes() == null || v.getAttributes().isEmpty()) {
+                            v.setAttributes(entry.getValue());
+                            productVariantRepository.save(v);
+                            log.info("Backfilled attributes for variant: {}", v.getSku());
+                        }
+                    });
+        }
     }
 
     private void ensureComprehensiveOrdersAndReviewsExist() {
@@ -1092,7 +1622,7 @@ public class TestDataInitializer implements CommandLineRunner {
                     .sellerResponse("Dạ Apple Flagship Store chân thành cảm ơn chị Lan đã tin tưởng lựa chọn mua sắm! Chúc chị có trải nghiệm tuyệt vời với chiếc iPhone 15 Pro Max. Shop luôn sẵn sàng hỗ trợ bảo hành chính hãng 12 tháng tại các trung tâm ủy quyền ạ!")
                     .sellerResponseAt(now.minusDays(6)).build());
             reviewMediaRepository.saveAll(List.of(
-                    ReviewMedia.builder().review(r1).mediaUrl("https://images.unsplash.com/photo-1695048133142-1a20484d2569").mediaType(ReviewMediaType.IMAGE).displayOrder(0).build(),
+                    ReviewMedia.builder().review(r1).mediaUrl("https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=800&q=80").mediaType(ReviewMediaType.IMAGE).displayOrder(0).build(),
                     ReviewMedia.builder().review(r1).mediaUrl("https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5").mediaType(ReviewMediaType.IMAGE).displayOrder(1).build()
             ));
             reviewHelpfulRepository.saveAll(List.of(

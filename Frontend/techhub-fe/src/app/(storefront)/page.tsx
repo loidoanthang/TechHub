@@ -10,7 +10,7 @@ export default function HomePage() {
     <div className="w-full flex flex-col">
       <HeroBento />
       <CategoryGrid />
-      <FlashDeals />
+      {/* <FlashDeals /> */}
       <RecommendedProducts />
     </div>
   );

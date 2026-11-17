@@ -1,6 +1,9 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { Package } from "lucide-react";
 
 export interface ProductThumbnailProps {
   src?: string | null;
@@ -19,6 +22,8 @@ export function ProductThumbnail({
   imageClassName = "object-cover",
   priority = false,
 }: ProductThumbnailProps) {
+  const [hasError, setHasError] = useState(false);
+
   return (
     <div
       className={cn(
@@ -27,17 +32,21 @@ export function ProductThumbnail({
         className
       )}
     >
-      {src ? (
+      {src && !hasError ? (
         <Image
           src={src}
           alt={alt}
           fill
           priority={priority}
           className={cn("object-cover", imageClassName)}
+          onError={() => setHasError(true)}
           unoptimized
         />
       ) : (
-        <span className="text-[10px] font-semibold text-slate-400">TechHub</span>
+        <div className="flex flex-col items-center justify-center gap-0.5 text-slate-400">
+          <Package className="w-4 h-4 text-slate-300" />
+          <span className="text-[9px] font-semibold tracking-tight text-slate-400">TechHub</span>
+        </div>
       )}
     </div>
   );

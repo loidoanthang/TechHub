@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { NotificationsPageView } from "@/features/notifications/components";
 
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "Thông báo gian hàng | TechHub Seller Center",
   description:

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { SellerWalletView } from "@/features/seller/components/wallet";
 
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "Ví & Doanh thu Người Bán | TechHub Seller Center",
   description:

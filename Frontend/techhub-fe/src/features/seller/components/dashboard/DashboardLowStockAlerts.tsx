@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { AlertTriangle, CheckCircle2, ChevronRight, Package, ArrowUpRight } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import type { LowStockVariantDto } from "@/types/sellerDashboard";
@@ -76,13 +77,14 @@ export function DashboardLowStockAlerts({
                 className="py-3 first:pt-0 last:pb-0 flex items-center justify-between gap-3 group"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-11 h-11 rounded-xl bg-[#f8f9fc] border border-[#e2e8f0] overflow-hidden shrink-0 flex items-center justify-center">
+                  <div className="w-11 h-11 rounded-xl bg-[#f8f9fc] border border-[#e2e8f0] overflow-hidden shrink-0 flex items-center justify-center relative">
                     {item.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={item.imageUrl}
                         alt={item.productName}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="44px"
+                        className="object-cover"
                       />
                     ) : (
                       <Package className="w-5 h-5 text-slate-400" />
@@ -91,7 +93,10 @@ export function DashboardLowStockAlerts({
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-bold text-[#0b1c30] truncate group-hover:text-[#0045cc] transition-colors">
+                      <h4
+                        title={item.productName}
+                        className="text-xs font-bold text-[#0b1c30] truncate group-hover:text-[#0045cc] transition-colors"
+                      >
                         {item.productName}
                       </h4>
                       {item.sku && (

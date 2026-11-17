@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { Wallet, ShieldCheck, ArrowUpRight, Clock, Info } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+import { toast } from "@/lib/toast";
 
 interface DashboardWalletCardProps {
   walletBalance?: number;
@@ -83,7 +84,11 @@ export function DashboardWalletCard({
           <button
             type="button"
             className="flex-1 py-2 px-3 rounded-xl bg-white text-[#0045cc] hover:bg-blue-50 text-xs font-bold transition-all shadow-xs text-center"
-            onClick={() => alert("Tính năng rút tiền ví đối tác đang được liên kết tự động qua cổng thanh toán.")}
+            onClick={() =>
+              toast.info(
+                "Tính năng rút tiền tự động qua tài khoản ngân hàng liên kết đang được xử lý theo kỳ đối soát định kỳ."
+              )
+            }
           >
             Yêu cầu rút tiền
           </button>

@@ -72,7 +72,7 @@ export interface Product {
   rating: number;
   reviewsCount: number;
   vendorName: string;
-  vendorSlug: string;
+  vendorSlug?: string;
   isVerifiedVendor?: boolean;
   imageUrl: string;
   tags?: string[];
