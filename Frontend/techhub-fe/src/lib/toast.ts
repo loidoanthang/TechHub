@@ -6,6 +6,12 @@ export interface ToastItem {
   type: ToastType;
 }
 
+declare global {
+  interface WindowEventMap {
+    "techhub:toast": CustomEvent<ToastItem>;
+  }
+}
+
 export const toast = {
   success: (message: string) => emitToast(message, "success"),
   error: (message: string) => emitToast(message, "error"),

@@ -1,4 +1,5 @@
 import { PaymentMethod, PaymentStatus } from "./enums";
+import type { AddressResponse } from "./address";
 
 export interface ShopOrderRequest {
   shopId: string;
@@ -41,7 +42,7 @@ export interface ShopCheckoutPreviewResponse {
 }
 
 export interface CheckoutPreviewResponse {
-  deliveryAddress?: unknown;
+  deliveryAddress?: AddressResponse | null;
   totalProductAmount: number;
   totalShippingFee: number;
   totalShopDiscountAmount?: number;

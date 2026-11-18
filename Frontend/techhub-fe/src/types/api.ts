@@ -5,6 +5,21 @@ export interface ApiResponse<T = unknown> {
   metadata?: unknown;
 }
 
+export type DiscriminatedApiResponse<T> =
+  | {
+      success: true;
+      data: T;
+      message: string;
+      metadata?: unknown;
+    }
+  | {
+      success: false;
+      message: string;
+      errorCode?: string;
+      data?: never;
+      metadata?: unknown;
+    };
+
 export interface PageResponse<T = unknown> {
   content: T[];
   pageNumber: number;

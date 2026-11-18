@@ -4,7 +4,7 @@ export const API_BASE_URL =
 //Web Socket
 export const WS_CHAT_URL =
   process.env.NEXT_PUBLIC_WS_URL ||
-  (API_BASE_URL.replace(/^http/, "ws") + "/ws-chat" as string);
+  (API_BASE_URL.replace(/^http/, "ws") + "/ws-chat");
 
 export const GOOGLE_CLIENT_ID =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";

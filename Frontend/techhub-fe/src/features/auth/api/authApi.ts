@@ -17,42 +17,42 @@ import type { UserProfile } from "@/types/user";
 
 export const authApi = {
   login: async (payload: LoginRequest): Promise<ApiResponse<AuthTokens>> => {
-    return (await apiClient.post(API_ENDPOINTS.AUTH.LOGIN, payload)) as unknown as ApiResponse<AuthTokens>;
+    return apiClient.post(API_ENDPOINTS.AUTH.LOGIN, payload);
   },
 
   register: async (payload: RegisterRequest): Promise<ApiResponse<void>> => {
-    return (await apiClient.post(API_ENDPOINTS.AUTH.REGISTER, payload)) as unknown as ApiResponse<void>;
+    return apiClient.post(API_ENDPOINTS.AUTH.REGISTER, payload);
   },
 
   verifyEmail: async (payload: VerifyEmailRequest): Promise<ApiResponse<void>> => {
-    return (await apiClient.post(API_ENDPOINTS.AUTH.VERIFY_EMAIL, payload)) as unknown as ApiResponse<void>;
+    return apiClient.post(API_ENDPOINTS.AUTH.VERIFY_EMAIL, payload);
   },
 
   resendVerification: async (payload: ResendVerificationRequest): Promise<ApiResponse<void>> => {
-    return (await apiClient.post(API_ENDPOINTS.AUTH.RESEND_VERIFICATION, payload)) as unknown as ApiResponse<void>;
+    return apiClient.post(API_ENDPOINTS.AUTH.RESEND_VERIFICATION, payload);
   },
 
   forgotPassword: async (payload: ForgotPasswordRequest): Promise<ApiResponse<void>> => {
-    return (await apiClient.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, payload)) as unknown as ApiResponse<void>;
+    return apiClient.post(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, payload);
   },
 
   resetPassword: async (payload: ResetPasswordRequest): Promise<ApiResponse<void>> => {
-    return (await apiClient.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, payload)) as unknown as ApiResponse<void>;
+    return apiClient.post(API_ENDPOINTS.AUTH.RESET_PASSWORD, payload);
   },
 
   changePassword: async (payload: ChangePasswordRequest): Promise<ApiResponse<void>> => {
-    return (await apiClient.post(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, payload)) as unknown as ApiResponse<void>;
+    return apiClient.post(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, payload);
   },
 
   logout: async (payload: LogoutRequest): Promise<ApiResponse<void>> => {
-    return (await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, payload)) as unknown as ApiResponse<void>;
+    return apiClient.post(API_ENDPOINTS.AUTH.LOGOUT, payload);
   },
 
   deleteAccount: async (payload: DeleteAccountRequest): Promise<ApiResponse<void>> => {
-    return (await apiClient.post(API_ENDPOINTS.AUTH.DELETE_ACCOUNT, payload)) as unknown as ApiResponse<void>;
+    return apiClient.post(API_ENDPOINTS.AUTH.DELETE_ACCOUNT, payload);
   },
 
   getProfile: async (): Promise<ApiResponse<UserProfile>> => {
-    return (await apiClient.get(API_ENDPOINTS.USER.PROFILE)) as unknown as ApiResponse<UserProfile>;
+    return apiClient.get(API_ENDPOINTS.USER.PROFILE);
   },
 };

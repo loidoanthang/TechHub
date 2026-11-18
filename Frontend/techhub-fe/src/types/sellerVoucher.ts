@@ -1,7 +1,7 @@
-export type DiscountType = "PERCENTAGE" | "FIXED_AMOUNT";
-export type VoucherAppliesTo = "PRODUCT" | "SHIPPING_FEE";
-export type VoucherStatus = "UPCOMING" | "ONGOING" | "EXPIRED" | "DISABLED";
+import type { DiscountType, VoucherAppliesTo, VoucherStatus } from "./enums";
+
 export type VoucherType = "SHOP" | "SYSTEM";
+export type { DiscountType, VoucherAppliesTo, VoucherStatus };
 
 export interface ShopVoucherResponse {
   id: string;

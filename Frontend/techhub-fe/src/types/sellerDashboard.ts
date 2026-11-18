@@ -1,4 +1,6 @@
-export type DashboardPeriod = "TODAY" | "LAST_7_DAYS" | "THIS_MONTH" | "CUSTOM";
+import type { DashboardPeriod } from "./enums";
+
+export type { DashboardPeriod };
 
 export interface SellerDashboardSummaryDto {
   netRevenue: number;

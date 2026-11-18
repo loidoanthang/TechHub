@@ -31,7 +31,7 @@ export interface ProductVariantResponse {
   price: number;
   stockQuantity: number;
   imageUrl?: string | null;
-  attributes?: Record<string, unknown>;
+  attributes?: Record<string, string | number | boolean | null>;
   status: ProductVariantStatus;
 }
 
@@ -48,7 +48,7 @@ export interface PublicProductDetailResponse {
   sellerName?: string | null;
   shopAvatarUrl?: string | null;
   isShopPaused: boolean;
-  attributes?: Record<string, unknown>;
+  attributes?: Record<string, string | number | boolean | null>;
   images: ProductImageResponse[];
   variants: ProductVariantResponse[];
   defaultVariantId?: string | null;

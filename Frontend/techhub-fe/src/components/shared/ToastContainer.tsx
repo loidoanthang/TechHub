@@ -8,11 +8,10 @@ export function ToastContainer() {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   useEffect(() => {
-    const handleToastEvent = (e: Event) => {
-      const customEvent = e as CustomEvent<ToastItem>;
-      if (!customEvent.detail) return;
+    const handleToastEvent = (e: CustomEvent<ToastItem>) => {
+      if (!e.detail) return;
 
-      const newToast = customEvent.detail;
+      const newToast = e.detail;
       setToasts((prev) => [...prev, newToast]);
 
       // Auto dismiss after 4.5 seconds
