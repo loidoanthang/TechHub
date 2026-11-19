@@ -42,11 +42,7 @@ import com.techhub.modules.auth.dto.request.RegisterRequest;
 import com.techhub.modules.auth.dto.request.ResendVerificationRequest;
 import com.techhub.modules.auth.dto.request.ResetPasswordRequest;
 import com.techhub.modules.auth.dto.request.VerifyEmailRequest;
-import com.techhub.modules.auth.service.AuthService;
-import com.techhub.modules.auth.service.EmailService;
-import com.techhub.modules.auth.service.JwtService;
-import com.techhub.modules.auth.service.RefreshTokenService;
-import com.techhub.modules.auth.service.VerificationTokensService;
+
 
 @Service
 @RequiredArgsConstructor

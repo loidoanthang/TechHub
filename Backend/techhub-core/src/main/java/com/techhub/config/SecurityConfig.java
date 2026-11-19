@@ -1,9 +1,6 @@
 package com.techhub.config;
 
-import com.techhub.config.properties.CorsProperties;
-import com.techhub.config.properties.JwtProperties;
-import com.techhub.config.properties.TokenProperties;
-import com.techhub.config.properties.VNPayProperties;
+import com.techhub.config.properties.*;
 import com.techhub.security.JwtAccessDeniedHandler;
 import com.techhub.security.JwtAuthenticationEntryPoint;
 import com.techhub.security.JwtAuthenticationFilter;
@@ -30,7 +27,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
-@EnableConfigurationProperties({JwtProperties.class, TokenProperties.class, CorsProperties.class, VNPayProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, TokenProperties.class, CorsProperties.class, VNPayProperties.class, CloudFlareR2Properties.class})
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
