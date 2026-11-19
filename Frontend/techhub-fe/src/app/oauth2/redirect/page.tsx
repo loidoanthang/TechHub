@@ -11,13 +11,18 @@ function OAuth2RedirectHandler() {
   const searchParams = useSearchParams();
   const { login } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [processed, setProcessed] = useState<boolean>(false);
 
   useEffect(() => {
+    // Only process once to avoid re-triggering if searchParams/login reference updates
+    if (processed) return;
+
     const accessToken = searchParams.get("accessToken") || searchParams.get("token");
     const refreshToken = searchParams.get("refreshToken");
     const errParam = searchParams.get("error");
 
     if (errParam) {
+      setProcessed(true);
       setError(errParam);
       setTimeout(() => {
         router.push(`${ROUTES.LOGIN}?error=${encodeURIComponent(errParam)}`);
@@ -26,11 +31,11 @@ function OAuth2RedirectHandler() {
     }
 
     if (accessToken) {
-      // Clear sensitive tokens from browser address bar and history to prevent credential leakage (CWE-598)
+      setProcessed(true);
+      // Clean query string from browser history immediately before handling login to prevent token leakage in history
       if (typeof window !== "undefined") {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
-
       login(
         {
           accessToken,
@@ -39,12 +44,13 @@ function OAuth2RedirectHandler() {
         ROUTES.HOME
       );
     } else {
+      setProcessed(true);
       setError("No authentication token provided.");
       setTimeout(() => {
         router.push(ROUTES.LOGIN);
       }, 2000);
     }
-  }, [searchParams, login, router]);
+  }, [searchParams, login, router, processed]);
 
   return (
     <div className="bg-white p-8 rounded-2xl shadow-[0_12px_40px_-10px_rgba(11,28,48,0.08)] flex flex-col items-center gap-4 max-w-sm text-center">
