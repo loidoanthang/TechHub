@@ -30,6 +30,12 @@ public interface OrderRepository extends JpaRepository<Order, UUID>, JpaSpecific
 
     List<Order> findByUserId(UUID userId);
 
+    @Query("SELECT CASE WHEN COUNT(o) > 0 THEN TRUE ELSE FALSE END FROM Order o WHERE o.user.id = :userId AND o.status NOT IN :terminalStatuses")
+    boolean existsActiveOrdersByUserId(@Param("userId") UUID userId, @Param("terminalStatuses") Collection<OrderStatus> terminalStatuses);
+
+    @Query("SELECT CASE WHEN COUNT(o) > 0 THEN TRUE ELSE FALSE END FROM Order o WHERE o.shop.id = :shopId AND o.status NOT IN :terminalStatuses")
+    boolean existsActiveOrdersByShopId(@Param("shopId") UUID shopId, @Param("terminalStatuses") Collection<OrderStatus> terminalStatuses);
+
     boolean existsByOrderNumber(String orderNumber);
 
     @EntityGraph(attributePaths = {"shop", "payment"})

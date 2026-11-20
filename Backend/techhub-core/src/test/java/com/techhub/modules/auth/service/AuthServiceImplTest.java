@@ -40,6 +40,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
@@ -54,6 +55,12 @@ import com.techhub.modules.auth.service.EmailService;
 import com.techhub.modules.auth.service.JwtService;
 import com.techhub.modules.auth.service.RefreshTokenService;
 import com.techhub.modules.auth.service.VerificationTokensService;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.shop.repository.ShopRepository;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceImplTest {
@@ -78,6 +85,15 @@ class AuthServiceImplTest {
 
     @Mock
     private RefreshTokenService refreshTokenService;
+
+    @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
+    private SellerRepository sellerRepository;
+
+    @Mock
+    private ShopRepository shopRepository;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -960,11 +976,13 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @DisplayName("Xóa tài khoản thành công - Xác nhận mật khẩu đúng, chuyển status DELETED, lưu deletedAt và revoke toàn bộ Refresh Tokens")
-    void deleteAccount_Success() {
+    @DisplayName("Xóa tài khoản thành công - Buyer bình thường không có đơn active và không có Shop")
+    void deleteAccount_Success_BuyerOnly() {
         setSecurityContextUser(sampleUser);
         when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
         when(passwordEncoder.matches("password123", sampleUser.getPassword())).thenReturn(true);
+        when(orderRepository.existsActiveOrdersByUserId(eq(sampleUser.getId()), anyCollection())).thenReturn(false);
+        when(sellerRepository.findWithUserForUpdateByUserId(sampleUser.getId())).thenReturn(Optional.empty());
 
         DeleteAccountRequest request = new DeleteAccountRequest("password123", "Tôi không còn nhu cầu sử dụng");
 
@@ -974,6 +992,111 @@ class AuthServiceImplTest {
         assertNotNull(sampleUser.getDeletedAt());
         verify(userRepository, times(1)).save(sampleUser);
         verify(refreshTokenService, times(1)).revokeAll(sampleUser);
+    }
+
+    @Test
+    @DisplayName("Xóa tài khoản thành công - Seller không có đơn active, ví bằng 0, shop được cascade sang BANNED")
+    void deleteAccount_Success_SellerCascaded() {
+        setSecurityContextUser(sampleUser);
+        when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(passwordEncoder.matches("password123", sampleUser.getPassword())).thenReturn(true);
+        when(orderRepository.existsActiveOrdersByUserId(eq(sampleUser.getId()), anyCollection())).thenReturn(false);
+
+        Seller seller = Seller.builder()
+                .id(UUID.randomUUID())
+                .user(sampleUser)
+                .balance(BigDecimal.ZERO)
+                .build();
+        Shop shop = Shop.builder()
+                .id(UUID.randomUUID())
+                .seller(seller)
+                .status(ShopStatus.ACTIVE)
+                .build();
+
+        when(sellerRepository.findWithUserForUpdateByUserId(sampleUser.getId())).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
+        when(orderRepository.existsActiveOrdersByShopId(eq(shop.getId()), anyCollection())).thenReturn(false);
+
+        DeleteAccountRequest request = new DeleteAccountRequest("password123", "Đóng cửa hàng và xóa tài khoản");
+
+        assertDoesNotThrow(() -> authService.deleteAccount(request));
+
+        assertEquals(UserStatus.DELETED, sampleUser.getStatus());
+        assertEquals(ShopStatus.BANNED, shop.getStatus());
+        verify(shopRepository, times(1)).save(shop);
+        verify(userRepository, times(1)).save(sampleUser);
+        verify(refreshTokenService, times(1)).revokeAll(sampleUser);
+    }
+
+    @Test
+    @DisplayName("Xóa tài khoản thất bại - Buyer còn đơn hàng active in-progress thì ném CANNOT_DELETE_ACCOUNT_ACTIVE_BUYER_ORDERS")
+    void deleteAccount_ActiveBuyerOrders_ThrowsException() {
+        setSecurityContextUser(sampleUser);
+        when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(passwordEncoder.matches("password123", sampleUser.getPassword())).thenReturn(false);
+        when(passwordEncoder.matches("password123", sampleUser.getPassword())).thenReturn(true);
+        when(orderRepository.existsActiveOrdersByUserId(eq(sampleUser.getId()), anyCollection())).thenReturn(true);
+
+        DeleteAccountRequest request = new DeleteAccountRequest("password123", null);
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> authService.deleteAccount(request));
+        assertEquals(ErrorCode.CANNOT_DELETE_ACCOUNT_ACTIVE_BUYER_ORDERS, exception.getErrorCode());
+        verify(userRepository, never()).save(any());
+        verify(refreshTokenService, never()).revokeAll(any());
+    }
+
+    @Test
+    @DisplayName("Xóa tài khoản thất bại - Seller wallet còn số dư lớn hơn 0 thì ném CANNOT_DELETE_ACCOUNT_WALLET_HAS_BALANCE")
+    void deleteAccount_SellerWalletHasBalance_ThrowsException() {
+        setSecurityContextUser(sampleUser);
+        when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(passwordEncoder.matches("password123", sampleUser.getPassword())).thenReturn(true);
+        when(orderRepository.existsActiveOrdersByUserId(eq(sampleUser.getId()), anyCollection())).thenReturn(false);
+
+        Seller seller = Seller.builder()
+                .id(UUID.randomUUID())
+                .user(sampleUser)
+                .balance(new BigDecimal("500000.00"))
+                .build();
+        when(sellerRepository.findWithUserForUpdateByUserId(sampleUser.getId())).thenReturn(Optional.of(seller));
+
+        DeleteAccountRequest request = new DeleteAccountRequest("password123", null);
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> authService.deleteAccount(request));
+        assertEquals(ErrorCode.CANNOT_DELETE_ACCOUNT_WALLET_HAS_BALANCE, exception.getErrorCode());
+        verify(userRepository, never()).save(any());
+        verify(refreshTokenService, never()).revokeAll(any());
+    }
+
+    @Test
+    @DisplayName("Xóa tài khoản thất bại - Seller shop còn đơn hàng active/khiếu nại in-progress thì ném CANNOT_DELETE_ACCOUNT_ACTIVE_SELLER_ORDERS")
+    void deleteAccount_ActiveSellerOrders_ThrowsException() {
+        setSecurityContextUser(sampleUser);
+        when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(passwordEncoder.matches("password123", sampleUser.getPassword())).thenReturn(true);
+        when(orderRepository.existsActiveOrdersByUserId(eq(sampleUser.getId()), anyCollection())).thenReturn(false);
+
+        Seller seller = Seller.builder()
+                .id(UUID.randomUUID())
+                .user(sampleUser)
+                .balance(BigDecimal.ZERO)
+                .build();
+        Shop shop = Shop.builder()
+                .id(UUID.randomUUID())
+                .seller(seller)
+                .status(ShopStatus.ACTIVE)
+                .build();
+
+        when(sellerRepository.findWithUserForUpdateByUserId(sampleUser.getId())).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
+        when(orderRepository.existsActiveOrdersByShopId(eq(shop.getId()), anyCollection())).thenReturn(true);
+
+        DeleteAccountRequest request = new DeleteAccountRequest("password123", null);
+
+        BusinessException exception = assertThrows(BusinessException.class, () -> authService.deleteAccount(request));
+        assertEquals(ErrorCode.CANNOT_DELETE_ACCOUNT_ACTIVE_SELLER_ORDERS, exception.getErrorCode());
+        verify(userRepository, never()).save(any());
+        verify(refreshTokenService, never()).revokeAll(any());
     }
 
     @Test

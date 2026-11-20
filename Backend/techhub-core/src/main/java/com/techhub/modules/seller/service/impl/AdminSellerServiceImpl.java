@@ -34,10 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import com.techhub.modules.seller.service.AdminSellerService;
@@ -250,7 +247,7 @@ public class AdminSellerServiceImpl implements AdminSellerService {
         }
 
         if (user.getRoles() == null) {
-            user.setRoles(new java.util.HashSet<>());
+            user.setRoles(new HashSet<>());
         }
 
         if (request.status() == SellerVerificationStatus.APPROVED) {

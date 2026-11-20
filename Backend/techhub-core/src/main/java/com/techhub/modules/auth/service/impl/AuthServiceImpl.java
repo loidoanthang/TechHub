@@ -29,8 +29,10 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import com.techhub.modules.auth.dto.request.ChangePasswordRequest;
 import com.techhub.modules.auth.dto.request.DeleteAccountRequest;
@@ -42,11 +44,24 @@ import com.techhub.modules.auth.dto.request.RegisterRequest;
 import com.techhub.modules.auth.dto.request.ResendVerificationRequest;
 import com.techhub.modules.auth.dto.request.ResetPasswordRequest;
 import com.techhub.modules.auth.dto.request.VerifyEmailRequest;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.seller.entity.Seller;
+import com.techhub.modules.seller.repository.SellerRepository;
+import com.techhub.modules.shop.entity.Shop;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.shop.repository.ShopRepository;
 
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+    private static final Set<OrderStatus> TERMINAL_ORDER_STATUSES = Set.of(
+            OrderStatus.COMPLETED,
+            OrderStatus.CANCELLED,
+            OrderStatus.REFUNDED
+    );
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokensService verificationTokensService;
@@ -54,6 +69,9 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final OrderRepository orderRepository;
+    private final SellerRepository sellerRepository;
+    private final ShopRepository shopRepository;
 
     @Transactional
     @Override
@@ -251,7 +269,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteAccount(DeleteAccountRequest request) {
         CustomUserDetails currentUser = SecurityUtils.getCurrentUser();
         User user = userRepository.findById(currentUser.user().getId())
@@ -265,6 +283,37 @@ public class AuthServiceImpl implements AuthService {
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new BusinessException(ErrorCode.WRONG_CURRENT_PASSWORD);
+        }
+
+        // 1. Condition 1: Check active buyer orders in progress
+        if (orderRepository.existsActiveOrdersByUserId(user.getId(), TERMINAL_ORDER_STATUSES)) {
+            throw new BusinessException(ErrorCode.CANNOT_DELETE_ACCOUNT_ACTIVE_BUYER_ORDERS);
+        }
+
+        // 2 & 3: Check Seller conditions if user has a registered seller profile
+        Optional<Seller> sellerOpt = sellerRepository.findWithUserForUpdateByUserId(user.getId());
+        if (sellerOpt.isPresent()) {
+            Seller seller = sellerOpt.get();
+
+            // Condition 3: Check remaining seller wallet balance
+            if (seller.getBalance() != null && seller.getBalance().compareTo(BigDecimal.ZERO) > 0) {
+                throw new BusinessException(ErrorCode.CANNOT_DELETE_ACCOUNT_WALLET_HAS_BALANCE);
+            }
+
+            // Find linked shop
+            Optional<Shop> shopOpt = shopRepository.findBySellerId(seller.getId());
+            if (shopOpt.isPresent()) {
+                Shop shop = shopOpt.get();
+
+                // Condition 2: Check active seller orders in progress or pending returns
+                if (orderRepository.existsActiveOrdersByShopId(shop.getId(), TERMINAL_ORDER_STATUSES)) {
+                    throw new BusinessException(ErrorCode.CANNOT_DELETE_ACCOUNT_ACTIVE_SELLER_ORDERS);
+                }
+
+                // Cascade Shop status to BANNED
+                shop.setStatus(ShopStatus.BANNED);
+                shopRepository.save(shop);
+            }
         }
 
         user.setStatus(UserStatus.DELETED);

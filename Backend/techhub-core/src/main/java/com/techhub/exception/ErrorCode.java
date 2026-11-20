@@ -143,7 +143,11 @@ public enum ErrorCode {
     PAYOUT_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "Payout request has already been processed"),
     PAYOUT_REJECTION_REASON_REQUIRED(HttpStatus.BAD_REQUEST, "Rejection reason is required when rejecting a payout request"),
     POLICY_NOT_FOUND(HttpStatus.NOT_FOUND, "Platform policy not found"),
-    INVALID_POLICY_VALUE(HttpStatus.BAD_REQUEST, "Invalid platform policy value");
+    INVALID_POLICY_VALUE(HttpStatus.BAD_REQUEST, "Invalid platform policy value"),
+
+    CANNOT_DELETE_ACCOUNT_ACTIVE_BUYER_ORDERS(HttpStatus.BAD_REQUEST, "Cannot delete account while you have active buyer orders in progress"),
+    CANNOT_DELETE_ACCOUNT_ACTIVE_SELLER_ORDERS(HttpStatus.BAD_REQUEST, "Cannot delete account while your shop has active seller orders or pending returns"),
+    CANNOT_DELETE_ACCOUNT_WALLET_HAS_BALANCE(HttpStatus.BAD_REQUEST, "Cannot delete account while seller wallet still has remaining balance. Please withdraw all funds first");
 
     private final HttpStatus status;
     private final String message;
