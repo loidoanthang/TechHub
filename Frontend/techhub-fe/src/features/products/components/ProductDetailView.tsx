@@ -47,6 +47,7 @@ import {
   useShopProductsQuery,
 } from "@/features/shops";
 import { ROUTES } from "@/lib/constants";
+import { isBuyerSuspendedError, getApiErrorMessage } from "@/lib/api/error";
 import type { ProductDetailData, ProductVariant } from "@/types/productDetail";
 
 interface ProductDetailViewProps {
@@ -331,27 +332,9 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
         setCartToast(null);
       }, 5000);
     } catch (err: unknown) {
-      const axiosErr = err as {
-        response?: {
-          data?: {
-            message?: string;
-            metadata?: { errorCode?: string };
-          };
-          status?: number;
-        };
-      };
-      const errorCode = axiosErr?.response?.data?.metadata?.errorCode;
-      const rawMsg = (axiosErr?.response?.data?.message || "").toLowerCase();
-      const isBuyerSuspended =
-        errorCode === "BUYER_ACCOUNT_SUSPENDED" ||
-        errorCode === "ACCOUNT_SUSPENDED" ||
-        rawMsg.includes("buyer") ||
-        rawMsg.includes("suspended");
-
-      const msg = isBuyerSuspended
+      const msg = isBuyerSuspendedError(err)
         ? "Tài khoản của bạn đang bị tạm ngưng đặc quyền mua sắm."
-        : axiosErr?.response?.data?.message ||
-          "Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.";
+        : getApiErrorMessage(err, "Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.");
       setActionError(msg);
       setTimeout(() => setActionError(null), 5000);
     }
@@ -384,27 +367,9 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
       });
       router.push(ROUTES.CHECKOUT);
     } catch (err: unknown) {
-      const axiosErr = err as {
-        response?: {
-          data?: {
-            message?: string;
-            metadata?: { errorCode?: string };
-          };
-          status?: number;
-        };
-      };
-      const errorCode = axiosErr?.response?.data?.metadata?.errorCode;
-      const rawMsg = (axiosErr?.response?.data?.message || "").toLowerCase();
-      const isBuyerSuspended =
-        errorCode === "BUYER_ACCOUNT_SUSPENDED" ||
-        errorCode === "ACCOUNT_SUSPENDED" ||
-        rawMsg.includes("buyer") ||
-        rawMsg.includes("suspended");
-
-      const msg = isBuyerSuspended
+      const msg = isBuyerSuspendedError(err)
         ? "Tài khoản của bạn đang bị tạm ngưng đặc quyền mua sắm."
-        : axiosErr?.response?.data?.message ||
-          "Không thể tiến hành mua ngay. Vui lòng thử lại.";
+        : getApiErrorMessage(err, "Không thể tiến hành mua ngay. Vui lòng thử lại.");
       setActionError(msg);
       setTimeout(() => setActionError(null), 5000);
       setIsBuyNowPending(false);

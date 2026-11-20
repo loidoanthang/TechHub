@@ -109,7 +109,15 @@ apiClient.interceptors.response.use(
 
     // Handle permanent account termination / lockout (BANNED or DELETED)
     // Local / partial suspensions (e.g. BUYER_ACCOUNT_SUSPENDED, SHOP_NOT_ACTIVE) do NOT revoke tokens
-    if (errorCode === "ACCOUNT_BANNED" || errorCode === "ACCOUNT_DELETED") {
+    if (errorCode === "ACCOUNT_DELETED") {
+      clearTokens();
+      if (typeof window !== "undefined") {
+        window.location.href = ROUTES.LOGIN;
+      }
+      return Promise.reject(error);
+    }
+
+    if (errorCode === "ACCOUNT_BANNED") {
       clearTokens();
       if (typeof window !== "undefined") {
         window.location.href = ROUTES.SUSPENDED;

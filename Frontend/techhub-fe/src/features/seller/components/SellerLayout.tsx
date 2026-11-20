@@ -49,6 +49,71 @@ interface NavSection {
   items: NavItem[];
 }
 
+function SellerNavigationLink({
+  item,
+  isActive,
+  isSuspended,
+  onClick,
+  mobile,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  isSuspended: boolean;
+  onClick?: () => void;
+  mobile?: boolean;
+}) {
+  const Icon = item.icon;
+  const isItemDisabled = Boolean(item.disabledWhenShopSuspended && isSuspended);
+
+  if (isItemDisabled) {
+    return (
+      <div
+        title="Tính năng bị khóa do gian hàng đang bị đình chỉ"
+        className={`flex items-center justify-between ${
+          mobile ? "px-3 py-2.5" : "px-2.5 py-2"
+        } rounded-xl text-xs font-semibold text-slate-400 bg-slate-50/60 cursor-not-allowed select-none opacity-60`}
+      >
+        <div className={`flex items-center ${mobile ? "gap-2.5" : "gap-2"}`}>
+          <Icon className="w-4 h-4 shrink-0 text-slate-400" />
+          <span className="truncate">{item.label}</span>
+        </div>
+        <span className="flex items-center gap-1 text-[10px] text-rose-500 font-bold bg-rose-50 px-1.5 py-0.5 rounded-md">
+          <Lock className="w-2.5 h-2.5" />
+          Khóa
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={item.href}
+      onClick={onClick}
+      className={`flex items-center justify-between ${
+        mobile ? "px-3 py-2.5" : "px-2.5 py-2"
+      } rounded-xl text-xs font-semibold transition-all ${
+        isActive
+          ? "bg-[#0045cc] text-white shadow-xs font-bold"
+          : "text-[#434656] hover:bg-[#eff4ff] hover:text-[#0045cc]"
+      }`}
+    >
+      <div className={`flex items-center ${mobile ? "gap-2.5" : "gap-2"}`}>
+        <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-[#737688]"}`} />
+        <span className="truncate">{item.label}</span>
+      </div>
+      {item.badge !== undefined && (
+        <span
+          className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
+            isActive ? "bg-white text-primary" : "bg-red-500 text-white"
+          }`}
+        >
+          {item.badge}
+        </span>
+      )}
+    </Link>
+  );
+}
+
 export function SellerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, isLoading: isAuthLoading, isAuthenticated, logout, refreshProfile } = useAuth();
@@ -394,58 +459,14 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
                   <span className="text-[10px] font-extrabold text-[#737688] tracking-wider px-2.5 mb-1">
                     {section.title}
                   </span>
-                  {section.items.map((item) => {
-                    const isActive = pathname === item.href;
-                    const Icon = item.icon;
-                    const isItemDisabled = Boolean(
-                      item.disabledWhenShopSuspended && currentStatus === "SUSPENDED"
-                    );
-
-                    if (isItemDisabled) {
-                      return (
-                        <div
-                          key={item.href}
-                          title="Tính năng bị khóa do gian hàng đang bị đình chỉ"
-                          className="flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-400 bg-slate-50/60 cursor-not-allowed select-none opacity-60"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Icon className="w-4 h-4 shrink-0 text-slate-400" />
-                            <span className="truncate">{item.label}</span>
-                          </div>
-                          <span className="flex items-center gap-1 text-[10px] text-rose-500 font-bold bg-rose-50 px-1.5 py-0.5 rounded-md">
-                            <Lock className="w-2.5 h-2.5" />
-                            Khóa
-                          </span>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={`flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-semibold transition-all ${
-                          isActive
-                            ? "bg-[#0045cc] text-white shadow-xs font-bold"
-                            : "text-[#434656] hover:bg-[#eff4ff] hover:text-[#0045cc]"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-[#737688]"}`} />
-                          <span className="truncate">{item.label}</span>
-                        </div>
-                        {item.badge !== undefined && (
-                          <span
-                            className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold shrink-0 ${
-                              isActive ? "bg-white text-primary" : "bg-red-500 text-white"
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                      </Link>
-                    );
-                  })}
+                  {section.items.map((item) => (
+                    <SellerNavigationLink
+                      key={item.href}
+                      item={item}
+                      isActive={pathname === item.href}
+                      isSuspended={currentStatus === "SUSPENDED"}
+                    />
+                  ))}
                 </div>
               ))}
             </nav>
@@ -479,55 +500,16 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
                     <span className="text-[10px] font-extrabold text-[#737688] tracking-wider px-3 mb-1">
                       {section.title}
                     </span>
-                    {section.items.map((item) => {
-                      const isActive = pathname === item.href;
-                      const Icon = item.icon;
-                      const isItemDisabled = Boolean(
-                        item.disabledWhenShopSuspended && currentStatus === "SUSPENDED"
-                      );
-
-                      if (isItemDisabled) {
-                        return (
-                          <div
-                            key={item.href}
-                            title="Tính năng bị khóa do gian hàng đang bị đình chỉ"
-                            className="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 bg-slate-50/60 cursor-not-allowed select-none opacity-60"
-                          >
-                            <div className="flex items-center gap-2.5">
-                              <Icon className="w-4 h-4 text-slate-400" />
-                              <span>{item.label}</span>
-                            </div>
-                            <span className="flex items-center gap-1 text-[10px] text-rose-500 font-bold bg-rose-50 px-1.5 py-0.5 rounded-md">
-                              <Lock className="w-2.5 h-2.5" />
-                              Khóa
-                            </span>
-                          </div>
-                        );
-                      }
-
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold ${
-                            isActive
-                              ? "bg-[#0045cc] text-white"
-                              : "text-[#434656] hover:bg-[#eff4ff]"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <Icon className="w-4 h-4" />
-                            <span>{item.label}</span>
-                          </div>
-                          {item.badge !== undefined && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-red-500 text-white">
-                              {item.badge}
-                            </span>
-                          )}
-                        </Link>
-                      );
-                    })}
+                    {section.items.map((item) => (
+                      <SellerNavigationLink
+                        key={item.href}
+                        item={item}
+                        isActive={pathname === item.href}
+                        isSuspended={currentStatus === "SUSPENDED"}
+                        onClick={() => setMobileMenuOpen(false)}
+                        mobile
+                      />
+                    ))}
                   </div>
                 ))}
               </nav>

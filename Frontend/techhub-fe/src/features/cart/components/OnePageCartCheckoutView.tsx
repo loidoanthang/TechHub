@@ -31,6 +31,7 @@ import { useCheckoutPreview } from "@/features/checkout/hooks/useCheckoutPreview
 import { VoucherSelectModal } from "@/features/checkout/components/VoucherSelectModal";
 import { checkoutApi } from "@/features/checkout/api/checkoutApi";
 import { ROUTES } from "@/lib/constants";
+import { isBuyerSuspendedError, getApiErrorMessage } from "@/lib/api/error";
 import type { PaymentMethod } from "@/types/enums";
 import type { PlaceOrderResponse, ShopOrderRequest } from "@/types/checkout";
 import type { CartPlatformVoucherResponse } from "@/types/voucher";
@@ -260,27 +261,9 @@ export function OnePageCartCheckoutView() {
       setIsPlaced(true);
       refetchCart();
     } catch (err: unknown) {
-      const axiosErr = err as {
-        response?: {
-          data?: {
-            message?: string;
-            metadata?: { errorCode?: string };
-          };
-          status?: number;
-        };
-      };
-      const errorCode = axiosErr?.response?.data?.metadata?.errorCode;
-      const rawMsg = (axiosErr?.response?.data?.message || "").toLowerCase();
-      const isSuspendedError =
-        errorCode === "BUYER_ACCOUNT_SUSPENDED" ||
-        errorCode === "ACCOUNT_SUSPENDED" ||
-        rawMsg.includes("buyer") ||
-        rawMsg.includes("suspended");
-
-      const msg = isSuspendedError
+      const msg = isBuyerSuspendedError(err)
         ? "Tài khoản của bạn đang bị tạm ngưng đặc quyền mua sắm. Bạn không thể đặt đơn mới vào lúc này."
-        : axiosErr?.response?.data?.message ||
-          "Đặt hàng thất bại. Vui lòng kiểm tra lại thông tin hoặc thử lại sau.";
+        : getApiErrorMessage(err, "Đặt hàng thất bại. Vui lòng kiểm tra lại thông tin hoặc thử lại sau.");
       setSubmitError(msg);
     } finally {
       setIsSubmitting(false);

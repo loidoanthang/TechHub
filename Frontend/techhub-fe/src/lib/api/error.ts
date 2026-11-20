@@ -7,6 +7,31 @@ export function isApiError(
   return axios.isAxiosError(error);
 }
 
+export function getApiErrorCode(error: unknown): string | undefined {
+  if (isApiError(error)) {
+    const data = error.response?.data;
+    if (data && typeof data === "object" && "metadata" in data) {
+      const metadata = data.metadata as { errorCode?: string } | undefined;
+      return metadata?.errorCode;
+    }
+  }
+  return undefined;
+}
+
+export function isBuyerSuspendedError(error: unknown): boolean {
+  if (isApiError(error)) {
+    const errorCode = getApiErrorCode(error);
+    const rawMsg = (error.response?.data?.message || "").toLowerCase();
+    const status = error.response?.status;
+    return (
+      errorCode === "BUYER_ACCOUNT_SUSPENDED" ||
+      errorCode === "ACCOUNT_SUSPENDED" ||
+      (status === 403 && (rawMsg.includes("buyer") || rawMsg.includes("suspended")))
+    );
+  }
+  return false;
+}
+
 export function getApiErrorMessage(
   error: unknown,
   fallback = "Đã có lỗi xảy ra. Vui lòng thử lại."
