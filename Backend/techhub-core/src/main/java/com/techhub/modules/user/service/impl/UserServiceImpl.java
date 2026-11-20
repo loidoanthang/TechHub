@@ -28,7 +28,13 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(currentUser.user().getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        validateUserActiveAndNonLocked(user);
+        validateUserStatus(user);
+        if (!user.isEmailVerified()) {
+            throw new BusinessException(ErrorCode.ACCOUNT_NOT_VERIFIED);
+        }
+        if (!user.isAccountNonLocked()) {
+            throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
+        }
 
         return UserProfileResponse.from(user);
     }
@@ -59,9 +65,6 @@ public class UserServiceImpl implements UserService {
         if (user.getStatus() == UserStatus.BANNED) {
             throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
         }
-        if (user.getStatus() == UserStatus.SUSPENDED) {
-            throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
-        }
         if (user.getStatus() == UserStatus.DELETED) {
             throw new BusinessException(ErrorCode.ACCOUNT_DELETED);
         }
@@ -69,6 +72,9 @@ public class UserServiceImpl implements UserService {
 
     private void validateUserActiveAndNonLocked(User user) {
         validateUserStatus(user);
+        if (user.getStatus() == UserStatus.SUSPENDED) {
+            throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
+        }
         if (!user.isEmailVerified()) {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_VERIFIED);
         }

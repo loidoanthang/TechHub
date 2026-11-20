@@ -13,6 +13,7 @@ import com.techhub.modules.seller.dto.response.SellerProductSummaryResponse;
 import com.techhub.modules.product.enums.ProductApprovalStatus;
 import com.techhub.modules.product.enums.ProductVisibilityStatus;
 import com.techhub.security.SecurityUtils;
+import com.techhub.security.annotation.RequireActiveShop;
 import com.techhub.modules.product.service.SellerProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class SellerProductController {
     private final SellerProductService sellerProductService;
 
     @PostMapping
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ProductDetailResponse> createProduct(
             @Valid @RequestBody CreateProductRequest request
@@ -72,7 +73,7 @@ public class SellerProductController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<ProductDetailResponse> updateProduct(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateProductRequest request
@@ -83,7 +84,7 @@ public class SellerProductController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<Void> deleteProduct(@PathVariable UUID id) {
         UUID userId = SecurityUtils.getCurrentUserId();
         sellerProductService.deleteProduct(userId, id);
@@ -91,7 +92,7 @@ public class SellerProductController {
     }
 
     @PostMapping("/{productId}/variants")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ProductVariantResponse> addProductVariant(
             @PathVariable UUID productId,
@@ -103,7 +104,7 @@ public class SellerProductController {
     }
 
     @PutMapping("/{productId}/variants/{variantId}")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<ProductVariantResponse> updateProductVariant(
             @PathVariable UUID productId,
             @PathVariable UUID variantId,
@@ -115,7 +116,7 @@ public class SellerProductController {
     }
 
     @DeleteMapping("/{productId}/variants/{variantId}")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<Void> deleteProductVariant(
             @PathVariable UUID productId,
             @PathVariable UUID variantId
@@ -126,7 +127,7 @@ public class SellerProductController {
     }
 
     @PatchMapping("/{id}/submit-approval")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<ProductDetailResponse> submitProductForApproval(@PathVariable UUID id) {
         UUID userId = SecurityUtils.getCurrentUserId();
         ProductDetailResponse response = sellerProductService.submitProductForApproval(userId, id);
@@ -134,7 +135,7 @@ public class SellerProductController {
     }
 
     @PatchMapping("/{id}/visibility")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<ProductDetailResponse> updateProductVisibility(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateProductVisibilityRequest request

@@ -581,20 +581,23 @@ class SellerReviewServiceImplTest {
     }
 
     @Test
-    @DisplayName("TC-70: respondToReview_Failed_SellerUserSuspended - Tài khoản Seller User bị SUSPENDED")
-    void respondToReview_Failed_SellerUserSuspended() {
-        UUID reviewId = UUID.randomUUID();
+    @DisplayName("TC-70: respondToReview_Success_SellerUserSuspended - User bị SUSPENDED thì Kênh Seller vẫn phản hồi review bình thường (BR-28)")
+    void respondToReview_Success_SellerUserSuspended() {
+        UUID reviewId = sampleReview.getId();
+        sampleReview.setSellerResponse(null);
         sellerUser.setStatus(UserStatus.SUSPENDED);
         SellerResponseRequest request = new SellerResponseRequest("Cảm ơn bạn!");
 
         when(sellerRepository.findByUserId(sellerUserId)).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
+        when(reviewRepository.findWithDetailsById(reviewId)).thenReturn(Optional.of(sampleReview));
+        when(reviewRepository.updateSellerResponse(eq(reviewId), eq("Cảm ơn bạn!"), any())).thenReturn(1);
+        when(reviewHelpfulRepository.countByReviewId(reviewId)).thenReturn(0L);
 
-        BusinessException ex = assertThrows(BusinessException.class, () ->
+        assertDoesNotThrow(() ->
                 sellerReviewService.respondToReview(sellerUserId, reviewId, request)
         );
-
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, ex.getErrorCode());
-        verify(reviewRepository, never()).findWithDetailsById(any());
+        verify(reviewRepository, times(1)).updateSellerResponse(eq(reviewId), eq("Cảm ơn bạn!"), any());
     }
 
     @Test

@@ -10,6 +10,7 @@ import com.techhub.modules.cart.dto.response.CartPreviewResponse;
 import com.techhub.modules.cart.dto.response.CartResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.modules.cart.service.CartService;
+import com.techhub.security.annotation.RequireActiveBuyer;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,7 +42,7 @@ public class CartController {
     }
 
     @PostMapping("/items")
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<CartItemResponse> addToCart(@Valid @RequestBody AddToCartRequest request) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         CartItemResponse data = cartService.addToCart(currentUserId, request);
@@ -49,7 +50,7 @@ public class CartController {
     }
 
     @PutMapping("/items/{itemId}")
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<CartItemResponse> updateCartItem(
             @PathVariable UUID itemId,
             @Valid @RequestBody UpdateCartItemRequest request
@@ -60,7 +61,7 @@ public class CartController {
     }
 
     @DeleteMapping("/items/{itemId}")
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<Void> deleteCartItem(@PathVariable UUID itemId) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         cartService.deleteCartItem(currentUserId, itemId);

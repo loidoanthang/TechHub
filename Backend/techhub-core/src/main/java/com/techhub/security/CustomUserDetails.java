@@ -33,7 +33,7 @@ public record CustomUserDetails(User user) implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.isEmailVerified() && user.getStatus() == UserStatus.ACTIVE;
+        return user.isEmailVerified() && user.getStatus() != UserStatus.DELETED;
     }
 
     @Override
@@ -44,8 +44,7 @@ public record CustomUserDetails(User user) implements UserDetails {
     @Override
     public boolean isAccountNonLocked() {
         return user.isAccountNonLocked()
-                && user.getStatus() != UserStatus.BANNED
-                && user.getStatus() != UserStatus.SUSPENDED;
+                && user.getStatus() != UserStatus.BANNED;
     }
 
     @Override

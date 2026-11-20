@@ -26,6 +26,7 @@ public enum ErrorCode {
     ACCOUNT_DELETED(HttpStatus.FORBIDDEN, "Account has been deleted"),
     ACCOUNT_BANNED(HttpStatus.FORBIDDEN, "Account has been banned"),
     ACCOUNT_SUSPENDED(HttpStatus.FORBIDDEN, "Account has been suspended"),
+    BUYER_ACCOUNT_SUSPENDED(HttpStatus.FORBIDDEN, "Buyer account is temporarily suspended. New purchases and buyer operations are restricted"),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "Invalid email or password"),
     EMAIL_EXISTS_UNVERIFIED(HttpStatus.BAD_REQUEST, "Email is already registered but not verified. Please verify your account"),
     OTP_RESEND_COOLDOWN(HttpStatus.TOO_MANY_REQUESTS, "Please wait 60 seconds before requesting a new code"),
@@ -134,8 +135,6 @@ public enum ErrorCode {
     INVALID_CONVERSATION_TYPE(HttpStatus.BAD_REQUEST, "Invalid conversation type for the participants' roles"),
     CONVERSATION_NOT_FOUND(HttpStatus.NOT_FOUND, "Conversation not found"),
     NOT_CONVERSATION_PARTICIPANT(HttpStatus.FORBIDDEN, "You are not a participant in this conversation"),
-
-    // Phase 11: Seller Wallet & Payout Operations
     INSUFFICIENT_WALLET_BALANCE(HttpStatus.BAD_REQUEST, "Insufficient wallet balance for withdrawal"),
     SELLER_NOT_VERIFIED(HttpStatus.FORBIDDEN, "Seller profile is not approved or verified"),
     BANK_ACCOUNT_NOT_CONFIGURED(HttpStatus.BAD_REQUEST, "Seller bank account information is not configured"),
@@ -143,8 +142,6 @@ public enum ErrorCode {
     PAYOUT_REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "Payout request not found"),
     PAYOUT_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "Payout request has already been processed"),
     PAYOUT_REJECTION_REASON_REQUIRED(HttpStatus.BAD_REQUEST, "Rejection reason is required when rejecting a payout request"),
-
-    // Platform Policy Operations
     POLICY_NOT_FOUND(HttpStatus.NOT_FOUND, "Platform policy not found"),
     INVALID_POLICY_VALUE(HttpStatus.BAD_REQUEST, "Invalid platform policy value");
 

@@ -27,6 +27,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "pub-40c21cebd3a0459bb8ce9747748cb8aa.r2.dev",
+      },
+      {
+        protocol: "https",
         hostname: "*.r2.dev",
       },
     ],

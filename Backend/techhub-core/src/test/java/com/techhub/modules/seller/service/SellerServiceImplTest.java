@@ -802,16 +802,30 @@ class SellerServiceImplTest {
     }
 
     @Test
-    @DisplayName("getSellerProfile: User bị SUSPENDED -> ném ACCOUNT_SUSPENDED (HTTP 403)")
-    void getSellerProfile_UserSuspended_ThrowsException() {
+    @DisplayName("getSellerProfile: User bị SUSPENDED nhưng Shop ACTIVE -> Thành công (BR-28 Role Isolation)")
+    void getSellerProfile_UserSuspended_Succeeds() {
         sampleUser.setStatus(UserStatus.SUSPENDED);
+        Seller seller = Seller.builder()
+                .id(UUID.randomUUID())
+                .user(sampleUser)
+                .sellerName("apple-flagship-store")
+                .verificationStatus(SellerVerificationStatus.APPROVED)
+                .build();
+
+        Shop shop = Shop.builder()
+                .id(UUID.randomUUID())
+                .seller(seller)
+                .status(ShopStatus.ACTIVE)
+                .build();
+
         when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(sellerRepository.findByUserId(sampleUser.getId())).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
 
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                sellerService.getSellerProfile());
+        SellerProfileResponse response = sellerService.getSellerProfile();
 
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, ex.getErrorCode());
-        verify(sellerRepository, never()).findByUserId(any());
+        assertNotNull(response);
+        assertEquals(seller.getId(), response.sellerId());
     }
 
     @Test
@@ -1131,19 +1145,36 @@ class SellerServiceImplTest {
     }
 
     @Test
-    @DisplayName("updateSellerProfile: User bị SUSPENDED -> ném ACCOUNT_SUSPENDED (HTTP 403)")
-    void updateSellerProfile_UserSuspended_ThrowsException() {
+    @DisplayName("updateSellerProfile: User bị SUSPENDED nhưng Shop ACTIVE -> Thành công (BR-28 Role Isolation)")
+    void updateSellerProfile_UserSuspended_Succeeds() {
         sampleUser.setStatus(UserStatus.SUSPENDED);
+        Seller seller = Seller.builder()
+                .id(UUID.randomUUID())
+                .user(sampleUser)
+                .sellerName("apple-old-slug")
+                .verificationStatus(SellerVerificationStatus.APPROVED)
+                .bankName("Vietcombank")
+                .bankAccountNumber("0123456789")
+                .bankAccountHolder("NGUYEN VAN A")
+                .build();
+        Shop shop = Shop.builder()
+                .id(UUID.randomUUID())
+                .seller(seller)
+                .status(ShopStatus.ACTIVE)
+                .build();
         UpdateSellerProfileRequest request = new UpdateSellerProfileRequest(
-                "apple-official-store", "Vietcombank", "0123456789", "NGUYEN VAN A"
+                "apple-official-store", "Techcombank", "9876543210", "nguyen van a"
         );
+
         when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(sellerRepository.findByUserId(sampleUser.getId())).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
+        when(sellerRepository.existsBySellerName("apple-official-store")).thenReturn(false);
+        when(sellerRepository.save(any(Seller.class))).thenReturn(seller);
 
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                sellerService.updateSellerProfile(request));
+        SellerProfileResponse response = sellerService.updateSellerProfile(request);
 
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, ex.getErrorCode());
-        verify(sellerRepository, never()).findByUserId(any());
+        assertNotNull(response);
     }
 
     @Test
@@ -1417,16 +1448,30 @@ class SellerServiceImplTest {
     }
 
     @Test
-    @DisplayName("getShopInfo: User bị tạm đình chỉ (SUSPENDED) -> ném ACCOUNT_SUSPENDED (HTTP 403)")
-    void getShopInfo_AccountSuspended_ThrowsException() {
+    @DisplayName("getShopInfo: User bị SUSPENDED nhưng Shop ACTIVE -> Thành công (BR-28 Role Isolation)")
+    void getShopInfo_AccountSuspended_Succeeds() {
         sampleUser.setStatus(UserStatus.SUSPENDED);
+        Seller seller = Seller.builder()
+                .id(UUID.randomUUID())
+                .user(sampleUser)
+                .sellerName("apple-store-vn")
+                .verificationStatus(SellerVerificationStatus.APPROVED)
+                .build();
+        Shop shop = Shop.builder()
+                .id(UUID.randomUUID())
+                .seller(seller)
+                .name("Apple Store VN")
+                .status(ShopStatus.ACTIVE)
+                .build();
+
         when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(sellerRepository.findByUserId(sampleUser.getId())).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
 
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                sellerService.getShopInfo());
+        SellerShopResponse response = sellerService.getShopInfo();
 
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, ex.getErrorCode());
-        verify(sellerRepository, never()).findByUserId(any());
+        assertNotNull(response);
+        assertEquals(shop.getId(), response.shopId());
     }
 
     @Test
@@ -1811,20 +1856,33 @@ class SellerServiceImplTest {
     }
 
     @Test
-    @DisplayName("updateShopInfo: User bị tạm đình chỉ (SUSPENDED) -> ném ACCOUNT_SUSPENDED (HTTP 403)")
-    void updateShopInfo_AccountSuspended_ThrowsException() {
+    @DisplayName("updateShopInfo: User bị SUSPENDED nhưng Shop ACTIVE -> Thành công (BR-28 Role Isolation)")
+    void updateShopInfo_AccountSuspended_Succeeds() {
         sampleUser.setStatus(UserStatus.SUSPENDED);
+        Seller seller = Seller.builder()
+                .id(UUID.randomUUID())
+                .user(sampleUser)
+                .sellerName("apple-store-vn")
+                .verificationStatus(SellerVerificationStatus.APPROVED)
+                .build();
+        Shop shop = Shop.builder()
+                .id(UUID.randomUUID())
+                .seller(seller)
+                .name("Apple Store VN")
+                .status(ShopStatus.ACTIVE)
+                .build();
         UpdateSellerShopRequest request = new UpdateSellerShopRequest(
-                "Shop Name", null, null, null
+                "Updated Shop Name", "New Desc", null, null
         );
 
         when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(sellerRepository.findByUserId(sampleUser.getId())).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
+        when(shopRepository.save(any(Shop.class))).thenReturn(shop);
 
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                sellerService.updateShopInfo(request));
+        SellerShopResponse response = sellerService.updateShopInfo(request);
 
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, ex.getErrorCode());
-        verify(sellerRepository, never()).findByUserId(any());
+        assertNotNull(response);
     }
 
     @Test
@@ -2257,18 +2315,31 @@ class SellerServiceImplTest {
     }
 
     @Test
-    @DisplayName("updateShopStatus: Tài khoản User bị SUSPENDED -> ném ACCOUNT_SUSPENDED (HTTP 403)")
-    void updateShopStatus_AccountSuspended_ThrowsException() {
+    @DisplayName("updateShopStatus: User bị SUSPENDED nhưng Shop ACTIVE -> Thành công (BR-28 Role Isolation)")
+    void updateShopStatus_AccountSuspended_Succeeds() {
         sampleUser.setStatus(UserStatus.SUSPENDED);
+        Seller seller = Seller.builder()
+                .id(UUID.randomUUID())
+                .user(sampleUser)
+                .sellerName("apple-store-vn")
+                .verificationStatus(SellerVerificationStatus.APPROVED)
+                .build();
+        Shop shop = Shop.builder()
+                .id(UUID.randomUUID())
+                .seller(seller)
+                .name("Apple Store VN")
+                .status(ShopStatus.ACTIVE)
+                .build();
         UpdateShopStatusRequest request = new UpdateShopStatusRequest(ShopStatus.PAUSED);
 
         when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(sellerRepository.findByUserId(sampleUser.getId())).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
+        when(shopRepository.save(any(Shop.class))).thenReturn(shop);
 
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                sellerService.updateShopStatus(request));
+        SellerShopResponse response = sellerService.updateShopStatus(request);
 
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, ex.getErrorCode());
-        verify(sellerRepository, never()).findByUserId(any());
+        assertNotNull(response);
     }
 
     @Test
@@ -2590,17 +2661,41 @@ class SellerServiceImplTest {
     }
 
     @Test
-    @DisplayName("getWarehouseAddress: Tài khoản User bị SUSPENDED -> ném ACCOUNT_SUSPENDED (HTTP 403)")
-    void getWarehouseAddress_AccountSuspended_ThrowsException() {
+    @DisplayName("getWarehouseAddress: User bị SUSPENDED nhưng Shop ACTIVE -> Thành công (BR-28 Role Isolation)")
+    void getWarehouseAddress_AccountSuspended_Succeeds() {
         sampleUser.setStatus(UserStatus.SUSPENDED);
+        Seller seller = Seller.builder()
+                .id(UUID.randomUUID())
+                .user(sampleUser)
+                .sellerName("apple-store-vn")
+                .verificationStatus(SellerVerificationStatus.APPROVED)
+                .build();
+        Shop shop = Shop.builder()
+                .id(UUID.randomUUID())
+                .seller(seller)
+                .name("Apple Store VN")
+                .status(ShopStatus.ACTIVE)
+                .build();
+        Address address = Address.builder()
+                .id(UUID.randomUUID())
+                .shopId(shop.getId())
+                .recipientName("Kho")
+                .phone("0123456789")
+                .province("HCM")
+                .district("Q1")
+                .ward("BN")
+                .streetAddress("123 Le Duan")
+                .isDefault(true)
+                .build();
 
         when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(sellerRepository.findByUserId(sampleUser.getId())).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
+        when(addressRepository.findByShopId(shop.getId())).thenReturn(Optional.of(address));
 
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                sellerService.getWarehouseAddress());
+        SellerWarehouseAddressResponse response = sellerService.getWarehouseAddress();
 
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, ex.getErrorCode());
-        verify(sellerRepository, never()).findByUserId(any());
+        assertNotNull(response);
     }
 
     @Test
@@ -3025,20 +3120,45 @@ class SellerServiceImplTest {
     }
 
     @Test
-    @DisplayName("updateWarehouseAddress: Tài khoản User bị SUSPENDED -> ném ACCOUNT_SUSPENDED (HTTP 403)")
-    void updateWarehouseAddress_AccountSuspended_ThrowsException() {
+    @DisplayName("updateWarehouseAddress: User bị SUSPENDED nhưng Shop ACTIVE -> Thành công (BR-28 Role Isolation)")
+    void updateWarehouseAddress_AccountSuspended_Succeeds() {
         sampleUser.setStatus(UserStatus.SUSPENDED);
+        Seller seller = Seller.builder()
+                .id(UUID.randomUUID())
+                .user(sampleUser)
+                .sellerName("apple-store-vn")
+                .verificationStatus(SellerVerificationStatus.APPROVED)
+                .build();
+        Shop shop = Shop.builder()
+                .id(UUID.randomUUID())
+                .seller(seller)
+                .name("Apple Store VN")
+                .status(ShopStatus.ACTIVE)
+                .build();
+        Address address = Address.builder()
+                .id(UUID.randomUUID())
+                .shopId(shop.getId())
+                .recipientName("Kho")
+                .phone("0123456789")
+                .province("HCM")
+                .district("Q1")
+                .ward("BN")
+                .streetAddress("123 Le Duan")
+                .isDefault(true)
+                .build();
         UpdateWarehouseAddressRequest request = new UpdateWarehouseAddressRequest(
-                "Nguyen Van Kho", "0987654321", "TP. Hồ Chí Minh", "Quận 1", "Phường Bến Nghé", "123 Lê Duẩn"
+                "Kho Mới", "0987654321", "HCM", "Q1", "BN", "456 Le Duan"
         );
 
         when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(sellerRepository.findByUserId(sampleUser.getId())).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
+        when(addressRepository.findByShopId(shop.getId())).thenReturn(Optional.of(address));
+        when(addressRepository.save(any(Address.class))).thenReturn(address);
 
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                sellerService.updateWarehouseAddress(request));
+        SellerWarehouseAddressResponse response = sellerService.updateWarehouseAddress(request);
 
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, ex.getErrorCode());
-        verify(sellerRepository, never()).findByUserId(any());
+        assertNotNull(response);
     }
 
     @Test
@@ -3421,16 +3541,37 @@ class SellerServiceImplTest {
     }
 
     @Test
-    @DisplayName("getShippingOption: Tài khoản User bị SUSPENDED -> ném ACCOUNT_SUSPENDED (HTTP 403)")
-    void getShippingOption_AccountSuspended_ThrowsException() {
+    @DisplayName("getShippingOption: User bị SUSPENDED nhưng Shop ACTIVE -> Thành công (BR-28 Role Isolation)")
+    void getShippingOption_AccountSuspended_Succeeds() {
         sampleUser.setStatus(UserStatus.SUSPENDED);
+        Seller seller = Seller.builder()
+                .id(UUID.randomUUID())
+                .user(sampleUser)
+                .sellerName("apple-store-vn")
+                .verificationStatus(SellerVerificationStatus.APPROVED)
+                .build();
+        Shop shop = Shop.builder()
+                .id(UUID.randomUUID())
+                .seller(seller)
+                .name("Apple Store VN")
+                .status(ShopStatus.ACTIVE)
+                .build();
+        ShippingOption option = ShippingOption.builder()
+                .id(UUID.randomUUID())
+                .shop(shop)
+                .name("Standard")
+                .shippingFee(new BigDecimal("30000"))
+                .isActive(true)
+                .build();
+
         when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(sellerRepository.findByUserId(sampleUser.getId())).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
+        when(shippingOptionRepository.findByShopId(shop.getId())).thenReturn(Optional.of(option));
 
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                sellerService.getShippingOption());
+        SellerShippingOptionResponse response = sellerService.getShippingOption();
 
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, ex.getErrorCode());
-        verify(sellerRepository, never()).findByUserId(any());
+        assertNotNull(response);
     }
 
     @Test
@@ -3797,18 +3938,39 @@ class SellerServiceImplTest {
     }
 
     @Test
-    @DisplayName("updateShippingOption: Tài khoản User bị SUSPENDED -> ném ACCOUNT_SUSPENDED (HTTP 403)")
-    void updateShippingOption_UserSuspended_ThrowsException() {
+    @DisplayName("updateShippingOption: User bị SUSPENDED nhưng Shop ACTIVE -> Thành công (BR-28 Role Isolation)")
+    void updateShippingOption_UserSuspended_Succeeds() {
         sampleUser.setStatus(UserStatus.SUSPENDED);
-        UpdateShippingOptionRequest request = new UpdateShippingOptionRequest(new BigDecimal("22000.00"));
+        Seller seller = Seller.builder()
+                .id(UUID.randomUUID())
+                .user(sampleUser)
+                .sellerName("apple-store-vn")
+                .verificationStatus(SellerVerificationStatus.APPROVED)
+                .build();
+        Shop shop = Shop.builder()
+                .id(UUID.randomUUID())
+                .seller(seller)
+                .name("Apple Store VN")
+                .status(ShopStatus.ACTIVE)
+                .build();
+        ShippingOption option = ShippingOption.builder()
+                .id(UUID.randomUUID())
+                .shop(shop)
+                .name("Standard")
+                .shippingFee(new BigDecimal("30000"))
+                .isActive(true)
+                .build();
+        UpdateShippingOptionRequest request = new UpdateShippingOptionRequest(new BigDecimal("25000"));
 
         when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(sellerRepository.findByUserId(sampleUser.getId())).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
+        when(shippingOptionRepository.findByShopId(shop.getId())).thenReturn(Optional.of(option));
+        when(shippingOptionRepository.save(any(ShippingOption.class))).thenReturn(option);
 
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                sellerService.updateShippingOption(request));
+        SellerShippingOptionResponse response = sellerService.updateShippingOption(request);
 
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, ex.getErrorCode());
-        verify(sellerRepository, never()).findByUserId(any());
+        assertNotNull(response);
     }
 
     @Test

@@ -57,6 +57,9 @@ public class SellerServiceImpl implements SellerService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         validateUserActiveAndNonLocked(user);
+        if (user.getStatus() == UserStatus.SUSPENDED) {
+            throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
+        }
 
         Optional<Seller> existingSellerOpt = sellerRepository.findByUserId(user.getId());
         if (existingSellerOpt.isPresent()) {
@@ -147,6 +150,9 @@ public class SellerServiceImpl implements SellerService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         validateUserActiveAndNonLocked(user);
+        if (user.getStatus() == UserStatus.SUSPENDED) {
+            throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
+        }
 
         Optional<Seller> sellerOpt = sellerRepository.findByUserId(user.getId());
         if (sellerOpt.isEmpty()) {
@@ -635,9 +641,6 @@ public class SellerServiceImpl implements SellerService {
     private void validateUserStatus(User user) {
         if (user.getStatus() == UserStatus.BANNED) {
             throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
-        }
-        if (user.getStatus() == UserStatus.SUSPENDED) {
-            throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
         }
         if (user.getStatus() == UserStatus.DELETED) {
             throw new BusinessException(ErrorCode.ACCOUNT_DELETED);

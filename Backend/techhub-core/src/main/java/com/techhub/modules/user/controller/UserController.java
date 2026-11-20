@@ -4,6 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.user.dto.request.UpdateProfileRequest;
 import com.techhub.modules.user.dto.response.UserProfileResponse;
 import com.techhub.modules.user.service.UserService;
+import com.techhub.security.annotation.RequireActiveBuyer;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -23,6 +24,7 @@ public class UserController {
     }
 
     @PutMapping("/profile")
+    @RequireActiveBuyer
     public ApiResponse<UserProfileResponse> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
         return ApiResponse.success(userService.updateProfile(request), "Profile updated successfully.", null);
     }

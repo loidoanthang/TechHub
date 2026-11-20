@@ -14,6 +14,8 @@ import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.security.CustomUserDetails;
 import com.techhub.security.SecurityUtils;
 import com.techhub.modules.auth.service.RefreshTokenService;
+import com.techhub.modules.shop.enums.ShopStatus;
+import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.modules.user.specification.UserSpecification;
 import com.techhub.modules.user.service.AdminUserService;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +47,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
     private final RefreshTokenService refreshTokenService;
+    private final ShopRepository shopRepository;
 
     @Override
     public PageResponse<AdminUserResponse> getUsers(
@@ -140,9 +143,14 @@ public class AdminUserServiceImpl implements AdminUserService {
         targetUser.setStatus(request.status());
         userRepository.save(targetUser);
 
-        // 7. Nếu bị BANNED hoặc SUSPENDED -> Lập tức thu hồi toàn bộ Refresh Token của user
-        if (request.status() == UserStatus.BANNED || request.status() == UserStatus.SUSPENDED) {
+        // 7. Nếu bị BANNED -> Lập tức thu hồi token và cascade sang Shop (BANNED shop)
+        if (request.status() == UserStatus.BANNED) {
             refreshTokenService.revokeAll(targetUser);
+            shopRepository.findBySeller_UserId(userId).ifPresent(shop -> {
+                shop.setStatus(ShopStatus.BANNED);
+                shopRepository.save(shop);
+                log.info("Cascaded user {} BANNED status to shop {}", userId, shop.getId());
+            });
         }
 
         log.info("Admin {} changed user {} status from {} to {}. Reason: {}",

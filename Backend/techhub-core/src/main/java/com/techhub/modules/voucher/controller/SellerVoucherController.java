@@ -11,6 +11,7 @@ import com.techhub.modules.voucher.enums.DiscountType;
 import com.techhub.modules.voucher.enums.VoucherAppliesTo;
 import com.techhub.modules.voucher.enums.VoucherStatus;
 import com.techhub.security.SecurityUtils;
+import com.techhub.security.annotation.RequireActiveShop;
 import com.techhub.modules.voucher.service.SellerVoucherService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class SellerVoucherController {
     private final SellerVoucherService sellerVoucherService;
 
     @PostMapping
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ShopVoucherResponse> createShopVoucher(
             @Valid @RequestBody CreateShopVoucherRequest request
@@ -70,7 +71,7 @@ public class SellerVoucherController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<ShopVoucherDetailResponse> updateShopVoucher(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateShopVoucherRequest request
@@ -81,7 +82,7 @@ public class SellerVoucherController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<ShopVoucherDetailResponse> updateShopVoucherStatus(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateShopVoucherStatusRequest request
@@ -92,7 +93,7 @@ public class SellerVoucherController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<Void> deleteShopVoucher(@PathVariable UUID id) {
         UUID userId = SecurityUtils.getCurrentUserId();
         sellerVoucherService.deleteShopVoucher(userId, id);

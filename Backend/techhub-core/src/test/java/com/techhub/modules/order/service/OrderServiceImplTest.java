@@ -653,16 +653,15 @@ class OrderServiceImplTest {
     }
 
     @Test
-    @DisplayName("Edge Case: getBuyerOrders ném ACCOUNT_SUSPENDED khi user bị SUSPENDED")
-    void getBuyerOrders_UserSuspended_ThrowsException() {
+    @DisplayName("Edge Case: getBuyerOrders cho phép user SUSPENDED xem danh sách đơn hàng đã mua (Read-only BR-28)")
+    void getBuyerOrders_UserSuspended_Succeeds() {
         activeUser.setStatus(UserStatus.SUSPENDED);
         when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
+        when(orderRepository.findAll(any(org.springframework.data.jpa.domain.Specification.class), any(org.springframework.data.domain.Pageable.class)))
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of()));
 
-        BusinessException exception = assertThrows(BusinessException.class, () ->
-                orderService.getBuyerOrders(userId, null, null, 0, 10, "createdAt", "desc")
-        );
-
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, exception.getErrorCode());
+        var response = orderService.getBuyerOrders(userId, null, null, 0, 10, "createdAt", "desc");
+        assertNotNull(response);
     }
 
     @Test
@@ -973,18 +972,20 @@ class OrderServiceImplTest {
     }
 
     @Test
-    @DisplayName("TC-10 (Detail): getBuyerOrderDetail_Throw_WhenUserSuspended")
-    void tc10_getBuyerOrderDetail_Throw_WhenUserSuspended() {
+    @DisplayName("TC-10 (Detail): getBuyerOrderDetail cho phép user SUSPENDED xem chi tiết đơn hàng (Read-only BR-28)")
+    void tc10_getBuyerOrderDetail_AllowsUserSuspended() {
         activeUser.setStatus(UserStatus.SUSPENDED);
         when(userRepository.findById(userId)).thenReturn(Optional.of(activeUser));
 
         UUID orderId = UUID.randomUUID();
+        when(orderRepository.findByIdAndUserId(orderId, userId)).thenReturn(Optional.empty());
+
         BusinessException exception = assertThrows(BusinessException.class, () ->
                 orderService.getBuyerOrderDetail(userId, orderId)
         );
 
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, exception.getErrorCode());
-        verifyNoInteractions(orderRepository);
+        assertEquals(ErrorCode.ORDER_NOT_FOUND, exception.getErrorCode());
+        verify(orderRepository, times(1)).findByIdAndUserId(orderId, userId);
     }
 
     @Test

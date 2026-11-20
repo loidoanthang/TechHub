@@ -18,6 +18,7 @@ import com.techhub.modules.seller.dto.response.SellerWarehouseAddressResponse;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.seller.service.SellerService;
+import com.techhub.security.annotation.RequireActiveShop;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -349,13 +350,12 @@ class SellerControllerTest {
     }
 
     @Test
-    @DisplayName("updateSellerProfile: Đảm bảo method có gắn annotation @PreAuthorize(\"hasRole('SELLER')\")")
+    @DisplayName("updateSellerProfile: Đảm bảo method có gắn annotation @RequireActiveShop")
     void updateSellerProfile_HasPreAuthorizeAnnotation() throws NoSuchMethodException {
         var method = SellerController.class.getMethod("updateSellerProfile", UpdateSellerProfileRequest.class);
-        var preAuthorize = method.getAnnotation(org.springframework.security.access.prepost.PreAuthorize.class);
+        var requireActiveShop = method.getAnnotation(RequireActiveShop.class);
 
-        assertNotNull(preAuthorize, "Method updateSellerProfile phải có @PreAuthorize");
-        assertEquals("hasRole('SELLER')", preAuthorize.value());
+        assertNotNull(requireActiveShop, "Method updateSellerProfile phải có @RequireActiveShop");
     }
 
     // ==========================================
@@ -470,13 +470,12 @@ class SellerControllerTest {
     }
 
     @Test
-    @DisplayName("updateShopInfo: Đảm bảo method có gắn annotation @PreAuthorize(\"hasRole('SELLER')\")")
+    @DisplayName("updateShopInfo: Đảm bảo method có gắn annotation @RequireActiveShop")
     void updateShopInfo_HasPreAuthorizeAnnotation() throws NoSuchMethodException {
         var method = SellerController.class.getMethod("updateShopInfo", UpdateSellerShopRequest.class);
-        var preAuthorize = method.getAnnotation(org.springframework.security.access.prepost.PreAuthorize.class);
+        var requireActiveShop = method.getAnnotation(RequireActiveShop.class);
 
-        assertNotNull(preAuthorize, "Method updateShopInfo phải có @PreAuthorize");
-        assertEquals("hasRole('SELLER')", preAuthorize.value());
+        assertNotNull(requireActiveShop, "Method updateShopInfo phải có @RequireActiveShop");
     }
 
     @Test
@@ -525,13 +524,12 @@ class SellerControllerTest {
     }
 
     @Test
-    @DisplayName("updateShopStatus: Đảm bảo method có gắn annotation @PreAuthorize(\"hasRole('SELLER')\")")
+    @DisplayName("updateShopStatus: Đảm bảo method có gắn annotation @RequireActiveShop")
     void updateShopStatus_HasPreAuthorizeAnnotation() throws NoSuchMethodException {
         var method = SellerController.class.getMethod("updateShopStatus", UpdateShopStatusRequest.class);
-        var preAuthorize = method.getAnnotation(org.springframework.security.access.prepost.PreAuthorize.class);
+        var requireActiveShop = method.getAnnotation(RequireActiveShop.class);
 
-        assertNotNull(preAuthorize, "Method updateShopStatus phải có @PreAuthorize");
-        assertEquals("hasRole('SELLER')", preAuthorize.value());
+        assertNotNull(requireActiveShop, "Method updateShopStatus phải có @RequireActiveShop");
     }
 
     @Test
@@ -651,13 +649,12 @@ class SellerControllerTest {
     }
 
     @Test
-    @DisplayName("updateWarehouseAddress: Đảm bảo method có gắn annotation @PreAuthorize(\"hasRole('SELLER')\")")
+    @DisplayName("updateWarehouseAddress: Đảm bảo method có gắn annotation @RequireActiveShop")
     void updateWarehouseAddress_HasPreAuthorizeAnnotation() throws NoSuchMethodException {
         var method = SellerController.class.getMethod("updateWarehouseAddress", UpdateWarehouseAddressRequest.class);
-        var preAuthorize = method.getAnnotation(org.springframework.security.access.prepost.PreAuthorize.class);
+        var requireActiveShop = method.getAnnotation(RequireActiveShop.class);
 
-        assertNotNull(preAuthorize, "Method updateWarehouseAddress phải có @PreAuthorize");
-        assertEquals("hasRole('SELLER')", preAuthorize.value());
+        assertNotNull(requireActiveShop, "Method updateWarehouseAddress phải có @RequireActiveShop");
     }
 
     // =========================================================================
@@ -754,13 +751,12 @@ class SellerControllerTest {
     }
 
     @Test
-    @DisplayName("updateShippingOption: Đảm bảo method có gắn annotation @PreAuthorize(\"hasRole('SELLER')\")")
+    @DisplayName("updateShippingOption: Đảm bảo method có gắn annotation @RequireActiveShop")
     void updateShippingOption_HasPreAuthorizeAnnotation() throws NoSuchMethodException {
         var method = SellerController.class.getMethod("updateShippingOption", UpdateShippingOptionRequest.class);
-        var preAuthorize = method.getAnnotation(org.springframework.security.access.prepost.PreAuthorize.class);
+        var requireActiveShop = method.getAnnotation(RequireActiveShop.class);
 
-        assertNotNull(preAuthorize, "Method updateShippingOption phải có @PreAuthorize");
-        assertEquals("hasRole('SELLER')", preAuthorize.value());
+        assertNotNull(requireActiveShop, "Method updateShippingOption phải có @RequireActiveShop");
     }
 }
 

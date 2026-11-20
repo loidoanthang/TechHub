@@ -6,6 +6,7 @@ import com.techhub.modules.review.dto.request.UpdateReviewRequest;
 import com.techhub.modules.review.dto.response.HelpfulVoteResponse;
 import com.techhub.modules.review.dto.response.ReviewResponse;
 import com.techhub.security.SecurityUtils;
+import com.techhub.security.annotation.RequireActiveBuyer;
 import com.techhub.modules.review.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<ReviewResponse> createReview(
             @Valid @RequestBody CreateReviewRequest request
     ) {
@@ -32,7 +33,7 @@ public class ReviewController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<ReviewResponse> updateReview(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateReviewRequest request
@@ -43,7 +44,7 @@ public class ReviewController {
     }
 
     @PostMapping("/{id}/helpful")
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<HelpfulVoteResponse> toggleHelpfulVote(@PathVariable UUID id) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         HelpfulVoteResponse response = reviewService.toggleHelpfulVote(currentUserId, id);

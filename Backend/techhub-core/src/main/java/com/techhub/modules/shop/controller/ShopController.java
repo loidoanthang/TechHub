@@ -5,6 +5,7 @@ import com.techhub.modules.voucher.dto.response.CartShopVoucherResponse;
 import com.techhub.modules.shop.dto.response.FollowShopResponse;
 import com.techhub.modules.shop.dto.response.PublicShopResponse;
 import com.techhub.security.SecurityUtils;
+import com.techhub.security.annotation.RequireActiveBuyer;
 import com.techhub.modules.shop.service.ShopFollowingService;
 import com.techhub.modules.shop.service.ShopService;
 import com.techhub.modules.voucher.service.ShopVoucherService;
@@ -40,7 +41,7 @@ public class ShopController {
     }
 
     @PostMapping("/{sellerName}/follow")
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<FollowShopResponse> followShop(
             @PathVariable String sellerName
     ) {
@@ -50,7 +51,7 @@ public class ShopController {
     }
 
     @DeleteMapping("/{sellerName}/follow")
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<Void> unfollowShop(
             @PathVariable String sellerName
     ) {

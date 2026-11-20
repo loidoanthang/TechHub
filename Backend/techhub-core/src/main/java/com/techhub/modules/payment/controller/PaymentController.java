@@ -6,6 +6,7 @@ import com.techhub.modules.payment.dto.request.VNPayRetryRequest;
 import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
 import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
 import com.techhub.security.SecurityUtils;
+import com.techhub.security.annotation.RequireActiveBuyer;
 import com.techhub.modules.payment.service.VNPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +50,7 @@ public class PaymentController {
      * Buyer retries payment for an unpaid, failed, or pending payment session.
      */
     @PostMapping("/retry/{paymentId}")
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<Map<String, String>> retryPayment(
             @PathVariable UUID paymentId,
             @RequestBody(required = false) VNPayRetryRequest request,

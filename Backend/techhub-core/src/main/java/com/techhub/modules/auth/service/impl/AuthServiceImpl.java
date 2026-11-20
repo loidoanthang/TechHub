@@ -118,9 +118,6 @@ public class AuthServiceImpl implements AuthService {
                 if (user.getStatus() == UserStatus.BANNED) {
                     throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
                 }
-                if (user.getStatus() == UserStatus.SUSPENDED) {
-                    throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
-                }
             }
             throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
         } catch (DisabledException ex) {
@@ -260,6 +257,10 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findById(currentUser.user().getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        if (user.getStatus() == UserStatus.SUSPENDED) {
+            throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
+        }
+
         validateUserActiveAndNonLocked(user);
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
@@ -276,9 +277,6 @@ public class AuthServiceImpl implements AuthService {
     private void validateUserStatus(User user) {
         if (user.getStatus() == UserStatus.BANNED) {
             throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
-        }
-        if (user.getStatus() == UserStatus.SUSPENDED) {
-            throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
         }
         if (user.getStatus() == UserStatus.DELETED) {
             throw new BusinessException(ErrorCode.ACCOUNT_DELETED);

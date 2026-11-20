@@ -4,6 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
 import com.techhub.modules.product.dto.response.WishlistResponse;
 import com.techhub.security.SecurityUtils;
+import com.techhub.security.annotation.RequireActiveBuyer;
 import com.techhub.modules.product.service.WishlistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +26,7 @@ public class WishlistController {
     private final WishlistService wishlistService;
 
     @PostMapping("/{productId}")
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<WishlistResponse> addToWishlist(@PathVariable UUID productId) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         WishlistResponse response = wishlistService.addToWishlist(currentUserId, productId);
@@ -33,7 +34,7 @@ public class WishlistController {
     }
 
     @DeleteMapping("/{productId}")
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<Void> removeFromWishlist(@PathVariable UUID productId) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         wishlistService.removeFromWishlist(currentUserId, productId);

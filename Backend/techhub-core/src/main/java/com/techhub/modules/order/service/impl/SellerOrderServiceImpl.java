@@ -647,14 +647,11 @@ public class SellerOrderServiceImpl implements SellerOrderService {
             throw new BusinessException(ErrorCode.NOT_A_SELLER);
         }
 
-        // Step 2: Validate Account Status (BR-11D)
+        // Step 2: Validate Account Status (BR-11D, BR-28: User SUSPENDED does not block Seller)
         User user = seller.getUser();
         if (user != null) {
             if (user.getStatus() == UserStatus.BANNED) {
                 throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
-            }
-            if (user.getStatus() == UserStatus.SUSPENDED) {
-                throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
             }
             if (user.getStatus() == UserStatus.DELETED) {
                 throw new BusinessException(ErrorCode.ACCOUNT_DELETED);

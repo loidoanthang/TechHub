@@ -14,6 +14,7 @@ import com.techhub.modules.seller.dto.response.SellerShopResponse;
 import com.techhub.modules.seller.dto.response.SellerVerificationStatusResponse;
 import com.techhub.modules.seller.dto.response.SellerWarehouseAddressResponse;
 import com.techhub.modules.seller.service.SellerService;
+import com.techhub.security.annotation.RequireActiveShop;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -56,7 +57,7 @@ public class SellerController {
     }
 
     @PutMapping("/profile")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<SellerProfileResponse> updateSellerProfile(
             @Valid @RequestBody UpdateSellerProfileRequest request
     ) {
@@ -72,7 +73,7 @@ public class SellerController {
     }
 
     @PutMapping("/shop")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<SellerShopResponse> updateShopInfo(
             @Valid @RequestBody UpdateSellerShopRequest request
     ) {
@@ -81,7 +82,7 @@ public class SellerController {
     }
 
     @PatchMapping("/shop/status")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<SellerShopResponse> updateShopStatus(
             @Valid @RequestBody UpdateShopStatusRequest request
     ) {
@@ -97,7 +98,7 @@ public class SellerController {
     }
 
     @PutMapping("/shop/address")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<SellerWarehouseAddressResponse> updateWarehouseAddress(
             @Valid @RequestBody UpdateWarehouseAddressRequest request
     ) {
@@ -113,7 +114,7 @@ public class SellerController {
     }
 
     @PutMapping("/shop/shipping-option")
-    @PreAuthorize("hasRole('SELLER')")
+    @RequireActiveShop
     public ApiResponse<SellerShippingOptionResponse> updateShippingOption(
             @Valid @RequestBody UpdateShippingOptionRequest request
     ) {

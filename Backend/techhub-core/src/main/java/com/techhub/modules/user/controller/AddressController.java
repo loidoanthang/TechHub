@@ -5,6 +5,7 @@ import com.techhub.modules.user.dto.request.CreateAddressRequest;
 import com.techhub.modules.user.dto.request.UpdateAddressRequest;
 import com.techhub.modules.user.dto.response.AddressResponse;
 import com.techhub.modules.user.service.AddressService;
+import com.techhub.security.annotation.RequireActiveBuyer;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ public class AddressController {
     }
 
     @PostMapping
+    @RequireActiveBuyer
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<AddressResponse> createAddress(@Valid @RequestBody CreateAddressRequest request) {
         AddressResponse data = addressService.createAddress(request);
@@ -36,6 +38,7 @@ public class AddressController {
     }
 
     @PutMapping("/{id}")
+    @RequireActiveBuyer
     public ApiResponse<AddressResponse> updateAddress(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateAddressRequest request
@@ -45,6 +48,7 @@ public class AddressController {
     }
 
     @DeleteMapping("/{id}")
+    @RequireActiveBuyer
     public ApiResponse<Void> deleteAddress(@PathVariable UUID id) {
         addressService.deleteAddress(id);
         return ApiResponse.success(null, "Address deleted successfully.", null);

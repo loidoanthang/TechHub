@@ -83,10 +83,6 @@ public class SellerReviewServiceImpl implements SellerReviewService {
                 log.warn("Seller user {} is BANNED", user.getId());
                 throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
             }
-            if (user.getStatus() == UserStatus.SUSPENDED) {
-                log.warn("Seller user {} is SUSPENDED", user.getId());
-                throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
-            }
         }
 
         // 3. Validate Shop (BR-20.21)
@@ -151,10 +147,6 @@ public class SellerReviewServiceImpl implements SellerReviewService {
             if (user.getStatus() == UserStatus.BANNED) {
                 log.warn("Seller user {} is BANNED", user.getId());
                 throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
-            }
-            if (user.getStatus() == UserStatus.SUSPENDED) {
-                log.warn("Seller user {} is SUSPENDED", user.getId());
-                throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
             }
         }
 

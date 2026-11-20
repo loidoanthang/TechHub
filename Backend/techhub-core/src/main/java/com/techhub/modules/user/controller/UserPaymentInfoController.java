@@ -4,6 +4,7 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.payment.dto.request.CreatePaymentInfoRequest;
 import com.techhub.modules.payment.dto.response.PaymentInfoResponse;
 import com.techhub.security.SecurityUtils;
+import com.techhub.security.annotation.RequireActiveBuyer;
 import com.techhub.modules.user.service.UserPaymentInfoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class UserPaymentInfoController {
     private final UserPaymentInfoService userPaymentInfoService;
 
     @PostMapping
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<PaymentInfoResponse> createPaymentInfo(
             @Valid @RequestBody CreatePaymentInfoRequest request
@@ -43,7 +44,7 @@ public class UserPaymentInfoController {
     }
 
     @PatchMapping("/{id}/default")
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<PaymentInfoResponse> setDefaultPaymentInfo(@PathVariable UUID id) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         PaymentInfoResponse response = userPaymentInfoService.setDefaultPaymentInfo(currentUserId, id);
@@ -51,7 +52,7 @@ public class UserPaymentInfoController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     public ApiResponse<Void> deletePaymentInfo(@PathVariable UUID id) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         userPaymentInfoService.deletePaymentInfo(currentUserId, id);

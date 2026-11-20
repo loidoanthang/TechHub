@@ -24,6 +24,8 @@ public interface ShopRepository extends JpaRepository<Shop, UUID>, JpaSpecificat
 
     Optional<Shop> findBySellerId(UUID sellerId);
 
+    Optional<Shop> findBySeller_UserId(UUID userId);
+
     Optional<Shop> findBySeller_SellerName(String sellerName);
 
     @EntityGraph(attributePaths = {"seller"})

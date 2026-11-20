@@ -6,6 +6,7 @@ import com.techhub.modules.order.dto.request.PlaceOrderRequest;
 import com.techhub.modules.order.dto.response.CheckoutPreviewResponse;
 import com.techhub.modules.order.dto.response.PlaceOrderResponse;
 import com.techhub.security.SecurityUtils;
+import com.techhub.security.annotation.RequireActiveBuyer;
 import com.techhub.modules.order.service.CheckoutService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class CheckoutController {
     }
 
     @PostMapping({"", "/place-order"})
-    @PreAuthorize("hasRole('BUYER')")
+    @RequireActiveBuyer
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<PlaceOrderResponse> placeOrder(
             @Valid @RequestBody PlaceOrderRequest request

@@ -124,14 +124,15 @@ class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Lấy thông tin thất bại - Tài khoản bị tạm ngưng (SUSPENDED) thì ném lỗi ACCOUNT_SUSPENDED")
-    void getProfile_AccountSuspended_ThrowsException() {
+    @DisplayName("Lấy thông tin thành công - Tài khoản bị tạm ngưng (SUSPENDED) vẫn được xem Profile (Read-only for Appeal)")
+    void getProfile_AccountSuspended_Succeeds() {
         sampleUser.setStatus(UserStatus.SUSPENDED);
         setSecurityContextUser(sampleUser);
         when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
 
-        BusinessException exception = assertThrows(BusinessException.class, () -> userService.getProfile());
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, exception.getErrorCode());
+        UserProfileResponse response = userService.getProfile();
+        assertNotNull(response);
+        assertEquals(sampleUser.getEmail(), response.email());
         verify(userRepository, times(1)).findById(sampleUser.getId());
     }
 

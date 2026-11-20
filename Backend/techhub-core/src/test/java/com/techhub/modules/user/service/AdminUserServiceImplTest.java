@@ -36,6 +36,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.modules.user.service.AdminUserService;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,6 +51,9 @@ class AdminUserServiceImplTest {
 
     @Mock
     private RefreshTokenService refreshTokenService;
+
+    @Mock
+    private ShopRepository shopRepository;
 
     @InjectMocks
     private AdminUserServiceImpl adminUserService;
@@ -265,13 +269,14 @@ class AdminUserServiceImplTest {
     // ==================== UPDATE USER STATUS TESTS ====================
 
     @Test
-    @DisplayName("Ban user thành công -> Cập nhật status BANNED và lập tức thu hồi toàn bộ Refresh Token")
+    @DisplayName("Ban user thành công -> Cập nhật status BANNED, thu hồi Refresh Token và cascade sang Shop")
     void updateUserStatus_Success_BanUser_RevokesTokens() {
         setSecurityContextUser(adminUser);
         UpdateUserStatusRequest request = new UpdateUserStatusRequest(UserStatus.BANNED, "Gian lận voucher khuyến mãi");
 
         when(userRepository.findById(user1.getId())).thenReturn(Optional.of(user1));
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(shopRepository.findBySeller_UserId(user1.getId())).thenReturn(Optional.empty());
         when(addressRepository.findDefaultAddressesByUserIds(List.of(user1.getId()))).thenReturn(List.of(address1));
 
         AdminUserResponse response = adminUserService.updateUserStatus(user1.getId(), request);
@@ -281,10 +286,11 @@ class AdminUserServiceImplTest {
         assertEquals("123 Le Loi, Phuong Ben Nghe, Quan 1, TP. Ho Chi Minh", response.defaultAddress());
         verify(userRepository, times(1)).save(user1);
         verify(refreshTokenService, times(1)).revokeAll(user1);
+        verify(shopRepository, times(1)).findBySeller_UserId(user1.getId());
     }
 
     @Test
-    @DisplayName("Đình chỉ (SUSPENDED) user thành công -> Thu hồi toàn bộ Refresh Token")
+    @DisplayName("Đình chỉ (SUSPENDED) user thành công -> Không thu hồi Refresh Token và không ảnh hưởng shop")
     void updateUserStatus_Success_SuspendUser_RevokesTokens() {
         setSecurityContextUser(adminUser);
         UpdateUserStatusRequest request = new UpdateUserStatusRequest(UserStatus.SUSPENDED, "Tạm khóa để điều tra hành vi");
@@ -299,7 +305,8 @@ class AdminUserServiceImplTest {
         assertEquals(UserStatus.SUSPENDED, response.status());
         assertNull(response.defaultAddress());
         verify(userRepository, times(1)).save(user1);
-        verify(refreshTokenService, times(1)).revokeAll(user1);
+        verify(refreshTokenService, never()).revokeAll(user1);
+        verify(shopRepository, never()).findBySeller_UserId(any());
     }
 
     @Test

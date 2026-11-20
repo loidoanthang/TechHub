@@ -2,8 +2,10 @@ package com.techhub.modules.order.controller;
 
 import com.techhub.common.ApiResponse;
 import com.techhub.common.PageResponse;
+import com.techhub.modules.order.dto.request.CancelOrderRequest;
 import com.techhub.modules.order.dto.response.BuyerOrderDetailResponse;
 import com.techhub.modules.order.dto.response.BuyerOrderResponse;
+import com.techhub.modules.order.dto.response.ReorderResponse;
 import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.security.SecurityUtils;
 import com.techhub.modules.order.service.OrderService;
@@ -73,7 +75,7 @@ public class OrderController {
     @PreAuthorize("hasRole('BUYER')")
     public ApiResponse<BuyerOrderDetailResponse> cancelBuyerOrder(
             @PathVariable UUID id,
-            @Valid @RequestBody com.techhub.modules.order.dto.request.CancelOrderRequest request
+            @Valid @RequestBody CancelOrderRequest request
     ) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
         BuyerOrderDetailResponse response = orderService.cancelBuyerOrder(currentUserId, id, request);
@@ -82,9 +84,9 @@ public class OrderController {
 
     @PostMapping("/{id}/reorder")
     @PreAuthorize("hasRole('BUYER')")
-    public ApiResponse<com.techhub.modules.order.dto.response.ReorderResponse> reorder(@PathVariable UUID id) {
+    public ApiResponse<ReorderResponse> reorder(@PathVariable UUID id) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
-        com.techhub.modules.order.dto.response.ReorderResponse response = orderService.reorder(currentUserId, id);
+        ReorderResponse response = orderService.reorder(currentUserId, id);
         return ApiResponse.success(response, "Xử lý mua lại đơn hàng thành công", null);
     }
 }

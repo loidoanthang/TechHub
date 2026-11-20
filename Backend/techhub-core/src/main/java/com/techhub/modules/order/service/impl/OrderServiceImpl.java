@@ -651,17 +651,11 @@ public class OrderServiceImpl implements OrderService {
         if (user.getStatus() == UserStatus.BANNED) {
             throw new BusinessException(ErrorCode.ACCOUNT_BANNED);
         }
-        if (user.getStatus() == UserStatus.SUSPENDED) {
-            throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
-        }
         if (user.getStatus() == UserStatus.DELETED) {
             throw new BusinessException(ErrorCode.ACCOUNT_DELETED);
         }
         if (!user.isEmailVerified()) {
             throw new BusinessException(ErrorCode.ACCOUNT_NOT_VERIFIED);
-        }
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new BusinessException(ErrorCode.ACCOUNT_LOCKED);
         }
         return user;
     }
