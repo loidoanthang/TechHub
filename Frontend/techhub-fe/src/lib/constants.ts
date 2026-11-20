@@ -122,6 +122,15 @@ export const API_ENDPOINTS = {
   VOUCHERS: {
     PLATFORM: "/api/vouchers/platform",
   },
+  UPLOAD: {
+    AVATAR: "/api/upload/avatar",
+    SHOP_AVATAR: (shopId: number | string) => `/api/upload/shops/${shopId}/avatar`,
+    SHOP_BANNER: (shopId: number | string) => `/api/upload/shops/${shopId}/banner`,
+    PRODUCTS: "/api/upload/products",
+    REVIEWS: "/api/upload/reviews",
+    RETURNS: "/api/upload/returns",
+    CHAT: "/api/upload/chat",
+  },
   NOTIFICATIONS: {
     BASE: "/api/notifications",
     READ: (id: string) => `/api/notifications/${id}/read`,

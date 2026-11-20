@@ -5,6 +5,9 @@ import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserAvatar } from "@/components/shared/UserAvatar";
+import { SingleImageUploader } from "@/components/shared/upload/SingleImageUploader";
+import { uploadApi } from "@/lib/api/upload";
+import { UPLOAD_LIMITS } from "@/features/uploads/types";
 import {
   Store,
   Image as ImageIcon,
@@ -24,21 +27,6 @@ import {
   useUpdateSellerShopMutation,
 } from "../../hooks/useSellerQueries";
 
-// Preset curated avatar and banner images for electronics sellers
-const PRESET_AVATARS = [
-  {
-    name: "TechHub Official",
-    url: "/images/default-avatar.svg",
-  },
-];
-
-const PRESET_BANNERS = [
-  {
-    name: "TechHub Hardware Banner",
-    url: "/images/sample-evidence.svg",
-  },
-];
-
 export function ShopProfileTab() {
   const { data: shop, isLoading, isError, refetch } = useSellerShopQuery();
   const updateShopMutation = useUpdateSellerShopMutation();
@@ -47,6 +35,10 @@ export function ShopProfileTab() {
     type: "success" | "error";
     message: string;
   } | null>(null);
+
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const [isBannerUploading, setIsBannerUploading] = useState(false);
+  const isAnyUploading = isAvatarUploading || isBannerUploading;
 
   const {
     register,
@@ -229,43 +221,37 @@ export function ShopProfileTab() {
             )}
           </div>
 
-          {/* Ảnh đại diện (Avatar URL) */}
+          {/* Ảnh đại diện (Avatar) */}
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <ImageIcon className="w-3.5 h-3.5 text-slate-500" />
-                <span>URL Ảnh đại diện (Logo Shop)</span>
+                <span>Ảnh đại diện (Logo Shop)</span>
               </span>
               <span className="text-[11px] font-normal text-slate-400">
-                Tỉ lệ 1:1 (khuyên dùng 200x200px)
+                Tỉ lệ 1:1 (khuyên dùng 200x200px) • Tối đa 2 MB
               </span>
             </label>
-            <input
-              type="url"
-              {...register("avatarUrl")}
-              placeholder="https://example.com/logo.png hoặc link ảnh online"
-              className={`w-full h-10 px-3.5 rounded-xl border text-xs text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] ${
-                errors.avatarUrl
-                  ? "border-rose-400 bg-rose-50/20"
-                  : "border-slate-200 bg-white"
-              }`}
-            />
-            {/* Quick avatar presets */}
-            <div className="flex flex-wrap items-center gap-2 pt-0.5">
-              <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                Mẫu gợi ý:
-              </span>
-              {PRESET_AVATARS.map((p) => (
-                <button
-                  key={p.name}
-                  type="button"
-                  onClick={() => setValue("avatarUrl", p.url, { shouldDirty: true })}
-                  className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-[#eff4ff] hover:text-[#0045cc] text-slate-600 transition-colors border border-slate-200"
-                >
-                  {p.name}
-                </button>
-              ))}
-            </div>
+            {shop ? (
+              <SingleImageUploader
+                value={watchedAvatar}
+                onChange={(url) =>
+                  setValue("avatarUrl", url, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
+                onClear={() => setValue("avatarUrl", "", { shouldDirty: true })}
+                maxSize={UPLOAD_LIMITS.SHOP_AVATAR}
+                presignFn={(file) =>
+                  uploadApi.getShopAvatarPresignedUrl(shop.shopId, file)
+                }
+                onUploadingChange={setIsAvatarUploading}
+                aspectRatio="1:1"
+                className="max-w-[220px]"
+                disabled={updateShopMutation.isPending}
+              />
+            ) : null}
             {errors.avatarUrl && (
               <p className="text-[11px] text-rose-600 font-medium">
                 {errors.avatarUrl.message}
@@ -273,43 +259,36 @@ export function ShopProfileTab() {
             )}
           </div>
 
-          {/* Ảnh bìa (Banner URL) */}
+          {/* Ảnh bìa (Banner) */}
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <ImageIcon className="w-3.5 h-3.5 text-slate-500" />
-                <span>URL Ảnh bìa (Cover Banner)</span>
+                <span>Ảnh bìa (Cover Banner)</span>
               </span>
               <span className="text-[11px] font-normal text-slate-400">
-                Tỉ lệ 3:1 hoặc 16:9 (khuyên dùng 1200x400px)
+                Tỉ lệ 16:9 (khuyên dùng 1200x675px) • Tối đa 4 MB
               </span>
             </label>
-            <input
-              type="url"
-              {...register("bannerUrl")}
-              placeholder="https://example.com/banner.jpg hoặc link ảnh bìa banner"
-              className={`w-full h-10 px-3.5 rounded-xl border text-xs text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] ${
-                errors.bannerUrl
-                  ? "border-rose-400 bg-rose-50/20"
-                  : "border-slate-200 bg-white"
-              }`}
-            />
-            {/* Quick banner presets */}
-            <div className="flex flex-wrap items-center gap-2 pt-0.5">
-              <span className="text-[11px] text-slate-400 flex items-center gap-1">
-                Mẫu gợi ý:
-              </span>
-              {PRESET_BANNERS.map((p) => (
-                <button
-                  key={p.name}
-                  type="button"
-                  onClick={() => setValue("bannerUrl", p.url, { shouldDirty: true })}
-                  className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 hover:bg-[#eff4ff] hover:text-[#0045cc] text-slate-600 transition-colors border border-slate-200"
-                >
-                  {p.name}
-                </button>
-              ))}
-            </div>
+            {shop ? (
+              <SingleImageUploader
+                value={watchedBanner}
+                onChange={(url) =>
+                  setValue("bannerUrl", url, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
+                onClear={() => setValue("bannerUrl", "", { shouldDirty: true })}
+                maxSize={UPLOAD_LIMITS.SHOP_BANNER}
+                presignFn={(file) =>
+                  uploadApi.getShopBannerPresignedUrl(shop.shopId, file)
+                }
+                onUploadingChange={setIsBannerUploading}
+                aspectRatio="16:9"
+                disabled={updateShopMutation.isPending}
+              />
+            ) : null}
             {errors.bannerUrl && (
               <p className="text-[11px] text-rose-600 font-medium">
                 {errors.bannerUrl.message}
@@ -324,13 +303,19 @@ export function ShopProfileTab() {
             </span>
             <button
               type="submit"
-              disabled={updateShopMutation.isPending || !isDirty}
+              disabled={
+                updateShopMutation.isPending || !isDirty || isAnyUploading
+              }
               className="h-10 px-5 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white text-xs font-bold transition-all shadow-xs flex items-center gap-2"
             >
-              {updateShopMutation.isPending && (
+              {(updateShopMutation.isPending || isAnyUploading) && (
                 <Loader2 className="w-4 h-4 animate-spin" />
               )}
-              <span>Lưu thay đổi hồ sơ</span>
+              <span>
+                {isAnyUploading
+                  ? "Đang tải ảnh lên..."
+                  : "Lưu thay đổi hồ sơ"}
+              </span>
             </button>
           </div>
         </form>

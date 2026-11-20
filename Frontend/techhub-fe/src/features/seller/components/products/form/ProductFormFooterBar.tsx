@@ -21,6 +21,7 @@ interface ProductFormFooterBarProps {
   onSaveDraft: () => void;
   onSubmitApproval: () => void;
   isEditMode?: boolean;
+  isUploadingImages?: boolean;
 }
 
 export function ProductFormFooterBar({
@@ -31,6 +32,7 @@ export function ProductFormFooterBar({
   onSaveDraft,
   onSubmitApproval,
   isEditMode = false,
+  isUploadingImages = false,
 }: ProductFormFooterBarProps) {
   return (
     <div className="fixed bottom-0 right-0 left-0 lg:left-56 z-40 bg-white/95 backdrop-blur-md px-6 py-3 border-t border-slate-200 shadow-xl flex items-center justify-between transition-all">
@@ -70,11 +72,13 @@ export function ProductFormFooterBar({
         {/* Save as Draft Button */}
         <button
           type="button"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isUploadingImages}
           onClick={onSaveDraft}
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition-all disabled:opacity-50"
         >
-          {isSubmitting && submittingAction === "DRAFT" ? (
+          {isUploadingImages ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : isSubmitting && submittingAction === "DRAFT" ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
           ) : (
             <Bookmark className="w-3.5 h-3.5 text-slate-500" />
@@ -86,11 +90,13 @@ export function ProductFormFooterBar({
         <div className="relative group/submit">
           <button
             type="button"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isUploadingImages}
             onClick={onSubmitApproval}
             className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-[#0045cc] hover:bg-[#0038a8] text-white text-xs font-semibold shadow-sm transition-all disabled:opacity-50 hover:shadow-md"
           >
-            {isSubmitting && submittingAction === "SUBMIT" ? (
+            {isUploadingImages ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : isSubmitting && submittingAction === "SUBMIT" ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
               <Send className="w-3.5 h-3.5" />

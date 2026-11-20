@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { X, RotateCcw, Upload, AlertCircle, Loader2 } from "lucide-react";
+import { X, RotateCcw, AlertCircle, Loader2 } from "lucide-react";
 import { useCreateReturnRequestMutation } from "@/features/orders/hooks/useOrderQueries";
+import { GalleryImageUploader } from "@/components/shared/upload/GalleryImageUploader";
+import { uploadApi } from "@/lib/api/upload";
+import { UPLOAD_LIMITS } from "@/features/uploads/types";
 
 interface ReturnRefundModalProps {
   orderId: string;
@@ -35,6 +38,7 @@ export function ReturnRefundModal({
   const [description, setDescription] = useState("");
   const [evidenceImages, setEvidenceImages] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const createReturnRequestMutation = useCreateReturnRequestMutation();
 
@@ -42,18 +46,6 @@ export function ReturnRefundModal({
 
   const formatPrice = (val: number) => {
     return new Intl.NumberFormat("vi-VN").format(val) + "₫";
-  };
-
-  const handleAddSampleImage = () => {
-    if (evidenceImages.length >= 3) return;
-    setEvidenceImages((prev) => [
-      ...prev,
-      "/images/sample-evidence.svg",
-    ]);
-  };
-
-  const removeImage = (idx: number) => {
-    setEvidenceImages((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -173,33 +165,21 @@ export function ReturnRefundModal({
               <label className="text-xs font-bold text-[#0b1c30]">
                 Evidence Media (Max 3)
               </label>
-              <button
-                type="button"
-                onClick={handleAddSampleImage}
-                disabled={evidenceImages.length >= 3}
-                className="text-[11px] font-semibold text-[#0045cc] hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-40"
-              >
-                <Upload className="w-3.5 h-3.5" />
-                <span>+ Add Sample Photo</span>
-              </button>
+              <span className="text-[11px] text-[#737688] font-mono">
+                {evidenceImages.length}/3
+              </span>
             </div>
 
-            {evidenceImages.length > 0 && (
-              <div className="flex gap-2">
-                {evidenceImages.map((img, i) => (
-                  <div key={i} className="relative w-16 h-16 rounded-xl overflow-hidden border border-[#c3c5d9]/40 group">
-                    <img src={img} alt="Evidence" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(i)}
-                      className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <GalleryImageUploader
+              value={evidenceImages}
+              onChange={setEvidenceImages}
+              maxFiles={3}
+              maxSize={UPLOAD_LIMITS.RETURN_PROOF}
+              presignFn={uploadApi.getReturnProofPresignedUrl}
+              onUploadingChange={setIsUploading}
+              isCoverSelectorEnabled={false}
+              disabled={createReturnRequestMutation.isPending}
+            />
           </div>
 
           {/* Actions */}
@@ -214,10 +194,15 @@ export function ReturnRefundModal({
             </button>
             <button
               type="submit"
-              disabled={createReturnRequestMutation.isPending}
+              disabled={createReturnRequestMutation.isPending || isUploading}
               className="px-6 py-2.5 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              {createReturnRequestMutation.isPending ? (
+              {isUploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Uploading evidence...</span>
+                </>
+              ) : createReturnRequestMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Submitting...</span>

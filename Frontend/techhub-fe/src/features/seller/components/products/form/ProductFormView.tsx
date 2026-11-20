@@ -220,6 +220,7 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittingAction, setSubmittingAction] = useState<"DRAFT" | "SUBMIT" | null>(null);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   // Success Modal & Warning Modal
   const [isSubmittedModalOpen, setIsSubmittedModalOpen] = useState(false);
@@ -613,6 +614,7 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
           images={watchedImages}
           onChange={(newImages) => setValue("images", newImages, { shouldValidate: true })}
           error={formattedErrors.images}
+          onUploadingChange={setIsUploadingImages}
         />
 
         {/* Card 3: Dynamic Category Specifications */}
@@ -642,6 +644,7 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
         variantCount={watchedVariants.length}
         isSubmitting={isSubmitting}
         submittingAction={submittingAction}
+        isUploadingImages={isUploadingImages}
         onSaveDraft={() => handleTriggerSubmit("DRAFT")}
         onSubmitApproval={() => handleTriggerSubmit("SUBMIT")}
         isEditMode={isEditMode}
