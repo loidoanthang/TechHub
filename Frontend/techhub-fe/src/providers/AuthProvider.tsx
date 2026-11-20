@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { authApi } from "@/features/auth/api/authApi";
 import {
   getAccessToken,
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const refreshProfile = useCallback(async (): Promise<UserProfile | null> => {
     try {
@@ -112,9 +114,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       clearTokens();
       setUser(null);
-      router.push(ROUTES.LOGIN);
+      queryClient.clear();
+      if (typeof window !== "undefined") {
+        window.location.href = ROUTES.LOGIN;
+      } else {
+        router.push(ROUTES.LOGIN);
+      }
     }
-  }, [router]);
+  }, [queryClient, router]);
 
   const value = useMemo<AuthContextType>(
     () => ({

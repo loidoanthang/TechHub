@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -26,6 +26,7 @@ export function LoginForm() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const isResetSuccess = searchParams.get("reset") === "true";
   const isChangedSuccess = searchParams.get("changed") === "true";
@@ -33,6 +34,12 @@ export function LoginForm() {
 
   const { login } = useAuth();
   const loginMutation = useLoginMutation();
+
+  // Ensure fresh state on component mount / route restore
+  useEffect(() => {
+    loginMutation.reset();
+    setIsRedirecting(false);
+  }, []);
 
   const {
     register,
@@ -58,9 +65,15 @@ export function LoginForm() {
       });
 
       if (response && response.success && response.data) {
+        setIsRedirecting(true);
         await login(response.data, returnUrl);
+      } else {
+        loginMutation.reset();
+        setIsRedirecting(false);
       }
     } catch (err) {
+      setIsRedirecting(false);
+      loginMutation.reset();
       const axiosError = err as AxiosError<ApiResponse<unknown>>;
       const errorData = axiosError.response?.data;
       const metadata = errorData?.metadata as { errorCode?: string } | undefined;
@@ -112,7 +125,7 @@ export function LoginForm() {
   };
 
   const isLoading = loginMutation.isPending || isSubmitting;
-  const isSuccess = loginMutation.isSuccess;
+  const isAuthenticating = isLoading || isRedirecting;
 
   return (
     <div className="relative w-full max-w-[440px]">
@@ -240,7 +253,7 @@ export function LoginForm() {
           {/* Submit */}
           <button
             type="submit"
-            disabled={isLoading || isSuccess}
+            disabled={isAuthenticating}
             className="w-full h-12 mt-2 bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-semibold rounded-xl shadow-md shadow-[#0045cc]/20 flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-80 cursor-pointer"
           >
             {isLoading ? (
@@ -248,7 +261,7 @@ export function LoginForm() {
                 <Loader2 className="w-5 h-5 animate-spin" />
                 <span>Authenticating...</span>
               </>
-            ) : isSuccess ? (
+            ) : isRedirecting ? (
               <>
                 <CheckCircle2 className="w-5 h-5 text-emerald-300" />
                 <span>Authenticated</span>

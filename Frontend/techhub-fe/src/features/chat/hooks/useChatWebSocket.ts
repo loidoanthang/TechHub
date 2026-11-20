@@ -78,6 +78,9 @@ export function useConversationSubscription(
           { queryKey: [...CHAT_KEYS.all, "conversations"] },
           (data) => updateConversationRow(data, incoming, true)
         );
+        void queryClient.invalidateQueries({
+          queryKey: [...CHAT_KEYS.all, "conversations"],
+        });
         playChatChime();
       }
     );
@@ -123,6 +126,10 @@ export function useAllConversationsSubscription(
           { queryKey: [...CHAT_KEYS.all, "conversations"] },
           (data) => updateConversationRow(data, incoming, true)
         );
+        // Ensure stale cache gets refetched in background
+        void queryClient.invalidateQueries({
+          queryKey: [...CHAT_KEYS.all, "conversations"],
+        });
         playChatChime();
       })
     );

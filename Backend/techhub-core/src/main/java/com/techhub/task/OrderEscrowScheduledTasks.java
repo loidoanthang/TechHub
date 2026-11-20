@@ -3,6 +3,7 @@ package com.techhub.task;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,11 +60,14 @@ public class OrderEscrowScheduledTasks {
     private final ProductVariantRepository productVariantRepository;
     private final VoucherRedemptionRepository voucherRedemptionRepository;
     private final VoucherRepository voucherRepository;
+    @Lazy
+    private final OrderEscrowScheduledTasks self;
 
     /**
      * Job 1: Auto-complete DELIVERED orders past 72h inspection window.
      * Settles earnings to Seller wallet atomically with double-condition update guard.
      */
+    @Transactional
     @Scheduled(cron = "${app.scheduling.auto-complete-cron:0 */30 * * * *}")
     public void autoCompleteDeliveredOrders() {
         LocalDateTime threshold = LocalDateTime.now().minusHours(72);
@@ -75,7 +79,7 @@ public class OrderEscrowScheduledTasks {
 
         for (Order order : eligibleOrders) {
             try {
-                autoCompleteSingleOrder(order.getId());
+                self.autoCompleteSingleOrder(order.getId());
             } catch (Exception e) {
                 log.error("Failed to auto-complete order {}", order.getId(), e);
             }
@@ -132,7 +136,7 @@ public class OrderEscrowScheduledTasks {
 
         for (CancellationRequest cr : pendingList) {
             try {
-                autoApproveSingleCancellation(cr.getId());
+                self.autoApproveSingleCancellation(cr.getId());
             } catch (Exception e) {
                 log.error("Failed to auto-approve cancellation request {}", cr.getId(), e);
             }
@@ -180,7 +184,7 @@ public class OrderEscrowScheduledTasks {
 
         for (ReturnRequest rr : pendingReturns) {
             try {
-                autoApproveSingleReturn(rr.getId());
+                self.autoApproveSingleReturn(rr.getId());
             } catch (Exception e) {
                 log.error("Failed to auto-approve return request {}", rr.getId(), e);
             }

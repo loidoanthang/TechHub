@@ -33,15 +33,17 @@ export function useConversationsQuery(params?: {
   page?: number;
   size?: number;
   enabled?: boolean;
+  refetchInterval?: number | false;
 }) {
   return useQuery({
-    queryKey: CHAT_KEYS.conversations(params),
+    queryKey: CHAT_KEYS.conversations(params ? { type: params.type, page: params.page, size: params.size } : undefined),
     queryFn: async () => {
       const res = await chatApi.getUserConversations(params);
       return res.data;
     },
     enabled: params?.enabled ?? true,
-    staleTime: 30 * 1000,
+    staleTime: 15 * 1000,
+    refetchInterval: params?.refetchInterval ?? 5000,
   });
 }
 

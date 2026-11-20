@@ -96,19 +96,25 @@ export function ChatMessageList({
                 clusterWithPrev ? "mt-0.5" : "mt-2"
               )}
             >
-              {!message.isMine && !clusterWithPrev ? (
-                <div className="relative mt-1 h-6 w-6 shrink-0 overflow-hidden rounded-full bg-slate-200">
-                  {opponentAvatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={opponentAvatar}
-                      alt={opponentName}
-                      className="h-full w-full object-cover"
-                    />
+              {!message.isMine ? (
+                <div className="w-6 shrink-0 flex items-end">
+                  {!clusterWithPrev ? (
+                    <div className="relative mb-0.5 h-6 w-6 overflow-hidden rounded-full bg-slate-200">
+                      {opponentAvatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={opponentAvatar}
+                          alt={opponentName}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span className="flex h-full w-full items-center justify-center text-[10px] font-bold text-slate-500">
+                          {opponentName.charAt(0).toUpperCase() || "?"}
+                        </span>
+                      )}
+                    </div>
                   ) : (
-                    <span className="flex h-full w-full items-center justify-center text-[10px] font-bold text-slate-500">
-                      {opponentName.charAt(0).toUpperCase() || "?"}
-                    </span>
+                    <div className="w-6" />
                   )}
                 </div>
               ) : null}
