@@ -18,10 +18,12 @@ import {
   ArrowRight,
   Loader2,
   AlertCircle,
+  AlertTriangle,
   PlusCircle,
   ChevronRight,
   Sparkles,
 } from "lucide-react";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useCart } from "@/features/cart/context/CartContext";
 import { useAddressesQuery } from "@/features/account/hooks/useAccountQueries";
 import { usePlatformVouchersQuery } from "@/features/checkout/hooks/useVouchers";
@@ -37,6 +39,8 @@ const isUuid = (val: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 
 export function OnePageCartCheckoutView() {
+  const { user } = useAuth();
+  const isBuyerSuspended = user?.status === "SUSPENDED";
   const { items, updateQuantity, removeItem, totalCount, refetchCart } = useCart();
   const { data: addresses = [], isLoading: isLoadingAddresses } = useAddressesQuery();
 
@@ -199,6 +203,11 @@ export function OnePageCartCheckoutView() {
     if (selectedItems.length === 0) return;
     setSubmitError(null);
 
+    if (isBuyerSuspended) {
+      setSubmitError("Tài khoản của bạn đang bị tạm ngưng đặc quyền mua sắm. Bạn không thể đặt đơn mới vào lúc này.");
+      return;
+    }
+
     if (!selectedAddressId && addresses.length > 0) {
       setSubmitError("Vui lòng chọn địa chỉ nhận hàng.");
       return;
@@ -251,10 +260,27 @@ export function OnePageCartCheckoutView() {
       setIsPlaced(true);
       refetchCart();
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { message?: string } } };
-      const msg =
-        axiosErr?.response?.data?.message ||
-        "Đặt hàng thất bại. Vui lòng kiểm tra lại thông tin hoặc thử lại sau.";
+      const axiosErr = err as {
+        response?: {
+          data?: {
+            message?: string;
+            metadata?: { errorCode?: string };
+          };
+          status?: number;
+        };
+      };
+      const errorCode = axiosErr?.response?.data?.metadata?.errorCode;
+      const rawMsg = (axiosErr?.response?.data?.message || "").toLowerCase();
+      const isSuspendedError =
+        errorCode === "BUYER_ACCOUNT_SUSPENDED" ||
+        errorCode === "ACCOUNT_SUSPENDED" ||
+        rawMsg.includes("buyer") ||
+        rawMsg.includes("suspended");
+
+      const msg = isSuspendedError
+        ? "Tài khoản của bạn đang bị tạm ngưng đặc quyền mua sắm. Bạn không thể đặt đơn mới vào lúc này."
+        : axiosErr?.response?.data?.message ||
+          "Đặt hàng thất bại. Vui lòng kiểm tra lại thông tin hoặc thử lại sau.";
       setSubmitError(msg);
     } finally {
       setIsSubmitting(false);
@@ -363,7 +389,16 @@ export function OnePageCartCheckoutView() {
             </Link>
           </div>
         ) : (
-          <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div>
+            {isBuyerSuspended && (
+              <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-center gap-3 animate-in fade-in">
+                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+                <p className="text-xs font-semibold text-amber-900 leading-relaxed">
+                  <strong>Đặc quyền mua sắm đang bị tạm ngưng:</strong> Tài khoản của bạn hiện tại không thể đặt đơn hàng mới. Nếu bạn là Người bán (Seller), kênh quản lý gian hàng của bạn vẫn hoạt động bình thường.
+                </p>
+              </div>
+            )}
+            <form onSubmit={handlePlaceOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column (8 cols): Cart Items + Shipping Address + Shipping Service + Payment */}
             <div className="lg:col-span-8 flex flex-col gap-5">
               {/* Select All Header */}
@@ -880,7 +915,7 @@ export function OnePageCartCheckoutView() {
 
                 <button
                   type="submit"
-                  disabled={isSubmitting || selectedItems.length === 0}
+                  disabled={isSubmitting || selectedItems.length === 0 || isBuyerSuspended}
                   className="w-full py-3.5 px-4 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-bold transition-all shadow-md flex items-center justify-center gap-2 mt-2 active:scale-[0.99] disabled:opacity-60 cursor-pointer"
                 >
                   {isSubmitting ? (
@@ -890,7 +925,7 @@ export function OnePageCartCheckoutView() {
                     </>
                   ) : (
                     <>
-                      <span>Đặt hàng ({formatPrice(grandTotal)})</span>
+                      <span>{isBuyerSuspended ? "Tài khoản bị tạm ngưng mua sắm" : `Đặt hàng (${formatPrice(grandTotal)})`}</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
@@ -903,6 +938,7 @@ export function OnePageCartCheckoutView() {
               </div>
             </div>
           </form>
+          </div>
         )}
       </div>
 

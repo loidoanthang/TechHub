@@ -107,13 +107,9 @@ apiClient.interceptors.response.use(
     const errorCode = (errorData?.metadata as { errorCode?: string })?.errorCode;
     const rawMessage = (errorData?.message || "").toLowerCase();
 
-    // Handle account suspension / lockout
-    if (
-      errorCode === "ACCOUNT_SUSPENDED" ||
-      errorCode === "ACCOUNT_BANNED" ||
-      rawMessage.includes("suspended") ||
-      rawMessage.includes("banned")
-    ) {
+    // Handle permanent account termination / lockout (BANNED or DELETED)
+    // Local / partial suspensions (e.g. BUYER_ACCOUNT_SUSPENDED, SHOP_NOT_ACTIVE) do NOT revoke tokens
+    if (errorCode === "ACCOUNT_BANNED" || errorCode === "ACCOUNT_DELETED") {
       clearTokens();
       if (typeof window !== "undefined") {
         window.location.href = ROUTES.SUSPENDED;

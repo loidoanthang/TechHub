@@ -141,9 +141,21 @@ export function UserStatusModal({
             </p>
           </div>
 
-          {targetStatus !== "ACTIVE" && (
+          {targetStatus === "SUSPENDED" && (
             <p className="text-[11px] text-amber-800 bg-amber-50 p-3 rounded-xl border border-amber-200 leading-relaxed">
-              Lưu ý: Khi khóa hoặc cấm tài khoản, hệ thống sẽ lập tức thu hồi toàn bộ Refresh Token đang hoạt động trên mọi thiết bị.
+              <strong>Lưu ý:</strong> Tạm ngưng quyền mua sắm của người dùng. Phiên đăng nhập và quyền quản lý gian hàng (nếu có) vẫn được giữ nguyên theo quy tắc BR-28.
+            </p>
+          )}
+
+          {targetStatus === "BANNED" && (
+            <p className="text-[11px] text-rose-800 bg-rose-50 p-3 rounded-xl border border-rose-200 leading-relaxed">
+              <strong>Lưu ý:</strong> Cấm vĩnh viễn tài khoản. Hệ thống sẽ lập tức thu hồi toàn bộ Refresh Token trên mọi thiết bị và đóng băng gian hàng ngay lập tức.
+            </p>
+          )}
+
+          {targetStatus === "DELETED" && (
+            <p className="text-[11px] text-rose-800 bg-rose-50 p-3 rounded-xl border border-rose-200 leading-relaxed">
+              <strong>Lưu ý:</strong> Xóa tài khoản (Soft Delete). Toàn bộ phiên đăng nhập trên mọi thiết bị sẽ bị thu hồi ngay lập tức.
             </p>
           )}
 

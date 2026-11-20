@@ -208,7 +208,36 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           });
           return;
         } catch (err: unknown) {
-          // If Backend doesn't have this variant in DB (e.g. 404), fallback to local cart
+          const axiosErr = err as AxiosError<{
+            message?: string;
+            metadata?: { errorCode?: string };
+          }>;
+          const status = axiosErr.response?.status;
+          const errorCode = axiosErr.response?.data?.metadata?.errorCode;
+          const msg = axiosErr.response?.data?.message || "";
+
+          // Do NOT fallback to local cart if backend actively rejected with business or permission errors
+          if (
+            status === 403 ||
+            errorCode === "BUYER_ACCOUNT_SUSPENDED" ||
+            errorCode === "ACCOUNT_SUSPENDED" ||
+            errorCode === "CANNOT_ADD_OWN_PRODUCT" ||
+            errorCode === "INSUFFICIENT_STOCK" ||
+            errorCode === "CART_LIMIT_EXCEEDED" ||
+            errorCode === "PRODUCT_SUSPENDED" ||
+            errorCode === "SHOP_NOT_ACTIVE" ||
+            errorCode === "SHOP_IS_PAUSED" ||
+            msg.toLowerCase().includes("suspended")
+          ) {
+            const displayMsg =
+              errorCode === "BUYER_ACCOUNT_SUSPENDED" || msg.toLowerCase().includes("buyer")
+                ? "Tài khoản của bạn đang bị tạm ngưng đặc quyền mua sắm."
+                : msg || "Không thể thêm sản phẩm vào giỏ hàng.";
+            setError(displayMsg);
+            throw err;
+          }
+
+          // If variant doesn't exist on server (e.g. 404 mock data), fallback to client cart
           console.warn("Backend cart sync error, falling back to client cart:", err);
           addToLocal();
           return;
@@ -242,10 +271,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           }
           return;
         } catch (err: unknown) {
-          const axiosErr = err as AxiosError<{ message?: string }>;
+          const axiosErr = err as AxiosError<{
+            message?: string;
+            metadata?: { errorCode?: string };
+          }>;
+          const errorCode = axiosErr.response?.data?.metadata?.errorCode;
           const msg =
-            axiosErr.response?.data?.message ||
-            "Không thể cập nhật số lượng sản phẩm.";
+            errorCode === "BUYER_ACCOUNT_SUSPENDED"
+              ? "Tài khoản của bạn đang bị tạm ngưng đặc quyền mua sắm."
+              : axiosErr.response?.data?.message ||
+                "Không thể cập nhật số lượng sản phẩm.";
           setError(msg);
         }
       }
