@@ -22,6 +22,7 @@ import {
 import { CategoryFormModal } from "./CategoryFormModal";
 import { CategoryAttributesDrawer } from "./CategoryAttributesDrawer";
 import { AdminTablePagination } from "../shared/AdminTablePagination";
+import { AdminCategoryMobileCard } from "./AdminCategoryMobileCard";
 import { useAdminDialogA11y } from "../../hooks/useAdminDialogA11y";
 import type { CategoryStatus } from "@/types/enums";
 import type { CategorySummaryResponse } from "@/types/adminCatalog";
@@ -236,7 +237,27 @@ export function AdminCategoriesView() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden flex flex-col">
-          <div className="overflow-x-auto no-scrollbar">
+          {/* Mobile Card View (< sm) */}
+          <div className="divide-y divide-slate-100 sm:hidden">
+            {categories.map((cat) => (
+              <AdminCategoryMobileCard
+                key={cat.id}
+                category={cat}
+                onEdit={(c) => {
+                  setEditingCategory(c);
+                  setFormModalOpen(true);
+                }}
+                onDelete={handleDeleteCategory}
+                onToggleStatus={handleToggleStatus}
+                onManageAttributes={setAttrDrawerCategoryId}
+                isStatusPending={statusMutation.isPending}
+                isDeletePending={deleteMutation.isPending}
+              />
+            ))}
+          </div>
+
+          {/* Desktop Table (>= sm) */}
+          <div className="overflow-x-auto no-scrollbar hidden sm:block">
             <table className="w-full min-w-[760px] text-left text-xs border-collapse table-fixed">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                 <tr>

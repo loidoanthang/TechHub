@@ -233,7 +233,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col w-full max-w-full overflow-x-hidden">
       {pendingHref && (
         <div
           aria-hidden
@@ -264,13 +264,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               href={ROUTES.ADMIN.DASHBOARD}
               className="flex items-center gap-2 min-w-0 group"
             >
-              <span className="font-heading text-xl font-extrabold tracking-tight text-on-surface">
+              <span className="font-heading text-lg sm:text-xl font-extrabold tracking-tight text-on-surface">
                 TECH<span className="text-primary">HUB</span>
               </span>
               <span className="h-4 w-px bg-outline-variant hidden sm:inline-block" />
               <span className="text-[11px] font-extrabold text-primary uppercase tracking-wider bg-surface-container-low px-2 py-0.5 rounded-md border border-primary/20 flex items-center gap-1 shrink-0">
                 <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                <span>
+                <span className="hidden xs:inline">
                   Admin<span className="hidden sm:inline"> Portal</span>
                 </span>
               </span>
@@ -334,7 +334,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                     Trung tâm Điều hành
                   </h3>
                   <p className="text-[10px] text-slate-600 truncate">
-                    TechHub Admin Portal
+                    Admin Portal
                   </p>
                 </div>
               </div>
@@ -361,7 +361,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-primary" />
                   <span className="font-heading font-extrabold text-on-surface">
-                    TechHub Admin Portal
+                    Admin Portal
                   </span>
                 </div>
                 <button

@@ -22,6 +22,8 @@ import {
   useSimulateShippingMutation,
 } from "../../hooks/useAdminFinance";
 import { useAdminDialogA11y } from "../../hooks/useAdminDialogA11y";
+import { AdminPolicyMobileCard } from "./AdminPolicyMobileCard";
+import { ScrollableTabsWrapper } from "@/components/shared/ScrollableTabsWrapper";
 import {
   policyUpdateSchema,
   broadcastSchema,
@@ -177,56 +179,58 @@ export function AdminSettingsView() {
       )}
 
       {/* Tabs */}
-      <div
-        role="tablist"
-        aria-label="Chính sách sàn và công cụ vận hành"
-        className="bg-white rounded-2xl border border-slate-200/80 p-2 shadow-2xs flex items-center gap-1.5 overflow-x-auto no-scrollbar"
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "POLICIES"}
-          onClick={() => setActiveTab("POLICIES")}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-            activeTab === "POLICIES"
-              ? "bg-[#0045cc] text-white"
-              : "text-slate-600 hover:bg-slate-100"
-          }`}
+      <ScrollableTabsWrapper>
+        <div
+          role="tablist"
+          aria-label="Chính sách sàn và công cụ vận hành"
+          className="bg-white rounded-2xl border border-slate-200/80 p-2 shadow-2xs flex items-center gap-1.5 overflow-x-auto no-scrollbar"
         >
-          <Sliders className="w-4 h-4" />
-          <span>Chính sách Giao dịch & Hoa hồng</span>
-        </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "POLICIES"}
+            onClick={() => setActiveTab("POLICIES")}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+              activeTab === "POLICIES"
+                ? "bg-[#0045cc] text-white"
+                : "text-slate-600 hover:bg-slate-100"
+            }`}
+          >
+            <Sliders className="w-4 h-4" />
+            <span>Chính sách Giao dịch & Hoa hồng</span>
+          </button>
 
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "BROADCAST"}
-          onClick={() => setActiveTab("BROADCAST")}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-            activeTab === "BROADCAST"
-              ? "bg-[#0045cc] text-white"
-              : "text-slate-600 hover:bg-slate-100"
-          }`}
-        >
-          <Megaphone className="w-4 h-4" />
-          <span>Phát Thông báo Toàn sàn</span>
-        </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "BROADCAST"}
+            onClick={() => setActiveTab("BROADCAST")}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+              activeTab === "BROADCAST"
+                ? "bg-[#0045cc] text-white"
+                : "text-slate-600 hover:bg-slate-100"
+            }`}
+          >
+            <Megaphone className="w-4 h-4" />
+            <span>Phát Thông báo Toàn sàn</span>
+          </button>
 
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "SHIPPING_SIM"}
-          onClick={() => setActiveTab("SHIPPING_SIM")}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-            activeTab === "SHIPPING_SIM"
-              ? "bg-[#0045cc] text-white"
-              : "text-slate-600 hover:bg-slate-100"
-          }`}
-        >
-          <Truck className="w-4 h-4" />
-          <span>Giả lập Giao vận (Demo)</span>
-        </button>
-      </div>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "SHIPPING_SIM"}
+            onClick={() => setActiveTab("SHIPPING_SIM")}
+            className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+              activeTab === "SHIPPING_SIM"
+                ? "bg-[#0045cc] text-white"
+                : "text-slate-600 hover:bg-slate-100"
+            }`}
+          >
+            <Truck className="w-4 h-4" />
+            <span>Giả lập Giao vận (Demo)</span>
+          </button>
+        </div>
+      </ScrollableTabsWrapper>
 
       {/* TAB 1: POLICIES */}
       {activeTab === "POLICIES" && (
@@ -249,8 +253,21 @@ export function AdminSettingsView() {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto no-scrollbar">
-              <table className="w-full min-w-[700px] text-left text-xs border-collapse">
+            <>
+              {/* Mobile Card List (< sm) */}
+              <div className="divide-y divide-slate-100 sm:hidden">
+                {(policiesQuery.data || []).map((pol) => (
+                  <AdminPolicyMobileCard
+                    key={pol.id}
+                    policy={pol}
+                    onEdit={openEditPolicy}
+                  />
+                ))}
+              </div>
+
+              {/* Desktop Table (>= sm) */}
+              <div className="overflow-x-auto no-scrollbar hidden sm:block">
+                <table className="w-full min-w-[700px] text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                     <th className="py-3 px-4 w-[28%]">Mã Tham số (Key)</th>
@@ -288,6 +305,7 @@ export function AdminSettingsView() {
                 </tbody>
               </table>
             </div>
+          </>
           )}
         </div>
       )}
