@@ -333,6 +333,23 @@ export function OnePageCartCheckoutView() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 flex flex-col gap-6">
         {/* Navigation Breadcrumb */}
         <div className="flex flex-col gap-2">
+          {/* Smart Mobile App Gatekeeper Banner for Checkout */}
+          <div className="sm:hidden p-3.5 rounded-2xl bg-gradient-to-r from-[#eff4ff] to-[#dce9ff] border border-[#0045cc]/20 flex items-center justify-between gap-3 shadow-xs mb-1">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="text-xl">📲</span>
+              <div className="flex flex-col truncate">
+                <span className="text-xs font-bold text-[#0b1c30] truncate">Đặt hàng nhanh hơn trên App</span>
+                <span className="text-[10px] text-[#434656] truncate">Thanh toán bảo mật & nhận voucher độc quyền</span>
+              </div>
+            </div>
+            <a
+              href="techhub://checkout"
+              className="px-3 py-1.5 rounded-xl bg-[#0045cc] text-white text-[11px] font-bold shrink-0 hover:bg-[#0d5bff] transition-colors"
+            >
+              Mở App
+            </a>
+          </div>
+
           <div className="flex items-center text-xs text-[#737688] gap-1.5">
             <Link href="/" className="hover:text-[#0045cc] transition-colors">
               Trang chủ
@@ -581,19 +598,21 @@ export function OnePageCartCheckoutView() {
                           onChange={() => setSelectedAddressId(addr.id)}
                           className="mt-1 accent-[#0045cc]"
                         />
-                        <div className="flex flex-col gap-0.5 text-sm flex-1">
-                          <div className="flex items-center gap-2 font-bold text-[#0b1c30]">
-                            <span>{addr.recipientName}</span>
+                        <div className="flex flex-col gap-1 text-sm flex-1 min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-[#0b1c30] break-words">{addr.recipientName}</span>
+                              {addr.isDefault && (
+                                <span className="bg-[#eff4ff] text-[#0045cc] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                                  Mặc định
+                                </span>
+                              )}
+                            </div>
                             <span className="text-xs font-normal text-[#737688]">
                               ({addr.phone})
                             </span>
-                            {addr.isDefault && (
-                              <span className="bg-[#eff4ff] text-[#0045cc] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-                                Mặc định
-                              </span>
-                            )}
                           </div>
-                          <p className="text-xs text-[#434656] leading-relaxed">
+                          <p className="text-xs text-[#434656] leading-relaxed break-words">
                             {addr.fullAddress || `${addr.streetAddress}, ${addr.ward}, ${addr.district}, ${addr.province}`}
                           </p>
                         </div>
@@ -645,17 +664,18 @@ export function OnePageCartCheckoutView() {
                         key={shop.shopId || idx}
                         className="p-4 rounded-xl border border-[#0045cc]/20 bg-[#eff4ff]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-white border border-[#c3c5d9]/40 flex items-center justify-center text-[#0045cc] shrink-0 mt-0.5 shadow-xs">
+                        <div className="flex items-start gap-3 min-w-0 flex-1">
+                          <div className="hidden sm:flex w-9 h-9 rounded-xl bg-white border border-[#c3c5d9]/40 items-center justify-center text-[#0045cc] shrink-0 mt-0.5 shadow-xs">
                             <Store className="w-4 h-4" />
                           </div>
-                          <div className="flex flex-col gap-0.5">
+                          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <span className="text-xs font-bold text-[#0b1c30]">
-                                Kiện {idx + 1}: {shop.shopName || "Gian hàng TechHub"}
+                                {/* Kiện {idx + 1}:  */}
+                                {shop.shopName || "Gian hàng"}
                               </span>
                               <span className="text-[10px] font-semibold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">
-                                Giao tiêu chuẩn
+                                tiêu chuẩn
                               </span>
                             </div>
                             <span className="text-[11px] text-[#737688]">
@@ -729,11 +749,11 @@ export function OnePageCartCheckoutView() {
                       />
                       <div className="flex flex-col">
                         <span className="text-xs font-bold text-[#0b1c30]">
-                          Cổng VNPay (Thẻ ATM / QR Pay / Visa / Mastercard)
+                          Cổng VNPay
                         </span>
-                        <span className="text-[11px] text-[#737688]">
-                          Thanh toán bảo mật trực tuyến qua VNPay Sandbox
-                        </span>
+                        {/* <span className="text-[11px] text-[#737688]">
+                          Thanh toán qua VNPay Sandbox
+                        </span> */}
                       </div>
                     </div>
                     <span className="text-[10px] font-bold text-[#0045cc] bg-[#eff4ff] px-2 py-0.5 rounded">
@@ -762,9 +782,9 @@ export function OnePageCartCheckoutView() {
                         <span className="text-xs font-bold text-[#0b1c30]">
                           Thanh toán khi nhận hàng (COD)
                         </span>
-                        <span className="text-[11px] text-[#737688]">
+                        {/* <span className="text-[11px] text-[#737688]">
                           Được kiểm tra tem niêm phong trước khi thanh toán
-                        </span>
+                        </span> */}
                       </div>
                     </div>
                   </label>
@@ -818,7 +838,6 @@ export function OnePageCartCheckoutView() {
                     className="w-full p-3 rounded-xl border border-dashed border-[#0045cc]/40 bg-[#eff4ff]/40 hover:bg-[#eff4ff] transition-all flex items-center justify-between text-left cursor-pointer group"
                   >
                     <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-[#0045cc]" />
                       <span className="text-xs font-semibold text-[#0045cc]">
                         {platformVouchers.filter((v) => v.isEligible).length > 0
                           ? `Chọn voucher (${

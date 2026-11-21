@@ -33,7 +33,7 @@ export default function RootLayout({
       lang="en"
       className={`${plusJakartaSans.variable} ${inter.variable} antialiased`}
     >
-      <body className="min-h-screen flex flex-col bg-background text-foreground">
+      <body className="min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden w-full max-w-full">
         <QueryProvider>
           <AuthProvider>
             <NotificationProvider>

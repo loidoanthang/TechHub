@@ -12,6 +12,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { NotificationItem } from "./NotificationItem";
+import { ScrollableTabsWrapper } from "@/components/shared";
 import {
   useNotificationsQuery,
   useSystemCategoryNotificationsQuery,
@@ -122,8 +123,8 @@ export function NotificationDropdown({
   return (
     <div
       ref={dropdownRef}
-      className="fixed inset-x-3 top-16 sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 w-auto sm:w-[420px] max-w-[420px] bg-white rounded-2xl shadow-xl border border-slate-200/80 z-50 overflow-visible flex flex-col animate-in fade-in-0 zoom-in-95 duration-150"
-      style={{ maxHeight: "calc(100vh - 100px)" }}
+      className="fixed inset-x-2 top-28 sm:inset-auto sm:right-0 sm:top-full sm:mt-2 w-auto sm:w-[420px] max-w-[420px] bg-white rounded-2xl shadow-xl border border-slate-200/80 z-50 overflow-visible flex flex-col animate-in fade-in-0 zoom-in-95 duration-150"
+      style={{ maxHeight: "calc(100vh - 120px)" }}
     >
       {/* Top arrow caret pointing to Bell on Desktop */}
       <div
@@ -144,26 +145,39 @@ export function NotificationDropdown({
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={handleMarkAllAsRead}
-          disabled={unreadCount === 0 || markAllAsReadMutation.isPending}
-          title={
-            unreadCount === 0
-              ? "Không có thông báo mới cần đọc"
-              : "Đánh dấu tất cả thông báo là đã đọc"
-          }
-          aria-label="Đánh dấu tất cả thông báo là đã đọc"
-          className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-container hover:underline disabled:opacity-40 disabled:hover:no-underline disabled:cursor-not-allowed transition-all cursor-pointer"
-        >
-          <CheckCheck className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Đánh dấu tất cả đã đọc</span>
-          <span className="inline sm:hidden">Đọc tất cả</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleMarkAllAsRead}
+            disabled={unreadCount === 0 || markAllAsReadMutation.isPending}
+            title={
+              unreadCount === 0
+                ? "Không có thông báo mới cần đọc"
+                : "Đánh dấu tất cả thông báo là đã đọc"
+            }
+            aria-label="Đánh dấu tất cả thông báo là đã đọc"
+            className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-container hover:underline disabled:opacity-40 disabled:hover:no-underline disabled:cursor-not-allowed transition-all cursor-pointer"
+          >
+            <CheckCheck className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Đánh dấu tất cả đã đọc</span>
+            <span className="inline sm:hidden">Đọc tất cả</span>
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="sm:hidden p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+            aria-label="Đóng"
+          >
+            ✕
+          </button>
+        </div>
       </div>
 
       {/* 2. Filter Tabs */}
-      <div className="flex items-center gap-1 px-3 py-2 bg-slate-50/70 border-b border-slate-100 overflow-x-auto scrollbar-none shrink-0 z-20">
+      <ScrollableTabsWrapper
+        className="px-3 py-2 bg-slate-50/70 border-b border-slate-100 shrink-0 z-20"
+        containerClassName="bg-slate-50/70 shrink-0 z-20"
+      >
         {TABS.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
@@ -186,7 +200,7 @@ export function NotificationDropdown({
             </button>
           );
         })}
-      </div>
+      </ScrollableTabsWrapper>
 
       {/* 3. Notification List with scroll */}
       <div className="flex-1 overflow-y-auto overscroll-contain divide-y divide-slate-100 max-h-[360px] sm:max-h-[420px] z-20">

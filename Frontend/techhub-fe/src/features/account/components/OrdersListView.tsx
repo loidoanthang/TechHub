@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ProductThumbnail } from "@/components/shared";
+import { ProductThumbnail, ScrollableTabsWrapper } from "@/components/shared";
 import {
   Search,
   Store,
@@ -108,7 +108,10 @@ export function OrdersListView() {
       </form>
 
       {/* Order Status Tabs */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar border-b border-[#eff4ff]">
+      <ScrollableTabsWrapper
+        className="pb-1 border-b border-[#eff4ff]"
+        containerClassName="border-b border-[#eff4ff]"
+      >
         {TABS.map((tab) => {
           const isActive = activeTab === tab.status;
           return (
@@ -125,7 +128,7 @@ export function OrdersListView() {
             </button>
           );
         })}
-      </div>
+      </ScrollableTabsWrapper>
 
       {error && (
         <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
@@ -174,27 +177,27 @@ export function OrdersListView() {
                 className="bg-white rounded-2xl border border-[#c3c5d9]/25 shadow-sm overflow-hidden flex flex-col transition-all hover:border-[#0045cc]/30"
               >
                 {/* Order Header */}
-                <div className="bg-[#eff4ff]/60 px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[#eff4ff]">
-                  <div className="flex items-center gap-3">
+                <div className="bg-[#eff4ff]/60 px-4 sm:px-5 py-3 sm:py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-2.5 border-b border-[#eff4ff]">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 min-w-0">
                     <Link
                       href={`/shops/${order.shopSlug || order.shopName}`}
-                      className="flex items-center gap-1.5 text-xs font-bold text-[#0b1c30] hover:text-[#0045cc] transition-colors cursor-pointer group"
+                      className="flex items-center gap-1.5 text-xs font-bold text-[#0b1c30] hover:text-[#0045cc] transition-colors cursor-pointer group truncate"
                     >
-                      <Store className="w-4 h-4 text-[#0045cc]" />
-                      <span className="group-hover:underline">{order.shopName}</span>
+                      <Store className="w-4 h-4 text-[#0045cc] shrink-0" />
+                      <span className="group-hover:underline truncate">{order.shopName}</span>
                     </Link>
-                    <span className="text-[#c3c5d9]">•</span>
-                    <span className="text-xs text-[#737688] font-mono">
+                    <span className="hidden sm:inline text-[#c3c5d9]">•</span>
+                    <span className="text-xs text-[#737688] font-mono break-all sm:break-normal">
                       #{order.orderNumber}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 pt-1 sm:pt-0 border-t sm:border-t-0 border-[#c3c5d9]/15">
                     <span className="text-[11px] text-[#737688]">
                       {new Date(order.createdAt).toLocaleDateString("vi-VN")}
                     </span>
                     <span
-                      className={`text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+                      className={`text-[10px] sm:text-[11px] font-bold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full uppercase tracking-wider ${
                         order.status === "COMPLETED"
                           ? "bg-[#006b5b]/10 text-[#006b5b]"
                           : order.status === "SHIPPING" || order.status === "DELIVERED"
@@ -262,14 +265,14 @@ export function OrdersListView() {
                                 {item.variantName}
                               </span>
                               <span>
-                                Qty: <strong className="text-[#0b1c30]">x{item.quantity}</strong>
+                                <strong className="text-[#0b1c30]">x{item.quantity}</strong>
                               </span>
                             </div>
                           </div>
                         </div>
 
                         {/* Item Pricing */}
-                        <div className="flex flex-col items-end shrink-0">
+                        <div className="flex flex-col items-end self-end md:self-auto shrink-0 w-full md:w-auto">
                           {hasDiscount ? (
                             <div className="flex items-center gap-1.5">
                               <span className="text-xs text-[#737688] line-through">
@@ -294,74 +297,76 @@ export function OrdersListView() {
                 </div>
 
                 {/* Order Footer & Actions */}
-                <div className="bg-[#eff4ff]/20 p-5 border-t border-[#eff4ff] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 text-xs text-[#737688]">
+                <div className="bg-[#eff4ff]/20 p-5 border-t border-[#eff4ff] flex flex-col md:flex-row items-end md:items-center justify-between gap-4">
+                  <div className="flex items-center justify-end w-full md:w-auto gap-3 text-xs text-[#737688]">
                     <span>Payment: <strong className="text-[#0b1c30] font-semibold">{order.paymentMethod}</strong></span>
                     <span>•</span>
                     <span>Status: <strong className="text-[#0b1c30] font-semibold">{order.paymentStatus}</strong></span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
-                    <div className="flex items-baseline gap-1.5 mr-2">
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 w-full md:w-auto justify-end">
+                    <div className="flex items-baseline gap-1.5">
                       <span className="text-xs text-[#737688]">Order Total:</span>
                       <span className="text-base font-bold text-[#0045cc]">
                         {formatPrice(order.totalAmount)}
                       </span>
                     </div>
 
-                    <Link
-                      href={`/account/orders/${order.orderId}`}
-                      className="px-4 py-2 rounded-xl border border-[#c3c5d9]/40 hover:bg-[#eff4ff] text-[#0b1c30] text-xs font-semibold transition-colors flex items-center gap-1.5"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-[#737688]" />
-                      <span>Details</span>
-                    </Link>
-
-                    {/* Pending payment: pay now */}
-                    {isPendingPayment && (
+                    <div className="flex flex-wrap items-center gap-2.5 justify-end">
                       <Link
-                        href={`/checkout?orderId=${order.orderId}`}
-                        className="px-4 py-2 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5"
+                        href={`/account/orders/${order.orderId}`}
+                        className="px-4 py-2 rounded-xl border border-[#c3c5d9]/40 hover:bg-[#eff4ff] text-[#0b1c30] text-xs font-semibold transition-colors flex items-center gap-1.5"
                       >
-                        <CreditCard className="w-3.5 h-3.5" />
-                        <span>Pay Now</span>
+                        <Eye className="w-3.5 h-3.5 text-[#737688]" />
+                        <span>Details</span>
                       </Link>
-                    )}
 
-                    {/* Delivered: Confirm Receipt */}
-                    {isDelivered && (
-                      <>
+                      {/* Pending payment: pay now */}
+                      {isPendingPayment && (
+                        <Link
+                          href={`/checkout?orderId=${order.orderId}`}
+                          className="px-4 py-2 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5"
+                        >
+                          <CreditCard className="w-3.5 h-3.5" />
+                          <span>Pay Now</span>
+                        </Link>
+                      )}
+
+                      {/* Delivered: Confirm Receipt */}
+                      {isDelivered && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleConfirmReceipt(order.orderId)}
+                            disabled={completeOrderMutation.isPending}
+                            className="px-4 py-2 rounded-xl bg-[#006b5b] hover:bg-[#008b77] text-white text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Confirm Receipt</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setReturnTargetOrder(order)}
+                            className="px-4 py-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Return / Refund</span>
+                          </button>
+                        </>
+                      )}
+
+                      {/* Cancel or Request Cancellation */}
+                      {canCancelOrRequest && (
                         <button
                           type="button"
-                          onClick={() => handleConfirmReceipt(order.orderId)}
-                          disabled={completeOrderMutation.isPending}
-                          className="px-4 py-2 rounded-xl bg-[#006b5b] hover:bg-[#008b77] text-white text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                          onClick={() => setCancelTargetOrder(order)}
+                          className="px-4 py-2 rounded-xl border border-[#ba1a1a]/30 text-[#ba1a1a] hover:bg-[#ba1a1a]/10 text-xs font-semibold transition-colors cursor-pointer"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>Confirm Receipt</span>
+                          <XCircle className="w-3.5 h-3.5 inline mr-1" />
+                          {isPendingPayment ? "Cancel Order" : "Request Cancel"}
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => setReturnTargetOrder(order)}
-                          className="px-4 py-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" />
-                          <span>Return / Refund</span>
-                        </button>
-                      </>
-                    )}
-
-                    {/* Cancel or Request Cancellation */}
-                    {canCancelOrRequest && (
-                      <button
-                        type="button"
-                        onClick={() => setCancelTargetOrder(order)}
-                        className="px-4 py-2 rounded-xl border border-[#ba1a1a]/30 text-[#ba1a1a] hover:bg-[#ba1a1a]/10 text-xs font-semibold transition-colors cursor-pointer"
-                      >
-                        <XCircle className="w-3.5 h-3.5 inline mr-1" />
-                        {isPendingPayment ? "Cancel Order" : "Request Cancel"}
-                      </button>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

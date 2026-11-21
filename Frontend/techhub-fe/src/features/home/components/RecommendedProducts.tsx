@@ -18,10 +18,10 @@ export function RecommendedProducts() {
   const productsToRender = hasServerProducts ? serverProducts : MOCK_RECOMMENDED_PRODUCTS;
 
   return (
-    <section className="max-w-6xl mx-auto px-6 lg:px-12 w-full pb-20">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 w-full pb-14 sm:pb-20">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-8 gap-3 sm:gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight font-[family-name:var(--font-heading)]">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#0b1c30] tracking-tight font-[family-name:var(--font-heading)]">
             Recommended for You
           </h2>
           <p className="text-xs text-[#434656] mt-1">
@@ -30,19 +30,19 @@ export function RecommendedProducts() {
         </div>
         <Link
           href="/search"
-          className="text-xs font-bold text-[#0045cc] hover:underline inline-flex items-center gap-1"
+          className="text-xs font-bold text-[#0045cc] hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
         >
           View all in catalog <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
 
       {isLoading && !hasServerProducts ? (
-        <div className="w-full py-20 flex flex-col items-center justify-center gap-3 text-slate-500">
+        <div className="w-full py-16 flex flex-col items-center justify-center gap-3 text-slate-500">
           <Loader2 className="w-8 h-8 animate-spin text-[#0045cc]" />
           <span className="text-xs">Loading hardware recommendations...</span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
           {productsToRender.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

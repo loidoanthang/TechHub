@@ -91,7 +91,7 @@ export function WishlistView() {
 
       {/* 2. Content View */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {Array.from({ length: 8 }).map((_, idx) => (
             <div
               key={idx}
@@ -105,7 +105,7 @@ export function WishlistView() {
           ))}
         </div>
       ) : error ? (
-        <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center flex flex-col items-center justify-center gap-3">
+        <div className="bg-white rounded-2xl p-8 sm:p-12 border border-slate-200 text-center flex flex-col items-center justify-center gap-3">
           <AlertCircle className="w-10 h-10 text-rose-500" />
           <h3 className="text-base font-bold text-[#0b1c30]">Không thể tải danh sách yêu thích</h3>
           <p className="text-xs text-slate-500 max-w-sm">
@@ -114,11 +114,11 @@ export function WishlistView() {
         </div>
       ) : items.length === 0 ? (
         /* Empty State */
-        <div className="bg-white rounded-2xl p-12 sm:p-16 border border-dashed border-slate-200 text-center flex flex-col items-center justify-center gap-4">
-          <div className="w-20 h-20 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500 mb-1">
-            <Heart className="w-10 h-10 fill-rose-100 text-rose-500" />
+        <div className="bg-white rounded-2xl p-8 sm:p-16 border border-dashed border-slate-200 text-center flex flex-col items-center justify-center gap-4">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500 mb-1">
+            <Heart className="w-8 h-8 sm:w-10 sm:h-10 fill-rose-100 text-rose-500" />
           </div>
-          <h3 className="text-lg font-bold text-[#0b1c30]">
+          <h3 className="text-base sm:text-lg font-bold text-[#0b1c30]">
             Danh sách yêu thích trống
           </h3>
           <p className="text-xs sm:text-sm text-[#434656] max-w-md leading-relaxed">
@@ -133,9 +133,9 @@ export function WishlistView() {
           </Link>
         </div>
       ) : (
-        /* Grid of Wishlist Items */
+        /* Grid of Wishlist Items: 2 cols on mobile */
         <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
             {items.map((item: WishlistResponse) => {
               const productUrl = `/products/${item.slug || item.productId}`;
               const formattedPrice =

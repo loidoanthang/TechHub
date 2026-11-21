@@ -460,6 +460,25 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
         </nav>
       </div>
 
+      {/* Smart Mobile App Gatekeeper Banner: Display on Mobile viewport */}
+      <div className="sm:hidden max-w-6xl mx-auto px-4 w-full">
+        <div className="p-3 rounded-xl bg-gradient-to-r from-[#eff4ff] to-[#dce9ff] border border-[#0045cc]/20 flex items-center justify-between gap-2 shadow-xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-lg">📲</span>
+            <div className="flex flex-col truncate">
+              <span className="text-xs font-bold text-[#0b1c30] truncate">Trải nghiệm mua tốt nhất trên App</span>
+              <span className="text-[10px] text-[#434656] truncate">Giảm thêm 50k & theo dõi vận chuyển tiện lợi</span>
+            </div>
+          </div>
+          <a
+            href={`techhub://product/${product.id}`}
+            className="px-3 py-1.5 rounded-lg bg-[#0045cc] text-white text-[11px] font-bold shrink-0 hover:bg-[#0d5bff] transition-colors"
+          >
+            Mở App
+          </a>
+        </div>
+      </div>
+
       {/* 2. Product Hero Showcase */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 w-full">
         {/* Shop Paused Banner if applicable */}
@@ -1441,6 +1460,35 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           </button>
         </div>
       )}
+
+      {/* Sticky Mobile Action Bar at bottom with iOS safe-area support */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-4 py-2.5 pb-[calc(0.625rem+env(safe-area-inset-bottom,0px))] flex items-center justify-between gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+        <button
+          type="button"
+          onClick={handleOpenChatWithSeller}
+          className="flex flex-col items-center justify-center p-1.5 text-slate-600 hover:text-[#0045cc] min-w-[48px]"
+          aria-label="Chat với Shop"
+        >
+          <MessageCircle className="w-5 h-5" />
+          <span className="text-[10px] font-semibold mt-0.5">Chat</span>
+        </button>
+
+        <a
+          href={`techhub://product/${product.id}`}
+          className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#0045cc] to-[#0d5bff] text-white font-bold text-xs text-center shadow-md active:scale-[0.99] flex items-center justify-center gap-1.5"
+        >
+          <span>📲 Mua trên App TechHub</span>
+        </a>
+
+        <button
+          disabled={isOutOfStock || isShopPaused || isAddingToCart}
+          onClick={handleAddToCart}
+          className="p-2.5 rounded-xl bg-[#eff4ff] text-[#0045cc] border border-[#0045cc]/20 font-bold hover:bg-[#dce9ff] disabled:opacity-50"
+          aria-label="Thêm vào giỏ"
+        >
+          <ShoppingCart className="w-5 h-5" />
+        </button>
+      </div>
     </div>
   );
 }

@@ -2,11 +2,11 @@ import Link from "next/link";
 
 export function HeroBento() {
   return (
-    <section className="max-w-6xl mx-auto px-6 lg:px-12 w-full pt-6 pb-14">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch min-h-[380px]">
+    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 w-full pt-4 sm:pt-6 pb-8 sm:pb-14">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
         {/* Left Wide Card (Hero: Upgrade Your Tech Game) */}
         <div
-          className="lg:col-span-6 rounded-2xl relative overflow-hidden flex flex-col justify-between p-8 lg:p-10 shadow-md group min-h-[360px] text-[#eaf1ff] bg-[#213145]"
+          className="lg:col-span-6 rounded-2xl relative overflow-hidden flex flex-col justify-between p-6 sm:p-8 lg:p-10 shadow-md group min-h-[260px] sm:min-h-[360px] text-[#eaf1ff] bg-[#213145]"
           style={{
             backgroundImage:
               "linear-gradient(to right, rgba(11,28,48,0.92) 0%, rgba(11,28,48,0.7) 50%, rgba(11,28,48,0.4) 100%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuCRerfsF4uN531w_dT2RXSf0XspKm3j-Ej87Su7SqCILbx8yyZYUuqxw9us3hKPQy54xFmnPcdpuUgOGdB2reE1-8K86Hxqg3Uft8mywz7jT1hbuHsH448kKUMBCYCFB71O8D7SLGWAU_K6NHjanNWpHxGAHXlosnyRq_rSI0KiSwjsmxSqPV1vui0CPTwkiYJ6rDzduFVeYJyxtL7O9P3pjEOVuaP-g8U7ZBFl9eiwAsd8mbpE6NDQ0Q')",
@@ -15,15 +15,15 @@ export function HeroBento() {
           }}
         >
           <div className="max-w-md z-10">
-            <h1 className="text-3xl lg:text-4xl font-bold text-white tracking-tight leading-tight mb-3 font-[family-name:var(--font-heading)]">
-              Upgrade Your Tech<br />Game
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight leading-tight mb-2 sm:mb-3 font-[family-name:var(--font-heading)]">
+              Upgrade Your Tech<br className="hidden sm:inline" /> Game
             </h1>
-            <p className="text-sm text-[#dce9ff] leading-relaxed max-w-sm mb-8">
+            <p className="text-xs sm:text-sm text-[#dce9ff] leading-relaxed max-w-sm mb-5 sm:mb-8">
               Gradually work your way up to more intense games as you level up your battle station.
             </p>
             <Link
               href="/products"
-              className="inline-flex items-center justify-center bg-white hover:bg-[#eff4ff] text-[#0b1c30] text-sm font-bold px-6 py-2.5 rounded-lg shadow-sm transition-colors"
+              className="inline-flex items-center justify-center bg-white hover:bg-[#eff4ff] text-[#0b1c30] text-xs sm:text-sm font-bold px-5 sm:px-6 py-2 sm:py-2.5 rounded-lg shadow-sm transition-colors"
             >
               Shop Now
             </Link>
@@ -32,7 +32,7 @@ export function HeroBento() {
 
         {/* Center Medium Card (Studio Headphones) */}
         <div
-          className="lg:col-span-3 rounded-2xl relative overflow-hidden flex flex-col justify-between p-6 lg:p-7 shadow-md group min-h-[360px] text-[#eaf1ff] bg-[#213145]"
+          className="hidden sm:flex lg:col-span-3 rounded-2xl relative overflow-hidden flex-col justify-between p-6 lg:p-7 shadow-md group min-h-[300px] sm:min-h-[360px] text-[#eaf1ff] bg-[#213145]"
           style={{
             backgroundImage:
               "linear-gradient(to bottom, rgba(11,28,48,0.9) 0%, rgba(11,28,48,0.65) 50%, rgba(11,28,48,0.95) 100%), url('https://lh3.googleusercontent.com/aida-public/AB6AXuAbgN1n61LQ-44P0lE_y8NQDV1IRAMbPXd2YYSZR-ZzKODtH2DtZFthEoJKrmgUsA2xz_XrGJ2h0orH-4s8SgGdVTsVzlQLvZyvN54khs8-p_85YhJTd6R83oRl9eBAfOBYnmav-xzY-xUK3hJyajHKWbIxObVna0nKKxM3nTe5O-7kDlWNJYac3Gwu9Sw2WrjzxSpsRVc-u919FMowK8DRaapEot4l17d6Ca4bKkFhTXq7-XrRwDqQrg')",
