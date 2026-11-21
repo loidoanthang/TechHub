@@ -6,6 +6,8 @@ import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
 import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
 import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
+import com.techhub.modules.payment.dto.response.VNPayQueryDrResponse;
+import com.techhub.modules.payment.dto.response.VNPayRefundResponse;
 import com.techhub.modules.order.repository.OrderRepository;
 import com.techhub.modules.payment.repository.PaymentRepository;
 import com.techhub.modules.voucher.repository.VoucherRedemptionRepository;
@@ -18,6 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -54,6 +58,9 @@ class VNPayServiceImplTest {
     @Mock
     private VoucherRepository voucherRepository;
 
+    @Mock
+    private RestTemplate restTemplate;
+
     @InjectMocks
     private VNPayServiceImpl vnPayService;
 
@@ -63,6 +70,7 @@ class VNPayServiceImplTest {
     private final String tmnCode = "MNACYPOK";
     private final String payUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
     private final String returnUrl = "http://localhost:3000/checkout/payment-callback";
+    private final String apiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
 
     @BeforeEach
     void setUp() {
@@ -380,5 +388,178 @@ class VNPayServiceImplTest {
         String hash = VNPayUtils.hashAllFields(params, hashSecret);
         params.put("vnp_SecureHash", hash);
         return params;
+    }
+
+    // ==========================================
+    // 5. queryTransaction Tests (QueryDR)
+    // ==========================================
+    @Test
+    @DisplayName("queryTransaction should sync payment to PAID when VNPAY reports success")
+    void queryTransaction_Success_SyncPaid() {
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+        when(vnPayProperties.getHashSecret()).thenReturn(hashSecret);
+        when(vnPayProperties.getTmnCode()).thenReturn(tmnCode);
+        when(vnPayProperties.getApiUrl()).thenReturn(apiUrl);
+
+        Order order = Order.builder().status(OrderStatus.PENDING_PAYMENT).build();
+        payment.getOrders().add(order);
+
+        VNPayQueryDrResponse mockResp = VNPayQueryDrResponse.builder()
+                .vnpResponseId("RESP_Q1")
+                .vnpCommand("querydr")
+                .vnpResponseCode("00")
+                .vnpTransactionStatus("00")
+                .vnpTransactionNo("14567890")
+                .vnpBankCode("NCB")
+                .vnpMessage("Success")
+                .build();
+
+        when(restTemplate.postForObject(eq(apiUrl), any(HttpEntity.class), eq(VNPayQueryDrResponse.class)))
+                .thenReturn(mockResp);
+
+        VNPayQueryDrResponse result = vnPayService.queryTransaction(payment.getId(), "127.0.0.1");
+
+        assertThat(result).isNotNull();
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.PAID);
+        assertThat(payment.getTransactionId()).isEqualTo("14567890");
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING_CONFIRMATION);
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    @DisplayName("queryTransaction should sync payment to FAILED when VNPAY reports failed status (02)")
+    void queryTransaction_SyncFailed() {
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+        when(vnPayProperties.getHashSecret()).thenReturn(hashSecret);
+        when(vnPayProperties.getTmnCode()).thenReturn(tmnCode);
+        when(vnPayProperties.getApiUrl()).thenReturn(apiUrl);
+
+        VNPayQueryDrResponse mockResp = VNPayQueryDrResponse.builder()
+                .vnpResponseId("RESP_Q2")
+                .vnpCommand("querydr")
+                .vnpResponseCode("00")
+                .vnpTransactionStatus("02")
+                .vnpTransactionNo("14567890")
+                .vnpBankCode("NCB")
+                .vnpMessage("Transaction Failed")
+                .build();
+
+        when(restTemplate.postForObject(eq(apiUrl), any(HttpEntity.class), eq(VNPayQueryDrResponse.class)))
+                .thenReturn(mockResp);
+
+        VNPayQueryDrResponse result = vnPayService.queryTransaction(payment.getId(), "127.0.0.1");
+
+        assertThat(result).isNotNull();
+        assertThat(result.isSuccess()).isFalse();
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.FAILED);
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    @DisplayName("queryTransaction should throw PAYMENT_NOT_FOUND when payment does not exist")
+    void queryTransaction_PaymentNotFound() {
+        when(paymentRepository.findById(any())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> vnPayService.queryTransaction(UUID.randomUUID(), "127.0.0.1"))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAYMENT_NOT_FOUND));
+    }
+
+    // ==========================================
+    // 6. refundTransaction Tests (Refund)
+    // ==========================================
+    @Test
+    @DisplayName("refundTransaction should execute full refund and increment payment refundedAmount")
+    void refundTransaction_Success_FullRefund() {
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setTransactionId("14567890");
+        payment.setAmount(new BigDecimal("250000.00"));
+        payment.setRefundedAmount(BigDecimal.ZERO);
+
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+        when(vnPayProperties.getHashSecret()).thenReturn(hashSecret);
+        when(vnPayProperties.getTmnCode()).thenReturn(tmnCode);
+        when(vnPayProperties.getApiUrl()).thenReturn(apiUrl);
+
+        VNPayRefundResponse mockResp = VNPayRefundResponse.builder()
+                .vnpResponseId("RESP_REF_1")
+                .vnpCommand("refund")
+                .vnpResponseCode("00")
+                .vnpMessage("Refund Success")
+                .build();
+
+        when(restTemplate.postForObject(eq(apiUrl), any(HttpEntity.class), eq(VNPayRefundResponse.class)))
+                .thenReturn(mockResp);
+
+        VNPayRefundResponse result = vnPayService.refundTransaction(
+                payment.getId(), new BigDecimal("250000.00"), null, "Full refund reason", "admin", "127.0.0.1"
+        );
+
+        assertThat(result).isNotNull();
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(payment.getRefundedAmount()).isEqualByComparingTo("250000.00");
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    @DisplayName("refundTransaction should execute partial refund successfully")
+    void refundTransaction_Success_PartialRefund() {
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setTransactionId("14567890");
+        payment.setAmount(new BigDecimal("250000.00"));
+        payment.setRefundedAmount(new BigDecimal("50000.00"));
+
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+        when(vnPayProperties.getHashSecret()).thenReturn(hashSecret);
+        when(vnPayProperties.getTmnCode()).thenReturn(tmnCode);
+        when(vnPayProperties.getApiUrl()).thenReturn(apiUrl);
+
+        VNPayRefundResponse mockResp = VNPayRefundResponse.builder()
+                .vnpResponseId("RESP_REF_2")
+                .vnpCommand("refund")
+                .vnpResponseCode("00")
+                .vnpMessage("Partial Refund Success")
+                .build();
+
+        when(restTemplate.postForObject(eq(apiUrl), any(HttpEntity.class), eq(VNPayRefundResponse.class)))
+                .thenReturn(mockResp);
+
+        VNPayRefundResponse result = vnPayService.refundTransaction(
+                payment.getId(), new BigDecimal("100000.00"), null, "Partial refund reason", "admin", "127.0.0.1"
+        );
+
+        assertThat(result).isNotNull();
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(payment.getRefundedAmount()).isEqualByComparingTo("150000.00");
+        verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    @DisplayName("refundTransaction should reject when amount exceeds refundable balance")
+    void refundTransaction_ExceedsRefundableBalance() {
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setAmount(new BigDecimal("250000.00"));
+        payment.setRefundedAmount(new BigDecimal("200000.00")); // Only 50k left
+
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+
+        assertThatThrownBy(() -> vnPayService.refundTransaction(
+                payment.getId(), new BigDecimal("100000.00"), null, "Exceeds", "admin", "127.0.0.1"
+        )).isInstanceOf(BusinessException.class)
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.INVALID_REFUND_AMOUNT));
+    }
+
+    @Test
+    @DisplayName("refundTransaction should reject when payment is not PAID")
+    void refundTransaction_NotPaid() {
+        payment.setStatus(PaymentStatus.PENDING);
+
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+
+        assertThatThrownBy(() -> vnPayService.refundTransaction(
+                payment.getId(), new BigDecimal("100000.00"), null, "Not paid", "admin", "127.0.0.1"
+        )).isInstanceOf(BusinessException.class)
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.REFUND_NOT_ALLOWED));
     }
 }

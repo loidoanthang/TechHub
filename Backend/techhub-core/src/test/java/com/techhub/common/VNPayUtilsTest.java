@@ -1,5 +1,7 @@
 package com.techhub.common;
 
+import com.techhub.modules.payment.dto.response.VNPayQueryDrResponse;
+import com.techhub.modules.payment.dto.response.VNPayRefundResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -156,5 +158,114 @@ class VNPayUtilsTest {
 
         assertThat(VNPayUtils.getCurrentTimeVN()).isNotNull();
         assertThat(VNPayUtils.getExpireTimeVN(15)).isAfter(VNPayUtils.getCurrentTimeVN().minusSeconds(5));
+    }
+
+    @Test
+    @DisplayName("buildQueryDrChecksum should calculate valid HMAC-SHA512 using pipe delimited format")
+    void testBuildQueryDrChecksum() {
+        String requestId = "REQ123";
+        String version = "2.1.0";
+        String command = "querydr";
+        String tmnCode = "TMN1";
+        String txnRef = "TXN999";
+        String txDate = "20261122100000";
+        String createDate = "20261122100500";
+        String ip = "127.0.0.1";
+        String orderInfo = "Query order";
+
+        String hash = VNPayUtils.buildQueryDrChecksum(
+                requestId, version, command, tmnCode, txnRef,
+                txDate, createDate, ip, orderInfo, SECRET_KEY
+        );
+
+        String expectedRaw = "REQ123|2.1.0|querydr|TMN1|TXN999|20261122100000|20261122100500|127.0.0.1|Query order";
+        String expectedHash = VNPayUtils.hmacSHA512(SECRET_KEY, expectedRaw);
+
+        assertThat(hash).isNotNull().hasSize(128);
+        assertThat(hash).isEqualTo(expectedHash);
+    }
+
+    @Test
+    @DisplayName("buildRefundChecksum should calculate valid HMAC-SHA512 using pipe delimited format")
+    void testBuildRefundChecksum() {
+        String requestId = "REF123";
+        String version = "2.1.0";
+        String command = "refund";
+        String tmnCode = "TMN1";
+        String trType = "02";
+        String txnRef = "TXN999";
+        long amount = 5000000;
+        String trNo = "140001";
+        String txDate = "20261122100000";
+        String creator = "admin";
+        String createDate = "20261122101000";
+        String ip = "127.0.0.1";
+        String orderInfo = "Refund order";
+
+        String hash = VNPayUtils.buildRefundChecksum(
+                requestId, version, command, tmnCode, trType,
+                txnRef, amount, trNo, txDate, creator,
+                createDate, ip, orderInfo, SECRET_KEY
+        );
+
+        String expectedRaw = "REF123|2.1.0|refund|TMN1|02|TXN999|5000000|140001|20261122100000|admin|20261122101000|127.0.0.1|Refund order";
+        String expectedHash = VNPayUtils.hmacSHA512(SECRET_KEY, expectedRaw);
+
+        assertThat(hash).isNotNull().hasSize(128);
+        assertThat(hash).isEqualTo(expectedHash);
+    }
+
+    @Test
+    @DisplayName("verifyQueryDrChecksum and verifyRefundChecksum should validate responses accurately")
+    void testVerifyResponseChecksums() {
+        // QueryDR response
+        String qRaw = "RESP1|querydr|00|Success|TMN1|TXN1|10000000|NCB|20261122100000|140001|01|00|Test||";
+        String qHash = VNPayUtils.hmacSHA512(SECRET_KEY, qRaw);
+
+        VNPayQueryDrResponse qResp = VNPayQueryDrResponse.builder()
+                .vnpResponseId("RESP1")
+                .vnpCommand("querydr")
+                .vnpResponseCode("00")
+                .vnpMessage("Success")
+                .vnpTmnCode("TMN1")
+                .vnpTxnRef("TXN1")
+                .vnpAmount("10000000")
+                .vnpBankCode("NCB")
+                .vnpPayDate("20261122100000")
+                .vnpTransactionNo("140001")
+                .vnpTransactionType("01")
+                .vnpTransactionStatus("00")
+                .vnpOrderInfo("Test")
+                .vnpPromotionCode("")
+                .vnpPromotionAmount("")
+                .vnpSecureHash(qHash)
+                .build();
+
+        assertThat(VNPayUtils.verifyQueryDrChecksum(qResp, SECRET_KEY)).isTrue();
+        assertThat(qResp.isSuccess()).isTrue();
+
+        // Refund response
+        String rRaw = "RESP2|refund|00|Success|TMN1|TXN1|10000000|NCB|20261122100000|140001|02|00|Refund Test";
+        String rHash = VNPayUtils.hmacSHA512(SECRET_KEY, rRaw);
+
+        VNPayRefundResponse rResp = VNPayRefundResponse.builder()
+                .vnpResponseId("RESP2")
+                .vnpCommand("refund")
+                .vnpResponseCode("00")
+                .vnpMessage("Success")
+                .vnpTmnCode("TMN1")
+                .vnpTxnRef("TXN1")
+                .vnpAmount("10000000")
+                .vnpBankCode("NCB")
+                .vnpPayDate("20261122100000")
+                .vnpTransactionNo("140001")
+                .vnpTransactionType("02")
+                .vnpTransactionStatus("00")
+                .vnpOrderInfo("Refund Test")
+                .vnpSecureHash(rHash)
+                .build();
+
+        assertThat(VNPayUtils.verifyRefundChecksum(rResp, SECRET_KEY)).isTrue();
+        assertThat(rResp.isSuccess()).isTrue();
     }
 }

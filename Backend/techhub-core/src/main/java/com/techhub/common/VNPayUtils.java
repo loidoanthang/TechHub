@@ -1,5 +1,7 @@
 package com.techhub.common;
 
+import com.techhub.modules.payment.dto.response.VNPayQueryDrResponse;
+import com.techhub.modules.payment.dto.response.VNPayRefundResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 import javax.crypto.Mac;
@@ -10,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 public final class VNPayUtils {
@@ -224,5 +227,133 @@ public final class VNPayUtils {
      */
     public static LocalDateTime getExpireTimeVN(int minutes) {
         return LocalDateTime.now(VN_ZONE).plusMinutes(minutes);
+    }
+
+    /**
+     * Build HMAC-SHA512 checksum for VNPAY QueryDR request.
+     * Follows pipe-separated order:
+     * vnp_RequestId|vnp_Version|vnp_Command|vnp_TmnCode|vnp_TxnRef|vnp_TransactionDate|vnp_CreateDate|vnp_IpAddr|vnp_OrderInfo
+     */
+    public static String buildQueryDrChecksum(
+            String requestId,
+            String version,
+            String command,
+            String tmnCode,
+            String txnRef,
+            String transactionDate,
+            String createDate,
+            String ipAddr,
+            String orderInfo,
+            String secretKey
+    ) {
+        String rawData = String.join("|",
+                Objects.requireNonNullElse(requestId, ""),
+                Objects.requireNonNullElse(version, "2.1.0"),
+                Objects.requireNonNullElse(command, "querydr"),
+                Objects.requireNonNullElse(tmnCode, ""),
+                Objects.requireNonNullElse(txnRef, ""),
+                Objects.requireNonNullElse(transactionDate, ""),
+                Objects.requireNonNullElse(createDate, ""),
+                Objects.requireNonNullElse(ipAddr, ""),
+                Objects.requireNonNullElse(orderInfo, "")
+        );
+        return hmacSHA512(secretKey, rawData);
+    }
+
+    /**
+     * Build HMAC-SHA512 checksum for VNPAY Refund request.
+     * Follows pipe-separated order:
+     * vnp_RequestId|vnp_Version|vnp_Command|vnp_TmnCode|vnp_TransactionType|vnp_TxnRef|vnp_Amount|vnp_TransactionNo|vnp_TransactionDate|vnp_CreateBy|vnp_CreateDate|vnp_IpAddr|vnp_OrderInfo
+     */
+    public static String buildRefundChecksum(
+            String requestId,
+            String version,
+            String command,
+            String tmnCode,
+            String transactionType,
+            String txnRef,
+            long amount,
+            String transactionNo,
+            String transactionDate,
+            String createBy,
+            String createDate,
+            String ipAddr,
+            String orderInfo,
+            String secretKey
+    ) {
+        String rawData = String.join("|",
+                Objects.requireNonNullElse(requestId, ""),
+                Objects.requireNonNullElse(version, "2.1.0"),
+                Objects.requireNonNullElse(command, "refund"),
+                Objects.requireNonNullElse(tmnCode, ""),
+                Objects.requireNonNullElse(transactionType, "02"),
+                Objects.requireNonNullElse(txnRef, ""),
+                String.valueOf(amount),
+                Objects.requireNonNullElse(transactionNo, "0"),
+                Objects.requireNonNullElse(transactionDate, ""),
+                Objects.requireNonNullElse(createBy, ""),
+                Objects.requireNonNullElse(createDate, ""),
+                Objects.requireNonNullElse(ipAddr, ""),
+                Objects.requireNonNullElse(orderInfo, "")
+        );
+        return hmacSHA512(secretKey, rawData);
+    }
+
+    /**
+     * Verify HMAC-SHA512 checksum for VNPAY QueryDR response.
+     * Response fields order:
+     * vnp_ResponseId|vnp_Command|vnp_ResponseCode|vnp_Message|vnp_TmnCode|vnp_TxnRef|vnp_Amount|vnp_BankCode|vnp_PayDate|vnp_TransactionNo|vnp_TransactionType|vnp_TransactionStatus|vnp_OrderInfo|vnp_PromotionCode|vnp_PromotionAmount
+     */
+    public static boolean verifyQueryDrChecksum(VNPayQueryDrResponse response, String secretKey) {
+        if (response == null || response.vnpSecureHash() == null || secretKey == null) {
+            return false;
+        }
+        String rawData = String.join("|",
+                Objects.requireNonNullElse(response.vnpResponseId(), ""),
+                Objects.requireNonNullElse(response.vnpCommand(), ""),
+                Objects.requireNonNullElse(response.vnpResponseCode(), ""),
+                Objects.requireNonNullElse(response.vnpMessage(), ""),
+                Objects.requireNonNullElse(response.vnpTmnCode(), ""),
+                Objects.requireNonNullElse(response.vnpTxnRef(), ""),
+                Objects.requireNonNullElse(response.vnpAmount(), ""),
+                Objects.requireNonNullElse(response.vnpBankCode(), ""),
+                Objects.requireNonNullElse(response.vnpPayDate(), ""),
+                Objects.requireNonNullElse(response.vnpTransactionNo(), ""),
+                Objects.requireNonNullElse(response.vnpTransactionType(), ""),
+                Objects.requireNonNullElse(response.vnpTransactionStatus(), ""),
+                Objects.requireNonNullElse(response.vnpOrderInfo(), ""),
+                Objects.requireNonNullElse(response.vnpPromotionCode(), ""),
+                Objects.requireNonNullElse(response.vnpPromotionAmount(), "")
+        );
+        String expectedHash = hmacSHA512(secretKey, rawData);
+        return expectedHash.equalsIgnoreCase(response.vnpSecureHash().trim());
+    }
+
+    /**
+     * Verify HMAC-SHA512 checksum for VNPAY Refund response.
+     * Response fields order:
+     * vnp_ResponseId|vnp_Command|vnp_ResponseCode|vnp_Message|vnp_TmnCode|vnp_TxnRef|vnp_Amount|vnp_BankCode|vnp_PayDate|vnp_TransactionNo|vnp_TransactionType|vnp_TransactionStatus|vnp_OrderInfo
+     */
+    public static boolean verifyRefundChecksum(VNPayRefundResponse response, String secretKey) {
+        if (response == null || response.vnpSecureHash() == null || secretKey == null) {
+            return false;
+        }
+        String rawData = String.join("|",
+                Objects.requireNonNullElse(response.vnpResponseId(), ""),
+                Objects.requireNonNullElse(response.vnpCommand(), ""),
+                Objects.requireNonNullElse(response.vnpResponseCode(), ""),
+                Objects.requireNonNullElse(response.vnpMessage(), ""),
+                Objects.requireNonNullElse(response.vnpTmnCode(), ""),
+                Objects.requireNonNullElse(response.vnpTxnRef(), ""),
+                Objects.requireNonNullElse(response.vnpAmount(), ""),
+                Objects.requireNonNullElse(response.vnpBankCode(), ""),
+                Objects.requireNonNullElse(response.vnpPayDate(), ""),
+                Objects.requireNonNullElse(response.vnpTransactionNo(), ""),
+                Objects.requireNonNullElse(response.vnpTransactionType(), ""),
+                Objects.requireNonNullElse(response.vnpTransactionStatus(), ""),
+                Objects.requireNonNullElse(response.vnpOrderInfo(), "")
+        );
+        String expectedHash = hmacSHA512(secretKey, rawData);
+        return expectedHash.equalsIgnoreCase(response.vnpSecureHash().trim());
     }
 }

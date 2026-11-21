@@ -5,6 +5,8 @@ import com.techhub.common.VNPayUtils;
 import com.techhub.modules.payment.dto.request.VNPayRetryRequest;
 import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
 import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
+import com.techhub.modules.payment.dto.response.VNPayQueryDrResponse;
+import com.techhub.modules.payment.dto.response.VNPayRefundResponse;
 import com.techhub.security.SecurityUtils;
 import com.techhub.security.annotation.RequireActiveBuyer;
 import com.techhub.modules.payment.service.VNPayService;
@@ -14,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 
@@ -62,5 +65,36 @@ public class PaymentController {
 
         String paymentUrl = vnPayService.retryPayment(currentUserId, paymentId, bankCode, clientIp);
         return ApiResponse.success(Map.of("paymentUrl", paymentUrl), "Tạo liên kết thanh toán lại thành công", null);
+    }
+
+    /**
+     * Query transaction status directly from VNPAY WebAPI (QueryDR).
+     */
+    @PostMapping("/query/{paymentId}")
+    @PreAuthorize("hasAnyRole('BUYER', 'ADMIN')")
+    public ApiResponse<VNPayQueryDrResponse> queryTransaction(
+            @PathVariable UUID paymentId,
+            HttpServletRequest httpRequest
+    ) {
+        String clientIp = VNPayUtils.getClientIp(httpRequest);
+        VNPayQueryDrResponse response = vnPayService.queryTransaction(paymentId, clientIp);
+        return ApiResponse.success(response, "Truy vấn trạng thái giao dịch từ VNPAY thành công", null);
+    }
+
+    /**
+     * Admin manual refund via VNPAY WebAPI (Refund).
+     */
+    @PostMapping("/refund/{paymentId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<VNPayRefundResponse> refundTransaction(
+            @PathVariable UUID paymentId,
+            @RequestParam BigDecimal amount,
+            @RequestParam(required = false) String reason,
+            HttpServletRequest httpRequest
+    ) {
+        String clientIp = VNPayUtils.getClientIp(httpRequest);
+        String createBy = SecurityUtils.getCurrentUserIdOptional().map(UUID::toString).orElse("admin");
+        VNPayRefundResponse response = vnPayService.refundTransaction(paymentId, amount, null, reason, createBy, clientIp);
+        return ApiResponse.success(response, "Yêu cầu hoàn tiền qua VNPAY đã được tiếp nhận", null);
     }
 }

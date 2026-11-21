@@ -4,10 +4,13 @@ import com.techhub.common.ApiResponse;
 import com.techhub.modules.payment.dto.request.VNPayRetryRequest;
 import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
 import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
+import com.techhub.modules.payment.dto.response.VNPayQueryDrResponse;
+import com.techhub.modules.payment.dto.response.VNPayRefundResponse;
 import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.enums.Role;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.security.CustomUserDetails;
+import com.techhub.security.annotation.RequireActiveBuyer;
 import com.techhub.modules.payment.service.VNPayService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.AfterEach;
@@ -179,7 +182,67 @@ class PaymentControllerTest {
         Method retryMethod = PaymentController.class.getMethod("retryPayment", UUID.class, VNPayRetryRequest.class, HttpServletRequest.class);
         assertTrue(retryMethod.isAnnotationPresent(PostMapping.class));
         assertArrayEquals(new String[]{"/retry/{paymentId}"}, retryMethod.getAnnotation(PostMapping.class).value());
-        assertTrue(retryMethod.isAnnotationPresent(PreAuthorize.class));
-        assertEquals("hasRole('BUYER')", retryMethod.getAnnotation(PreAuthorize.class).value());
+        assertTrue(retryMethod.isAnnotationPresent(RequireActiveBuyer.class));
+
+        // Query method annotations
+        Method queryMethod = PaymentController.class.getMethod("queryTransaction", UUID.class, HttpServletRequest.class);
+        assertTrue(queryMethod.isAnnotationPresent(PostMapping.class));
+        assertArrayEquals(new String[]{"/query/{paymentId}"}, queryMethod.getAnnotation(PostMapping.class).value());
+        assertTrue(queryMethod.isAnnotationPresent(PreAuthorize.class));
+        assertEquals("hasAnyRole('BUYER', 'ADMIN')", queryMethod.getAnnotation(PreAuthorize.class).value());
+
+        // Refund method annotations
+        Method refundMethod = PaymentController.class.getMethod("refundTransaction", UUID.class, BigDecimal.class, String.class, HttpServletRequest.class);
+        assertTrue(refundMethod.isAnnotationPresent(PostMapping.class));
+        assertArrayEquals(new String[]{"/refund/{paymentId}"}, refundMethod.getAnnotation(PostMapping.class).value());
+        assertTrue(refundMethod.isAnnotationPresent(PreAuthorize.class));
+        assertEquals("hasRole('ADMIN')", refundMethod.getAnnotation(PreAuthorize.class).value());
+    }
+
+    @Test
+    @DisplayName("queryTransaction should call VNPayService and return response")
+    void testQueryTransaction() {
+        UUID paymentId = UUID.randomUUID();
+        when(httpRequest.getRemoteAddr()).thenReturn("127.0.0.1");
+
+        VNPayQueryDrResponse mockQueryResponse = VNPayQueryDrResponse.builder()
+                .vnpResponseCode("00")
+                .vnpTransactionStatus("00")
+                .vnpTransactionNo("TXN123456")
+                .vnpMessage("Success")
+                .build();
+
+        when(vnPayService.queryTransaction(eq(paymentId), anyString())).thenReturn(mockQueryResponse);
+
+        ApiResponse<VNPayQueryDrResponse> result = paymentController.queryTransaction(paymentId, httpRequest);
+
+        assertThat(result).isNotNull();
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getData().vnpTransactionNo()).isEqualTo("TXN123456");
+        verify(vnPayService).queryTransaction(paymentId, "127.0.0.1");
+    }
+
+    @Test
+    @DisplayName("refundTransaction should call VNPayService and return response")
+    void testRefundTransaction() {
+        UUID paymentId = UUID.randomUUID();
+        BigDecimal amount = new BigDecimal("100000.00");
+        when(httpRequest.getRemoteAddr()).thenReturn("127.0.0.1");
+
+        VNPayRefundResponse mockRefundResponse = VNPayRefundResponse.builder()
+                .vnpResponseCode("00")
+                .vnpResponseId("RESP_REF_99")
+                .vnpMessage("Success")
+                .build();
+
+        when(vnPayService.refundTransaction(eq(paymentId), eq(amount), isNull(), eq("Faulty product"), anyString(), anyString()))
+                .thenReturn(mockRefundResponse);
+
+        ApiResponse<VNPayRefundResponse> result = paymentController.refundTransaction(paymentId, amount, "Faulty product", httpRequest);
+
+        assertThat(result).isNotNull();
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getData().vnpResponseId()).isEqualTo("RESP_REF_99");
+        verify(vnPayService).refundTransaction(eq(paymentId), eq(amount), isNull(), eq("Faulty product"), anyString(), eq("127.0.0.1"));
     }
 }

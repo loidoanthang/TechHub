@@ -6,6 +6,8 @@ import com.techhub.modules.order.dto.request.CreateReturnRequest;
 import com.techhub.modules.order.dto.request.ProcessReturnRequest;
 import com.techhub.modules.order.dto.response.ReturnRequestResponse;
 import com.techhub.modules.order.service.impl.ReturnRequestServiceImpl;
+import com.techhub.modules.payment.dto.response.VNPayRefundResponse;
+import com.techhub.modules.payment.service.VNPayService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +28,8 @@ import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.modules.order.enums.ReturnRequestStatus;
 import com.techhub.modules.payment.enums.PaymentMethod;
 import com.techhub.modules.payment.enums.PaymentStatus;
+import com.techhub.modules.payment.enums.RefundMethod;
+import com.techhub.modules.payment.enums.RefundStatus;
 import com.techhub.modules.seller.enums.SellerVerificationStatus;
 import com.techhub.modules.shop.enums.ShopStatus;
 import com.techhub.modules.user.enums.UserStatus;
@@ -74,6 +78,9 @@ class ReturnRequestServiceImplTest {
 
     @Mock
     private SellerWalletTransactionRepository sellerWalletTransactionRepository;
+
+    @Mock
+    private VNPayService vnPayService;
 
     @InjectMocks
     private ReturnRequestServiceImpl returnRequestService;
@@ -283,5 +290,105 @@ class ReturnRequestServiceImplTest {
         assertEquals(OrderStatus.COMPLETED, order.getStatus());
         verify(sellerRepository).incrementBalance(eq(seller.getId()), eq(order.getTotalSellerEarnings()));
         verify(sellerWalletTransactionRepository).save(any(SellerWalletTransaction.class));
+    }
+
+    @Test
+    @DisplayName("processReturnRequest - APPROVED (Online VNPAY Payment): Gọi VNPAY Refund thành công và lưu gatewayRefundId")
+    void processReturnRequest_Approved_OnlineVNPay_Success() {
+        UUID rrId = UUID.randomUUID();
+        order.setStatus(OrderStatus.RETURN_REQUESTED);
+        payment.setPaymentMethod(PaymentMethod.VNPAY);
+
+        ReturnRequest rr = ReturnRequest.builder()
+                .id(rrId)
+                .order(order)
+                .user(buyer)
+                .status(ReturnRequestStatus.PENDING)
+                .reason("Lỗi phần cứng")
+                .createdAt(LocalDateTime.now().minusHours(5))
+                .build();
+
+        when(sellerRepository.findByUserId(userId)).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
+        when(returnRequestRepository.findByIdAndShopId(rrId, shop.getId())).thenReturn(Optional.of(rr));
+        when(returnRequestRepository.save(any(ReturnRequest.class))).thenAnswer(i -> i.getArgument(0));
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+
+        VNPayRefundResponse mockRefundResp = VNPayRefundResponse.builder()
+                .vnpResponseCode("00")
+                .vnpResponseId("VNP_RESP_100")
+                .vnpMessage("Success")
+                .build();
+
+        when(vnPayService.refundTransaction(
+                eq(payment.getId()),
+                eq(order.getTotalAmount()),
+                eq("02"),
+                anyString(),
+                anyString(),
+                anyString()
+        )).thenReturn(mockRefundResp);
+
+        ProcessReturnRequest request = new ProcessReturnRequest(ReturnRequestStatus.APPROVED, "Đồng ý nhận hàng và hoàn tiền");
+
+        ReturnRequestResponse response = returnRequestService.processReturnRequest(userId, rrId, request);
+
+        assertNotNull(response);
+        assertEquals(ReturnRequestStatus.APPROVED, response.status());
+        assertEquals(OrderStatus.REFUNDED, order.getStatus());
+        verify(refundTransactionRepository).save(argThat(tx ->
+                tx.getRefundMethod() == RefundMethod.GATEWAY_REFUND &&
+                tx.getStatus() == RefundStatus.SUCCESS &&
+                "VNP_RESP_100".equals(tx.getGatewayRefundId())
+        ));
+    }
+
+    @Test
+    @DisplayName("processReturnRequest - APPROVED (Online VNPAY Payment): VNPAY từ chối hoàn tiền thì ném REFUND_FAILED")
+    void processReturnRequest_Approved_OnlineVNPay_Failed() {
+        UUID rrId = UUID.randomUUID();
+        order.setStatus(OrderStatus.RETURN_REQUESTED);
+        payment.setPaymentMethod(PaymentMethod.VNPAY);
+
+        ReturnRequest rr = ReturnRequest.builder()
+                .id(rrId)
+                .order(order)
+                .user(buyer)
+                .status(ReturnRequestStatus.PENDING)
+                .reason("Lỗi kỹ thuật")
+                .createdAt(LocalDateTime.now().minusHours(5))
+                .build();
+
+        when(sellerRepository.findByUserId(userId)).thenReturn(Optional.of(seller));
+        when(shopRepository.findBySellerId(seller.getId())).thenReturn(Optional.of(shop));
+        when(returnRequestRepository.findByIdAndShopId(rrId, shop.getId())).thenReturn(Optional.of(rr));
+        when(returnRequestRepository.save(any(ReturnRequest.class))).thenAnswer(i -> i.getArgument(0));
+        when(orderRepository.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+
+        VNPayRefundResponse mockRefundResp = VNPayRefundResponse.builder()
+                .vnpResponseCode("91")
+                .vnpResponseId("VNP_RESP_ERR")
+                .vnpMessage("Transaction not found")
+                .build();
+
+        when(vnPayService.refundTransaction(
+                eq(payment.getId()),
+                eq(order.getTotalAmount()),
+                eq("02"),
+                anyString(),
+                anyString(),
+                anyString()
+        )).thenReturn(mockRefundResp);
+
+        ProcessReturnRequest request = new ProcessReturnRequest(ReturnRequestStatus.APPROVED, "Đồng ý nhận hàng");
+
+        assertThrows(BusinessException.class, () ->
+                returnRequestService.processReturnRequest(userId, rrId, request)
+        );
+
+        verify(refundTransactionRepository).save(argThat(tx ->
+                tx.getRefundMethod() == RefundMethod.GATEWAY_REFUND &&
+                tx.getStatus() == RefundStatus.FAILED
+        ));
     }
 }

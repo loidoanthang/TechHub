@@ -2,8 +2,11 @@ package com.techhub.modules.payment.service;
 
 import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
 import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
+import com.techhub.modules.payment.dto.response.VNPayQueryDrResponse;
+import com.techhub.modules.payment.dto.response.VNPayRefundResponse;
 import com.techhub.modules.payment.entity.Payment;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
 
@@ -75,4 +78,26 @@ public interface VNPayService {
      * @return true if successfully removed on VNPAY
      */
     boolean removeToken(UUID userId, String vnpToken, String clientIp);
+
+    /**
+     * Query transaction status directly from VNPAY WebAPI (vnp_Command=querydr).
+     *
+     * @param paymentId ID of Payment entity
+     * @param clientIp  Client IP address
+     * @return VNPayQueryDrResponse from VNPAY
+     */
+    VNPayQueryDrResponse queryTransaction(UUID paymentId, String clientIp);
+
+    /**
+     * Request a refund for a paid transaction via VNPAY WebAPI (vnp_Command=refund).
+     *
+     * @param paymentId  ID of Payment entity
+     * @param amount     Amount to refund
+     * @param refundType "02" (full) or "03" (partial), or null for auto detection
+     * @param reason     Reason for refund
+     * @param createBy   Username or identifier of refund initiator
+     * @param clientIp   Client IP address
+     * @return VNPayRefundResponse from VNPAY
+     */
+    VNPayRefundResponse refundTransaction(UUID paymentId, BigDecimal amount, String refundType, String reason, String createBy, String clientIp);
 }

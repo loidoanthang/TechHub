@@ -4,31 +4,38 @@ import com.techhub.common.VNPayUtils;
 import com.techhub.config.properties.VNPayProperties;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
+import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.order.enums.OrderStatus;
+import com.techhub.modules.order.repository.OrderRepository;
+import com.techhub.modules.payment.dto.request.VNPayQueryDrRequest;
+import com.techhub.modules.payment.dto.request.VNPayRefundRequest;
 import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
 import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
-import com.techhub.modules.order.entity.Order;
+import com.techhub.modules.payment.dto.response.VNPayQueryDrResponse;
+import com.techhub.modules.payment.dto.response.VNPayRefundResponse;
 import com.techhub.modules.payment.entity.Payment;
-import com.techhub.modules.voucher.entity.Voucher;
-import com.techhub.modules.voucher.entity.VoucherRedemption;
-import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.modules.payment.enums.PaymentStatus;
 import com.techhub.modules.payment.enums.VNPayBankCode;
-import com.techhub.modules.voucher.enums.VoucherRedemptionStatus;
-import com.techhub.modules.order.repository.OrderRepository;
 import com.techhub.modules.payment.repository.PaymentRepository;
+import com.techhub.modules.payment.service.VNPayService;
+import com.techhub.modules.voucher.entity.Voucher;
+import com.techhub.modules.voucher.entity.VoucherRedemption;
+import com.techhub.modules.voucher.enums.VoucherRedemptionStatus;
 import com.techhub.modules.voucher.repository.VoucherRedemptionRepository;
 import com.techhub.modules.voucher.repository.VoucherRepository;
-import com.techhub.modules.payment.service.VNPayService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
-import com.techhub.modules.payment.service.VNPayService;
 
 @Slf4j
 @Service
@@ -40,6 +47,7 @@ public class VNPayServiceImpl implements VNPayService {
     private final OrderRepository orderRepository;
     private final VoucherRedemptionRepository voucherRedemptionRepository;
     private final VoucherRepository voucherRepository;
+    private final RestTemplate restTemplate;
 
     @Override
     public String createPaymentUrl(Payment payment, String bankCode, String clientIp) {
@@ -408,6 +416,203 @@ public class VNPayServiceImpl implements VNPayService {
             payment.setBankCode(bankCode);
         }
         paymentRepository.save(payment);
+    }
+
+    @Override
+    @Transactional
+    public VNPayQueryDrResponse queryTransaction(UUID paymentId, String clientIp) {
+        if (paymentId == null) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_FOUND);
+        }
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
+
+        String requestId = UUID.randomUUID().toString().replace("-", "");
+        String version = "2.1.0";
+        String command = "querydr";
+        String tmnCode = vnPayProperties.getTmnCode();
+        String txnRef = payment.getId().toString();
+        String orderInfo = "Truy van giao dich TechHub: " + payment.getId();
+
+        LocalDateTime txDate = payment.getCreatedAt() != null ? payment.getCreatedAt() : LocalDateTime.now();
+        String transactionDate = VNPayUtils.formatVNPayDate(txDate);
+        String createDate = VNPayUtils.formatVNPayDate(LocalDateTime.now(VNPayUtils.VN_ZONE));
+        String ipAddr = (clientIp != null && !clientIp.isBlank()) ? clientIp : "127.0.0.1";
+
+        String checksum = VNPayUtils.buildQueryDrChecksum(
+                requestId, version, command, tmnCode, txnRef,
+                transactionDate, createDate, ipAddr, orderInfo,
+                vnPayProperties.getHashSecret()
+        );
+
+        VNPayQueryDrRequest request = VNPayQueryDrRequest.builder()
+                .vnpRequestId(requestId)
+                .vnpVersion(version)
+                .vnpCommand(command)
+                .vnpTmnCode(tmnCode)
+                .vnpTxnRef(txnRef)
+                .vnpOrderInfo(orderInfo)
+                .vnpTransactionDate(transactionDate)
+                .vnpCreateDate(createDate)
+                .vnpIpAddr(ipAddr)
+                .vnpSecureHash(checksum)
+                .build();
+
+        log.info("Sending VNPay QueryDR request to {}: txnRef={}, requestId={}",
+                vnPayProperties.getApiUrl(), txnRef, requestId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<VNPayQueryDrRequest> entity = new HttpEntity<>(request, headers);
+
+        VNPayQueryDrResponse response;
+        try {
+            response = restTemplate.postForObject(vnPayProperties.getApiUrl(), entity, VNPayQueryDrResponse.class);
+        } catch (Exception e) {
+            log.error("Failed to call VNPay QueryDR WebAPI: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_FOUND, "Không thể kết nối đến cổng VNPAY để truy vấn giao dịch: " + e.getMessage());
+        }
+
+        if (response == null) {
+            log.warn("VNPay QueryDR returned empty response for paymentId={}", paymentId);
+            return null;
+        }
+
+        log.info("Received VNPay QueryDR response: responseCode={}, transactionStatus={}, responseId={}",
+                response.vnpResponseCode(), response.vnpTransactionStatus(), response.vnpResponseId());
+
+        if (response.vnpSecureHash() != null && !response.vnpSecureHash().isBlank()) {
+            boolean valid = VNPayUtils.verifyQueryDrChecksum(response, vnPayProperties.getHashSecret());
+            if (!valid) {
+                log.warn("VNPay QueryDR response checksum mismatch for paymentId={}", paymentId);
+            }
+        }
+
+        if (response.isSuccess()) {
+            if (payment.getStatus() != PaymentStatus.PAID) {
+                log.info("Syncing payment {} to PAID from QueryDR", payment.getId());
+                completePaymentSuccess(payment, response.vnpTransactionNo(), response.vnpBankCode());
+            }
+        } else if ("02".equals(response.vnpTransactionStatus()) || "24".equals(response.vnpTransactionStatus())) {
+            if (payment.getStatus() == PaymentStatus.PENDING) {
+                log.info("Syncing payment {} to FAILED from QueryDR (status={})", payment.getId(), response.vnpTransactionStatus());
+                completePaymentFailure(payment, response.vnpTransactionNo(), response.vnpBankCode());
+            }
+        }
+
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public VNPayRefundResponse refundTransaction(UUID paymentId, BigDecimal amount, String refundType, String reason, String createBy, String clientIp) {
+        if (paymentId == null) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_FOUND);
+        }
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
+
+        if (payment.getStatus() != PaymentStatus.PAID) {
+            throw new BusinessException(ErrorCode.REFUND_NOT_ALLOWED, "Chỉ có thể hoàn tiền cho giao dịch đã thanh toán thành công (PAID)");
+        }
+
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_DATA, "Số tiền hoàn phải lớn hơn 0");
+        }
+
+        BigDecimal currentRefunded = Objects.requireNonNullElse(payment.getRefundedAmount(), BigDecimal.ZERO);
+        BigDecimal maxRefundable = payment.getAmount().subtract(currentRefunded);
+        if (amount.compareTo(maxRefundable) > 0) {
+            throw new BusinessException(ErrorCode.INVALID_REFUND_AMOUNT, "Số tiền hoàn (" + amount + ") vượt quá số tiền còn lại có thể hoàn (" + maxRefundable + ")");
+        }
+
+        String type = refundType;
+        if (type == null || type.isBlank()) {
+            type = (amount.compareTo(payment.getAmount()) >= 0) ? "02" : "03";
+        }
+
+        String requestId = UUID.randomUUID().toString().replace("-", "");
+        String version = "2.1.0";
+        String command = "refund";
+        String tmnCode = vnPayProperties.getTmnCode();
+        String txnRef = payment.getId().toString();
+        long amountInVndCents = amount.multiply(new BigDecimal(100)).longValue();
+        String transactionNo = (payment.getTransactionId() != null && !payment.getTransactionId().isBlank())
+                ? payment.getTransactionId()
+                : "0";
+        LocalDateTime txDate = payment.getUpdatedAt() != null ? payment.getUpdatedAt() : (payment.getCreatedAt() != null ? payment.getCreatedAt() : LocalDateTime.now());
+        String transactionDate = VNPayUtils.formatVNPayDate(txDate);
+        String creator = (createBy != null && !createBy.isBlank()) ? createBy : "admin";
+        String createDate = VNPayUtils.formatVNPayDate(LocalDateTime.now(VNPayUtils.VN_ZONE));
+        String ipAddr = (clientIp != null && !clientIp.isBlank()) ? clientIp : "127.0.0.1";
+        String orderInfo = (reason != null && !reason.isBlank()) ? reason : "Hoan tien giao dich " + payment.getId();
+
+        String checksum = VNPayUtils.buildRefundChecksum(
+                requestId, version, command, tmnCode, type,
+                txnRef, amountInVndCents, transactionNo, transactionDate,
+                creator, createDate, ipAddr, orderInfo,
+                vnPayProperties.getHashSecret()
+        );
+
+        VNPayRefundRequest request = VNPayRefundRequest.builder()
+                .vnpRequestId(requestId)
+                .vnpVersion(version)
+                .vnpCommand(command)
+                .vnpTmnCode(tmnCode)
+                .vnpTransactionType(type)
+                .vnpTxnRef(txnRef)
+                .vnpAmount(amountInVndCents)
+                .vnpOrderInfo(orderInfo)
+                .vnpBankCode(payment.getBankCode())
+                .vnpTransactionNo(transactionNo)
+                .vnpTransactionDate(transactionDate)
+                .vnpCreateBy(creator)
+                .vnpCreateDate(createDate)
+                .vnpIpAddr(ipAddr)
+                .vnpSecureHash(checksum)
+                .build();
+
+        log.info("Sending VNPay Refund request to {}: txnRef={}, amount={}, type={}, requestId={}",
+                vnPayProperties.getApiUrl(), txnRef, amount, type, requestId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<VNPayRefundRequest> entity = new HttpEntity<>(request, headers);
+
+        VNPayRefundResponse response;
+        try {
+            response = restTemplate.postForObject(vnPayProperties.getApiUrl(), entity, VNPayRefundResponse.class);
+        } catch (Exception e) {
+            log.error("Failed to call VNPay Refund WebAPI: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.REFUND_FAILED, "Lỗi kết nối tới cổng VNPAY khi hoàn tiền: " + e.getMessage());
+        }
+
+        if (response == null) {
+            log.error("VNPay Refund returned empty response for paymentId={}", paymentId);
+            throw new BusinessException(ErrorCode.REFUND_FAILED, "Cổng VNPAY không phản hồi yêu cầu hoàn tiền");
+        }
+
+        log.info("Received VNPay Refund response: responseCode={}, message={}, responseId={}",
+                response.vnpResponseCode(), response.vnpMessage(), response.vnpResponseId());
+
+        if (response.vnpSecureHash() != null && !response.vnpSecureHash().isBlank()) {
+            boolean valid = VNPayUtils.verifyRefundChecksum(response, vnPayProperties.getHashSecret());
+            if (!valid) {
+                log.warn("VNPay Refund response checksum mismatch for paymentId={}", paymentId);
+            }
+        }
+
+        if (response.isSuccess()) {
+            payment.setRefundedAmount(currentRefunded.add(amount));
+            payment.setUpdatedAt(LocalDateTime.now());
+            paymentRepository.save(payment);
+            log.info("Successfully updated refundedAmount for payment {}: newRefundedAmount={}",
+                    payment.getId(), payment.getRefundedAmount());
+        }
+
+        return response;
     }
 
     private String resolveErrorMessage(String responseCode) {

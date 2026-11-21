@@ -33,10 +33,12 @@ import com.techhub.modules.order.entity.Order;
 import com.techhub.modules.order.entity.ReturnRequest;
 import com.techhub.modules.order.repository.OrderRepository;
 import com.techhub.modules.order.repository.ReturnRequestRepository;
+import com.techhub.modules.payment.dto.response.VNPayRefundResponse;
 import com.techhub.modules.payment.entity.Payment;
 import com.techhub.modules.payment.entity.RefundTransaction;
 import com.techhub.modules.payment.repository.PaymentRepository;
 import com.techhub.modules.payment.repository.RefundTransactionRepository;
+import com.techhub.modules.payment.service.VNPayService;
 import com.techhub.modules.seller.entity.Seller;
 import com.techhub.modules.seller.entity.SellerWalletTransaction;
 import com.techhub.modules.seller.repository.SellerRepository;
@@ -60,6 +62,7 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
     private final RefundTransactionRepository refundTransactionRepository;
     private final PaymentRepository paymentRepository;
     private final SellerWalletTransactionRepository sellerWalletTransactionRepository;
+    private final VNPayService vnPayService;
 
     @Override
     @Transactional
@@ -294,23 +297,71 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
             refundTransactionRepository.save(refundTx);
             log.info("Recorded BANK_TRANSFER_MANUAL refund transaction for COD order {}: amount={}", order.getId(), refundAmt);
         } else {
-            BigDecimal currentRefunded = Objects.requireNonNullElse(payment.getRefundedAmount(), BigDecimal.ZERO);
-            payment.setRefundedAmount(currentRefunded.add(refundAmt));
-            payment.setUpdatedAt(now);
-            paymentRepository.save(payment);
+            String refundType = (refundAmt.compareTo(payment.getAmount()) >= 0) ? "02" : "03";
+            String reason = "Hoan tien don hang " + order.getOrderNumber() + " yeu cau tra hang " + returnRequest.getId();
+            String createBy = (order.getShop() != null && order.getShop().getSeller() != null)
+                    ? "seller_" + order.getShop().getSeller().getId()
+                    : "system";
 
-            RefundTransaction refundTx = RefundTransaction.builder()
-                    .payment(payment)
-                    .order(order)
-                    .returnRequest(returnRequest)
-                    .amount(refundAmt)
-                    .refundMethod(RefundMethod.GATEWAY_REFUND)
-                    .status(RefundStatus.SUCCESS)
-                    .gatewayRefundId("MOCK_REFUND_" + UUID.randomUUID().toString().substring(0, 8))
-                    .createdAt(now)
-                    .build();
-            refundTransactionRepository.save(refundTx);
-            log.info("Recorded GATEWAY_REFUND transaction for Online order {}: amount={}", order.getId(), refundAmt);
+            VNPayRefundResponse refundResponse;
+            try {
+                refundResponse = vnPayService.refundTransaction(
+                        payment.getId(),
+                        refundAmt,
+                        refundType,
+                        reason,
+                        createBy,
+                        "127.0.0.1"
+                );
+            } catch (Exception e) {
+                log.error("Failed to execute VNPay refund for order {}: {}", order.getId(), e.getMessage());
+                RefundTransaction failedTx = RefundTransaction.builder()
+                        .payment(payment)
+                        .order(order)
+                        .returnRequest(returnRequest)
+                        .amount(refundAmt)
+                        .refundMethod(RefundMethod.GATEWAY_REFUND)
+                        .status(RefundStatus.FAILED)
+                        .createdAt(now)
+                        .build();
+                refundTransactionRepository.save(failedTx);
+                throw e;
+            }
+
+            if (refundResponse != null && refundResponse.isSuccess()) {
+                String gatewayId = refundResponse.vnpResponseId() != null
+                        ? refundResponse.vnpResponseId()
+                        : "VNP_REFUND_" + System.currentTimeMillis();
+
+                RefundTransaction refundTx = RefundTransaction.builder()
+                        .payment(payment)
+                        .order(order)
+                        .returnRequest(returnRequest)
+                        .amount(refundAmt)
+                        .refundMethod(RefundMethod.GATEWAY_REFUND)
+                        .status(RefundStatus.SUCCESS)
+                        .gatewayRefundId(gatewayId)
+                        .createdAt(now)
+                        .build();
+                refundTransactionRepository.save(refundTx);
+                log.info("Recorded GATEWAY_REFUND transaction for Online order {}: amount={}, gatewayRefundId={}",
+                        order.getId(), refundAmt, gatewayId);
+            } else {
+                String errorMsg = refundResponse != null ? refundResponse.vnpMessage() : "Unknown VNPAY error";
+                String errCode = refundResponse != null ? refundResponse.vnpResponseCode() : "99";
+                RefundTransaction failedTx = RefundTransaction.builder()
+                        .payment(payment)
+                        .order(order)
+                        .returnRequest(returnRequest)
+                        .amount(refundAmt)
+                        .refundMethod(RefundMethod.GATEWAY_REFUND)
+                        .status(RefundStatus.FAILED)
+                        .gatewayRefundId(refundResponse != null ? refundResponse.vnpResponseId() : null)
+                        .createdAt(now)
+                        .build();
+                refundTransactionRepository.save(failedTx);
+                throw new BusinessException(ErrorCode.REFUND_FAILED, "Hoàn tiền qua VNPAY thất bại: " + errorMsg + " (Mã: " + errCode + ")");
+            }
         }
     }
 
