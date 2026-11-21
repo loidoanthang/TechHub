@@ -16,3 +16,4 @@ export {
   GalleryImageUploader,
   type GalleryImageUploaderProps,
 } from "./upload/GalleryImageUploader";
+export { ScrollableTabsWrapper } from "./ScrollableTabsWrapper";

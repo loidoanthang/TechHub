@@ -34,7 +34,9 @@ export function Header() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const mobileDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -57,11 +59,18 @@ export function Header() {
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        !dropdownRef.current.contains(target)
       ) {
         setDropdownOpen(false);
+      }
+      if (
+        mobileDropdownRef.current &&
+        !mobileDropdownRef.current.contains(target)
+      ) {
+        setMobileDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -77,8 +86,8 @@ export function Header() {
 
   return (
     <header className="fixed top-0 w-full z-50 bg-white border-b border-slate-200/70 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-      {/* Top utility sub-header */}
-      <div className="bg-[#eff4ff] text-[#434656]">
+      {/* Top utility sub-header: Only on desktop */}
+      <div className="hidden md:block bg-[#eff4ff] text-[#434656]">
         <div className="max-w-6xl mx-auto px-6 lg:px-12 h-9 flex items-center justify-between text-[11px] font-semibold">
           <div className="flex items-center gap-2 truncate">
             <span>
@@ -108,48 +117,191 @@ export function Header() {
       </div>
 
       {/* Main Omnisearch & Navigation header */}
-      <div className="max-w-6xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between gap-6">
-        {/* TechHub Logo */}
-        <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
-          <div className="relative w-8 h-8 flex items-center justify-center">
-            <Image
-              src="/logo.svg"
-              alt="TechHub Logo"
-              width={32}
-              height={32}
-              className="object-contain"
-              priority
-            />
-          </div>
-          <span className="text-2xl font-bold tracking-tight text-[#0b1c30] font-[family-name:var(--font-heading)]">
-            Tech<span className="text-[#0045cc]">Hub</span>
-          </span>
-        </Link>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 py-2 sm:py-0 sm:h-20 flex flex-col sm:flex-row justify-between sm:items-center gap-2 sm:gap-6">
+        {/* Top row on Mobile: Logo on Left, Actions on Right */}
+        <div className="flex items-center justify-between w-full sm:w-auto">
+          {/* TechHub Logo */}
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+            <div className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
+              <Image
+                src="/logo.svg"
+                alt="TechHub Logo"
+                width={32}
+                height={32}
+                className="object-contain"
+                priority
+              />
+            </div>
+            <span className="text-xl sm:text-2xl font-bold tracking-tight text-[#0b1c30] font-[family-name:var(--font-heading)]">
+              Tech<span className="text-[#0045cc]">Hub</span>
+            </span>
+          </Link>
 
-        {/* Omnisearch field */}
-        <form onSubmit={handleSearchSubmit} className="flex-1 max-w-2xl relative">
+          {/* Header Actions on Mobile (duplicated here for clean 2-row layout) */}
+          <div className="flex sm:hidden items-center gap-1">
+            <NotificationBell portalContext="buyer" />
+
+            <Link
+              href={isAuthenticated ? ROUTES.ACCOUNT.WISHLIST : ROUTES.LOGIN}
+              className="relative p-2 rounded-lg hover:bg-[#dce9ff] transition-colors text-[#434656] hover:text-[#0b1c30] min-w-[36px] min-h-[36px] flex items-center justify-center"
+              aria-label="Wishlist"
+              title="Danh sách yêu thích"
+            >
+              <Heart className="w-5 h-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute 0 top-0.5 right-0.5 bg-rose-500 text-white text-[9px] font-bold rounded-full h-3.5 min-w-[14px] px-0.5 flex items-center justify-center shadow-xs">
+                  {wishlistCount > 99 ? "99+" : wishlistCount}
+                </span>
+              )}
+            </Link>
+
+            <button
+              type="button"
+              onClick={toggleCart}
+              className="relative p-2 rounded-lg hover:bg-[#dce9ff] transition-colors text-[#434656] hover:text-[#0b1c30] min-w-[36px] min-h-[36px] flex items-center justify-center"
+              aria-label="Cart"
+            >
+              <ShoppingBag className="w-5 h-5" />
+              {totalCount > 0 && (
+                <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-[#0045cc] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                  {totalCount}
+                </span>
+              )}
+            </button>
+
+            {/* Mobile User Avatar / Login */}
+            {isLoading ? (
+              <div className="w-7 h-7 rounded-full bg-slate-200 animate-pulse ml-1" />
+            ) : isAuthenticated && user ? (
+              <div className="relative ml-1" ref={mobileDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setMobileDropdownOpen((prev) => !prev)}
+                  className="flex items-center cursor-pointer p-0.5 rounded-full hover:ring-2 hover:ring-[#0045cc]/30 transition-all"
+                  aria-label="User profile"
+                >
+                  <UserAvatar
+                    src={user.avatarUrl}
+                    alt={fullName}
+                    size="sm"
+                  />
+                </button>
+
+                {/* Mobile Dropdown Menu */}
+                {mobileDropdownOpen && (
+                  <div className="fixed right-3 top-14 w-60 bg-white rounded-2xl shadow-[0_12px_40px_-10px_rgba(11,28,48,0.2)] border border-slate-200 py-2 z-[9999] animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-4 py-2 border-b border-slate-100">
+                      <p className="text-xs font-semibold text-[#0b1c30] truncate">
+                        {fullName}
+                      </p>
+                      <p className="text-[11px] text-[#737688] truncate">{user.email}</p>
+                    </div>
+
+                    <Link
+                      href={ROUTES.ACCOUNT.PROFILE}
+                      onClick={() => setMobileDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#434656] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors"
+                    >
+                      <UserIcon className="w-4 h-4 text-[#737688]" />
+                      <span>Thông tin tài khoản</span>
+                    </Link>
+
+                    <Link
+                      href={ROUTES.ACCOUNT.ORDERS}
+                      onClick={() => setMobileDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#434656] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors"
+                    >
+                      <Package className="w-4 h-4 text-[#737688]" />
+                      <span>Đơn mua của tôi</span>
+                    </Link>
+
+                    <Link
+                      href={ROUTES.ACCOUNT.ADDRESSES}
+                      onClick={() => setMobileDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#434656] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors"
+                    >
+                      <MapPin className="w-4 h-4 text-[#737688]" />
+                      <span>Sổ địa chỉ</span>
+                    </Link>
+
+                    <Link
+                      href={ROUTES.ACCOUNT.WISHLIST}
+                      onClick={() => setMobileDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#434656] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors"
+                    >
+                      <Heart className="w-4 h-4 text-[#737688]" />
+                      <span>Danh sách yêu thích</span>
+                    </Link>
+
+                    <Link
+                      href={isSeller ? ROUTES.SELLER.DASHBOARD : ROUTES.SELLER.REGISTER}
+                      onClick={() => setMobileDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#0045cc] font-medium hover:bg-[#eff4ff] transition-colors border-t border-slate-50"
+                    >
+                      <Store className="w-4 h-4" />
+                      <span>{isSeller ? "Kênh Người Bán" : "Trở thành Người Bán"}</span>
+                    </Link>
+
+                    {isAdmin && (
+                      <Link
+                        href={ROUTES.ADMIN.DASHBOARD}
+                        onClick={() => setMobileDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#0b1c30] font-bold hover:bg-[#eff4ff] transition-colors border-t border-slate-50"
+                      >
+                        <ShieldCheck className="w-4 h-4 text-[#0045cc]" />
+                        <span>Cổng Quản trị (Admin)</span>
+                      </Link>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileDropdownOpen(false);
+                        logout();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-red-600 hover:bg-red-50 transition-colors border-t border-slate-100 text-left cursor-pointer"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Đăng xuất</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href={ROUTES.LOGIN}
+                className="ml-1 px-2.5 py-1 text-xs font-bold text-white bg-[#0045cc] rounded-lg"
+              >
+                Login
+              </Link>
+            )}
+          </div>
+        </div>
+
+        {/* Omnisearch field (Full width row on mobile, center flex on desktop) */}
+        <form onSubmit={handleSearchSubmit} className="w-full sm:flex-1 sm:max-w-2xl relative">
           <div className="flex items-center rounded-lg bg-[#eff4ff] p-1 shadow-[0_1px_3px_rgba(15,23,42,0.04)] focus-within:ring-2 focus-within:ring-[#0045cc]/20">
             <div className="relative flex-1 flex items-center px-2 pl-3">
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-transparent text-sm text-[#0b1c30] placeholder:text-[#737688] focus:outline-none"
-                placeholder="Tìm kiếm iPhone, MacBook, Sony, tai nghe, màn hình..."
+                className="w-full bg-transparent text-xs sm:text-sm text-[#0b1c30] placeholder:text-[#737688] focus:outline-none"
+                placeholder="Tìm kiếm iPhone, MacBook, phụ kiện..."
                 type="text"
               />
             </div>
             <button
               type="submit"
-              className="flex items-center justify-center bg-[#0045cc] hover:bg-[#0d5bff] text-white px-5 py-2 rounded-lg transition-colors shadow-sm cursor-pointer"
+              className="flex items-center justify-center bg-[#0045cc] hover:bg-[#0d5bff] text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg transition-colors shadow-sm cursor-pointer"
               aria-label="Search"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
         </form>
 
-        {/* Header Actions */}
-        <div className="flex items-center gap-4 flex-shrink-0">
+        {/* Header Actions for Desktop */}
+        <div className="hidden sm:flex items-center gap-4 flex-shrink-0">
           {/* Notifications, Wishlist & Cart */}
           <div className="flex items-center gap-1.5 sm:gap-2">
             <NotificationBell portalContext="buyer" />

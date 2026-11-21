@@ -23,9 +23,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const productUrl = `/products/${product.slug}`;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group relative border border-[#eff4ff]">
+    <div className="bg-white rounded-xl shadow-sm p-2.5 sm:p-4 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group relative border border-[#eff4ff]">
       {/* Product Image viewport */}
-      <div className="relative w-full aspect-square rounded-lg bg-[#eff4ff] overflow-hidden mb-3 p-4 flex items-center justify-center group/img">
+      <div className="relative w-full aspect-square rounded-lg bg-[#eff4ff] overflow-hidden mb-2 sm:mb-3 p-2 sm:p-4 flex items-center justify-center group/img">
         <Link
           href={productUrl}
           className="absolute inset-0 flex items-center justify-center"
@@ -90,7 +90,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Title */}
         <Link
           href={productUrl}
-          className="text-sm font-semibold text-[#0b1c30] line-clamp-2 hover:text-[#0045cc] transition-colors mb-2 leading-snug"
+          className="text-xs sm:text-sm font-semibold text-[#0b1c30] line-clamp-2 hover:text-[#0045cc] transition-colors mb-1.5 sm:mb-2 leading-snug"
           title={product.title}
         >
           {product.title}
@@ -98,7 +98,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Spec tags */}
         {product.tags && product.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
+          <div className="hidden sm:flex flex-wrap gap-1 mb-3">
             {product.tags.slice(0, 3).map((tag, idx) => (
               <span
                 key={idx}
@@ -111,26 +111,26 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
 
         {/* Rating */}
-        <div className="flex items-center gap-1 text-xs text-[#434656] mt-auto mb-3">
-          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+        <div className="flex items-center gap-1 text-[11px] sm:text-xs text-[#434656] mt-auto mb-2 sm:mb-3">
+          <Star className="w-3 sm:w-3.5 h-3 sm:h-3.5 fill-amber-400 text-amber-400" />
           <span className="font-bold text-[#0b1c30]">{product.rating.toFixed(1)}</span>
-          <span className="text-[11px]">({product.reviewsCount})</span>
+          <span className="text-[10px] sm:text-[11px]">({product.reviewsCount})</span>
         </div>
 
         {/* Price & Action button */}
         <div className="pt-2 border-t border-[#eff4ff] flex items-center justify-between">
           <div className="flex flex-col">
-            <span className="text-base font-bold text-[#0b1c30] font-mono">
+            <span className="text-xs sm:text-base font-bold text-[#0b1c30] font-mono">
               {formattedPrice}
             </span>
             {formattedOriginalPrice && (
-              <span className="text-xs text-[#737688] line-through font-mono">
+              <span className="text-[10px] sm:text-xs text-[#737688] line-through font-mono">
                 {formattedOriginalPrice}
               </span>
             )}
           </div>
 
-          <span className="text-xs font-semibold text-[#0045cc] group-hover:underline flex items-center gap-0.5">
+          <span className="hidden sm:flex text-xs font-semibold text-[#0045cc] group-hover:underline items-center gap-0.5">
             Chi tiết
             <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </span>

@@ -11,9 +11,9 @@ export default function StorefrontLayout({
   return (
     <CartProvider>
       <ChatProvider>
-        <div className="min-h-screen flex flex-col bg-[#f8f9ff]">
+        <div className="min-h-screen flex flex-col bg-[#f8f9ff] overflow-x-hidden w-full max-w-full">
           <Header />
-          <main className="flex-1 flex flex-col pt-28">{children}</main>
+          <main className="flex-1 flex flex-col pt-32 sm:pt-28 pb-12 sm:pb-0">{children}</main>
           <Footer />
           <CartDrawer />
         </div>
