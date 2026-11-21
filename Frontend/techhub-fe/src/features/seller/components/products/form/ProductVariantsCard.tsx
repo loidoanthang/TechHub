@@ -236,8 +236,8 @@ export function ProductVariantsCard({
         )}
 
         {/* Variants Table */}
-        <div className="border border-slate-200 rounded-xl overflow-hidden">
-          <table className="w-full table-fixed text-left text-xs border-collapse">
+        <div className="border border-slate-200 rounded-xl overflow-x-auto no-scrollbar">
+          <table className="w-full min-w-[600px] table-fixed text-left text-xs border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold select-none">
                 <th

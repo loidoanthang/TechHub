@@ -244,7 +244,7 @@ export function PlatformVoucherModal({
                   : "Phát hành Voucher Toàn Sàn (TechHub Subsidized)"}
               </h2>
               <p className="text-[11px] text-slate-600">
-                Áp dụng toàn bộ gian hàng trên TechHub, ngân sách do Sàn tài trợ 100% (BR-16D).
+                Áp dụng toàn bộ gian hàng trên TechHub, ngân sách do Sàn tài trợ 100%.
               </p>
             </div>
           </div>

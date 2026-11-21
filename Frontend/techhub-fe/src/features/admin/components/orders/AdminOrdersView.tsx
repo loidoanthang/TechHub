@@ -13,6 +13,8 @@ import {
 import { useAdminOrdersQuery } from "../../hooks/useAdminOperations";
 import { AdminOrderDetailDrawer } from "./AdminOrderDetailDrawer";
 import { AdminTablePagination } from "../shared/AdminTablePagination";
+import { AdminOrderMobileCard } from "./AdminOrderMobileCard";
+import { ScrollableTabsWrapper } from "@/components/shared/ScrollableTabsWrapper";
 import { formatPrice } from "@/lib/utils";
 import type { OrderStatus } from "@/types/enums";
 
@@ -93,31 +95,33 @@ export function AdminOrdersView() {
       {/* Filter Bar */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-2xs flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 pb-2 border-b border-slate-100">
-          <div
-            role="tablist"
-            aria-label="Lọc đơn hàng theo trạng thái"
-            className="flex items-center gap-1.5 overflow-x-auto no-scrollbar"
-          >
-            {ORDER_STATUS_TABS.map((tab) => (
-              <button
-                key={tab.id || "ALL"}
-                type="button"
-                role="tab"
-                aria-selected={statusFilter === tab.id}
-                onClick={() => {
-                  setStatusFilter(tab.id);
-                  setPage(0);
-                }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer transition-colors duration-150 min-h-[34px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                  statusFilter === tab.id
-                    ? "bg-[#0045cc] text-white"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <ScrollableTabsWrapper className="w-full sm:w-auto">
+            <div
+              role="tablist"
+              aria-label="Lọc đơn hàng theo trạng thái"
+              className="flex items-center gap-1.5 overflow-x-auto no-scrollbar"
+            >
+              {ORDER_STATUS_TABS.map((tab) => (
+                <button
+                  key={tab.id || "ALL"}
+                  type="button"
+                  role="tab"
+                  aria-selected={statusFilter === tab.id}
+                  onClick={() => {
+                    setStatusFilter(tab.id);
+                    setPage(0);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer transition-colors duration-150 min-h-[34px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                    statusFilter === tab.id
+                      ? "bg-[#0045cc] text-white"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </ScrollableTabsWrapper>
 
           <AdminTablePagination
             variant="top-mini"
@@ -143,30 +147,36 @@ export function AdminOrdersView() {
               className="w-full h-10 pl-9 pr-4 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder:text-slate-500 focus:outline-none focus:border-primary"
             />
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <input
-              type="date"
-              value={startDate}
-              aria-label="Lọc đơn từ ngày"
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setPage(0);
-              }}
-              className="h-10 px-3 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white"
-            />
-            <span aria-hidden="true" className="text-xs text-slate-500">
+          <div className="grid grid-cols-2 gap-2 w-full md:w-auto md:flex md:items-center">
+            <div className="flex flex-col md:flex-row md:items-center gap-1">
+              <span className="text-[10px] text-slate-500 font-medium md:hidden">Từ ngày:</span>
+              <input
+                type="date"
+                value={startDate}
+                aria-label="Lọc đơn từ ngày"
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setPage(0);
+                }}
+                className="w-full md:w-auto h-10 px-3 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white"
+              />
+            </div>
+            <span aria-hidden="true" className="text-xs text-slate-400 hidden md:inline">
               →
             </span>
-            <input
-              type="date"
-              value={endDate}
-              aria-label="Lọc đơn đến ngày"
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                setPage(0);
-              }}
-              className="h-10 px-3 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white"
-            />
+            <div className="flex flex-col md:flex-row md:items-center gap-1">
+              <span className="text-[10px] text-slate-500 font-medium md:hidden">Đến ngày:</span>
+              <input
+                type="date"
+                value={endDate}
+                aria-label="Lọc đơn đến ngày"
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setPage(0);
+                }}
+                className="w-full md:w-auto h-10 px-3 rounded-xl border border-slate-200 text-xs text-slate-700 bg-white"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -199,7 +209,20 @@ export function AdminOrdersView() {
           {isFetching && (
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary-container z-10 animate-pulse motion-reduce:animate-none" />
           )}
-          <div className="overflow-x-auto no-scrollbar">
+
+          {/* Mobile Card View (< sm) */}
+          <div className="divide-y divide-slate-100 sm:hidden">
+            {orders.map((o) => (
+              <AdminOrderMobileCard
+                key={o.orderId}
+                order={o}
+                onViewDetails={setSelectedOrderId}
+              />
+            ))}
+          </div>
+
+          {/* Desktop Table (>= sm) */}
+          <div className="overflow-x-auto no-scrollbar hidden sm:block">
             <table className="w-full min-w-[860px] text-left text-xs border-collapse table-fixed">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                 <tr>

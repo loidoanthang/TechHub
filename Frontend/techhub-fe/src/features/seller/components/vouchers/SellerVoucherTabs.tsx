@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Search, Filter, Percent, Truck } from "lucide-react";
+import { ScrollableTabsWrapper } from "@/components/shared/ScrollableTabsWrapper";
 import type {
   VoucherStatus,
   DiscountType,
@@ -48,34 +49,36 @@ export function SellerVoucherTabs({
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl shadow-2xs overflow-hidden flex flex-col">
       {/* 1. Horizontal Status Tabs */}
-      <div className="flex items-center overflow-x-auto no-scrollbar border-b border-slate-100 px-3 pt-1">
-        {tabs.map((tab) => {
-          const isActive = currentStatus === tab.status;
-          return (
-            <button
-              key={tab.label}
-              type="button"
-              onClick={() => onStatusChange(tab.status)}
-              className={`flex items-center gap-2 px-3.5 py-3 text-xs font-semibold whitespace-nowrap border-b-2 transition-all cursor-pointer ${
-                isActive
-                  ? "border-[#0045cc] text-[#0045cc]"
-                  : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
-              }`}
-            >
-              <span>{tab.label}</span>
-              <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+      <ScrollableTabsWrapper>
+        <div className="flex items-center overflow-x-auto no-scrollbar border-b border-slate-100 px-3 pt-1">
+          {tabs.map((tab) => {
+            const isActive = currentStatus === tab.status;
+            return (
+              <button
+                key={tab.label}
+                type="button"
+                onClick={() => onStatusChange(tab.status)}
+                className={`flex items-center gap-2 px-3.5 py-3 text-xs font-semibold whitespace-nowrap border-b-2 transition-all cursor-pointer ${
                   isActive
-                    ? "bg-blue-50 text-[#0045cc]"
-                    : "bg-slate-100 text-slate-500"
+                    ? "border-[#0045cc] text-[#0045cc]"
+                    : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
                 }`}
               >
-                {tab.count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+                <span>{tab.label}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    isActive
+                      ? "bg-blue-50 text-[#0045cc]"
+                      : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </ScrollableTabsWrapper>
 
       {/* 2. Filter & Search Controls Bar */}
       <div className="p-3.5 flex flex-col md:flex-row items-center justify-between gap-3 bg-slate-50/40">

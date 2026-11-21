@@ -19,3 +19,21 @@ export const statusReasonSchema = z.object({
 });
 
 export type StatusReasonFormValues = z.infer<typeof statusReasonSchema>;
+
+export const adminCancelOrderSchema = z.object({
+  reasonCode: z.enum([
+    "SELLER_FORCE_MAJEURE",
+    "SELLER_OUT_OF_STOCK",
+    "BUYER_CHANGED_MIND",
+    "BUYER_INCORRECT_ADDRESS",
+    "BUYER_PAYMENT_ISSUE",
+    "OTHER",
+  ]),
+  reasonNote: z
+    .string()
+    .trim()
+    .max(500, "Ghi chú không được vượt quá 500 ký tự")
+    .optional(),
+});
+
+export type AdminCancelOrderFormValues = z.infer<typeof adminCancelOrderSchema>;

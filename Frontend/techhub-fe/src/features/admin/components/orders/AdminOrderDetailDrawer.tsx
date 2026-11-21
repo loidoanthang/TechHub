@@ -13,6 +13,7 @@ import {
   MapPin,
   CreditCard,
   XCircle,
+  Package,
 } from "lucide-react";
 import {
   useAdminOrderDetailQuery,
@@ -20,10 +21,11 @@ import {
 } from "../../hooks/useAdminOperations";
 import { useAdminDialogA11y } from "../../hooks/useAdminDialogA11y";
 import {
-  statusReasonSchema,
-  type StatusReasonFormValues,
+  adminCancelOrderSchema,
+  type AdminCancelOrderFormValues,
 } from "../../schemas/moderationSchema";
 import { formatPrice, getThumbnailUrl } from "@/lib/utils";
+import { ADMIN_CANCELLATION_REASONS } from "@/lib/constants";
 
 interface AdminOrderDetailDrawerProps {
   orderId: string | null;
@@ -56,14 +58,20 @@ export function AdminOrderDetailDrawer({
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<StatusReasonFormValues>({
-    resolver: zodResolver(statusReasonSchema),
-    defaultValues: { reason: "" },
+  } = useForm<AdminCancelOrderFormValues>({
+    resolver: zodResolver(adminCancelOrderSchema),
+    defaultValues: {
+      reasonCode: "SELLER_FORCE_MAJEURE",
+      reasonNote: "",
+    },
   });
 
   useEffect(() => {
     if (orderId) {
-      reset({ reason: "" });
+      reset({
+        reasonCode: "SELLER_FORCE_MAJEURE",
+        reasonNote: "",
+      });
     }
   }, [orderId, reset]);
 
@@ -71,17 +79,25 @@ export function AdminOrderDetailDrawer({
 
   const canCancel =
     order &&
-    !["COMPLETED", "CANCELLED", "REFUNDED", "RETURNED"].includes(order.status);
+    (order.availableActions?.length
+      ? order.availableActions.includes("FORCE_CANCEL")
+      : [
+          "PENDING_PAYMENT",
+          "PENDING_CONFIRMATION",
+          "CONFIRMED",
+          "PREPARING",
+          "WAITING_FOR_PICKUP",
+        ].includes(order.status));
 
-  const handleCancelSubmit = async (values: StatusReasonFormValues) => {
+  const handleCancelSubmit = async (values: AdminCancelOrderFormValues) => {
     if (!order) return;
     setActionError(null);
     try {
       await cancelMutation.mutateAsync({
         id: orderId,
         data: {
-          reasonCode: "KHAC",
-          note: values.reason.trim(),
+          reasonCode: values.reasonCode,
+          reasonNote: values.reasonNote?.trim() || undefined,
         },
       });
       onActionSuccess?.(
@@ -96,19 +112,21 @@ export function AdminOrderDetailDrawer({
     }
   };
 
+  const itemsList = order?.items || [];
+
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="admin-order-drawer-title"
-      className="fixed inset-0 z-50 flex justify-end"
+      className="fixed inset-0 z-50 flex justify-end overflow-hidden"
     >
       <div
         className="fixed inset-0 bg-slate-950/50"
         onClick={handleClose}
       />
 
-      <div className="relative z-10 w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 motion-reduce:animate-none">
+      <div className="relative z-10 w-full max-w-2xl bg-white h-screen max-h-screen shadow-2xl flex flex-col animate-in slide-in-from-right duration-200 motion-reduce:animate-none">
         {/* Header */}
         <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/70 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -137,8 +155,11 @@ export function AdminOrderDetailDrawer({
           </button>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 flex flex-col gap-5">
+        {/* Body (scrollable container) */}
+        <div
+          tabIndex={0}
+          className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6 flex flex-col gap-5 min-h-0 focus:outline-none"
+        >
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
               <Loader2 className="w-7 h-7 text-[#0045cc] animate-spin" />
@@ -167,17 +188,17 @@ export function AdminOrderDetailDrawer({
               )}
 
               {/* Shop & Buyer */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 shrink-0">
                 <div className="p-4 rounded-2xl border border-slate-200/80 flex flex-col gap-1.5 text-xs">
                   <span className="font-bold text-[#0b1c30] flex items-center gap-1.5 pb-1 border-b border-slate-100">
                     <Store className="w-3.5 h-3.5 text-[#0045cc]" />
                     Gian hàng Bán
                   </span>
                   <span className="font-bold text-slate-900">
-                    {order.shop.shopName}
+                    {order.shop?.shopName || "Không xác định"}
                   </span>
                   <span className="text-[11px] font-mono text-slate-500">
-                    {order.shop.sellerEmail}
+                    {order.shop?.sellerEmail || "Chưa có email"}
                   </span>
                 </div>
 
@@ -187,29 +208,32 @@ export function AdminOrderDetailDrawer({
                     Khách hàng Mua
                   </span>
                   <span className="font-bold text-slate-900">
-                    {order.buyer.buyerName}
+                    {order.buyer?.buyerName || "Khách mua"}
                   </span>
                   <span className="text-[11px] font-mono text-slate-500">
-                    {order.buyer.buyerEmail}
+                    {order.buyer?.buyerEmail || "Chưa có email"}
                   </span>
                 </div>
               </div>
 
               {/* Delivery & Payment */}
-              <div className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/70 flex flex-col gap-2 text-xs">
+              <div className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/70 flex flex-col gap-2 text-xs shrink-0">
                 <div className="flex items-start gap-2">
                   <MapPin className="w-4 h-4 text-[#0045cc] shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold text-slate-800">
                       {order.deliveryAddress?.recipientName ||
-                        order.buyer.recipientName}{" "}
+                        order.buyer?.recipientName ||
+                        "Người nhận"}{" "}
                       •{" "}
                       {order.deliveryAddress?.phone ||
-                        order.buyer.recipientPhone}
+                        order.buyer?.recipientPhone ||
+                        "Chưa có số ĐT"}
                     </span>
                     <p className="text-slate-600 mt-0.5">
                       {order.deliveryAddress?.fullAddress ||
-                        order.buyer.deliveryAddressSummary}
+                        order.buyer?.deliveryAddressSummary ||
+                        "Chưa có địa chỉ chi tiết"}
                     </p>
                   </div>
                 </div>
@@ -217,7 +241,9 @@ export function AdminOrderDetailDrawer({
                   <div className="flex items-center justify-between pt-2 border-t border-slate-200/60">
                     <span className="flex items-center gap-1.5 text-slate-600">
                       <CreditCard className="w-3.5 h-3.5" />
-                      {order.paymentInfo.paymentMethodName}
+                      {order.paymentInfo.paymentMethodName.includes("VNPAY")
+                        ? "Cổng thanh toán VNPAY"
+                        : order.paymentInfo.paymentMethodName}
                     </span>
                     <span className="font-bold text-[#0045cc]">
                       {order.paymentInfo.paymentStatusDescription}
@@ -226,53 +252,85 @@ export function AdminOrderDetailDrawer({
                 )}
               </div>
 
-              {/* Items */}
-              <div className="border border-slate-200 rounded-2xl overflow-hidden">
-                <div className="bg-slate-50 px-4 py-2.5 border-b border-slate-200 text-xs font-bold text-slate-700">
-                  Sản phẩm trong đơn ({order.items.length})
+              {/* Items in Order */}
+              <div className="border border-slate-200 rounded-2xl bg-white shadow-2xs shrink-0 flex flex-col">
+                <div className="bg-slate-50/90 px-4 py-2.5 border-b border-slate-200 flex items-center justify-between text-xs font-bold text-slate-700 rounded-t-2xl">
+                  <span className="flex items-center gap-1.5">
+                    <Package className="w-4 h-4 text-primary" />
+                    Sản phẩm trong đơn ({order.totalItemsCount || itemsList.length})
+                  </span>
+                  {itemsList.length > 0 && (
+                    <span className="text-[11px] font-normal text-slate-500">
+                      {itemsList.length} mặt hàng
+                    </span>
+                  )}
                 </div>
-                <div className="divide-y divide-slate-100">
-                  {order.items.map((item) => (
-                    <div
-                      key={item.orderItemId}
-                      className="p-3.5 flex items-center justify-between gap-3 text-xs"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-11 h-11 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
-                          {item.imageUrl && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={getThumbnailUrl(item.imageUrl, 120)}
-                              alt={item.productName}
-                              width={44}
-                              height={44}
-                              decoding="async"
-                              className="w-full h-full object-cover"
-                            />
-                          )}
+
+                {itemsList.length === 0 ? (
+                  <div className="p-6 text-center text-xs text-slate-500">
+                    Không có thông tin chi tiết sản phẩm.
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100">
+                    {itemsList.map((item, idx) => (
+                      <div
+                        key={item.orderItemId || `item-${idx}`}
+                        className="p-4 flex items-center justify-between gap-3 text-xs hover:bg-slate-50/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center text-slate-400">
+                            {item.imageUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={getThumbnailUrl(item.imageUrl, 120)}
+                                alt={item.productName || "Sản phẩm"}
+                                width={48}
+                                height={48}
+                                decoding="async"
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <Package className="w-5 h-5 text-slate-300" />
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-900 truncate" title={item.productName}>
+                              {item.productName || "Sản phẩm không có tên"}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-slate-500 mt-1">
+                              {item.variantName && (
+                                <span className="text-slate-700 font-medium">
+                                  {item.variantName}
+                                </span>
+                              )}
+                              {item.sku && <span>SKU: {item.sku}</span>}
+                              <span className="inline-flex items-center px-1.5 py-0.2 bg-slate-100 text-slate-800 rounded font-semibold text-[10px]">
+                                SL: x{item.quantity}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 mt-1">
+                              Đơn giá: {formatPrice(item.discountedUnitPrice || item.originalPrice || 0)}
+                            </div>
+                          </div>
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-bold text-slate-900 truncate">
-                            {item.productName}
-                          </p>
-                          <p className="text-[11px] text-slate-500">
-                            {item.variantName} • SKU: {item.sku} • SL:{" "}
-                            <strong>x{item.quantity}</strong>
-                          </p>
+                        <div className="text-right shrink-0">
+                          <span className="font-mono font-bold text-slate-900 block">
+                            {formatPrice(item.finalSubtotal || 0)}
+                          </span>
                         </div>
                       </div>
-                      <span className="font-mono font-bold text-slate-900 shrink-0">
-                        {formatPrice(item.finalSubtotal)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Financial Breakdown */}
-              <div className="p-4 rounded-2xl border border-slate-200 bg-white flex flex-col gap-2 text-xs">
+              <div className="p-4 rounded-2xl border border-slate-200 bg-white flex flex-col gap-2 text-xs shrink-0">
                 <span className="font-bold text-slate-800 border-b border-slate-100 pb-2">
-                  Chi tiết Tài chính & Đối soát (BR-16D)
+                  Chi tiết Tài chính &amp; Đối soát
                 </span>
                 <div className="flex justify-between text-slate-600">
                   <span>Tổng tiền hàng:</span>
@@ -322,34 +380,58 @@ export function AdminOrderDetailDrawer({
               {showCancelForm && (
                 <form
                   onSubmit={handleSubmit(handleCancelSubmit)}
-                  className="bg-rose-50/70 border border-rose-200 rounded-2xl p-4 flex flex-col gap-3"
+                  className="bg-rose-50/70 border border-rose-200 rounded-2xl p-4 flex flex-col gap-3 shrink-0"
                 >
-                  <label className="text-xs font-bold text-rose-900">
-                    Lý do Admin can thiệp hủy đơn (Bắt buộc) *
-                  </label>
-                  <textarea
-                    rows={3}
-                    {...register("reason")}
-                    placeholder="VD: Người bán không giao hàng quá hạn, xử lý khiếu nại hoàn tiền cho người mua..."
-                    className="w-full p-3 rounded-xl border border-rose-300 bg-white text-xs text-slate-800 focus:outline-none"
-                  />
-                  {errors.reason && (
-                    <p className="text-[11px] text-rose-600 font-medium">
-                      {errors.reason.message}
-                    </p>
-                  )}
-                  <div className="flex justify-end gap-2">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-rose-900">
+                      Lý do Quản trị viên hủy đơn (Bắt buộc) *
+                    </label>
+                    <select
+                      {...register("reasonCode")}
+                      className="w-full p-2.5 rounded-xl border border-rose-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-rose-500 font-medium"
+                    >
+                      {ADMIN_CANCELLATION_REASONS.map((reason) => (
+                        <option key={reason.code} value={reason.code}>
+                          {reason.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.reasonCode && (
+                      <p className="text-[11px] text-rose-600 font-medium">
+                        {errors.reasonCode.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-bold text-rose-900">
+                      Ghi chú / Căn cứ phân xử chi tiết
+                    </label>
+                    <textarea
+                      rows={3}
+                      {...register("reasonNote")}
+                      placeholder="VD: Cửa hàng xác nhận quá hạn không giao hàng; Giải quyết khiếu nại hoàn tiền cho người mua..."
+                      className="w-full p-3 rounded-xl border border-rose-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                    />
+                    {errors.reasonNote && (
+                      <p className="text-[11px] text-rose-600 font-medium">
+                        {errors.reasonNote.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-1">
                     <button
                       type="button"
                       onClick={() => setShowCancelForm(false)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 cursor-pointer hover:bg-slate-200/50"
                     >
                       Đóng
                     </button>
                     <button
                       type="submit"
                       disabled={cancelMutation.isPending}
-                      className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
                     >
                       {cancelMutation.isPending && (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />

@@ -402,6 +402,7 @@ export function OrdersListView() {
           orderNumber={returnTargetOrder.orderNumber}
           shopName={returnTargetOrder.shopName}
           totalAmount={returnTargetOrder.totalAmount}
+          paymentMethod={returnTargetOrder.paymentMethod}
           isOpen={Boolean(returnTargetOrder)}
           onClose={() => setReturnTargetOrder(null)}
           onSuccess={() => {

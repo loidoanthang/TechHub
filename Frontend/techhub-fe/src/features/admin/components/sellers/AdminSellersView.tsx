@@ -20,6 +20,9 @@ import {
 import { SellerDetailDrawer } from "./SellerDetailDrawer";
 import { ShopDetailDrawer } from "./ShopDetailDrawer";
 import { AdminTablePagination } from "../shared/AdminTablePagination";
+import { AdminSellerMobileCard } from "./AdminSellerMobileCard";
+import { AdminShopMobileCard } from "./AdminShopMobileCard";
+import { ScrollableTabsWrapper } from "@/components/shared/ScrollableTabsWrapper";
 import { formatPrice } from "@/lib/utils";
 import type { SellerVerificationStatus, ShopStatus } from "@/types/enums";
 
@@ -113,47 +116,49 @@ export function AdminSellersView() {
       <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-2xs flex flex-col gap-3">
         {/* Top-level Tabs & Mini-Pagination */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 border-b border-slate-100 pb-2.5">
-          <div
-            role="tablist"
-            aria-label="Quản lý đối tác Seller và Gian hàng"
-            className="flex items-center gap-2 overflow-x-auto no-scrollbar"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mainTab === "APPLICATIONS"}
-              onClick={() => {
-                setMainTab("APPLICATIONS");
-                setPage(0);
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors duration-150 whitespace-nowrap cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                mainTab === "APPLICATIONS"
-                  ? "bg-[#0045cc] text-white"
-                  : "text-slate-600 hover:bg-slate-100"
-              }`}
+          <ScrollableTabsWrapper className="w-full sm:w-auto">
+            <div
+              role="tablist"
+              aria-label="Quản lý đối tác Seller và Gian hàng"
+              className="flex items-center gap-2 overflow-x-auto no-scrollbar"
             >
-              <UserCheck className="w-4 h-4" />
-              <span>Hồ sơ Đăng ký Seller</span>
-            </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mainTab === "APPLICATIONS"}
+                onClick={() => {
+                  setMainTab("APPLICATIONS");
+                  setPage(0);
+                }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors duration-150 whitespace-nowrap cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                  mainTab === "APPLICATIONS"
+                    ? "bg-[#0045cc] text-white"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                <UserCheck className="w-4 h-4" />
+                <span>Hồ sơ Đăng ký Seller</span>
+              </button>
 
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mainTab === "SHOPS"}
-              onClick={() => {
-                setMainTab("SHOPS");
-                setPage(0);
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors duration-150 whitespace-nowrap cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                mainTab === "SHOPS"
-                  ? "bg-[#0045cc] text-white"
-                  : "text-slate-600 hover:bg-slate-100"
-              }`}
-            >
-              <Store className="w-4 h-4" />
-              <span>Danh sách Gian hàng (Shops)</span>
-            </button>
-          </div>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mainTab === "SHOPS"}
+                onClick={() => {
+                  setMainTab("SHOPS");
+                  setPage(0);
+                }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-colors duration-150 whitespace-nowrap cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                  mainTab === "SHOPS"
+                    ? "bg-[#0045cc] text-white"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                <Store className="w-4 h-4" />
+                <span>Danh sách Gian hàng (Shops)</span>
+              </button>
+            </div>
+          </ScrollableTabsWrapper>
 
           <AdminTablePagination
             variant="top-mini"
@@ -253,8 +258,21 @@ export function AdminSellersView() {
               Không có hồ sơ đăng ký Seller nào phù hợp bộ lọc.
             </div>
           ) : (
-            <div className="overflow-x-auto no-scrollbar">
-              <table className="w-full min-w-[780px] text-left text-xs border-collapse table-fixed">
+            <>
+              {/* Mobile Card List (< sm) */}
+              <div className="divide-y divide-slate-100 sm:hidden">
+                {(sellersQuery.data?.content || []).map((s) => (
+                  <AdminSellerMobileCard
+                    key={s.id}
+                    seller={s}
+                    onInspect={setSelectedSellerId}
+                  />
+                ))}
+              </div>
+
+              {/* Desktop Table (>= sm) */}
+              <div className="overflow-x-auto no-scrollbar hidden sm:block">
+                <table className="w-full min-w-[780px] text-left text-xs border-collapse table-fixed">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                   <tr>
                     <th className="py-2.5 px-4 w-[24%]">Gian hàng / Slug</th>
@@ -319,6 +337,7 @@ export function AdminSellersView() {
                 </tbody>
               </table>
             </div>
+          </>
           )}
 
           {/* Bottom Pagination */}
@@ -341,8 +360,21 @@ export function AdminSellersView() {
               Không tìm thấy gian hàng nào phù hợp.
             </div>
           ) : (
-            <div className="overflow-x-auto no-scrollbar">
-              <table className="w-full min-w-[800px] text-left text-xs border-collapse table-fixed">
+            <>
+              {/* Mobile Card List (< sm) */}
+              <div className="divide-y divide-slate-100 sm:hidden">
+                {(shopsQuery.data?.content || []).map((shop) => (
+                  <AdminShopMobileCard
+                    key={shop.id}
+                    shop={shop}
+                    onManage={setSelectedShopId}
+                  />
+                ))}
+              </div>
+
+              {/* Desktop Table (>= sm) */}
+              <div className="overflow-x-auto no-scrollbar hidden sm:block">
+                <table className="w-full min-w-[800px] text-left text-xs border-collapse table-fixed">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                   <tr>
                     <th className="py-2.5 px-4 w-[28%]">Gian hàng</th>
@@ -408,6 +440,7 @@ export function AdminSellersView() {
                 </tbody>
               </table>
             </div>
+          </>
           )}
 
           {/* Bottom Pagination */}

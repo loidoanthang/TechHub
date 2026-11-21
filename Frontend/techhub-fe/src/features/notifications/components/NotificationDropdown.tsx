@@ -123,7 +123,7 @@ export function NotificationDropdown({
   return (
     <div
       ref={dropdownRef}
-      className="fixed inset-x-2 top-28 sm:inset-auto sm:right-0 sm:top-full sm:mt-2 w-auto sm:w-[420px] max-w-[420px] bg-white rounded-2xl shadow-xl border border-slate-200/80 z-50 overflow-visible flex flex-col animate-in fade-in-0 zoom-in-95 duration-150"
+      className="fixed inset-x-2 top-28 sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 w-auto sm:w-[420px] max-w-[420px] bg-white rounded-2xl shadow-xl border border-slate-200/80 z-50 overflow-visible flex flex-col animate-in fade-in-0 zoom-in-95 duration-150"
       style={{ maxHeight: "calc(100vh - 120px)" }}
     >
       {/* Top arrow caret pointing to Bell on Desktop */}

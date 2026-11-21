@@ -21,14 +21,14 @@ const ROUTE_STRATEGIES: Record<PortalContext, Record<string, RouteResolver>> = {
     PRODUCT: () => ROUTES.SELLER.PRODUCTS,
     REVIEW: () => ROUTES.SELLER.REVIEWS,
     SHOP: () => ROUTES.SELLER.SETTINGS,
-    PROMOTION: () => ROUTES.PRODUCTS,
+    PROMOTION: () => ROUTES.SELLER.VOUCHERS,
   },
   admin: {
     ORDER: () => ROUTES.ADMIN.ORDERS,
-    PRODUCT: (id) => (id ? `${ROUTES.PRODUCTS}/${id}` : ROUTES.PRODUCTS),
+    PRODUCT: () => ROUTES.ADMIN.PRODUCTS,
     REVIEW: () => ROUTES.ADMIN.DASHBOARD,
     SHOP: (id) => (id ? `${ROUTES.ADMIN.SELLERS}/${id}` : ROUTES.ADMIN.SELLERS),
-    PROMOTION: () => ROUTES.PRODUCTS,
+    PROMOTION: () => ROUTES.ADMIN.FINANCE,
   },
   buyer: {
     ORDER: (id) => (id ? `${ROUTES.ACCOUNT.ORDERS}/${id}` : ROUTES.ACCOUNT.ORDERS),

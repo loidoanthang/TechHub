@@ -124,7 +124,86 @@ export function TransactionTable({
 
   return (
     <div className="bg-white rounded-2xl border border-[#eff4ff] shadow-xs overflow-hidden">
-      <div className="overflow-x-auto">
+      {/* Mobile Card View (< sm) */}
+      <div className="divide-y divide-slate-100 sm:hidden">
+        {transactions.map((tx) => {
+          const meta = TX_META[tx.type] || {
+            label: tx.type,
+            badgeClass: "bg-slate-100 text-slate-700 border-slate-200",
+            iconClass: "text-slate-500",
+            Icon: ReceiptText,
+            isCredit: tx.amount > 0,
+            isOrderLink: false,
+          };
+          const { Icon } = meta;
+
+          return (
+            <div key={tx.id} className="p-4 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span
+                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${meta.badgeClass}`}
+                >
+                  <Icon className={`w-3 h-3 ${meta.iconClass}`} />
+                  <span>{meta.label}</span>
+                </span>
+                <span
+                  className={`font-mono font-bold text-sm ${
+                    meta.isCredit ? "text-emerald-600" : "text-rose-600"
+                  }`}
+                >
+                  {meta.isCredit ? "+" : "-"} {formatPrice(Math.abs(tx.amount))}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <span className="font-mono text-[11px]">
+                  {formatTransactionDate(tx.createdAt)}
+                </span>
+                <span className="font-medium text-slate-700">
+                  Dư: <strong className="font-mono">{formatPrice(tx.balanceAfter)}</strong>
+                </span>
+              </div>
+
+              {tx.description && (
+                <p className="text-xs text-slate-600 line-clamp-2">
+                  {tx.description}
+                </p>
+              )}
+
+              {tx.referenceId && (
+                <div className="pt-1 flex items-center justify-between text-[11px] border-t border-slate-50">
+                  <span className="text-slate-400">Tham chiếu:</span>
+                  {meta.isOrderLink ? (
+                    <Link
+                      href={ROUTES.SELLER.ORDER_DETAIL(tx.referenceId)}
+                      className="inline-flex items-center gap-1 text-[#0045cc] font-mono font-bold hover:underline"
+                    >
+                      <span>#{tx.referenceId.slice(0, 8)}...</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(tx.referenceId!, "mã tham chiếu")}
+                      className="inline-flex items-center gap-1 font-mono text-slate-500 hover:text-slate-900"
+                    >
+                      <span>#{tx.referenceId.slice(0, 8)}...</span>
+                      {copiedId === tx.referenceId ? (
+                        <Check className="w-3 h-3 text-emerald-600" />
+                      ) : (
+                        <Copy className="w-3 h-3 text-slate-400" />
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop Table (>= sm) */}
+      <div className="overflow-x-auto hidden sm:block">
         <table className="w-full text-left text-xs">
           <thead className="bg-slate-50/75 border-b border-slate-100 text-slate-500 font-semibold uppercase tracking-wider">
             <tr>

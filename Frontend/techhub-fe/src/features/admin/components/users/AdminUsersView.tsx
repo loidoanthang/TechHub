@@ -17,6 +17,7 @@ import {
 import { useAdminUsersQuery } from "../../hooks/useAdminOperations";
 import { UserStatusModal } from "./UserStatusModal";
 import { AdminTablePagination } from "../shared/AdminTablePagination";
+import { AdminUserMobileCard } from "./AdminUserMobileCard";
 import type { AdminUserResponse } from "@/types/admin";
 import type { UserStatus } from "@/types/enums";
 
@@ -170,7 +171,22 @@ export function AdminUsersView() {
           {isFetching && (
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary-container z-10 animate-pulse motion-reduce:animate-none" />
           )}
-          <div className="overflow-x-auto no-scrollbar">
+
+          {/* Mobile Card View (< sm) */}
+          <div className="divide-y divide-slate-100 sm:hidden">
+            {users.map((u) => (
+              <AdminUserMobileCard
+                key={u.id}
+                user={u}
+                onUpdateStatus={(user, targetStatus) =>
+                  setModalState({ user, targetStatus })
+                }
+              />
+            ))}
+          </div>
+
+          {/* Desktop Table (>= sm) */}
+          <div className="overflow-x-auto no-scrollbar hidden sm:block">
             <table className="w-full min-w-[820px] text-left text-xs border-collapse table-fixed">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                 <tr>

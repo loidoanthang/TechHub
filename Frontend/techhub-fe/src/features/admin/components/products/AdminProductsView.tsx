@@ -16,6 +16,8 @@ import { useAdminProductsQuery } from "../../hooks/useAdminModeration";
 import { useAdminCategoriesQuery } from "../../hooks/useAdminOperations";
 import { ProductModerationDrawer } from "./ProductModerationDrawer";
 import { AdminTablePagination } from "../shared/AdminTablePagination";
+import { AdminProductMobileCard } from "./AdminProductMobileCard";
+import { ScrollableTabsWrapper } from "@/components/shared/ScrollableTabsWrapper";
 import { formatPrice, getThumbnailUrl } from "@/lib/utils";
 import type { ProductApprovalStatus } from "@/types/enums";
 
@@ -106,31 +108,33 @@ export function AdminProductsView() {
       <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-2xs flex flex-col gap-3">
         {/* Tabs & Top Mini-Pagination */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 pb-2 border-b border-slate-100">
-          <div
-            role="tablist"
-            aria-label="Lọc sản phẩm theo trạng thái duyệt"
-            className="flex items-center gap-1.5 overflow-x-auto no-scrollbar"
-          >
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                role="tab"
-                aria-selected={activeTab === t.id}
-                onClick={() => {
-                  setActiveTab(t.id);
-                  setPage(0);
-                }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer min-h-[34px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                  activeTab === t.id
-                    ? "bg-[#0045cc] text-white"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+          <ScrollableTabsWrapper className="w-full sm:w-auto">
+            <div
+              role="tablist"
+              aria-label="Lọc sản phẩm theo trạng thái duyệt"
+              className="flex items-center gap-1.5 overflow-x-auto no-scrollbar"
+            >
+              {TABS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === t.id}
+                  onClick={() => {
+                    setActiveTab(t.id);
+                    setPage(0);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer min-h-[34px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                    activeTab === t.id
+                      ? "bg-[#0045cc] text-white"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </ScrollableTabsWrapper>
 
           <AdminTablePagination
             variant="top-mini"
@@ -214,7 +218,20 @@ export function AdminProductsView() {
           {isFetching && (
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary-container z-10 animate-pulse motion-reduce:animate-none" />
           )}
-          <div className="overflow-x-auto no-scrollbar">
+
+          {/* Mobile Card View (< sm) */}
+          <div className="divide-y divide-slate-100 sm:hidden">
+            {products.map((p) => (
+              <AdminProductMobileCard
+                key={p.id}
+                product={p}
+                onModerate={setSelectedProductId}
+              />
+            ))}
+          </div>
+
+          {/* Desktop Table (>= sm) */}
+          <div className="overflow-x-auto no-scrollbar hidden sm:block">
             <table className="w-full min-w-[820px] text-left text-xs border-collapse table-fixed">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                 <tr>

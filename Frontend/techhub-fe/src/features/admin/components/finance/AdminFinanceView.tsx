@@ -33,6 +33,9 @@ import {
 } from "../../schemas/moderationSchema";
 import { PlatformVoucherModal } from "./PlatformVoucherModal";
 import { AdminTablePagination } from "../shared/AdminTablePagination";
+import { AdminVoucherMobileCard } from "./AdminVoucherMobileCard";
+import { AdminPayoutMobileCard } from "./AdminPayoutMobileCard";
+import { ScrollableTabsWrapper } from "@/components/shared/ScrollableTabsWrapper";
 import { formatPrice } from "@/lib/utils";
 import type { AdminPayoutResponse, AdminVoucherResponse } from "@/types/adminFinance";
 import type { PayoutStatus, VoucherType } from "@/types/enums";
@@ -234,47 +237,49 @@ export function AdminFinanceView() {
       {/* Tabs & Filters */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-2xs flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 border-b border-slate-100 pb-2.5">
-          <div
-            role="tablist"
-            aria-label="Phân mục Tài chính & Voucher"
-            className="flex items-center gap-2 overflow-x-auto no-scrollbar"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === "VOUCHERS"}
-              onClick={() => {
-                setActiveTab("VOUCHERS");
-                setPage(0);
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                activeTab === "VOUCHERS"
-                  ? "bg-[#0045cc] text-white"
-                  : "text-slate-600 hover:bg-slate-100"
-              }`}
+          <ScrollableTabsWrapper className="w-full sm:w-auto">
+            <div
+              role="tablist"
+              aria-label="Phân mục Tài chính & Voucher"
+              className="flex items-center gap-2 overflow-x-auto no-scrollbar"
             >
-              <Ticket className="w-4 h-4" />
-              <span>Mã Giảm Giá Toàn Sàn</span>
-            </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "VOUCHERS"}
+                onClick={() => {
+                  setActiveTab("VOUCHERS");
+                  setPage(0);
+                }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                  activeTab === "VOUCHERS"
+                    ? "bg-[#0045cc] text-white"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                <Ticket className="w-4 h-4" />
+                <span>Mã Giảm Giá Toàn Sàn</span>
+              </button>
 
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeTab === "PAYOUTS"}
-              onClick={() => {
-                setActiveTab("PAYOUTS");
-                setPage(0);
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                activeTab === "PAYOUTS"
-                  ? "bg-[#0045cc] text-white"
-                  : "text-slate-600 hover:bg-slate-100"
-              }`}
-            >
-              <Landmark className="w-4 h-4" />
-              <span>Yêu cầu Rút tiền (Payouts)</span>
-            </button>
-          </div>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === "PAYOUTS"}
+                onClick={() => {
+                  setActiveTab("PAYOUTS");
+                  setPage(0);
+                }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 whitespace-nowrap cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                  activeTab === "PAYOUTS"
+                    ? "bg-[#0045cc] text-white"
+                    : "text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                <Landmark className="w-4 h-4" />
+                <span>Yêu cầu Rút tiền (Payouts)</span>
+              </button>
+            </div>
+          </ScrollableTabsWrapper>
 
           <AdminTablePagination
             variant="top-mini"
@@ -366,8 +371,32 @@ export function AdminFinanceView() {
               Chưa có mã giảm giá nào phù hợp.
             </div>
           ) : (
-            <div className="overflow-x-auto no-scrollbar">
-              <table className="w-full min-w-[820px] text-left text-xs border-collapse table-fixed">
+            <>
+              {/* Mobile Card List (< sm) */}
+              <div className="divide-y divide-slate-100 sm:hidden">
+                {(vouchersQuery.data?.content || []).map((v) => (
+                  <AdminVoucherMobileCard
+                    key={v.id}
+                    voucher={v}
+                    onEdit={(voucher) => {
+                      setEditingVoucher(voucher);
+                      setVoucherModalOpen(true);
+                    }}
+                    onDelete={(voucher) =>
+                      setConfirmAction({
+                        type: "DELETE_VOUCHER",
+                        voucher,
+                      })
+                    }
+                    onToggleStatus={handleToggleVoucher}
+                    isUpdatingStatus={toggleVoucherStatusMutation.isPending}
+                  />
+                ))}
+              </div>
+
+              {/* Desktop Table (>= sm) */}
+              <div className="overflow-x-auto no-scrollbar hidden sm:block">
+                <table className="w-full min-w-[820px] text-left text-xs border-collapse table-fixed">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                   <tr>
                     <th className="py-2.5 px-4 w-[24%]">Mã / Chương trình</th>
@@ -467,6 +496,7 @@ export function AdminFinanceView() {
                 </tbody>
               </table>
             </div>
+          </>
           )}
 
           {/* Bottom Pagination */}
@@ -489,8 +519,28 @@ export function AdminFinanceView() {
               Không có yêu cầu rút tiền (Payout) nào phù hợp bộ lọc.
             </div>
           ) : (
-            <div className="overflow-x-auto no-scrollbar">
-              <table className="w-full min-w-[820px] text-left text-xs border-collapse table-fixed">
+            <>
+              {/* Mobile Card List (< sm) */}
+              <div className="divide-y divide-slate-100 sm:hidden">
+                {(payoutsQuery.data?.content || []).map((p) => (
+                  <AdminPayoutMobileCard
+                    key={p.id}
+                    payout={p}
+                    onApprove={(payout) =>
+                      setConfirmAction({
+                        type: "APPROVE_PAYOUT",
+                        payout,
+                      })
+                    }
+                    onReject={setRejectingPayout}
+                    isProcessing={processPayoutMutation.isPending}
+                  />
+                ))}
+              </div>
+
+              {/* Desktop Table (>= sm) */}
+              <div className="overflow-x-auto no-scrollbar hidden sm:block">
+                <table className="w-full min-w-[820px] text-left text-xs border-collapse table-fixed">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                   <tr>
                     <th className="py-2.5 px-4 w-[22%]">Gian hàng / Seller</th>
@@ -576,6 +626,7 @@ export function AdminFinanceView() {
                 </tbody>
               </table>
             </div>
+          </>
           )}
 
           {/* Bottom Pagination */}
