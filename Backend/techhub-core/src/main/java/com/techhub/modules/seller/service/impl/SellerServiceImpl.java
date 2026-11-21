@@ -150,9 +150,6 @@ public class SellerServiceImpl implements SellerService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         validateUserActiveAndNonLocked(user);
-        if (user.getStatus() == UserStatus.SUSPENDED) {
-            throw new BusinessException(ErrorCode.ACCOUNT_SUSPENDED);
-        }
 
         Optional<Seller> sellerOpt = sellerRepository.findByUserId(user.getId());
         if (sellerOpt.isEmpty()) {

@@ -620,15 +620,16 @@ class SellerServiceImplTest {
     }
 
     @Test
-    @DisplayName("getVerificationStatus: User bị SUSPENDED -> ném ACCOUNT_SUSPENDED (HTTP 403)")
-    void getVerificationStatus_UserSuspended_ThrowsException() {
+    @DisplayName("getVerificationStatus: User bị SUSPENDED -> Thành công (Read-only BR-28)")
+    void getVerificationStatus_UserSuspended_Succeeds() {
         sampleUser.setStatus(UserStatus.SUSPENDED);
         when(userRepository.findById(sampleUser.getId())).thenReturn(Optional.of(sampleUser));
+        when(sellerRepository.findByUserId(sampleUser.getId())).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class, () ->
-                sellerService.getVerificationStatus());
+        SellerVerificationStatusResponse response = sellerService.getVerificationStatus();
 
-        assertEquals(ErrorCode.ACCOUNT_SUSPENDED, ex.getErrorCode());
+        assertNotNull(response);
+        assertFalse(response.hasApplied());
     }
 
     @Test

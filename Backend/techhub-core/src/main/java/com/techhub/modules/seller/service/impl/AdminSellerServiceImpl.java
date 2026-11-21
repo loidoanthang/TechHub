@@ -237,6 +237,12 @@ public class AdminSellerServiceImpl implements AdminSellerService {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 
+        if (request.status() == SellerVerificationStatus.APPROVED && user.getStatus() != UserStatus.ACTIVE) {
+            log.warn("Cannot approve seller {}: user {} is in status {}",
+                    seller.getId(), user.getId(), user.getStatus());
+            throw new BusinessException(ErrorCode.USER_NOT_ACTIVE);
+        }
+
         Shop shop = shopRepository.findBySellerId(seller.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SHOP_NOT_FOUND));
 
