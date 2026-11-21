@@ -1,4 +1,5 @@
 import type {
+  CancellationReasonCode,
   DashboardPeriod,
   OrderStatus,
   PaymentMethod,
@@ -384,8 +385,8 @@ export interface AdminOrderDetailResponse {
 }
 
 export interface AdminCancelOrderRequest {
-  reasonCode?: string;
-  note: string;
+  reasonCode: CancellationReasonCode;
+  reasonNote?: string;
 }
 
 export interface AdminOrdersQueryParams {

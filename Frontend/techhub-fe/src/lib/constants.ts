@@ -282,3 +282,30 @@ export const SELLER_CANCELLATION_REASONS: CancellationReasonOption[] = [
     label: "Lý do khác",
   },
 ];
+
+export const ADMIN_CANCELLATION_REASONS: CancellationReasonOption[] = [
+  {
+    code: "SELLER_FORCE_MAJEURE",
+    label: "Người bán vi phạm quy định / Sự cố vận hành gian hàng",
+  },
+  {
+    code: "SELLER_OUT_OF_STOCK",
+    label: "Người bán hết hàng / Không thể bàn giao sản phẩm",
+  },
+  {
+    code: "BUYER_CHANGED_MIND",
+    label: "Theo yêu cầu giải quyết tranh chấp cho Người mua",
+  },
+  {
+    code: "BUYER_INCORRECT_ADDRESS",
+    label: "Địa chỉ nhận hàng không hợp lệ / Gian lận thông tin",
+  },
+  {
+    code: "BUYER_PAYMENT_ISSUE",
+    label: "Sự cố giao dịch thanh toán / Gian lận tài chính",
+  },
+  {
+    code: "OTHER",
+    label: "Quyết định can thiệp khác của Quản trị viên",
+  },
+];
