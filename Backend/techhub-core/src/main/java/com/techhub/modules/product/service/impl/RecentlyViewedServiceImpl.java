@@ -121,6 +121,7 @@ public class RecentlyViewedServiceImpl implements RecentlyViewedService {
             }
 
             String coverImageUrl = imageMap.get(pId);
+            String shopName = product.getShop() != null ? product.getShop().getName() : null;
             boolean isShopPaused = product.getShop() != null && product.getShop().getStatus() == ShopStatus.PAUSED;
 
             return RecentlyViewedResponse.builder()
@@ -130,6 +131,7 @@ public class RecentlyViewedServiceImpl implements RecentlyViewedService {
                     .slug(product.getSlug())
                     .coverImageUrl(coverImageUrl)
                     .minPrice(minPrice)
+                    .shopName(shopName)
                     .inStock(inStock)
                     .isShopPaused(isShopPaused)
                     .viewedAt(item.getViewedAt())

@@ -4,6 +4,7 @@ import type { ApiResponse, PageResponse } from "@/types/api";
 import type {
   ProductSummaryResponse,
   PublicProductDetailResponse,
+  RecentlyViewedResponse,
 } from "@/types/product";
 import type {
   CategorySummaryResponse,
@@ -68,5 +69,19 @@ export const productApi = {
     appliesTo?: string;
   }): Promise<ApiResponse<unknown>> => {
     return apiClient.get(API_ENDPOINTS.VOUCHERS.PLATFORM, { params });
+  },
+
+  recordProductView: (id: string): Promise<ApiResponse<void>> => {
+    return apiClient.post(API_ENDPOINTS.PRODUCTS.RECORD_VIEW(id));
+  },
+
+  getRecentlyViewed: (): Promise<ApiResponse<RecentlyViewedResponse[]>> => {
+    return apiClient.get(API_ENDPOINTS.PRODUCTS.RECENTLY_VIEWED);
+  },
+
+  getSimilarProducts: (
+    id: string
+  ): Promise<ApiResponse<ProductSummaryResponse[]>> => {
+    return apiClient.get(API_ENDPOINTS.PRODUCTS.SIMILAR(id));
   },
 };

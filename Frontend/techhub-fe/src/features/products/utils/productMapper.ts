@@ -1,6 +1,7 @@
 import type {
   ProductSummaryResponse,
   PublicProductDetailResponse,
+  RecentlyViewedResponse,
   Product,
 } from "@/types/product";
 import type {
@@ -10,8 +11,38 @@ import type {
   ProductSpec,
 } from "@/types/productDetail";
 
-export function mapProductSummaryToProduct(summary: ProductSummaryResponse): Product {
+export interface CreateCardFallbackProductOptions {
+  id: string;
+  slug?: string;
+  title: string;
+  price: number;
+  vendorName: string;
+  vendorSlug?: string;
+  isVerifiedVendor: boolean;
+  imageUrl: string;
+  inStock: boolean;
+  rating?: number;
+  reviewsCount?: number;
+}
+
+export function createCardFallbackProduct(opts: CreateCardFallbackProductOptions): Product {
   return {
+    id: opts.id,
+    slug: opts.slug,
+    title: opts.title,
+    price: opts.price,
+    vendorName: opts.vendorName,
+    vendorSlug: opts.vendorSlug,
+    isVerifiedVendor: opts.isVerifiedVendor,
+    imageUrl: opts.imageUrl,
+    rating: opts.rating ?? 5.0,
+    reviewsCount: opts.reviewsCount ?? 0,
+    inStock: opts.inStock,
+  };
+}
+
+export function mapProductSummaryToProduct(summary: ProductSummaryResponse): Product {
+  return createCardFallbackProduct({
     id: summary.id,
     slug: summary.slug,
     title: summary.name,
@@ -20,10 +51,22 @@ export function mapProductSummaryToProduct(summary: ProductSummaryResponse): Pro
     vendorSlug: summary.sellerName,
     isVerifiedVendor: !summary.isShopPaused,
     imageUrl: summary.coverImageUrl || "",
-    rating: 5.0,
-    reviewsCount: 0,
-    inStock: summary.inStock,
-  };
+    inStock: Boolean(summary.inStock),
+  });
+}
+
+export function mapRecentlyViewedToProduct(item: RecentlyViewedResponse): Product {
+  const shopName = item.shopName?.trim() || "";
+  return createCardFallbackProduct({
+    id: item.productId,
+    slug: item.slug,
+    title: item.productName,
+    price: Number(item.minPrice),
+    vendorName: shopName,
+    isVerifiedVendor: Boolean(shopName && !item.isShopPaused),
+    imageUrl: item.coverImageUrl || "",
+    inStock: Boolean(item.inStock),
+  });
 }
 
 export function mapPublicDetailToProductDetailData(

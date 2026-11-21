@@ -118,19 +118,19 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Price & Action button */}
-        <div className="pt-2 border-t border-[#eff4ff] flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-xs sm:text-base font-bold text-[#0b1c30] font-mono">
+        <div className="pt-2 border-t border-[#eff4ff] flex items-center justify-between gap-2">
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm sm:text-base font-bold text-[#0b1c30] font-mono truncate">
               {formattedPrice}
             </span>
             {formattedOriginalPrice && (
-              <span className="text-[10px] sm:text-xs text-[#737688] line-through font-mono">
+              <span className="text-[10px] sm:text-xs text-[#737688] line-through font-mono truncate">
                 {formattedOriginalPrice}
               </span>
             )}
           </div>
 
-          <span className="hidden sm:flex text-xs font-semibold text-[#0045cc] group-hover:underline items-center gap-0.5">
+          <span className="text-xs font-semibold text-[#0045cc] group-hover:underline flex items-center gap-0.5 shrink-0 whitespace-nowrap">
             Chi tiết
             <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </span>

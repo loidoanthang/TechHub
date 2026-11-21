@@ -149,3 +149,24 @@ export function useUpdateProductMutation() {
     },
   });
 }
+
+/**
+ * Hook xóa biến thể sản phẩm (DELETE /api/seller/products/{productId}/variants/{variantId})
+ */
+export function useDeleteProductVariantMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      productId,
+      variantId,
+    }: {
+      productId: string;
+      variantId: string;
+    }) => sellerProductApi.deleteVariant(productId, variantId),
+    onSuccess: (_, { productId }) => {
+      queryClient.invalidateQueries({ queryKey: SELLER_PRODUCT_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: SELLER_PRODUCT_KEYS.detail(productId) });
+    },
+  });
+}
+

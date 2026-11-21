@@ -51,6 +51,9 @@ export const API_ENDPOINTS = {
   PRODUCTS: {
     BASE: "/api/products",
     BY_SLUG: (slug: string) => `/api/products/${slug}`,
+    RECORD_VIEW: (id: string) => `/api/products/${id}/view`,
+    RECENTLY_VIEWED: "/api/products/recently-viewed",
+    SIMILAR: (id: string) => `/api/products/${id}/similar`,
   },
   CART: {
     BASE: "/api/cart",
@@ -70,6 +73,7 @@ export const API_ENDPOINTS = {
     ORDER_DETAIL: (id: string) => `/api/orders/${id}`,
     ORDER_COMPLETE: (id: string) => `/api/orders/${id}/complete`,
     ORDER_CANCEL: (id: string) => `/api/orders/${id}/cancel`,
+    ORDER_REORDER: (id: string) => `/api/orders/${id}/reorder`,
     ORDER_CANCELLATION_REQ: (id: string) => `/api/orders/${id}/cancellation-request`,
     ORDER_RETURN_REQ: (id: string) => `/api/orders/${id}/return-request`,
     RETURN_REQUESTS: "/api/return-requests",
@@ -92,6 +96,8 @@ export const API_ENDPOINTS = {
     PRODUCTS: "/api/seller/products",
     PRODUCT_DETAIL: (id: string) => `/api/seller/products/${id}`,
     PRODUCT_VARIANTS: (id: string) => `/api/seller/products/${id}/variants`,
+    PRODUCT_VARIANT_DETAIL: (productId: string, variantId: string) =>
+      `/api/seller/products/${productId}/variants/${variantId}`,
     SUBMIT_APPROVAL: (id: string) => `/api/seller/products/${id}/submit-approval`,
     VISIBILITY: (id: string) => `/api/seller/products/${id}/visibility`,
     ORDERS: "/api/seller/orders",
@@ -178,6 +184,8 @@ export const API_ENDPOINTS = {
     POLICIES: "/api/admin/policies",
     NOTIFICATIONS_BROADCAST: "/api/admin/notifications/broadcast",
     SHIPPING_SIMULATE: "/api/admin/shipping/simulate-advance",
+    REVIEWS: "/api/admin/reviews",
+    REVIEW_DETAIL: (id: string) => `/api/admin/reviews/${id}`,
   },
 } as const;
 
@@ -203,6 +211,7 @@ export const ROUTES = {
     ADDRESSES: "/account/addresses",
     SECURITY: "/account/security",
     WISHLIST: "/account/wishlist",
+    RECENTLY_VIEWED: "/account/recently-viewed",
     FOLLOWED_SHOPS: "/account/followed-shops",
     NOTIFICATIONS: "/account/notifications",
     MESSAGES: "/account/messages",
@@ -224,6 +233,7 @@ export const ROUTES = {
   ADMIN: {
     DASHBOARD: "/admin/dashboard",
     PRODUCTS: "/admin/products",
+    REVIEWS: "/admin/reviews",
     SELLERS: "/admin/sellers",
     CATEGORIES: "/admin/categories",
     ORDERS: "/admin/orders",

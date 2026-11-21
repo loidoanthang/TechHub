@@ -15,6 +15,7 @@ import {
   Heart,
   Store,
   MessagesSquare,
+  Clock,
 } from "lucide-react";
 import { useProfileQuery } from "../hooks/useAccountQueries";
 import { useWishlistIdsQuery } from "../api/wishlistApi";
@@ -74,6 +75,12 @@ export function AccountSidebar() {
       href: "/account/wishlist",
       icon: Heart,
       badge: wishlistData?.totalCount ? String(wishlistData.totalCount) : null,
+    },
+    {
+      label: "Đã xem gần đây",
+      href: ROUTES.ACCOUNT.RECENTLY_VIEWED,
+      icon: Clock,
+      badge: null,
     },
     {
       label: "Shop đang theo dõi",

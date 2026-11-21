@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ProductThumbnail, ScrollableTabsWrapper } from "@/components/shared";
 import {
@@ -11,13 +12,19 @@ import {
   CheckCircle2,
   XCircle,
   RotateCcw,
+  RefreshCw,
   CreditCard,
   Truck,
   Check,
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import { useBuyerOrdersQuery, useCompleteOrderMutation, useReturnRequestStatusesQuery } from "@/features/orders/hooks/useOrderQueries";
+import {
+  useBuyerOrdersQuery,
+  useCompleteOrderMutation,
+  useReturnRequestStatusesQuery,
+  useReorderMutation,
+} from "@/features/orders/hooks/useOrderQueries";
 import type { OrderStatus } from "@/types/enums";
 import type { BuyerOrderResponse, BuyerOrderItemResponse } from "@/types/order";
 import { CancelOrderModal } from "./CancelOrderModal";
@@ -53,14 +60,43 @@ export function OrdersListView() {
   const { data: returnStatuses } = useReturnRequestStatusesQuery(completedOrderIds);
 
   const completeOrderMutation = useCompleteOrderMutation();
+  const reorderMutation = useReorderMutation();
+  const router = useRouter();
 
   // Modals state
   const [cancelTargetOrder, setCancelTargetOrder] = useState<BuyerOrderResponse | null>(null);
   const [returnTargetOrder, setReturnTargetOrder] = useState<BuyerOrderResponse | null>(null);
+  const [reorderingOrderId, setReorderingOrderId] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleReorder = async (orderId: string) => {
+    try {
+      setReorderingOrderId(orderId);
+      const res = await reorderMutation.mutateAsync(orderId);
+      const data = res.data;
+      if (data) {
+        if (data.itemsAddedSuccessfully > 0) {
+          showToast(
+            `Đã thêm ${data.itemsAddedSuccessfully} sản phẩm vào giỏ hàng.${
+              data.unavailableItems.length > 0
+                ? ` (${data.unavailableItems.length} sản phẩm đã hết hàng)`
+                : ""
+            }`
+          );
+          router.push("/cart");
+        } else {
+          showToast("Các sản phẩm trong đơn hàng hiện đã hết hàng.");
+        }
+      }
+    } catch {
+      showToast("Không thể mua lại đơn hàng. Vui lòng thử lại sau.");
+    } finally {
+      setReorderingOrderId(null);
+    }
   };
 
   const formatPrice = (val?: number | string | null) => {
@@ -353,6 +389,23 @@ export function OrdersListView() {
                             <span>Return / Refund</span>
                           </button>
                         </>
+                      )}
+
+                      {/* Reorder: For Completed or Cancelled orders */}
+                      {(isCompleted || order.status === "CANCELLED") && (
+                        <button
+                          type="button"
+                          onClick={() => handleReorder(order.orderId)}
+                          disabled={reorderingOrderId === order.orderId}
+                          className="px-4 py-2 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        >
+                          {reorderingOrderId === order.orderId ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <RefreshCw className="w-3.5 h-3.5" />
+                          )}
+                          <span>Mua lại</span>
+                        </button>
                       )}
 
                       {/* Cancel or Request Cancellation */}

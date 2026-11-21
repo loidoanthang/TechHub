@@ -93,6 +93,7 @@ export interface CreateProductImageRequest {
  * Request biến thể sản phẩm (1-50 variants, mã SKU duy nhất)
  */
 export interface CreateProductVariantRequest {
+  id?: string;
   sku: string;
   variantName: string;
   description?: string;

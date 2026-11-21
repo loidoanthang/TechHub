@@ -19,6 +19,7 @@ import {
   ArrowLeft,
   Loader2,
   ShieldAlert,
+  MessageSquareText,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ROUTES } from "@/lib/constants";
@@ -54,6 +55,11 @@ const NAV_SECTIONS: NavSection[] = [
         label: "Kiểm duyệt Sản phẩm",
         href: ROUTES.ADMIN.PRODUCTS,
         icon: PackageCheck,
+      },
+      {
+        label: "Kiểm duyệt Đánh giá",
+        href: ROUTES.ADMIN.REVIEWS,
+        icon: MessageSquareText,
       },
       {
         label: "Đối tác & Gian hàng",

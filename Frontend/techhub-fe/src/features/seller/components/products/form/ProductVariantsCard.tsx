@@ -19,6 +19,8 @@ interface ProductVariantsCardProps {
   productName: string;
   brandName: string;
   errors: Record<string, string>;
+  onRequestDeleteVariant: (variantIndex: number, variant: CreateProductVariantRequest) => void;
+  isDeletingVariant?: boolean;
 }
 
 export function ProductVariantsCard({
@@ -27,8 +29,17 @@ export function ProductVariantsCard({
   productName,
   brandName,
   errors,
+  onRequestDeleteVariant,
+  isDeletingVariant = false,
 }: ProductVariantsCardProps) {
   const [isMultiVariant, setIsMultiVariant] = useState(variants.length > 1);
+
+  // Sync state when product detail loads asynchronously (e.g. edit mode with > 1 variants)
+  React.useEffect(() => {
+    if (variants.length > 1) {
+      setIsMultiVariant(true);
+    }
+  }, [variants.length]);
 
   // Bulk Apply inputs
   const [bulkPrice, setBulkPrice] = useState("");
@@ -86,15 +97,6 @@ export function ProductVariantsCard({
       stockQuantity: variants[0]?.stockQuantity || 10,
     };
     onChange([...variants, newVariant]);
-  };
-
-  const handleRemoveVariant = (idxToRemove: number) => {
-    if (variants.length <= 1) return;
-    const filtered = variants.filter((_, idx) => idx !== idxToRemove);
-    onChange(filtered);
-    if (filtered.length === 1) {
-      setIsMultiVariant(false);
-    }
   };
 
   const handleUpdateVariant = (
@@ -254,12 +256,12 @@ export function ProductVariantsCard({
                 >
                   Mã phân loại (SKU) *
                 </th>
-                <th className="py-2.5 px-3 w-[24%] text-right">
+                <th className="py-2.5 px-3 w-[20%] text-right">
                   Giá bán (VND) *
                 </th>
-                <th className="py-2.5 px-3 w-[14%] text-center">Tồn kho *</th>
+                <th className="py-2.5 px-3 w-[12%] text-center">Tồn kho *</th>
                 {isMultiVariant && (
-                  <th className="py-2.5 px-2 w-[8%] text-center">Xóa</th>
+                  <th className="py-2.5 px-3 w-[14%] text-center">Thao tác</th>
                 )}
               </tr>
             </thead>
@@ -359,15 +361,15 @@ export function ProductVariantsCard({
 
                     {/* 5. Delete Action (Multi-variant only) */}
                     {isMultiVariant && (
-                      <td className="py-3 px-2 align-top text-center">
+                      <td className="py-3 px-3 align-top text-center">
                         <button
                           type="button"
-                          disabled={variants.length <= 1}
-                          onClick={() => handleRemoveVariant(idx)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent mt-0.5"
-                          title="Xóa phân loại"
+                          disabled={variants.length <= 1 || isDeletingVariant}
+                          onClick={() => onRequestDeleteVariant(idx, variant)}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-rose-600 bg-rose-50/50 hover:bg-rose-100/80 text-[11px] font-semibold transition-all shadow-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-rose-50/50"
+                          title="Xóa biến thể này"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </td>
                     )}

@@ -10,6 +10,7 @@ import type {
   CancellationRequestResponse,
   CreateReturnRequest,
   ReturnRequestResponse,
+  ReorderResponse,
 } from "@/types/order";
 
 export interface BuyerOrderQueryParams {
@@ -98,5 +99,9 @@ export const orderApi = {
     return apiClient.post(
       ENDPOINTS.BUYER.RETURN_REQUEST_CANCEL(requestId)
     );
+  },
+
+  reorder: (orderId: string): Promise<ApiResponse<ReorderResponse>> => {
+    return apiClient.post(ENDPOINTS.BUYER.ORDER_REORDER(orderId));
   },
 };

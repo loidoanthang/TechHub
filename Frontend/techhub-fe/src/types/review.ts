@@ -103,3 +103,50 @@ export interface SellerReviewQueryParams {
   sortBy?: "createdAt" | "rating";
   sortDirection?: "ASC" | "DESC";
 }
+
+export interface AdminReviewResponse {
+  id: string;
+  orderItemId: string;
+  orderId?: string;
+  orderNumber?: string;
+  productId: string;
+  productName: string;
+  variantName?: string | null;
+  sku?: string | null;
+  imageUrl?: string | null;
+  shopId?: string;
+  shopName?: string;
+  rating: number;
+  comment: string | null;
+  mediaList: ReviewMediaResponse[];
+  reviewerId?: string;
+  reviewerName: string;
+  reviewerAvatar: string | null;
+  sellerResponse: string | null;
+  sellerResponseAt: string | null;
+  helpfulCount: number;
+  isReported?: boolean;
+  reportReason?: string;
+  reportCount?: number;
+  createdAt: string;
+}
+
+export interface AdminReviewQueryParams {
+  page?: number;
+  size?: number;
+  keyword?: string;
+  rating?: number;
+  hasMedia?: boolean;
+  isReported?: boolean;
+  sortBy?: "createdAt" | "rating" | "reportCount";
+  sortDirection?: "ASC" | "DESC";
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface AdminReviewStats {
+  totalReviews: number;
+  reportedReviews: number;
+  negativeReviews: number;
+  averageRating: number;
+}

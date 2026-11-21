@@ -155,3 +155,30 @@ export interface ReturnRequestResponse {
   createdAt: string;
   respondedAt?: string | null;
 }
+
+export interface ReorderItemDto {
+  orderItemId: string;
+  variantId: string;
+  productName: string;
+  variantName: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface ReorderUnavailableItemDto {
+  orderItemId: string;
+  variantId: string;
+  productName: string;
+  reason: string;
+}
+
+export interface ReorderResponse {
+  orderId: string;
+  totalItemsRequested: number;
+  itemsAddedSuccessfully: number;
+  addedItems: ReorderItemDto[];
+  unavailableItems: ReorderUnavailableItemDto[];
+  cartTotalItemTypes: number;
+  cartTotalQuantity: number;
+}
+

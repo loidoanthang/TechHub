@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ProductThumbnail } from "@/components/shared";
 import {
@@ -16,11 +17,17 @@ import {
   CheckCircle2,
   XCircle,
   RotateCcw,
+  RefreshCw,
   Loader2,
   AlertCircle,
   Star,
 } from "lucide-react";
-import { useBuyerOrderDetailQuery, useCompleteOrderMutation, useReturnRequestQuery } from "@/features/orders/hooks/useOrderQueries";
+import {
+  useBuyerOrderDetailQuery,
+  useCompleteOrderMutation,
+  useReturnRequestQuery,
+  useReorderMutation,
+} from "@/features/orders/hooks/useOrderQueries";
 import type { OrderStatus } from "@/types/enums";
 import type { BuyerOrderItemResponse } from "@/types/order";
 import { CancelOrderModal } from "./CancelOrderModal";
@@ -38,16 +45,46 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
   const { data: order, isLoading, error, refetch } = useBuyerOrderDetailQuery(orderId);
   const { data: returnRequest } = useReturnRequestQuery(orderId);
   const completeOrderMutation = useCompleteOrderMutation();
+  const reorderMutation = useReorderMutation();
+  const router = useRouter();
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+  const [isReordering, setIsReordering] = useState(false);
   const [selectedReviewItem, setSelectedReviewItem] =
     useState<BuyerOrderItemResponse | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleReorder = async () => {
+    if (!order) return;
+    try {
+      setIsReordering(true);
+      const res = await reorderMutation.mutateAsync(order.orderId);
+      const data = res.data;
+      if (data) {
+        if (data.itemsAddedSuccessfully > 0) {
+          showToast(
+            `Đã thêm ${data.itemsAddedSuccessfully} sản phẩm vào giỏ hàng.${
+              data.unavailableItems.length > 0
+                ? ` (${data.unavailableItems.length} sản phẩm đã hết hàng)`
+                : ""
+            }`
+          );
+          router.push("/cart");
+        } else {
+          showToast("Các sản phẩm trong đơn hàng hiện đã hết hàng.");
+        }
+      }
+    } catch {
+      showToast("Không thể mua lại đơn hàng. Vui lòng thử lại sau.");
+    } finally {
+      setIsReordering(false);
+    }
   };
 
   const formatPrice = (val?: number | string | null) => {
@@ -95,6 +132,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
   }
 
   const isDelivered = order.status === "DELIVERED";
+  const isCompleted = order.status === "COMPLETED";
   const isPendingPayment = order.status === "PENDING_PAYMENT";
   const canCancelOrRequest =
     order.status === "PENDING_PAYMENT" ||
@@ -491,6 +529,23 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
                 <span>Return / Refund</span>
               </button>
             </>
+          )}
+
+          {/* Reorder Button for Completed or Cancelled orders */}
+          {(isCompleted || order.status === "CANCELLED") && (
+            <button
+              type="button"
+              onClick={handleReorder}
+              disabled={isReordering}
+              className="px-5 py-2.5 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              {isReordering ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <RefreshCw className="w-4 h-4" />
+              )}
+              <span>Mua lại đơn hàng</span>
+            </button>
           )}
 
           {canCancelOrRequest && (

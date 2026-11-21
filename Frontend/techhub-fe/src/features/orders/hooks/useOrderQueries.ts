@@ -141,3 +141,14 @@ export function useCancelReturnRequestMutation() {
     },
   });
 }
+
+export function useReorderMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (orderId: string) => orderApi.reorder(orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
+}
+
