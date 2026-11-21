@@ -3,7 +3,6 @@ package com.techhub.task;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,8 +59,6 @@ public class OrderEscrowScheduledTasks {
     private final ProductVariantRepository productVariantRepository;
     private final VoucherRedemptionRepository voucherRedemptionRepository;
     private final VoucherRepository voucherRepository;
-    @Lazy
-    private final OrderEscrowScheduledTasks self;
 
     /**
      * Job 1: Auto-complete DELIVERED orders past 72h inspection window.
@@ -79,7 +76,7 @@ public class OrderEscrowScheduledTasks {
 
         for (Order order : eligibleOrders) {
             try {
-                self.autoCompleteSingleOrder(order.getId());
+                autoCompleteSingleOrder(order.getId());
             } catch (Exception e) {
                 log.error("Failed to auto-complete order {}", order.getId(), e);
             }
@@ -122,9 +119,7 @@ public class OrderEscrowScheduledTasks {
         log.info("Order {} successfully auto-completed and settled past 72h SLA", orderId);
     }
 
-    /**
-     * Job 2: Auto-approve pending cancellation requests past 72h SLA.
-     */
+    @Transactional
     @Scheduled(cron = "${app.scheduling.auto-cancel-cron:0 */30 * * * *}")
     public void autoApproveCancellationRequests() {
         LocalDateTime threshold = LocalDateTime.now().minusHours(72);
@@ -136,7 +131,7 @@ public class OrderEscrowScheduledTasks {
 
         for (CancellationRequest cr : pendingList) {
             try {
-                self.autoApproveSingleCancellation(cr.getId());
+                autoApproveSingleCancellation(cr.getId());
             } catch (Exception e) {
                 log.error("Failed to auto-approve cancellation request {}", cr.getId(), e);
             }
@@ -170,9 +165,7 @@ public class OrderEscrowScheduledTasks {
         }
     }
 
-    /**
-     * Job 3: Auto-approve pending return requests past 72h SLA.
-     */
+    @Transactional
     @Scheduled(cron = "${app.scheduling.auto-refund-cron:0 */30 * * * *}")
     public void autoApproveReturnRequests() {
         LocalDateTime threshold = LocalDateTime.now().minusHours(72);
@@ -184,7 +177,7 @@ public class OrderEscrowScheduledTasks {
 
         for (ReturnRequest rr : pendingReturns) {
             try {
-                self.autoApproveSingleReturn(rr.getId());
+                autoApproveSingleReturn(rr.getId());
             } catch (Exception e) {
                 log.error("Failed to auto-approve return request {}", rr.getId(), e);
             }

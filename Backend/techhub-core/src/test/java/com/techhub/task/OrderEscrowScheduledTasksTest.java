@@ -92,7 +92,6 @@ class OrderEscrowScheduledTasksTest {
 
     @BeforeEach
     void setUp() {
-        org.springframework.test.util.ReflectionTestUtils.setField(escrowTasks, "self", escrowTasks);
         orderId = UUID.randomUUID();
 
         seller = new Seller();
