@@ -12,6 +12,7 @@ interface ReturnRefundModalProps {
   orderNumber: string;
   shopName: string;
   totalAmount: number;
+  paymentMethod?: string;
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
@@ -30,6 +31,7 @@ export function ReturnRefundModal({
   orderNumber,
   shopName,
   totalAmount,
+  paymentMethod,
   isOpen,
   onClose,
   onSuccess,
@@ -37,8 +39,13 @@ export function ReturnRefundModal({
   const [selectedReasonCode, setSelectedReasonCode] = useState(RETURN_REASONS[0].code);
   const [description, setDescription] = useState("");
   const [evidenceImages, setEvidenceImages] = useState<string[]>([]);
+  const [bankName, setBankName] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  const [bankAccountHolder, setBankAccountHolder] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  const isCod = paymentMethod === "COD";
 
   const createReturnRequestMutation = useCreateReturnRequestMutation();
 
@@ -55,12 +62,22 @@ export function ReturnRefundModal({
     const reasonItem = RETURN_REASONS.find((r) => r.code === selectedReasonCode);
     const reasonText = `${reasonItem?.label || selectedReasonCode}: ${description.trim()}`;
 
+    if (isCod) {
+      if (!bankName.trim() || !bankAccountNumber.trim() || !bankAccountHolder.trim()) {
+        setErrorMessage("Vui lòng cung cấp đầy đủ thông tin tài khoản ngân hàng để nhận hoàn tiền cho đơn COD.");
+        return;
+      }
+    }
+
     try {
       await createReturnRequestMutation.mutateAsync({
         orderId,
         data: {
           reason: reasonText,
           proofImages: evidenceImages.length > 0 ? evidenceImages.join(",") : undefined,
+          bankName: isCod ? bankName.trim() : undefined,
+          bankAccountNumber: isCod ? bankAccountNumber.trim() : undefined,
+          bankAccountHolder: isCod ? bankAccountHolder.trim().toUpperCase() : undefined,
         },
       });
       onSuccess();
@@ -181,6 +198,64 @@ export function ReturnRefundModal({
               disabled={createReturnRequestMutation.isPending}
             />
           </div>
+
+          {/* COD Bank Details Section */}
+          {isCod && (
+            <div className="flex flex-col gap-3 p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/80">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-amber-900">
+                  Thông tin nhận hoàn tiền (Đơn COD) <span className="text-[#ba1a1a]">*</span>
+                </span>
+              </div>
+              <p className="text-[11px] text-amber-800 leading-relaxed">
+                Đơn hàng thanh toán khi nhận hàng (COD) sẽ được hoàn tiền bằng hình thức chuyển khoản trực tiếp sau khi được duyệt.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="flex flex-col gap-1 sm:col-span-2">
+                  <label className="text-[11px] font-semibold text-[#434656]">
+                    Tên ngân hàng <span className="text-[#ba1a1a]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                    placeholder="Ví dụ: Vietcombank, MB Bank, Techcombank..."
+                    required={isCod}
+                    className="w-full px-3 py-2 rounded-xl border border-[#c3c5d9]/40 bg-white text-xs text-[#0b1c30] placeholder:text-[#737688] focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 transition-all"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-[#434656]">
+                    Số tài khoản <span className="text-[#ba1a1a]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={bankAccountNumber}
+                    onChange={(e) => setBankAccountNumber(e.target.value.replace(/\s+/g, ""))}
+                    placeholder="Nhập số tài khoản"
+                    required={isCod}
+                    className="w-full px-3 py-2 rounded-xl border border-[#c3c5d9]/40 bg-white text-xs text-[#0b1c30] placeholder:text-[#737688] focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 transition-all font-mono"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-semibold text-[#434656]">
+                    Chủ tài khoản <span className="text-[#ba1a1a]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={bankAccountHolder}
+                    onChange={(e) => setBankAccountHolder(e.target.value.toUpperCase())}
+                    placeholder="NGUYEN VAN A"
+                    required={isCod}
+                    className="w-full px-3 py-2 rounded-xl border border-[#c3c5d9]/40 bg-white text-xs text-[#0b1c30] placeholder:text-[#737688] focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 transition-all uppercase"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#eff4ff]">

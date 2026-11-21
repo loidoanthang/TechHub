@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Calendar } from "lucide-react";
+import { ScrollableTabsWrapper } from "@/components/shared/ScrollableTabsWrapper";
 import type {
   SellerWalletTransactionType,
   DateFilterPreset,
@@ -47,25 +48,27 @@ export function TransactionFilterTabs({
     <div className="space-y-3 pb-2 border-b border-slate-100">
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         {/* Type Tabs */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0 scrollbar-none">
-          {TYPE_TABS.map((tab) => {
-            const isActive = selectedType === tab.value;
-            return (
-              <button
-                key={tab.label}
-                type="button"
-                onClick={() => onSelectType(tab.value)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
-                  isActive
-                    ? "bg-[#0045cc] text-white shadow-xs"
-                    : "bg-slate-100/70 hover:bg-slate-200/60 text-slate-600"
-                }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
+        <ScrollableTabsWrapper className="w-full lg:w-auto">
+          <div className="flex items-center gap-1.5 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0 scrollbar-none">
+            {TYPE_TABS.map((tab) => {
+              const isActive = selectedType === tab.value;
+              return (
+                <button
+                  key={tab.label}
+                  type="button"
+                  onClick={() => onSelectType(tab.value)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                    isActive
+                      ? "bg-[#0045cc] text-white shadow-xs"
+                      : "bg-slate-100/70 hover:bg-slate-200/60 text-slate-600"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </ScrollableTabsWrapper>
 
         {/* Date Filter Presets */}
         <div className="flex items-center gap-2 self-stretch lg:self-auto justify-end">

@@ -82,10 +82,10 @@ export function DashboardPeriodFilterBar({
   return (
     <div
       ref={containerRef}
-      className={`relative flex flex-wrap items-center gap-2 ${className}`}
+      className={`relative flex items-center justify-between sm:justify-start gap-2 max-w-full ${className}`}
     >
-      {/* Pills Container */}
-      <div className="bg-white border border-slate-200 rounded-xl p-1 flex items-center gap-1 overflow-x-auto no-scrollbar shadow-2xs">
+      {/* Pills Container with horizontal scroll on mobile */}
+      <div className="bg-white border border-slate-200 rounded-xl p-1 flex items-center gap-1 overflow-x-auto no-scrollbar shadow-2xs max-w-full shrink-0">
         {PERIOD_OPTIONS.map((opt) => {
           const isSelected = period === opt.id;
           return (
@@ -93,7 +93,7 @@ export function DashboardPeriodFilterBar({
               key={opt.id}
               type="button"
               onClick={() => handleSelectPeriod(opt.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-colors duration-150 whitespace-nowrap cursor-pointer flex items-center gap-1.5 shrink-0 ${
                 isSelected
                   ? "bg-[#0045cc] text-white shadow-2xs"
                   : "text-slate-600 hover:bg-slate-100"

@@ -532,6 +532,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
           orderNumber={order.orderNumber}
           shopName={order.shopName}
           totalAmount={order.totalAmount}
+          paymentMethod={order.paymentMethod}
           isOpen={isReturnModalOpen}
           onClose={() => setIsReturnModalOpen(false)}
           onSuccess={() => {

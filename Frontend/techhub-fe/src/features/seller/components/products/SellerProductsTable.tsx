@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ROUTES } from "@/lib/constants";
 import type { SellerProductSummaryResponse } from "@/types/sellerProduct";
 import { SellerProductRow } from "./SellerProductRow";
+import { SellerProductMobileCard } from "./SellerProductMobileCard";
 
 interface SellerProductsTableProps {
   products: SellerProductSummaryResponse[];
@@ -73,8 +74,22 @@ export function SellerProductsTable({
 
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-      {/* Table container with responsive handling & no ugly scrollbar */}
-      <div className="w-full overflow-x-auto no-scrollbar">
+      {/* Mobile Card List (< sm) */}
+      <div className="divide-y divide-slate-100 sm:hidden">
+        {products.map((product) => (
+          <SellerProductMobileCard
+            key={product.id}
+            product={product}
+            onToggleVisibility={onToggleVisibility}
+            onSubmitApproval={onSubmitApproval}
+            onDeleteProduct={onDeleteProduct}
+            isUpdatingVisibility={updatingProductId === product.id}
+          />
+        ))}
+      </div>
+
+      {/* Desktop Table (>= sm) with responsive handling & no ugly scrollbar */}
+      <div className="w-full overflow-x-auto no-scrollbar hidden sm:block">
         <table className="w-full min-w-[780px] text-left text-xs border-collapse table-fixed">
           <thead>
             <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-semibold select-none">

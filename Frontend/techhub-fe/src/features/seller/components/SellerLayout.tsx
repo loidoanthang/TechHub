@@ -311,40 +311,40 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] flex flex-col">
+    <div className="min-h-screen bg-[#f8f9fc] flex flex-col overflow-x-hidden w-full max-w-full">
       {/* 1. TOP HEADER */}
       <header className="sticky top-0 z-40 w-full bg-white border-b border-[#e2e8f0] shadow-xs">
-        <div className="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 sm:gap-4 max-w-full">
           {/* Left: Mobile hamburger & Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl text-[#434656] hover:bg-[#eff4ff] transition-colors"
+              className="lg:hidden p-1.5 sm:p-2 rounded-xl text-[#434656] hover:bg-[#eff4ff] transition-colors"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            <Link href={ROUTES.SELLER.DASHBOARD} className="flex items-center gap-2 group">
-              <span className="font-heading text-xl font-extrabold tracking-tight text-[#0b1c30]">
+            <Link href={ROUTES.SELLER.DASHBOARD} className="flex items-center gap-1.5 sm:gap-2 group">
+              <span className="font-heading text-lg sm:text-xl font-extrabold tracking-tight text-[#0b1c30]">
                 TECH<span className="text-[#0045cc]">HUB</span>
               </span>
-              <span className="h-4 w-px bg-[#c3c5d9]"></span>
-              <span className="text-[11px] font-extrabold text-[#0045cc] uppercase tracking-wider bg-[#eff4ff] px-2 py-0.5 rounded-md border border-[#0045cc]/20">
+              <span className="hidden sm:inline h-4 w-px bg-[#c3c5d9]"></span>
+              <span className="hidden sm:inline text-[11px] font-extrabold text-[#0045cc] uppercase tracking-wider bg-[#eff4ff] px-2 py-0.5 rounded-md border border-[#0045cc]/20">
                 Seller Centre
               </span>
             </Link>
           </div>
 
           {/* Center/Right: Shop Status, Public Shop Link & Profile */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
             {/* Shop Status Selector */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl text-xs font-bold border transition-all ${
                   currentStatus === "ACTIVE"
                     ? "bg-[#006b5b]/10 text-[#006b5b] border-[#006b5b]/20 hover:bg-[#006b5b]/20"
                     : currentStatus === "PAUSED"
@@ -418,15 +418,15 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
             {/* Notification Bell */}
             <NotificationBell portalContext="seller" />
 
-            <div className="h-4 w-px bg-[#c3c5d9]"></div>
+            <div className="hidden sm:block h-4 w-px bg-[#c3c5d9]"></div>
 
             {/* User Profile */}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5 sm:gap-2.5">
               <UserAvatar
                 src={shop?.avatarUrl || user.avatarUrl}
                 alt={shop?.shopName || "Gian hàng"}
-                size={36}
-                className="rounded-2xl ring-2 ring-[#eff4ff]"
+                size={32}
+                className="rounded-xl ring-2 ring-[#eff4ff]"
               />
               <div className="hidden sm:flex flex-col text-left">
                 <span className="text-xs font-bold text-[#0b1c30] leading-tight line-clamp-1 max-w-[120px]">
@@ -438,7 +438,7 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
                 type="button"
                 onClick={logout}
                 title="Đăng xuất"
-                className="p-1.5 rounded-xl text-[#737688] hover:text-[#ba1a1a] hover:bg-red-50 transition-colors"
+                className="p-1 sm:p-1.5 rounded-xl text-[#737688] hover:text-[#ba1a1a] hover:bg-red-50 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
               </button>

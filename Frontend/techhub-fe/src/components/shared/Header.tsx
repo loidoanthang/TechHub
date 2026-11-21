@@ -87,7 +87,7 @@ export function Header() {
   return (
     <header className="fixed top-0 w-full z-50 bg-white border-b border-slate-200/70 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
       {/* Top utility sub-header: Only on desktop */}
-      <div className="hidden md:block bg-[#eff4ff] text-[#434656]">
+      {/* <div className="hidden md:block bg-[#eff4ff] text-[#434656]">
         <div className="max-w-6xl mx-auto px-6 lg:px-12 h-9 flex items-center justify-between text-[11px] font-semibold">
           <div className="flex items-center gap-2 truncate">
             <span>
@@ -114,7 +114,7 @@ export function Header() {
             </Link>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Omnisearch & Navigation header */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 py-2 sm:py-0 sm:h-20 flex flex-col sm:flex-row justify-between sm:items-center gap-2 sm:gap-6">

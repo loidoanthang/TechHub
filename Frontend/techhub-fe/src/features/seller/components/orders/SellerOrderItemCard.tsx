@@ -74,10 +74,48 @@ export const SellerOrderItemCard = memo(function SellerOrderItemCard({
 
   return (
     <article className="bg-white rounded-2xl border border-slate-200 shadow-2xs hover:border-primary/40 transition-all overflow-hidden flex flex-col">
-      {/* 1. Header Bar: Order ID, Timestamp, Recipient info */}
-      <div className="px-4 sm:px-5 py-3.5 bg-slate-50 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-        {/* Left: Order number & Recipient */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+      {/* 1. Header Bar: Order ID, Timestamp, Recipient info & Status */}
+      <div className="px-4 sm:px-5 py-3 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+        {/* Mobile Top Row: Recipient + Time (Left) & Status Badge (Right) */}
+        <div className="flex sm:hidden items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 truncate">
+            <span className="truncate">{order.buyerInfo?.recipientName || order.buyerInfo?.buyerName}</span>
+            <span className="text-slate-400 font-normal">•</span>
+            <time dateTime={order.createdAt} className="text-slate-500 font-normal text-[11px] shrink-0">
+              {new Date(order.createdAt).toLocaleDateString("vi-VN", {
+                day: "2-digit",
+                month: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </time>
+          </div>
+          <span
+            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${getStatusBadge(
+              order.status
+            )}`}
+          >
+            {order.statusDescription || order.status}
+          </span>
+        </div>
+
+        {/* Mobile Sub-row: Order Number */}
+        <div className="flex sm:hidden items-center justify-between text-xs font-mono">
+          <Link
+            href={`/seller/orders/${order.orderId}`}
+            className="font-bold text-primary hover:underline text-[11px]"
+          >
+            #{order.orderNumber}
+          </Link>
+          {items.length > 1 && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-200 text-slate-700">
+              {order.totalItemsCount} sản phẩm
+            </span>
+          )}
+        </div>
+
+        {/* Desktop Header (> sm) */}
+        <div className="hidden sm:flex flex-wrap items-center gap-2 sm:gap-3">
           <Link
             href={`/seller/orders/${order.orderId}`}
             className="font-mono font-bold text-primary hover:underline flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
@@ -91,7 +129,7 @@ export const SellerOrderItemCard = memo(function SellerOrderItemCard({
 
           <time
             dateTime={order.createdAt}
-            className="text-slate-600 font-medium"
+            className="text-slate-600 font-medium text-[11px] sm:text-xs"
           >
             {new Date(order.createdAt).toLocaleDateString("vi-VN", {
               day: "2-digit",
@@ -102,30 +140,30 @@ export const SellerOrderItemCard = memo(function SellerOrderItemCard({
             })}
           </time>
 
-          <span aria-hidden="true" className="text-slate-400 hidden sm:inline">
+          <span aria-hidden="true" className="text-slate-400">
             •
           </span>
 
           {/* Recipient summary pill */}
           <div className="flex items-center gap-1.5 text-on-surface-variant bg-white px-2.5 py-1 rounded-lg border border-slate-200 text-xs">
-            <span className="font-bold text-on-surface">
+            <span className="font-bold text-on-surface truncate">
               {order.buyerInfo?.recipientName || order.buyerInfo?.buyerName}
             </span>
             {order.buyerInfo?.recipientPhone && (
-              <span className="text-slate-600 font-mono">
+              <span className="text-slate-600 font-mono text-[11px]">
                 ({order.buyerInfo.recipientPhone})
               </span>
             )}
             {order.buyerInfo?.provinceCity && (
-              <span className="text-slate-600 hidden md:inline">
+              <span className="text-slate-600">
                 - {order.buyerInfo.provinceCity}
               </span>
             )}
           </div>
         </div>
 
-        {/* Right: Status badge & Items count */}
-        <div className="flex items-center gap-2">
+        {/* Desktop Status Badge & Items count (> sm) */}
+        <div className="hidden sm:flex items-center justify-end gap-2">
           {items.length > 1 && (
             <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
               {order.totalItemsCount} sản phẩm
@@ -142,19 +180,19 @@ export const SellerOrderItemCard = memo(function SellerOrderItemCard({
       </div>
 
       {/* 2. Body Grid: Products List + Financials + Actions */}
-      <div className="p-4 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-center">
+      <div className="p-3.5 sm:p-5 flex flex-col lg:grid lg:grid-cols-12 gap-3 sm:gap-6 items-stretch lg:items-center">
         {/* Left Column (6 cols): Items List */}
         <div className="lg:col-span-6 flex flex-col gap-3 min-w-0">
           {displayItems.map((item, idx) => (
             <div key={item.orderItemId || idx} className="flex items-start gap-3">
               {/* Product Thumbnail with lazy loading & fixed aspect to prevent CLS */}
-              <div className="w-14 h-14 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
                 {item.imageUrl ? (
                   <img
                     src={item.imageUrl}
                     alt={item.productName}
-                    width={56}
-                    height={56}
+                    width={64}
+                    height={64}
                     loading="lazy"
                     decoding="async"
                     className="w-full h-full object-cover"
@@ -166,10 +204,17 @@ export const SellerOrderItemCard = memo(function SellerOrderItemCard({
 
               {/* Product Title & Spec details */}
               <div className="flex-1 min-w-0">
-                <h4 className="text-xs font-bold text-on-surface truncate" title={item.productName}>
-                  {item.productName}
-                </h4>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
+                <div className="flex items-start justify-between gap-2">
+                  <h4 className="text-xs font-bold text-on-surface line-clamp-2" title={item.productName}>
+                    {item.productName}
+                  </h4>
+                  {/* Desktop Price */}
+                  <span className="text-xs font-bold text-on-surface shrink-0 hidden sm:inline">
+                    {formatPrice(item.finalSubtotal)}
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5 mt-1">
                   {item.variantName && (
                     <span className="text-[11px] text-on-surface-variant font-medium bg-slate-100 px-2 py-0.5 rounded">
                       {item.variantName}
@@ -180,18 +225,24 @@ export const SellerOrderItemCard = memo(function SellerOrderItemCard({
                       SKU: {item.sku}
                     </span>
                   )}
-                  {/* Highlighting Quantity */}
+                </div>
+
+                {/* Mobile Bottom Row for Item: Qty & Price */}
+                <div className="flex sm:hidden items-center justify-between mt-2 pt-1">
+                  <span className="text-[11px] font-extrabold text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
+                    x{item.quantity}
+                  </span>
+                  <span className="text-xs font-bold text-slate-900">
+                    {formatPrice(item.finalSubtotal)}
+                  </span>
+                </div>
+
+                {/* Desktop Qty */}
+                <div className="hidden sm:inline-block mt-1.5">
                   <span className="text-[11px] font-extrabold text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">
                     x{item.quantity}
                   </span>
                 </div>
-              </div>
-
-              {/* Price per item */}
-              <div className="text-right shrink-0">
-                <span className="text-xs font-bold text-on-surface">
-                  {formatPrice(item.finalSubtotal)}
-                </span>
               </div>
             </div>
           ))}
@@ -227,39 +278,47 @@ export const SellerOrderItemCard = memo(function SellerOrderItemCard({
         </div>
 
         {/* Middle Column (3 cols): Financials & Net Earnings */}
-        <div className="lg:col-span-3 flex flex-col justify-center border-t lg:border-t-0 lg:border-l border-slate-100 pt-3 lg:pt-0 lg:pl-5 min-w-0">
-          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider whitespace-nowrap">
-            Thực nhận Shop
-          </span>
-          <span className="font-heading text-base sm:text-lg font-extrabold text-primary tracking-tight whitespace-nowrap">
-            {formatPrice(order.totalSellerEarnings)}
-          </span>
-          <span className="text-[11px] text-slate-600 mt-0.5 whitespace-nowrap">
-            Khách trả: {formatPrice(order.buyerTotalAmount)}
-          </span>
-          <div className="flex items-center gap-1.5 mt-2">
-            {isCOD ? (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 flex items-center gap-1 whitespace-nowrap">
-                <Banknote className="w-3 h-3 text-slate-500 shrink-0" />
-                <span>COD Thu tiền mặt</span>
-              </span>
-            ) : (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1 whitespace-nowrap">
-                <CreditCard className="w-3 h-3 text-emerald-600 shrink-0" />
-                <span>VNPAY Đã thanh toán</span>
-              </span>
-            )}
+        <div className="lg:col-span-3 flex flex-row lg:flex-col items-center lg:items-start justify-between border-t lg:border-t-0 lg:border-l border-slate-100 pt-2.5 lg:pt-0 lg:pl-5 min-w-0">
+          <div>
+            <div className="flex items-center gap-1.5">
+              {isCOD ? (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 flex items-center gap-1 whitespace-nowrap">
+                  <Banknote className="w-3 h-3 text-slate-500 shrink-0" />
+                  <span>COD</span>
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1 whitespace-nowrap">
+                  <CreditCard className="w-3 h-3 text-emerald-600 shrink-0" />
+                  <span>VNPAY</span>
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-slate-500 mt-1 hidden sm:block">
+              Khách trả: {formatPrice(order.buyerTotalAmount)}
+            </p>
+          </div>
+
+          <div className="text-right lg:text-left">
+            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">
+              Thực nhận Shop
+            </span>
+            <span className="font-heading text-base sm:text-lg font-extrabold text-primary tracking-tight whitespace-nowrap block">
+              {formatPrice(order.totalSellerEarnings)}
+            </span>
+            <span className="text-[10px] text-slate-500 block sm:hidden">
+              Khách trả: {formatPrice(order.buyerTotalAmount)}
+            </span>
           </div>
         </div>
 
         {/* Right Column (3 cols): Contextual Actions */}
-        <div className="lg:col-span-3 flex flex-col sm:flex-row lg:flex-col items-stretch lg:items-end justify-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-100 pt-3 lg:pt-0 lg:pl-5">
+        <div className="lg:col-span-3 flex flex-col sm:flex-row lg:flex-col items-stretch lg:items-end justify-center gap-2 border-t lg:border-t-0 lg:border-l border-slate-100 pt-2.5 lg:pt-0 lg:pl-5">
           {/* Primary Action Button */}
           {hasConfirm && onConfirmOrder && (
             <button
               type="button"
               onClick={() => onConfirmOrder(order)}
-              className="w-full lg:w-48 min-h-[40px] py-2 px-3 rounded-xl bg-primary hover:bg-primary-container text-white text-xs font-bold transition-all shadow-2xs text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 whitespace-nowrap"
+              className="w-full lg:w-48 min-h-[38px] py-2 px-3 rounded-xl bg-primary hover:bg-primary-container text-white text-xs font-bold transition-all shadow-2xs text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 whitespace-nowrap"
             >
               Xác nhận đơn
             </button>
@@ -269,7 +328,7 @@ export const SellerOrderItemCard = memo(function SellerOrderItemCard({
             <button
               type="button"
               onClick={() => onStartPreparing(order)}
-              className="w-full lg:w-48 min-h-[40px] py-2 px-3 rounded-xl bg-primary hover:bg-primary-container text-white text-xs font-bold transition-all shadow-2xs text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 whitespace-nowrap"
+              className="w-full lg:w-48 min-h-[38px] py-2 px-3 rounded-xl bg-primary hover:bg-primary-container text-white text-xs font-bold transition-all shadow-2xs text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 whitespace-nowrap"
             >
               Bắt đầu đóng gói
             </button>
@@ -279,7 +338,7 @@ export const SellerOrderItemCard = memo(function SellerOrderItemCard({
             <button
               type="button"
               onClick={() => onReadyForPickup(order)}
-              className="w-full lg:w-48 min-h-[40px] py-2 px-3 rounded-xl bg-secondary hover:bg-teal-700 text-white text-xs font-bold transition-all shadow-2xs text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-1 whitespace-nowrap"
+              className="w-full lg:w-48 min-h-[38px] py-2 px-3 rounded-xl bg-secondary hover:bg-teal-700 text-white text-xs font-bold transition-all shadow-2xs text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-1 whitespace-nowrap"
             >
               Đóng gói xong (Chờ lấy)
             </button>
@@ -292,7 +351,7 @@ export const SellerOrderItemCard = memo(function SellerOrderItemCard({
                 type="button"
                 onClick={() => onPrintShippingLabel(order)}
                 title="In phiếu gửi & Tem niêm phong"
-                className="flex-1 min-h-[38px] py-1.5 px-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-on-surface-variant hover:text-primary border border-slate-200 text-xs font-semibold flex items-center justify-center gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary whitespace-nowrap"
+                className="flex-1 min-h-[36px] py-1.5 px-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-on-surface-variant hover:text-primary border border-slate-200 text-xs font-semibold flex items-center justify-center gap-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary whitespace-nowrap"
               >
                 <Printer className="w-3.5 h-3.5 shrink-0" />
                 <span>In phiếu</span>
@@ -301,7 +360,7 @@ export const SellerOrderItemCard = memo(function SellerOrderItemCard({
 
             <Link
               href={`/seller/orders/${order.orderId}`}
-              className="flex-1 min-h-[38px] py-1.5 px-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-on-surface-variant hover:text-primary border border-slate-200 text-xs font-semibold flex items-center justify-center gap-1 transition-colors text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary whitespace-nowrap"
+              className="flex-1 min-h-[36px] py-1.5 px-2 rounded-xl bg-slate-50 hover:bg-blue-50 text-on-surface-variant hover:text-primary border border-slate-200 text-xs font-semibold flex items-center justify-center gap-1 transition-colors text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary whitespace-nowrap"
             >
               <span>Chi tiết</span>
               <ExternalLink className="w-3.5 h-3.5 shrink-0" />

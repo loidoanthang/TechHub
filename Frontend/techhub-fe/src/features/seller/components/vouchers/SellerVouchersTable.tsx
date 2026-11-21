@@ -4,6 +4,7 @@ import React from "react";
 import { Ticket, ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
 import type { ShopVoucherResponse } from "@/types/sellerVoucher";
 import { SellerVoucherRow } from "./SellerVoucherRow";
+import { SellerVoucherMobileCard } from "./SellerVoucherMobileCard";
 
 interface SellerVouchersTableProps {
   vouchers: ShopVoucherResponse[];
@@ -72,8 +73,22 @@ export function SellerVouchersTable({
 
   return (
     <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-      {/* Table container with responsive horizontal scroll handling */}
-      <div className="w-full overflow-x-auto no-scrollbar">
+      {/* Mobile Card List (< sm) */}
+      <div className="divide-y divide-slate-100 sm:hidden">
+        {vouchers.map((voucher) => (
+          <SellerVoucherMobileCard
+            key={voucher.id}
+            voucher={voucher}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onToggleStatus={onToggleStatus}
+            isUpdatingStatus={updatingVoucherId === voucher.id}
+          />
+        ))}
+      </div>
+
+      {/* Desktop Table (>= sm) container with responsive horizontal scroll handling */}
+      <div className="w-full overflow-x-auto no-scrollbar hidden sm:block">
         <table className="w-full min-w-[850px] text-left text-xs border-collapse table-fixed">
           <thead>
             <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-semibold select-none">
