@@ -51,7 +51,10 @@ import com.techhub.modules.order.entity.OrderItem;
 import com.techhub.modules.order.repository.OrderItemRepository;
 import com.techhub.modules.order.repository.OrderRepository;
 import com.techhub.modules.payment.entity.Payment;
+import com.techhub.modules.payment.enums.PaymentInfoStatus;
 import com.techhub.modules.payment.repository.PaymentRepository;
+import com.techhub.modules.user.entity.UserPaymentInfo;
+import com.techhub.modules.user.repository.UserPaymentInfoRepository;
 import com.techhub.modules.product.entity.Product;
 import com.techhub.modules.product.entity.ProductImage;
 import com.techhub.modules.product.entity.ProductVariant;
@@ -88,6 +91,7 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final VoucherRedemptionRepository voucherRedemptionRepository;
     private final ProductVariantRepository productVariantRepository;
     private final PaymentRepository paymentRepository;
+    private final UserPaymentInfoRepository userPaymentInfoRepository;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final VNPayService vnPayService;
@@ -736,7 +740,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         int totalSelectedItems = items.stream().mapToInt(CartItem::getQuantity).sum();
 
-        List<String> availablePaymentMethods = List.of("COD", "VNPAY");
+        List<String> availablePaymentMethods = List.of("COD", "VNPAY", "VNPAY_TOKEN");
 
         return new CheckoutPreviewResponse(
                 deliveryAddress,
@@ -1519,10 +1523,29 @@ public class CheckoutServiceImpl implements CheckoutService {
             cartItemRepository.deleteByCartIdAndIdIn(cartId, uniqueItemIds);
         }
 
-        // 18. Build PlaceOrderResponse
+        // 18. Build PlaceOrderResponse & Handle 1-Click Token Pay
         String paymentUrl = null;
         if (request.paymentMethod() == PaymentMethod.VNPAY && finalTotalAmount.compareTo(BigDecimal.ZERO) > 0) {
             paymentUrl = vnPayService.createPaymentUrl(payment, request.bankCode(), resolveClientIp());
+        } else if (request.paymentMethod() == PaymentMethod.VNPAY_TOKEN && finalTotalAmount.compareTo(BigDecimal.ZERO) > 0) {
+            UserPaymentInfo paymentInfo;
+            if (request.paymentInfoId() != null) {
+                paymentInfo = userPaymentInfoRepository.findByIdAndUserIdAndStatus(request.paymentInfoId(), user.getId(), PaymentInfoStatus.ACTIVE)
+                        .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_INFO_NOT_FOUND));
+            } else {
+                paymentInfo = userPaymentInfoRepository.findByUserIdAndStatusOrderByIsDefaultDescCreatedAtDesc(user.getId(), PaymentInfoStatus.ACTIVE)
+                        .stream().findFirst()
+                        .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_INFO_NOT_FOUND));
+            }
+
+            vnPayService.executeTokenPay(payment, paymentInfo.getVnpToken(), resolveClientIp());
+
+            // Advance orders to PENDING_CONFIRMATION since payment is PAID
+            for (Order o : createdOrders) {
+                o.setStatus(OrderStatus.PENDING_CONFIRMATION);
+                o.setUpdatedAt(now);
+            }
+            orderRepository.saveAll(createdOrders);
         }
 
         return new PlaceOrderResponse(

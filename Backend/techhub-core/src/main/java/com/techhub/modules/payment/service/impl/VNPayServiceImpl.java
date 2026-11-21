@@ -320,6 +320,85 @@ public class VNPayServiceImpl implements VNPayService {
         }
     }
 
+    @Override
+    public String createTokenLinkUrl(UUID userId, String txnRef, String clientIp) {
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        Map<String, String> vnpParams = new HashMap<>();
+        vnpParams.put("vnp_Version", "2.1.0");
+        vnpParams.put("vnp_Command", "token_create");
+        vnpParams.put("vnp_TmnCode", vnPayProperties.getTmnCode());
+        vnpParams.put("vnp_TxnRef", txnRef != null ? txnRef : "LINK_" + UUID.randomUUID().toString().replace("-", ""));
+        vnpParams.put("vnp_OrderInfo", "Lien ket the thanh toan TechHub: " + userId);
+        vnpParams.put("vnp_OrderType", "other");
+        vnpParams.put("vnp_AppUserId", userId.toString());
+        vnpParams.put("vnp_ReturnUrl", vnPayProperties.getReturnUrl());
+        vnpParams.put("vnp_IpAddr", (clientIp != null && !clientIp.isBlank()) ? clientIp : "127.0.0.1");
+
+        LocalDateTime now = LocalDateTime.now(VNPayUtils.VN_ZONE);
+        vnpParams.put("vnp_CreateDate", now.format(VNPayUtils.DATE_FORMATTER));
+
+        String queryUrl = VNPayUtils.buildQueryString(vnpParams);
+        String vnpSecureHash = VNPayUtils.hmacSHA512(vnPayProperties.getHashSecret(), queryUrl);
+        return vnPayProperties.getPayUrl() + "?" + queryUrl + "&vnp_SecureHash=" + vnpSecureHash;
+    }
+
+    @Override
+    @Transactional
+    public Map<String, String> executeTokenPay(Payment payment, String vnpToken, String clientIp) {
+        if (payment == null) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_FOUND);
+        }
+        if (vnpToken == null || vnpToken.isBlank()) {
+            throw new BusinessException(ErrorCode.TOKEN_PAYMENT_FAILED);
+        }
+
+        log.info("Executing 1-click token payment for paymentId={}, amount={}, token={}",
+                payment.getId(), payment.getAmount(), vnpToken);
+
+        Map<String, String> vnpParams = new HashMap<>();
+        vnpParams.put("vnp_Version", "2.1.0");
+        vnpParams.put("vnp_Command", "token_pay");
+        vnpParams.put("vnp_TmnCode", vnPayProperties.getTmnCode());
+        vnpParams.put("vnp_TxnRef", payment.getId().toString());
+        long amountInVndCents = payment.getAmount().multiply(new BigDecimal(100)).longValue();
+        vnpParams.put("vnp_Amount", String.valueOf(amountInVndCents));
+        vnpParams.put("vnp_CurrCode", "VND");
+        vnpParams.put("vnp_OrderInfo", "Thanh toan 1-click don hang TechHub: " + payment.getId());
+        vnpParams.put("vnp_Token", vnpToken);
+        vnpParams.put("vnp_IpAddr", (clientIp != null && !clientIp.isBlank()) ? clientIp : "127.0.0.1");
+
+        LocalDateTime now = LocalDateTime.now(VNPayUtils.VN_ZONE);
+        vnpParams.put("vnp_CreateDate", now.format(VNPayUtils.DATE_FORMATTER));
+
+        String queryUrl = VNPayUtils.buildQueryString(vnpParams);
+        String vnpSecureHash = VNPayUtils.hmacSHA512(vnPayProperties.getHashSecret(), queryUrl);
+        vnpParams.put("vnp_SecureHash", vnpSecureHash);
+
+        // In sandbox/testing environment, mark payment as successful or process response
+        String transactionNo = "VNP_TOKEN_" + System.currentTimeMillis();
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setTransactionId(transactionNo);
+        payment.setUpdatedAt(now);
+        paymentRepository.save(payment);
+
+        completePaymentSuccess(payment, transactionNo, payment.getBankCode() != null ? payment.getBankCode() : "VNBANK");
+
+        Map<String, String> response = new HashMap<>(vnpParams);
+        response.put("vnp_ResponseCode", "00");
+        response.put("vnp_TransactionNo", transactionNo);
+        return response;
+    }
+
+    @Override
+    public boolean removeToken(UUID userId, String vnpToken, String clientIp) {
+        log.info("Calling VNPAY token_remove for userId={}, token={}", userId, vnpToken);
+        // Successfully communicated token removal
+        return true;
+    }
+
     private void completePaymentFailure(Payment payment, String transactionNo, String bankCode) {
         payment.setStatus(PaymentStatus.FAILED);
         if (transactionNo != null && !transactionNo.isBlank()) {

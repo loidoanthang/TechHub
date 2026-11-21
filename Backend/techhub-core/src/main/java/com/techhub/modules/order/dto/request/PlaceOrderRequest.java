@@ -17,6 +17,8 @@ public record PlaceOrderRequest(
         @NotNull(message = "Payment method is required")
         PaymentMethod paymentMethod,
 
+        UUID paymentInfoId,
+
         String bankCode,
 
         @NotEmpty(message = "Selected cart item IDs cannot be empty")
@@ -39,7 +41,20 @@ public record PlaceOrderRequest(
             List<UUID> selectedCartItemIds,
             List<ShopOrderRequest> shopOrders
     ) {
-        this(addressId, paymentMethod, null, selectedCartItemIds, shopOrders, null, null, null);
+        this(addressId, paymentMethod, null, null, selectedCartItemIds, shopOrders, null, null, null);
+    }
+
+    public PlaceOrderRequest(
+            UUID addressId,
+            PaymentMethod paymentMethod,
+            String bankCode,
+            List<UUID> selectedCartItemIds,
+            List<ShopOrderRequest> shopOrders,
+            UUID platformVoucherId,
+            UUID platformShippingVoucherId,
+            String idempotencyKey
+    ) {
+        this(addressId, paymentMethod, null, bankCode, selectedCartItemIds, shopOrders, platformVoucherId, platformShippingVoucherId, idempotencyKey);
     }
 
     public PlaceOrderRequest(
@@ -51,6 +66,6 @@ public record PlaceOrderRequest(
             UUID platformShippingVoucherId,
             String idempotencyKey
     ) {
-        this(addressId, paymentMethod, null, selectedCartItemIds, shopOrders, platformVoucherId, platformShippingVoucherId, idempotencyKey);
+        this(addressId, paymentMethod, null, null, selectedCartItemIds, shopOrders, platformVoucherId, platformShippingVoucherId, idempotencyKey);
     }
 }

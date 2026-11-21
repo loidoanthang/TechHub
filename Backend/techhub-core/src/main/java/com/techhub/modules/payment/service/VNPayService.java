@@ -45,4 +45,34 @@ public interface VNPayService {
      * @return New VNPAY payment redirect URL
      */
     String retryPayment(UUID userId, UUID paymentId, String bankCode, String clientIp);
+
+    /**
+     * Create VNPAY token creation redirect URL (vnp_Command=token_create).
+     *
+     * @param userId   ID of buyer linking their card
+     * @param txnRef   Transaction reference for this linking session
+     * @param clientIp Client IP address
+     * @return Full redirect URL with HMAC-SHA512 checksum
+     */
+    String createTokenLinkUrl(UUID userId, String txnRef, String clientIp);
+
+    /**
+     * Execute 1-click token payment (vnp_Command=token_pay).
+     *
+     * @param payment  The Payment entity
+     * @param vnpToken Token of the linked card
+     * @param clientIp Client IP address
+     * @return Result map from VNPAY or throws BusinessException if rejected
+     */
+    Map<String, String> executeTokenPay(Payment payment, String vnpToken, String clientIp);
+
+    /**
+     * Remove a stored token on VNPAY gateway (vnp_Command=token_remove).
+     *
+     * @param userId   ID of buyer
+     * @param vnpToken Token of the card to remove
+     * @param clientIp Client IP address
+     * @return true if successfully removed on VNPAY
+     */
+    boolean removeToken(UUID userId, String vnpToken, String clientIp);
 }

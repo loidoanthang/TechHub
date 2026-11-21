@@ -1,14 +1,18 @@
 package com.techhub.modules.user.service;
 
-import com.techhub.modules.payment.dto.request.CreatePaymentInfoRequest;
 import com.techhub.modules.payment.dto.response.PaymentInfoResponse;
+import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
+import com.techhub.modules.payment.dto.response.VNPayTokenLinkResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface UserPaymentInfoService {
 
-    PaymentInfoResponse createPaymentInfo(UUID userId, CreatePaymentInfoRequest request);
+    VNPayTokenLinkResponse initiateTokenLink(UUID userId, String clientIp);
+
+    VNPayIpnResponse processTokenCreateIpn(Map<String, String> queryParams);
 
     List<PaymentInfoResponse> getPaymentInfos(UUID userId);
 

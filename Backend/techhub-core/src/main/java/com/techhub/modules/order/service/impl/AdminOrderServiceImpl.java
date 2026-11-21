@@ -387,6 +387,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         return switch (method) {
             case COD -> "Thanh toán khi nhận hàng (COD)";
             case VNPAY -> "Cổng thanh toán VNPAY (QR, Thẻ ATM, Visa/Master, Ví VNPAY)";
+            case VNPAY_TOKEN -> "Thanh toán nhanh bằng thẻ liên kết VNPAY (1-Click Checkout)";
         };
     }
 

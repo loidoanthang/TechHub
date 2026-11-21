@@ -1,5 +1,6 @@
 package com.techhub.modules.user.entity;
 
+import com.techhub.modules.payment.enums.PaymentInfoStatus;
 import com.techhub.modules.payment.enums.PaymentType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,10 +19,11 @@ import java.util.UUID;
 @Table(
         name = "user_payment_info",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_user_payment_info_user_provider_account", columnNames = {"user_id", "provider", "account_number"})
+                @UniqueConstraint(name = "uk_user_payment_info_token", columnNames = {"vnp_token"})
         },
         indexes = {
-                @Index(name = "idx_user_payment_info_user_id", columnList = "user_id")
+                @Index(name = "idx_user_payment_info_user_id", columnList = "user_id"),
+                @Index(name = "idx_user_payment_info_token", columnList = "vnp_token")
         }
 )
 public class UserPaymentInfo {
@@ -36,19 +38,28 @@ public class UserPaymentInfo {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_type", nullable = false, length = 20)
-    private PaymentType paymentType;
+    @Builder.Default
+    private PaymentType paymentType = PaymentType.BANK_ACCOUNT;
 
-    @Column(name = "provider", nullable = false, length = 50)
-    private String provider;
+    @Column(name = "vnp_token", length = 255)
+    private String vnpToken;
 
-    @Column(name = "account_number", nullable = false, length = 100)
-    private String accountNumber;
+    @Column(name = "bank_code", length = 50)
+    private String bankCode;
+
+    @Column(name = "card_mask", length = 50)
+    private String cardMask;
+
+    @Column(name = "card_type", length = 20)
+    private String cardType;
 
     @Column(name = "account_holder_name", length = 150)
     private String accountHolderName;
 
-    @Column(name = "card_expiry", length = 7)
-    private String cardExpiry;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private PaymentInfoStatus status = PaymentInfoStatus.ACTIVE;
 
     @Column(name = "is_default", nullable = false)
     @Builder.Default

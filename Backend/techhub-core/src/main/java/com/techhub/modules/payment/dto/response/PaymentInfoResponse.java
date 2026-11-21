@@ -1,7 +1,8 @@
 package com.techhub.modules.payment.dto.response;
 
-import com.techhub.modules.user.entity.UserPaymentInfo;
+import com.techhub.modules.payment.enums.PaymentInfoStatus;
 import com.techhub.modules.payment.enums.PaymentType;
+import com.techhub.modules.user.entity.UserPaymentInfo;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -9,10 +10,11 @@ import java.util.UUID;
 public record PaymentInfoResponse(
         UUID id,
         PaymentType paymentType,
-        String provider,
-        String accountNumber,
+        String bankCode,
+        String cardMask,
+        String cardType,
         String accountHolderName,
-        String cardExpiry,
+        PaymentInfoStatus status,
         boolean isDefault,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
@@ -21,26 +23,14 @@ public record PaymentInfoResponse(
         return new PaymentInfoResponse(
                 info.getId(),
                 info.getPaymentType(),
-                info.getProvider(),
-                maskAccountNumber(info.getAccountNumber()),
+                info.getBankCode(),
+                info.getCardMask(),
+                info.getCardType(),
                 info.getAccountHolderName(),
-                info.getCardExpiry(),
+                info.getStatus(),
                 info.isDefault(),
                 info.getCreatedAt(),
                 info.getUpdatedAt()
         );
-    }
-
-    public static String maskAccountNumber(String rawNumber) {
-        if (rawNumber == null || rawNumber.isBlank()) {
-            return "";
-        }
-        int len = rawNumber.length();
-        if (len <= 4) {
-            return "*".repeat(len);
-        }
-        String lastFour = rawNumber.substring(len - 4);
-        int maskLen = Math.max(6, len - 4);
-        return "*".repeat(maskLen) + lastFour;
     }
 }

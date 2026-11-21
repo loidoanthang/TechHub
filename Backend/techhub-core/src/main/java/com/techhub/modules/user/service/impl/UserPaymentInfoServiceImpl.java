@@ -1,28 +1,30 @@
 package com.techhub.modules.user.service.impl;
 
+import com.techhub.common.VNPayUtils;
+import com.techhub.config.properties.VNPayProperties;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
-import com.techhub.modules.payment.dto.request.CreatePaymentInfoRequest;
 import com.techhub.modules.payment.dto.response.PaymentInfoResponse;
+import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
+import com.techhub.modules.payment.dto.response.VNPayTokenLinkResponse;
+import com.techhub.modules.payment.enums.PaymentInfoStatus;
+import com.techhub.modules.payment.enums.PaymentType;
+import com.techhub.modules.payment.service.VNPayService;
 import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.entity.UserPaymentInfo;
-import com.techhub.modules.payment.enums.PaymentType;
 import com.techhub.modules.user.enums.UserStatus;
 import com.techhub.modules.user.repository.UserPaymentInfoRepository;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.modules.user.service.UserPaymentInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
-import com.techhub.modules.user.service.UserPaymentInfoService;
 
 @Service
 @RequiredArgsConstructor
@@ -30,123 +32,109 @@ import com.techhub.modules.user.service.UserPaymentInfoService;
 public class UserPaymentInfoServiceImpl implements UserPaymentInfoService {
 
     private static final int MAX_PAYMENT_INFO_PER_USER = 5;
-    private static final DateTimeFormatter EXPIRY_FORMATTER = DateTimeFormatter.ofPattern("MM/yyyy");
 
     private final UserRepository userRepository;
     private final UserPaymentInfoRepository userPaymentInfoRepository;
+    private final VNPayService vnPayService;
+    private final VNPayProperties vnPayProperties;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public PaymentInfoResponse createPaymentInfo(UUID userId, CreatePaymentInfoRequest request) {
-        log.info("Creating payment info for userId={}, paymentType={}, provider='{}'",
-                userId, request.paymentType(), request.provider());
+    @Transactional(readOnly = true)
+    public VNPayTokenLinkResponse initiateTokenLink(UUID userId, String clientIp) {
+        log.info("Initiating VNPAY card linking for userId={}", userId);
 
-        // 1. Validate User
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getStatus() != UserStatus.ACTIVE) {
-            log.warn("Attempt to add payment info for non-active user: userId={}, status={}", userId, user.getStatus());
+            log.warn("Attempt to link card for non-active user: userId={}, status={}", userId, user.getStatus());
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
-        // 2. Sanitize Inputs
-        String cleanAccountNumber = request.accountNumber().replaceAll("[^0-9a-zA-Z]", "").trim();
-        if (cleanAccountNumber.length() < 6 || cleanAccountNumber.length() > 30) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT_DATA);
-        }
-
-        String normalizedProvider = request.provider().trim();
-        String normalizedHolderName = (request.accountHolderName() != null)
-                ? request.accountHolderName().trim().toUpperCase()
-                : null;
-
-        // 3. Check Capacity Limit (Max 5)
-        long currentCount = userPaymentInfoRepository.countByUserId(userId);
+        long currentCount = userPaymentInfoRepository.countByUserIdAndStatus(userId, PaymentInfoStatus.ACTIVE);
         if (currentCount >= MAX_PAYMENT_INFO_PER_USER) {
             log.warn("Payment info capacity reached for userId={}: currentCount={}", userId, currentCount);
             throw new BusinessException(ErrorCode.PAYMENT_INFO_LIMIT_EXCEEDED);
         }
 
-        // 4. Check Duplicate Account for same user and provider
-        if (userPaymentInfoRepository.existsByUserIdAndProviderIgnoreCaseAndAccountNumber(
-                userId, normalizedProvider, cleanAccountNumber)) {
-            log.warn("Duplicate payment info detected: userId={}, provider='{}'", userId, normalizedProvider);
-            throw new BusinessException(ErrorCode.DUPLICATE_PAYMENT_INFO);
+        String txnRef = "LINK_" + userId.toString().substring(0, 8) + "_" + System.currentTimeMillis();
+        String redirectUrl = vnPayService.createTokenLinkUrl(userId, txnRef, clientIp);
+
+        return new VNPayTokenLinkResponse(redirectUrl, txnRef);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public VNPayIpnResponse processTokenCreateIpn(Map<String, String> queryParams) {
+        log.info("Processing VNPAY Token Create IPN: {}", queryParams);
+
+        if (!VNPayUtils.verifySignature(queryParams, vnPayProperties.getHashSecret())) {
+            log.warn("VNPAY Token Create IPN: Invalid checksum");
+            return VNPayIpnResponse.invalidChecksum();
         }
 
-        // 5. Validate Card Expiry according to PaymentType
-        String validatedCardExpiry = null;
-        if (request.paymentType() == PaymentType.CREDIT_CARD) {
-            if (request.cardExpiry() == null || request.cardExpiry().isBlank()) {
-                throw new BusinessException(ErrorCode.INVALID_INPUT_DATA);
-            }
-            String expiry = request.cardExpiry().trim();
-            if (!expiry.matches("^(0[1-9]|1[0-2])\\/\\d{4}$")) {
-                throw new BusinessException(ErrorCode.INVALID_CARD_EXPIRY);
-            }
-            try {
-                YearMonth expiryYearMonth = YearMonth.parse(expiry, EXPIRY_FORMATTER);
-                if (expiryYearMonth.isBefore(YearMonth.now())) {
-                    log.warn("Expired credit card rejected: userId={}, expiry='{}'", userId, expiry);
-                    throw new BusinessException(ErrorCode.INVALID_CARD_EXPIRY);
-                }
-            } catch (DateTimeParseException ex) {
-                throw new BusinessException(ErrorCode.INVALID_CARD_EXPIRY);
-            }
-            validatedCardExpiry = expiry;
+        String responseCode = queryParams.get("vnp_ResponseCode");
+        if (!"00".equals(responseCode)) {
+            log.warn("VNPAY Token Create IPN failed with responseCode: {}", responseCode);
+            return VNPayIpnResponse.success();
         }
 
-        // 6. Resolve Default Status (Always reset atomically when willBeDefault is true)
-        boolean willBeDefault = (currentCount == 0) || Boolean.TRUE.equals(request.isDefault());
-        if (willBeDefault) {
-            userPaymentInfoRepository.resetDefaultByUserId(userId);
+        String appUserId = queryParams.get("vnp_AppUserId");
+        String token = queryParams.get("vnp_Token");
+        String bankCode = queryParams.get("vnp_BankCode");
+        String cardType = queryParams.get("vnp_CardType");
+        String cardMask = queryParams.get("vnp_CardNumber");
+
+        if (appUserId == null || token == null) {
+            log.warn("VNPAY Token Create IPN: missing appUserId or token");
+            return VNPayIpnResponse.orderNotFound();
         }
 
-        // 7. Save Entity with Concurrency Duplicate Protection
+        UUID userId;
+        try {
+            userId = UUID.fromString(appUserId);
+        } catch (Exception e) {
+            log.warn("VNPAY Token Create IPN: malformed userId: {}", appUserId);
+            return VNPayIpnResponse.orderNotFound();
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        Optional<UserPaymentInfo> existingOpt = userPaymentInfoRepository.findByVnpToken(token);
+        if (existingOpt.isPresent()) {
+            UserPaymentInfo existing = existingOpt.get();
+            existing.setStatus(PaymentInfoStatus.ACTIVE);
+            userPaymentInfoRepository.save(existing);
+            return VNPayIpnResponse.success();
+        }
+
+        long activeCount = userPaymentInfoRepository.countByUserIdAndStatus(userId, PaymentInfoStatus.ACTIVE);
+        boolean isDefault = (activeCount == 0);
+
         UserPaymentInfo paymentInfo = UserPaymentInfo.builder()
                 .user(user)
-                .paymentType(request.paymentType())
-                .provider(normalizedProvider)
-                .accountNumber(cleanAccountNumber)
-                .accountHolderName(normalizedHolderName)
-                .cardExpiry(validatedCardExpiry)
-                .isDefault(willBeDefault)
+                .paymentType(PaymentType.BANK_ACCOUNT)
+                .vnpToken(token)
+                .bankCode(bankCode != null ? bankCode : "VNPAY")
+                .cardMask(cardMask != null ? cardMask : "****")
+                .cardType(cardType != null ? cardType : "ATM")
+                .status(PaymentInfoStatus.ACTIVE)
+                .isDefault(isDefault)
                 .build();
 
-        UserPaymentInfo saved;
-        try {
-            saved = userPaymentInfoRepository.saveAndFlush(paymentInfo);
-        } catch (DataIntegrityViolationException ex) {
-            log.warn("Concurrent duplicate payment info detected: userId={}, provider='{}'", userId, normalizedProvider);
-            throw new BusinessException(ErrorCode.DUPLICATE_PAYMENT_INFO);
-        }
-
-        log.info("Payment info created successfully: id={}, userId={}, isDefault={}",
-                saved.getId(), userId, saved.isDefault());
-
-        return PaymentInfoResponse.from(saved);
+        userPaymentInfoRepository.save(paymentInfo);
+        log.info("Saved new VNPAY token for user {}: token={}", userId, token);
+        return VNPayIpnResponse.success();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<PaymentInfoResponse> getPaymentInfos(UUID userId) {
-        log.info("Fetching payment infos for userId={}", userId);
-
-        // 1. Validate User
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            log.warn("Attempt to fetch payment info for non-active user: userId={}, status={}", userId, user.getStatus());
-            throw new BusinessException(ErrorCode.ACCESS_DENIED);
-        }
-
-        // 2. Query saved payment accounts (Default first, then newest first)
-        List<UserPaymentInfo> paymentInfos = userPaymentInfoRepository.findByUserIdOrderByIsDefaultDescCreatedAtDesc(userId);
-
-        // 3. Map to DTO with data masking
-        return paymentInfos.stream()
+        log.info("Fetching active payment infos for userId={}", userId);
+        return userPaymentInfoRepository
+                .findByUserIdAndStatusOrderByIsDefaultDescCreatedAtDesc(userId, PaymentInfoStatus.ACTIVE)
+                .stream()
                 .map(PaymentInfoResponse::from)
                 .toList();
     }
@@ -156,7 +144,6 @@ public class UserPaymentInfoServiceImpl implements UserPaymentInfoService {
     public PaymentInfoResponse setDefaultPaymentInfo(UUID userId, UUID paymentInfoId) {
         log.info("Setting default payment info: userId={}, paymentInfoId={}", userId, paymentInfoId);
 
-        // 1. Validate User
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -165,23 +152,16 @@ public class UserPaymentInfoServiceImpl implements UserPaymentInfoService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
-        // 2. Validate Payment Info exists and belongs to current user (IDOR prevention)
-        UserPaymentInfo paymentInfo = userPaymentInfoRepository.findByIdAndUserId(paymentInfoId, userId)
+        UserPaymentInfo paymentInfo = userPaymentInfoRepository.findByIdAndUserIdAndStatus(paymentInfoId, userId, PaymentInfoStatus.ACTIVE)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_INFO_NOT_FOUND));
 
-        // 3. If already default, return immediately (Idempotency)
         if (paymentInfo.isDefault()) {
-            log.info("Payment info is already default: id={}, userId={}", paymentInfoId, userId);
             return PaymentInfoResponse.from(paymentInfo);
         }
 
-        // 4. Atomically reset all existing defaults for this user
         userPaymentInfoRepository.resetDefaultByUserId(userId);
-
-        // 5. Set this payment info as default and save
         paymentInfo.setDefault(true);
         UserPaymentInfo saved = userPaymentInfoRepository.save(paymentInfo);
-        log.info("Payment info successfully set to default: id={}, userId={}", saved.getId(), userId);
 
         return PaymentInfoResponse.from(saved);
     }
@@ -189,9 +169,8 @@ public class UserPaymentInfoServiceImpl implements UserPaymentInfoService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deletePaymentInfo(UUID userId, UUID paymentInfoId) {
-        log.info("Deleting payment info: userId={}, paymentInfoId={}", userId, paymentInfoId);
+        log.info("Removing payment info: userId={}, paymentInfoId={}", userId, paymentInfoId);
 
-        // 1. Validate User
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -200,23 +179,33 @@ public class UserPaymentInfoServiceImpl implements UserPaymentInfoService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
-        // 2. Validate Payment Info exists and belongs to current user (IDOR prevention)
-        UserPaymentInfo paymentInfo = userPaymentInfoRepository.findByIdAndUserId(paymentInfoId, userId)
+        UserPaymentInfo paymentInfo = userPaymentInfoRepository.findByIdAndUserIdAndStatus(paymentInfoId, userId, PaymentInfoStatus.ACTIVE)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_INFO_NOT_FOUND));
 
-        // 3. Auto-promote remaining account if deleting default
         boolean wasDefault = paymentInfo.isDefault();
-        if (wasDefault) {
-            userPaymentInfoRepository.findFirstByUserIdAndIdNotOrderByCreatedAtDesc(userId, paymentInfoId)
-                    .ifPresent(nextDefault -> {
-                        log.info("Auto-promoting next payment info to default: id={}, userId={}", nextDefault.getId(), userId);
-                        nextDefault.setDefault(true);
-                        userPaymentInfoRepository.save(nextDefault);
-                    });
+
+        // 1. Mark as REMOVED locally
+        paymentInfo.setStatus(PaymentInfoStatus.REMOVED);
+        paymentInfo.setDefault(false);
+        userPaymentInfoRepository.save(paymentInfo);
+
+        // 2. Call VNPAY gateway to remove token
+        if (paymentInfo.getVnpToken() != null) {
+            try {
+                vnPayService.removeToken(userId, paymentInfo.getVnpToken(), "127.0.0.1");
+            } catch (Exception e) {
+                log.warn("Failed to notify VNPAY token removal: {}", e.getMessage());
+            }
         }
 
-        // 4. Hard delete payment info
-        userPaymentInfoRepository.delete(paymentInfo);
-        log.info("Payment info deleted successfully: id={}, userId={}, wasDefault={}", paymentInfoId, userId, wasDefault);
+        // 3. Promote another active card as default if wasDefault
+        if (wasDefault) {
+            userPaymentInfoRepository.findFirstByUserIdAndIdNotAndStatusOrderByCreatedAtDesc(userId, paymentInfoId, PaymentInfoStatus.ACTIVE)
+                    .ifPresent(nextDefault -> {
+                        nextDefault.setDefault(true);
+                        userPaymentInfoRepository.save(nextDefault);
+                        log.info("Promoted payment info {} to new default for userId={}", nextDefault.getId(), userId);
+                    });
+        }
     }
 }

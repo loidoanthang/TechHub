@@ -33,7 +33,8 @@ public class CheckoutController {
         return ApiResponse.success(data, "Checkout preview calculated successfully", null);
     }
 
-    @PostMapping({"", "/place-order"})
+    @PostMapping("/place-order")
+    @PreAuthorize("hasRole('BUYER')")
     @RequireActiveBuyer
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<PlaceOrderResponse> placeOrder(

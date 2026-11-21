@@ -120,6 +120,7 @@ public enum ErrorCode {
     PAYMENT_INFO_NOT_FOUND(HttpStatus.NOT_FOUND, "Payment information not found"),
     PAYMENT_INFO_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "Payment information limit reached. Maximum 5 accounts allowed per user"),
     DUPLICATE_PAYMENT_INFO(HttpStatus.BAD_REQUEST, "Payment account number already saved for this provider"),
+    TOKEN_PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "Token payment failed via VNPAY gateway"),
     INVALID_CARD_EXPIRY(HttpStatus.BAD_REQUEST, "Invalid card expiry date or card has expired"),
     ORDER_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "Order item not found"),
     ORDER_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "Only completed orders can be reviewed"),
