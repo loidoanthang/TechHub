@@ -774,6 +774,11 @@ public class CheckoutServiceImpl implements CheckoutService {
             Optional<Payment> existingPaymentOpt = paymentRepository.findByTransactionId(request.idempotencyKey());
             if (existingPaymentOpt.isPresent()) {
                 Payment existingPayment = existingPaymentOpt.get();
+                if (existingPayment.getUser() != null && !existingPayment.getUser().getId().equals(userId)) {
+                    log.warn("IDOR attempt: User {} attempted to access payment {} with idempotencyKey {}",
+                            userId, existingPayment.getId(), request.idempotencyKey());
+                    throw new BusinessException(ErrorCode.ACCESS_DENIED);
+                }
                 List<Order> existingOrders = orderRepository.findByPaymentId(existingPayment.getId());
                 if (!existingOrders.isEmpty()) {
                     log.info("Idempotent request detected for key {}. Returning existing order summary.", request.idempotencyKey());

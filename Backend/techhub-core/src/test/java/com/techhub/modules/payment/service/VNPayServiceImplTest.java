@@ -383,6 +383,47 @@ class VNPayServiceImplTest {
         verify(paymentRepository).save(payment);
     }
 
+    @Test
+    @DisplayName("retryPaymentByOrder should throw ORDER_NOT_FOUND if order does not exist or belongs to another user (IDOR)")
+    void retryPaymentByOrder_OrderNotFound() {
+        UUID orderId = UUID.randomUUID();
+        when(orderRepository.findByIdAndUserId(orderId, buyer.getId())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> vnPayService.retryPaymentByOrder(buyer.getId(), orderId, null, "127.0.0.1"))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ORDER_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("retryPaymentByOrder should throw PAYMENT_NOT_FOUND if order has no linked payment")
+    void retryPaymentByOrder_NoPayment() {
+        UUID orderId = UUID.randomUUID();
+        Order orderWithoutPayment = Order.builder().id(orderId).user(buyer).payment(null).build();
+        when(orderRepository.findByIdAndUserId(orderId, buyer.getId())).thenReturn(Optional.of(orderWithoutPayment));
+
+        assertThatThrownBy(() -> vnPayService.retryPaymentByOrder(buyer.getId(), orderId, null, "127.0.0.1"))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.PAYMENT_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("retryPaymentByOrder should succeed and return retry URL when valid order and payment")
+    void retryPaymentByOrder_Success() {
+        mockVNPayProperties();
+        UUID orderId = UUID.randomUUID();
+        Order activeOrder = Order.builder().id(orderId).status(OrderStatus.PENDING_PAYMENT).user(buyer).payment(payment).build();
+        payment.getOrders().add(activeOrder);
+        when(orderRepository.findByIdAndUserId(orderId, buyer.getId())).thenReturn(Optional.of(activeOrder));
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+
+        String retryUrl = vnPayService.retryPaymentByOrder(buyer.getId(), orderId, "VNBANK", "127.0.0.1");
+
+        assertThat(retryUrl).isNotNull();
+        assertThat(retryUrl).startsWith(payUrl + "?");
+        assertThat(retryUrl).contains("vnp_BankCode=VNBANK");
+        assertThat(retryUrl).contains("vnp_TxnRef=" + payment.getId() + "_");
+    }
+
     private Map<String, String> createValidVNPayParams(String txnRef, String amount, String responseCode, String transactionStatus) {
         Map<String, String> params = new HashMap<>();
         params.put("vnp_TxnRef", txnRef);
@@ -433,6 +474,17 @@ class VNPayServiceImplTest {
         assertThat(payment.getTransactionId()).isEqualTo("14567890");
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING_CONFIRMATION);
         verify(paymentRepository).save(payment);
+    }
+
+    @Test
+    @DisplayName("queryTransaction with userId should throw ACCESS_DENIED if caller does not own payment (IDOR)")
+    void queryTransaction_AccessDenied_WhenNotOwner() {
+        UUID anotherUserId = UUID.randomUUID();
+        when(paymentRepository.findById(payment.getId())).thenReturn(Optional.of(payment));
+
+        assertThatThrownBy(() -> vnPayService.queryTransaction(anotherUserId, payment.getId(), "127.0.0.1"))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ACCESS_DENIED);
     }
 
     @Test

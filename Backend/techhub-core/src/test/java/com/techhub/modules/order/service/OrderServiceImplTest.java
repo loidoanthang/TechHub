@@ -233,6 +233,7 @@ class OrderServiceImplTest {
         assertEquals("ORD-20261015-001", firstOrder.orderNumber());
         assertEquals("Apple Official Store", firstOrder.shopName());
         assertEquals("apple-official-store", firstOrder.shopSlug());
+        assertEquals(payment.getId(), firstOrder.paymentId());
         assertEquals(OrderStatus.CONFIRMED, firstOrder.status());
         assertEquals("Đã xác nhận", firstOrder.statusDescription());
         assertEquals(1, firstOrder.items().size());
@@ -1047,6 +1048,7 @@ class OrderServiceImplTest {
         assertEquals("Giao trước 17h chiều! Đồ dễ vỡ 📦⚡", response.note());
         assertEquals(OrderStatus.PREPARING, response.status());
         assertEquals("Người bán đang chuẩn bị hàng", response.statusDescription());
+        assertEquals(payment.getId(), response.paymentId());
         assertEquals(List.of("REQUEST_CANCELLATION"), response.availableActions());
     }
 

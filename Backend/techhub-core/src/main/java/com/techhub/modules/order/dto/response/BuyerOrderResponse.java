@@ -19,6 +19,7 @@ public record BuyerOrderResponse(
         String statusDescription,
         PaymentMethod paymentMethod,
         PaymentStatus paymentStatus,
+        UUID paymentId,
         BigDecimal totalProductAmount,
         BigDecimal shippingFee,
         BigDecimal shopDiscountAmount,

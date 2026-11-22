@@ -31,6 +31,7 @@ public record BuyerOrderDetailResponse(
         String paymentMethodName,
         PaymentStatus paymentStatus,
         String paymentStatusDescription,
+        UUID paymentId,
         LocalDateTime createdAt,
         LocalDateTime deliveredAt,
         LocalDateTime completedAt,

@@ -254,6 +254,26 @@ public class VNPayServiceImpl implements VNPayService {
         return buildPaymentUrl(payment, payment.getBankCode(), clientIp, retryTxnRef);
     }
 
+    @Override
+    @Transactional
+    public String retryPaymentByOrder(UUID userId, UUID orderId, String bankCode, String clientIp) {
+        log.info("Retrying payment by orderId {} for user {}", orderId, userId);
+
+        if (orderId == null) {
+            throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+        }
+
+        Order order = orderRepository.findByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+
+        Payment payment = order.getPayment();
+        if (payment == null) {
+            throw new BusinessException(ErrorCode.PAYMENT_NOT_FOUND);
+        }
+
+        return retryPayment(userId, payment.getId(), bankCode, clientIp);
+    }
+
     private String buildPaymentUrl(Payment payment, String bankCode, String clientIp, String txnRef) {
         String ipAddress = (clientIp != null && !clientIp.isBlank()) ? clientIp : "127.0.0.1";
         LocalDateTime now = VNPayUtils.getCurrentTimeVN();
@@ -450,12 +470,24 @@ public class VNPayServiceImpl implements VNPayService {
     @Override
     @Transactional
     public VNPayQueryDrResponse queryTransaction(UUID paymentId, String clientIp) {
+        return queryTransaction(null, paymentId, clientIp);
+    }
+
+    @Override
+    @Transactional
+    public VNPayQueryDrResponse queryTransaction(UUID userId, UUID paymentId, String clientIp) {
         if (paymentId == null) {
             throw new BusinessException(ErrorCode.PAYMENT_NOT_FOUND);
         }
 
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
+
+        if (userId != null && (payment.getUser() == null || !payment.getUser().getId().equals(userId))) {
+            log.warn("IDOR attempt: User {} tried to query payment {} belonging to {}",
+                    userId, paymentId, payment.getUser() != null ? payment.getUser().getId() : "null");
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
 
         String requestId = UUID.randomUUID().toString().replace("-", "");
         String version = "2.1.0";

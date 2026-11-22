@@ -50,6 +50,19 @@ public interface VNPayService {
     String retryPayment(UUID userId, UUID paymentId, String bankCode, String clientIp);
 
     /**
+     * Retry payment for an existing pending/failed order.
+     * Looks up order by orderId and userId (IDOR protected), retrieves its payment session,
+     * and delegates to retryPayment.
+     *
+     * @param userId    ID of authenticated buyer
+     * @param orderId   ID of Order entity
+     * @param bankCode  Optional bank/channel code
+     * @param clientIp  Client IP address
+     * @return New VNPAY payment redirect URL
+     */
+    String retryPaymentByOrder(UUID userId, UUID orderId, String bankCode, String clientIp);
+
+    /**
      * Create VNPAY token creation redirect URL (vnp_Command=token_create).
      *
      * @param userId   ID of buyer linking their card
@@ -87,6 +100,17 @@ public interface VNPayService {
      * @return VNPayQueryDrResponse from VNPAY
      */
     VNPayQueryDrResponse queryTransaction(UUID paymentId, String clientIp);
+
+    /**
+     * Query transaction status directly from VNPAY WebAPI with IDOR protection.
+     * If userId is provided, validates that the payment belongs to the user.
+     *
+     * @param userId    Optional ID of authenticated buyer (null for admin/internal bypass)
+     * @param paymentId ID of Payment entity
+     * @param clientIp  Client IP address
+     * @return VNPayQueryDrResponse from VNPAY
+     */
+    VNPayQueryDrResponse queryTransaction(UUID userId, UUID paymentId, String clientIp);
 
     /**
      * Request a refund for a paid transaction via VNPAY WebAPI (vnp_Command=refund).

@@ -1538,6 +1538,7 @@ class CheckoutServiceImplTest {
         String idemKey = "idem-test-key-12345";
         Payment existingPayment = Payment.builder()
                 .id(UUID.randomUUID())
+                .user(buyer)
                 .paymentMethod(PaymentMethod.COD)
                 .status(PaymentStatus.PENDING)
                 .amount(BigDecimal.valueOf(530000))
@@ -1576,5 +1577,39 @@ class CheckoutServiceImplTest {
         assertEquals("ORD-20261015-EXISTING", response.orders().get(0).orderNumber());
         // Không tạo thêm đơn, không trừ thêm kho
         verify(productVariantRepository, never()).findAllByIdInForUpdate(any());
+    }
+
+    @Test
+    @DisplayName("TC-20: placeOrder_Idempotency_ThrowAccessDenied_WhenIdempotencyKeyBelongsToAnotherUser (IDOR Prevention)")
+    void placeOrder_Idempotency_ThrowAccessDenied_WhenIdempotencyKeyBelongsToAnotherUser() {
+        String idemKey = "idem-stolen-key-99999";
+        User anotherUser = new User();
+        anotherUser.setId(UUID.randomUUID());
+
+        Payment existingPayment = Payment.builder()
+                .id(UUID.randomUUID())
+                .user(anotherUser)
+                .paymentMethod(PaymentMethod.COD)
+                .status(PaymentStatus.PENDING)
+                .amount(BigDecimal.valueOf(530000))
+                .transactionId(idemKey)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        when(paymentRepository.findByTransactionId(idemKey)).thenReturn(Optional.of(existingPayment));
+
+        PlaceOrderRequest request = new PlaceOrderRequest(
+                defaultAddress.getId(),
+                PaymentMethod.COD,
+                List.of(cartItemA.getId()),
+                List.of(new ShopOrderRequest(shopA.getId(), List.of(), null)),
+                null,
+                null,
+                idemKey
+        );
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> checkoutService.placeOrder(userId, request));
+        assertEquals(ErrorCode.ACCESS_DENIED, ex.getErrorCode());
+        verifyNoInteractions(orderRepository);
     }
 }

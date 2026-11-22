@@ -126,7 +126,7 @@ class OrderControllerTest {
 
         BuyerOrderResponse orderResponse = new BuyerOrderResponse(
                 orderId, "ORD-20261015-001", shopId, "Apple Official Store", "apple-official-store",
-                OrderStatus.CONFIRMED, "Đã xác nhận", PaymentMethod.COD, PaymentStatus.PENDING,
+                OrderStatus.CONFIRMED, "Đã xác nhận", PaymentMethod.COD, PaymentStatus.PENDING, UUID.randomUUID(),
                 new BigDecimal("500000.00"), new BigDecimal("30000.00"),
                 BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("530000.00"),
                 1, List.of(item), LocalDateTime.now(), null, null, null,
@@ -233,7 +233,7 @@ class OrderControllerTest {
                 new BigDecimal("500000.00"), new BigDecimal("30000.00"),
                 BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("530000.00"),
                 "Giao giờ hành chính", PaymentMethod.COD, "Thanh toán khi nhận hàng (COD)",
-                PaymentStatus.PAID, "Đã thanh toán tiền mặt cho bưu tá",
+                PaymentStatus.PAID, "Đã thanh toán tiền mặt cho bưu tá", UUID.randomUUID(),
                 LocalDateTime.now(), LocalDateTime.now(), null, null,
                 Collections.emptyList(), List.of("COMPLETE_ORDER", "REQUEST_RETURN")
         );
@@ -293,7 +293,7 @@ class OrderControllerTest {
                 new BigDecimal("650000.00"), new BigDecimal("30000.00"),
                 new BigDecimal("30000.00"), new BigDecimal("20000.00"), new BigDecimal("630000.00"),
                 "Giao giờ hành chính", PaymentMethod.COD, "Thanh toán khi nhận hàng (COD)",
-                PaymentStatus.PAID, "Đã thanh toán tiền mặt cho bưu tá",
+                PaymentStatus.PAID, "Đã thanh toán tiền mặt cho bưu tá", UUID.randomUUID(),
                 LocalDateTime.now().minusHours(4), LocalDateTime.now().minusHours(1), LocalDateTime.now(), null,
                 Collections.emptyList(), List.of("REVIEW", "BUY_AGAIN")
         );

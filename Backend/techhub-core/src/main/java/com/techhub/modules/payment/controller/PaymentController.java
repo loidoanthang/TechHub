@@ -7,9 +7,11 @@ import com.techhub.modules.payment.dto.response.VNPayCallbackResponse;
 import com.techhub.modules.payment.dto.response.VNPayIpnResponse;
 import com.techhub.modules.payment.dto.response.VNPayQueryDrResponse;
 import com.techhub.modules.payment.dto.response.VNPayRefundResponse;
+import com.techhub.security.CustomUserDetails;
 import com.techhub.security.SecurityUtils;
 import com.techhub.security.annotation.RequireActiveBuyer;
 import com.techhub.modules.payment.service.VNPayService;
+import com.techhub.modules.user.enums.Role;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +70,24 @@ public class PaymentController {
     }
 
     /**
+     * Buyer retries payment for an unpaid, failed, or pending order by orderId.
+     */
+    @PostMapping("/retry-order/{orderId}")
+    @RequireActiveBuyer
+    public ApiResponse<Map<String, String>> retryPaymentByOrder(
+            @PathVariable UUID orderId,
+            @RequestBody(required = false) VNPayRetryRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        UUID currentUserId = SecurityUtils.getCurrentUserId();
+        String bankCode = (request != null) ? request.bankCode() : null;
+        String clientIp = VNPayUtils.getClientIp(httpRequest);
+
+        String paymentUrl = vnPayService.retryPaymentByOrder(currentUserId, orderId, bankCode, clientIp);
+        return ApiResponse.success(Map.of("paymentUrl", paymentUrl), "Tạo liên kết thanh toán lại thành công", null);
+    }
+
+    /**
      * Query transaction status directly from VNPAY WebAPI (QueryDR).
      */
     @PostMapping("/query/{paymentId}")
@@ -76,8 +96,13 @@ public class PaymentController {
             @PathVariable UUID paymentId,
             HttpServletRequest httpRequest
     ) {
+        CustomUserDetails currentUser = SecurityUtils.getCurrentUser();
+        boolean isAdmin = currentUser.user() != null && currentUser.user().getRoles() != null
+                && currentUser.user().getRoles().contains(Role.ADMIN);
+        UUID callerUserId = isAdmin ? null : currentUser.user().getId();
+
         String clientIp = VNPayUtils.getClientIp(httpRequest);
-        VNPayQueryDrResponse response = vnPayService.queryTransaction(paymentId, clientIp);
+        VNPayQueryDrResponse response = vnPayService.queryTransaction(callerUserId, paymentId, clientIp);
         return ApiResponse.success(response, "Truy vấn trạng thái giao dịch từ VNPAY thành công", null);
     }
 

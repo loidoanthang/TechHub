@@ -160,6 +160,24 @@ class PaymentControllerTest {
     }
 
     @Test
+    @DisplayName("retryPaymentByOrder should delegate to VNPayService and return paymentUrl")
+    void testRetryPaymentByOrder() {
+        UUID orderId = UUID.randomUUID();
+        VNPayRetryRequest request = new VNPayRetryRequest("VNBANK");
+        when(httpRequest.getRemoteAddr()).thenReturn("192.168.1.100");
+        when(vnPayService.retryPaymentByOrder(userId, orderId, "VNBANK", "192.168.1.100"))
+                .thenReturn("https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?retry_order=123");
+
+        ApiResponse<Map<String, String>> result = paymentController.retryPaymentByOrder(orderId, request, httpRequest);
+
+        assertThat(result).isNotNull();
+        assertThat(result.isSuccess()).isTrue();
+        assertThat(result.getData()).containsKey("paymentUrl");
+        assertThat(result.getData().get("paymentUrl")).contains("https://sandbox.vnpayment.vn");
+        verify(vnPayService).retryPaymentByOrder(userId, orderId, "VNBANK", "192.168.1.100");
+    }
+
+    @Test
     @DisplayName("Verify Spring Web and Security annotations on PaymentController")
     void testAnnotations() throws NoSuchMethodException {
         // Controller class annotations
@@ -184,6 +202,12 @@ class PaymentControllerTest {
         assertArrayEquals(new String[]{"/retry/{paymentId}"}, retryMethod.getAnnotation(PostMapping.class).value());
         assertTrue(retryMethod.isAnnotationPresent(RequireActiveBuyer.class));
 
+        // Retry by order method annotations
+        Method retryByOrderMethod = PaymentController.class.getMethod("retryPaymentByOrder", UUID.class, VNPayRetryRequest.class, HttpServletRequest.class);
+        assertTrue(retryByOrderMethod.isAnnotationPresent(PostMapping.class));
+        assertArrayEquals(new String[]{"/retry-order/{orderId}"}, retryByOrderMethod.getAnnotation(PostMapping.class).value());
+        assertTrue(retryByOrderMethod.isAnnotationPresent(RequireActiveBuyer.class));
+
         // Query method annotations
         Method queryMethod = PaymentController.class.getMethod("queryTransaction", UUID.class, HttpServletRequest.class);
         assertTrue(queryMethod.isAnnotationPresent(PostMapping.class));
@@ -200,7 +224,7 @@ class PaymentControllerTest {
     }
 
     @Test
-    @DisplayName("queryTransaction should call VNPayService and return response")
+    @DisplayName("queryTransaction should call VNPayService with caller userId and return response")
     void testQueryTransaction() {
         UUID paymentId = UUID.randomUUID();
         when(httpRequest.getRemoteAddr()).thenReturn("127.0.0.1");
@@ -212,14 +236,14 @@ class PaymentControllerTest {
                 .vnpMessage("Success")
                 .build();
 
-        when(vnPayService.queryTransaction(eq(paymentId), anyString())).thenReturn(mockQueryResponse);
+        when(vnPayService.queryTransaction(eq(userId), eq(paymentId), anyString())).thenReturn(mockQueryResponse);
 
         ApiResponse<VNPayQueryDrResponse> result = paymentController.queryTransaction(paymentId, httpRequest);
 
         assertThat(result).isNotNull();
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getData().vnpTransactionNo()).isEqualTo("TXN123456");
-        verify(vnPayService).queryTransaction(paymentId, "127.0.0.1");
+        verify(vnPayService).queryTransaction(userId, paymentId, "127.0.0.1");
     }
 
     @Test
