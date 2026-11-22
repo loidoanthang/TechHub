@@ -57,11 +57,6 @@ const NAV_SECTIONS: NavSection[] = [
         icon: PackageCheck,
       },
       {
-        label: "Kiểm duyệt Đánh giá",
-        href: ROUTES.ADMIN.REVIEWS,
-        icon: MessageSquareText,
-      },
-      {
         label: "Đối tác & Gian hàng",
         href: ROUTES.ADMIN.SELLERS,
         icon: Store,
