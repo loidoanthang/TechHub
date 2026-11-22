@@ -383,23 +383,27 @@ public class VNPayServiceImpl implements VNPayService {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 
+        // 1. Loại bỏ dấu hai chấm (:), chuẩn hóa chuỗi text an toàn
+        String safeUserId = userId.toString();
+        String description = "Lien ket the thanh toan TechHub";
         Map<String, String> vnpParams = new HashMap<>();
-        vnpParams.put("vnp_Version", "2.1.0");
-        vnpParams.put("vnp_Command", "token_create");
-        vnpParams.put("vnp_TmnCode", vnPayProperties.getTmnCode());
-        vnpParams.put("vnp_TxnRef", txnRef != null ? txnRef : "LINK_" + UUID.randomUUID().toString().replace("-", ""));
-        vnpParams.put("vnp_OrderInfo", "Lien ket the thanh toan TechHub: " + userId);
-        vnpParams.put("vnp_OrderType", "other");
-        vnpParams.put("vnp_AppUserId", userId.toString());
-        vnpParams.put("vnp_ReturnUrl", vnPayProperties.getReturnUrl());
-        vnpParams.put("vnp_IpAddr", (clientIp != null && !clientIp.isBlank()) ? clientIp : "127.0.0.1");
+        vnpParams.put("vnp_version", "2.1.0");
+        vnpParams.put("vnp_command", "token_create");
+        vnpParams.put("vnp_tmn_code", vnPayProperties.getTmnCode());
+        vnpParams.put("vnp_txn_ref", txnRef != null ? txnRef : "LINK_" + userId.toString().substring(0, 8) + "_" + System.currentTimeMillis());
+        vnpParams.put("vnp_txn_desc", description);
+        vnpParams.put("vnp_card_type", "01");     // 01: Thẻ/Tài khoản nội địa
+        vnpParams.put("vnp_locale", "vn");
+        vnpParams.put("vnp_app_user_id", safeUserId);
+        vnpParams.put("vnp_return_url", vnPayProperties.getReturnUrl());
+        vnpParams.put("vnp_ip_addr", (clientIp != null && !clientIp.isBlank()) ? clientIp : "127.0.0.1");
 
         LocalDateTime now = LocalDateTime.now(VNPayUtils.VN_ZONE);
-        vnpParams.put("vnp_CreateDate", now.format(VNPayUtils.DATE_FORMATTER));
+        vnpParams.put("vnp_create_date", now.format(VNPayUtils.DATE_FORMATTER));
 
         String queryUrl = VNPayUtils.buildQueryString(vnpParams);
         String vnpSecureHash = VNPayUtils.hmacSHA512(vnPayProperties.getHashSecret(), queryUrl);
-        return vnPayProperties.getPayUrl() + "?" + queryUrl + "&vnp_SecureHash=" + vnpSecureHash;
+        return vnPayProperties.getCreateUrl() + "?" + queryUrl + "&vnp_secure_hash=" + vnpSecureHash;
     }
 
     @Override
@@ -415,24 +419,30 @@ public class VNPayServiceImpl implements VNPayService {
         log.info("Executing 1-click token payment for paymentId={}, amount={}, token={}",
                 payment.getId(), payment.getAmount(), vnpToken);
 
+        String paymentShortId = payment.getId().toString().replace("-", "");
+        if (paymentShortId.length() > 8) {
+            paymentShortId = paymentShortId.substring(0, 8);
+        }
+
         Map<String, String> vnpParams = new HashMap<>();
-        vnpParams.put("vnp_Version", "2.1.0");
-        vnpParams.put("vnp_Command", "token_pay");
-        vnpParams.put("vnp_TmnCode", vnPayProperties.getTmnCode());
-        vnpParams.put("vnp_TxnRef", payment.getId().toString());
+        vnpParams.put("vnp_version", "2.1.0");
+        vnpParams.put("vnp_command", "token_pay");
+        vnpParams.put("vnp_tmn_code", vnPayProperties.getTmnCode());
+        vnpParams.put("vnp_txn_ref", payment.getId().toString());
         long amountInVndCents = payment.getAmount().multiply(new BigDecimal(100)).longValue();
-        vnpParams.put("vnp_Amount", String.valueOf(amountInVndCents));
-        vnpParams.put("vnp_CurrCode", "VND");
-        vnpParams.put("vnp_OrderInfo", "Thanh toan 1-click don hang TechHub: " + payment.getId());
-        vnpParams.put("vnp_Token", vnpToken);
-        vnpParams.put("vnp_IpAddr", (clientIp != null && !clientIp.isBlank()) ? clientIp : "127.0.0.1");
+        vnpParams.put("vnp_amount", String.valueOf(amountInVndCents));
+        vnpParams.put("vnp_curr_code", "VND");
+        vnpParams.put("vnp_order_info", "Thanh toan 1 click TechHub " + paymentShortId);
+        vnpParams.put("vnp_token", vnpToken);
+        vnpParams.put("vnp_locale", "vn");
+        vnpParams.put("vnp_ip_addr", (clientIp != null && !clientIp.isBlank()) ? clientIp : "127.0.0.1");
 
         LocalDateTime now = LocalDateTime.now(VNPayUtils.VN_ZONE);
-        vnpParams.put("vnp_CreateDate", now.format(VNPayUtils.DATE_FORMATTER));
+        vnpParams.put("vnp_create_date", now.format(VNPayUtils.DATE_FORMATTER));
 
         String queryUrl = VNPayUtils.buildQueryString(vnpParams);
         String vnpSecureHash = VNPayUtils.hmacSHA512(vnPayProperties.getHashSecret(), queryUrl);
-        vnpParams.put("vnp_SecureHash", vnpSecureHash);
+        vnpParams.put("vnp_secure_hash", vnpSecureHash);
 
         // In sandbox/testing environment, mark payment as successful or process response
         String transactionNo = "VNP_TOKEN_" + System.currentTimeMillis();
@@ -444,8 +454,8 @@ public class VNPayServiceImpl implements VNPayService {
         completePaymentSuccess(payment, transactionNo, payment.getBankCode() != null ? payment.getBankCode() : "VNBANK");
 
         Map<String, String> response = new HashMap<>(vnpParams);
-        response.put("vnp_ResponseCode", "00");
-        response.put("vnp_TransactionNo", transactionNo);
+        response.put("vnp_response_code", "00");
+        response.put("vnp_transaction_no", transactionNo);
         return response;
     }
 

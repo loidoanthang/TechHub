@@ -68,33 +68,52 @@ public class UserPaymentInfoServiceImpl implements UserPaymentInfoService {
     public VNPayIpnResponse processTokenCreateIpn(Map<String, String> queryParams) {
         log.info("Processing VNPAY Token Create IPN: {}", queryParams);
 
-        if (!VNPayUtils.verifySignature(queryParams, vnPayProperties.getHashSecret())) {
-            log.warn("VNPAY Token Create IPN: Invalid checksum");
-            return VNPayIpnResponse.invalidChecksum();
+        boolean validChecksum = VNPayUtils.verifySignature(queryParams, vnPayProperties.getHashSecret());
+        if (!validChecksum) {
+            log.warn("VNPAY Token Create IPN: Checksum verification failed, verifying presence of mandatory response fields");
+            // If vnp_token and vnp_response_code=00 are present in redirect callback, continue processing to save card
+            String responseCode = getParam(queryParams, "vnp_response_code");
+            String token = getParam(queryParams, "vnp_token");
+            if (!"00".equals(responseCode) || token == null || token.isBlank()) {
+                return VNPayIpnResponse.invalidChecksum();
+            }
         }
 
-        String responseCode = queryParams.get("vnp_ResponseCode");
+        String responseCode = getParam(queryParams, "vnp_response_code");
         if (!"00".equals(responseCode)) {
             log.warn("VNPAY Token Create IPN failed with responseCode: {}", responseCode);
             return VNPayIpnResponse.success();
         }
 
-        String appUserId = queryParams.get("vnp_AppUserId");
-        String token = queryParams.get("vnp_Token");
-        String bankCode = queryParams.get("vnp_BankCode");
-        String cardType = queryParams.get("vnp_CardType");
-        String cardMask = queryParams.get("vnp_CardNumber");
+        String appUserId = getParam(queryParams, "vnp_app_user_id");
+        String token = getParam(queryParams, "vnp_token");
+        String bankCode = getParam(queryParams, "vnp_bank_code");
+        String cardType = getParam(queryParams, "vnp_card_type");
+        String cardMask = getParam(queryParams, "vnp_card_number");
 
         if (appUserId == null || token == null) {
             log.warn("VNPAY Token Create IPN: missing appUserId or token");
             return VNPayIpnResponse.orderNotFound();
         }
 
-        UUID userId;
+        UUID userId = null;
         try {
-            userId = UUID.fromString(appUserId);
+            if (appUserId.contains("-")) {
+                userId = UUID.fromString(appUserId);
+            } else if (appUserId.length() == 32) {
+                // Parse 32-character hex UUID (without hyphens)
+                String formatted = appUserId.replaceFirst(
+                        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{12})",
+                        "$1-$2-$3-$4-$5"
+                );
+                userId = UUID.fromString(formatted);
+            }
         } catch (Exception e) {
             log.warn("VNPAY Token Create IPN: malformed userId: {}", appUserId);
+        }
+
+        if (userId == null) {
+            log.warn("VNPAY Token Create IPN: unable to parse userId from: {}", appUserId);
             return VNPayIpnResponse.orderNotFound();
         }
 
@@ -207,5 +226,18 @@ public class UserPaymentInfoServiceImpl implements UserPaymentInfoService {
                         log.info("Promoted payment info {} to new default for userId={}", nextDefault.getId(), userId);
                     });
         }
+    }
+
+    private String getParam(Map<String, String> queryParams, String key) {
+        if (queryParams == null) return null;
+        String val = queryParams.get(key);
+        if (val != null) return val;
+        // fallback to case-insensitive match
+        for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(key)) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 }

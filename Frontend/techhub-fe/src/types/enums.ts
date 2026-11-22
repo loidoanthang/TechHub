@@ -57,6 +57,12 @@ export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 export const PAYMENT_STATUSES = ["PENDING", "COMPLETED", "FAILED", "EXPIRED", "REFUNDED"] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
+export const PAYMENT_INFO_STATUSES = ["ACTIVE", "INACTIVE", "REMOVED"] as const;
+export type PaymentInfoStatus = (typeof PAYMENT_INFO_STATUSES)[number];
+
+export const PAYMENT_TYPES = ["BANK_ACCOUNT", "E_WALLET", "CREDIT_CARD"] as const;
+export type PaymentType = (typeof PAYMENT_TYPES)[number];
+
 // Cancellation & Return
 export const CANCELLATION_REASON_CODES = [
   "BUYER_CHANGED_MIND",

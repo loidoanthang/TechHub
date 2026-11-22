@@ -88,6 +88,12 @@ export function AccountSidebar() {
       badge: null,
     },
     {
+      label: "Phương thức thanh toán",
+      href: ROUTES.ACCOUNT.PAYMENT_METHODS,
+      icon: CreditCard,
+      badge: null,
+    },
+    {
       label: "Bảo mật & Mật khẩu",
       href: "/account/security",
       icon: Lock,

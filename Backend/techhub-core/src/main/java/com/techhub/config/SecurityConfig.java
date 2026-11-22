@@ -77,7 +77,8 @@ public class SecurityConfig {
                                 "/api/products/**",
                                 "/api/vouchers/**",
                                 "/api/payment/vnpay/ipn",
-                                "/api/payment/vnpay/callback"
+                                "/api/payment/vnpay/callback",
+                                "/api/users/payment-info/token-ipn"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

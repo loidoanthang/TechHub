@@ -11,6 +11,8 @@ public class VNPayProperties {
     private String tmnCode;
     private String hashSecret;
     private String payUrl;
+    private String createUrl;
     private String returnUrl;
+    private String removeUrl;
     private String apiUrl;
 }

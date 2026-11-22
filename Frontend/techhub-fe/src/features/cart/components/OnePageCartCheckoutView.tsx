@@ -30,6 +30,10 @@ import { usePlatformVouchersQuery } from "@/features/checkout/hooks/useVouchers"
 import { useCheckoutPreview } from "@/features/checkout/hooks/useCheckoutPreview";
 import { VoucherSelectModal } from "@/features/checkout/components/VoucherSelectModal";
 import { checkoutApi } from "@/features/checkout/api/checkoutApi";
+import {
+  usePaymentInfosQuery,
+  useInitiateTokenLinkMutation,
+} from "@/features/account/hooks/usePaymentInfoQueries";
 import { ROUTES } from "@/lib/constants";
 import { isBuyerSuspendedError, getApiErrorMessage } from "@/lib/api/error";
 import type { PaymentMethod } from "@/types/enums";
@@ -56,8 +60,22 @@ export function OnePageCartCheckoutView() {
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState<CartPlatformVoucherResponse | null>(null);
 
-  // Payment state
-  const [paymentMethod, setPaymentMethod] = useState<"vnpay" | "cod">("vnpay");
+  // Payment state & Linked Cards
+  const { data: savedCards = [], isLoading: isLoadingCards } = usePaymentInfosQuery();
+  const initiateTokenMutation = useInitiateTokenLinkMutation();
+
+  const [paymentMethod, setPaymentMethod] = useState<"vnpay" | "cod" | "token">("vnpay");
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+
+  // Auto select default card if available
+  useEffect(() => {
+    if (savedCards.length > 0 && !selectedCardId) {
+      const defaultCard = savedCards.find((c) => c.isDefault) || savedCards[0];
+      if (defaultCard) {
+        setSelectedCardId(defaultCard.id);
+      }
+    }
+  }, [savedCards, selectedCardId]);
 
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -222,7 +240,12 @@ export function OnePageCartCheckoutView() {
     setIsSubmitting(true);
 
     try {
-      const mappedPaymentMethod: PaymentMethod = paymentMethod === "cod" ? "COD" : "VNPAY";
+      let mappedPaymentMethod: PaymentMethod = "VNPAY";
+      if (paymentMethod === "cod") {
+        mappedPaymentMethod = "COD";
+      } else if (paymentMethod === "token") {
+        mappedPaymentMethod = "VNPAY_TOKEN";
+      }
 
       // Group shop orders strictly from selected items
       const shopOrders: ShopOrderRequest[] = Object.entries(selectedGroupedStores).map(([_, storeItems]) => ({
@@ -238,6 +261,7 @@ export function OnePageCartCheckoutView() {
         const res = await checkoutApi.placeOrder({
           addressId: selectedAddressId,
           paymentMethod: mappedPaymentMethod,
+          paymentInfoId: mappedPaymentMethod === "VNPAY_TOKEN" ? selectedCardId : null,
           selectedCartItemIds: validCartItemIds,
           shopOrders,
           platformVoucherId: selectedVoucher && !isShippingVoucher ? selectedVoucher.id : null,
@@ -250,7 +274,7 @@ export function OnePageCartCheckoutView() {
           return;
         }
 
-        // COD success
+        // 1-Click Token Pay or COD success -> Open Confirmation Modal
         setConfirmedOrder(res.data);
         setIsPlaced(true);
         refetchCart();
@@ -299,7 +323,11 @@ export function OnePageCartCheckoutView() {
             <div className="flex justify-between">
               <span className="text-[#737688]">Phương thức:</span>
               <span className="font-semibold text-emerald-600 uppercase">
-                {paymentMethod === "vnpay" ? "VNPay QR" : "Thanh toán khi nhận hàng (COD)"}
+                {paymentMethod === "vnpay"
+                  ? "VNPay QR"
+                  : paymentMethod === "token"
+                  ? "Thẻ liên kết (1-Click Pay)"
+                  : "Thanh toán khi nhận hàng (COD)"}
               </span>
             </div>
             <div className="flex justify-between">
@@ -730,6 +758,112 @@ export function OnePageCartCheckoutView() {
                 </div>
 
                 <div className="flex flex-col gap-2.5">
+                  {/* Linked Card (1-Click Token Pay) */}
+                  {savedCards.length > 0 && (
+                    <div
+                      className={`border rounded-xl p-4 flex flex-col gap-3 transition-all ${
+                        paymentMethod === "token"
+                          ? "border-[#0045cc] bg-[#eff4ff]/60 ring-2 ring-[#0045cc]/15"
+                          : "border-[#c3c5d9]/30 bg-white hover:bg-neutral-50"
+                      }`}
+                    >
+                      <label
+                        onClick={() => setPaymentMethod("token")}
+                        className="flex items-center justify-between cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name="payment"
+                            checked={paymentMethod === "token"}
+                            onChange={() => setPaymentMethod("token")}
+                            className="accent-[#0045cc]"
+                          />
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold text-[#0b1c30] flex items-center gap-1.5">
+                              Thẻ đã liên kết (1-Click Pay)
+                              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
+                                Thanh toán tức thì
+                              </span>
+                            </span>
+                            <span className="text-[11px] text-[#737688]">
+                              Không cần quét QR hay redirect, xác nhận đơn ngay lập tức
+                            </span>
+                          </div>
+                        </div>
+                      </label>
+
+                      {/* Card Selection Chips when token method active */}
+                      {paymentMethod === "token" && (
+                        <div className="pt-2 border-t border-[#c3c5d9]/20 flex flex-col gap-2 pl-7">
+                          <span className="text-[11px] font-semibold text-[#434656]">Chọn thẻ thanh toán:</span>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {savedCards.map((card) => {
+                              const isSelected = (selectedCardId || savedCards[0]?.id) === card.id;
+                              return (
+                                <button
+                                  key={card.id}
+                                  type="button"
+                                  onClick={() => setSelectedCardId(card.id)}
+                                  className={`p-2.5 rounded-lg border text-left flex items-center justify-between transition-all cursor-pointer ${
+                                    isSelected
+                                      ? "border-[#0045cc] bg-white ring-1 ring-[#0045cc] shadow-2xs"
+                                      : "border-[#c3c5d9]/30 bg-white/70 hover:bg-white"
+                                  }`}
+                                >
+                                  <div className="flex flex-col min-w-0">
+                                    <span className="text-xs font-mono font-bold text-[#0b1c30] truncate">
+                                      {card.cardMask}
+                                    </span>
+                                    <span className="text-[10px] text-[#737688] uppercase">
+                                      {card.bankCode} • {card.cardType || "Card"}
+                                    </span>
+                                  </div>
+                                  {card.isDefault && (
+                                    <span className="text-[9px] font-bold text-[#0045cc] bg-[#eff4ff] px-1.5 py-0.5 rounded shrink-0">
+                                      Mặc định
+                                    </span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Quick Link Card Option if less than 5 cards */}
+                  {savedCards.length < 5 && (
+                    <div className="flex items-center justify-between px-4 py-2 rounded-xl bg-blue-50/50 border border-dashed border-blue-200">
+                      <span className="text-[11px] text-[#434656]">
+                        {savedCards.length === 0 ? "Bạn chưa liên kết thẻ VNPAY?" : "Muốn thêm thẻ ngân hàng khác?"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const res = await initiateTokenMutation.mutateAsync();
+                            if (res.data?.redirectUrl) {
+                              window.location.href = res.data.redirectUrl;
+                            }
+                          } catch {
+                            setSubmitError("Không thể chuyển tới trang liên kết thẻ. Vui lòng thử lại sau.");
+                          }
+                        }}
+                        disabled={initiateTokenMutation.isPending}
+                        className="text-xs font-bold text-[#0045cc] hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                      >
+                        {initiateTokenMutation.isPending ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Plus className="w-3 h-3" />
+                        )}
+                        <span>Liên kết thẻ mới</span>
+                      </button>
+                    </div>
+                  )}
+
                   {/* VNPay */}
                   <label
                     onClick={() => setPaymentMethod("vnpay")}
@@ -749,16 +883,18 @@ export function OnePageCartCheckoutView() {
                       />
                       <div className="flex flex-col">
                         <span className="text-xs font-bold text-[#0b1c30]">
-                          Cổng VNPay
+                          Cổng VNPay (Quét mã QR / Ứng dụng ngân hàng)
                         </span>
-                        {/* <span className="text-[11px] text-[#737688]">
-                          Thanh toán qua VNPay Sandbox
-                        </span> */}
+                        <span className="text-[11px] text-[#737688]">
+                          Chuyển hướng sang VNPay để quét QR hoặc chọn ngân hàng
+                        </span>
                       </div>
                     </div>
-                    <span className="text-[10px] font-bold text-[#0045cc] bg-[#eff4ff] px-2 py-0.5 rounded">
-                      Khuyên dùng
-                    </span>
+                    {savedCards.length === 0 && (
+                      <span className="text-[10px] font-bold text-[#0045cc] bg-[#eff4ff] px-2 py-0.5 rounded">
+                        Khuyên dùng
+                      </span>
+                    )}
                   </label>
 
                   {/* COD */}

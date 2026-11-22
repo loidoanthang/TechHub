@@ -133,7 +133,7 @@ public final class VNPayUtils {
     /**
      * Verify VNPAY signature from IPN webhook or callback redirect params.
      *
-     * @param fields    Map of query parameters including vnp_SecureHash
+     * @param fields    Map of query parameters including vnp_secure_hash or vnp_SecureHash
      * @param secretKey VNPAY Hash Secret
      * @return true if signature is valid, false otherwise
      */
@@ -142,13 +142,100 @@ public final class VNPayUtils {
             return false;
         }
 
-        String secureHash = fields.get("vnp_SecureHash");
+        String secureHash = fields.get("vnp_secure_hash");
+        if (secureHash == null || secureHash.isBlank()) {
+            secureHash = fields.get("vnp_SecureHash");
+        }
         if (secureHash == null || secureHash.isBlank()) {
             return false;
         }
 
         String calculatedHash = hashAllFields(fields, secretKey);
-        return calculatedHash.equalsIgnoreCase(secureHash.trim());
+        boolean match = calculatedHash.equalsIgnoreCase(secureHash.trim());
+        if (!match) {
+            String rawHash = hashAllFieldsRaw(fields, secretKey);
+            if (rawHash.equalsIgnoreCase(secureHash.trim())) {
+                return true;
+            }
+            // Fallback: Check if vnp_txn_desc had '+' that got decoded to space or vice versa
+            String altHash = hashAllFieldsAltSpaces(fields, secretKey);
+            if (altHash.equalsIgnoreCase(secureHash.trim())) {
+                return true;
+            }
+            org.slf4j.LoggerFactory.getLogger(VNPayUtils.class).warn(
+                    "VNPay checksum mismatch! incomingHash={}, calculatedHash={}, rawHash={}, altHash={}",
+                    secureHash, calculatedHash, rawHash, altHash
+            );
+        }
+        return match;
+    }
+
+    /**
+     * Fallback hash replacing spaces with '+' or vice versa in values
+     */
+    public static String hashAllFieldsAltSpaces(Map<String, String> fields, String secretKey) {
+        if (fields == null || fields.isEmpty() || secretKey == null || secretKey.isBlank()) {
+            return "";
+        }
+
+        Map<String, String> sortedFields = new TreeMap<>();
+        for (Map.Entry<String, String> entry : fields.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (key != null && !key.isBlank() && value != null && !value.isBlank()) {
+                if (!"vnp_SecureHash".equalsIgnoreCase(key) && !"vnp_SecureHashType".equalsIgnoreCase(key)) {
+                    sortedFields.put(key, value.replace(" ", "+"));
+                }
+            }
+        }
+
+        StringBuilder hashData = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> entry : sortedFields.entrySet()) {
+            if (!first) {
+                hashData.append('&');
+            }
+            hashData.append(entry.getKey());
+            hashData.append('=');
+            hashData.append(entry.getValue());
+            first = false;
+        }
+
+        return hmacSHA512(secretKey, hashData.toString());
+    }
+
+    /**
+     * Fallback hash without URLEncoder in case gateway signed unencoded values
+     */
+    public static String hashAllFieldsRaw(Map<String, String> fields, String secretKey) {
+        if (fields == null || fields.isEmpty() || secretKey == null || secretKey.isBlank()) {
+            return "";
+        }
+
+        Map<String, String> sortedFields = new TreeMap<>();
+        for (Map.Entry<String, String> entry : fields.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (key != null && !key.isBlank() && value != null && !value.isBlank()) {
+                if (!"vnp_SecureHash".equalsIgnoreCase(key) && !"vnp_SecureHashType".equalsIgnoreCase(key)) {
+                    sortedFields.put(key, value);
+                }
+            }
+        }
+
+        StringBuilder hashData = new StringBuilder();
+        boolean first = true;
+        for (Map.Entry<String, String> entry : sortedFields.entrySet()) {
+            if (!first) {
+                hashData.append('&');
+            }
+            hashData.append(entry.getKey());
+            hashData.append('=');
+            hashData.append(entry.getValue());
+            first = false;
+        }
+
+        return hmacSHA512(secretKey, hashData.toString());
     }
 
     /**

@@ -4,7 +4,9 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, XCircle, Loader2, ArrowRight } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { checkoutApi } from "../api/checkoutApi";
+import { PAYMENT_INFO_KEYS } from "@/features/account/hooks/usePaymentInfoQueries";
 
 interface CallbackResult {
   success: boolean;
@@ -17,6 +19,13 @@ interface CallbackResult {
 
 function PaymentCallbackContent() {
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
+  const isTokenLink =
+    searchParams.get("vnp_command") === "token_create" ||
+    searchParams.get("vnp_Command") === "token_create" ||
+    searchParams.get("vnp_txn_ref")?.startsWith("LINK_") ||
+    searchParams.get("vnp_TxnRef")?.startsWith("LINK_");
+
   const [state, setState] = useState<{
     isLoading: boolean;
     result: CallbackResult | null;
@@ -32,9 +41,12 @@ function PaymentCallbackContent() {
 
     async function verifyPayment() {
       const queryString = searchParams.toString();
+      const hasSecureHash =
+        searchParams.get("vnp_SecureHash") ||
+        searchParams.get("vnp_secure_hash");
 
       // If no query parameters are present, reject immediately (prevents direct unauthorized visit)
-      if (!queryString || !searchParams.get("vnp_SecureHash")) {
+      if (!queryString || !hasSecureHash) {
         if (isMounted) {
           setState({
             isLoading: false,
@@ -55,6 +67,9 @@ function PaymentCallbackContent() {
 
         if (isMounted) {
           if (res.success && res.data?.success) {
+            if (isTokenLink) {
+              queryClient.invalidateQueries({ queryKey: PAYMENT_INFO_KEYS.all });
+            }
             setState({
               isLoading: false,
               result: res.data,
@@ -109,7 +124,7 @@ function PaymentCallbackContent() {
               <Loader2 className="w-8 h-8 animate-spin" />
             </div>
             <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
-              Verifying Payment...
+              {isTokenLink ? "Verifying Card Linking..." : "Verifying Payment..."}
             </h1>
             <p className="text-sm text-[#434656] leading-relaxed">
               Please wait while we verify your transaction status and digital checksum with VNPay secure servers.
@@ -121,10 +136,12 @@ function PaymentCallbackContent() {
               <CheckCircle2 className="w-10 h-10" />
             </div>
             <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
-              Payment Successful!
+              {isTokenLink ? "Card Linked Successfully!" : "Payment Successful!"}
             </h1>
             <p className="text-sm text-[#434656] leading-relaxed">
-              Your VNPay transaction has been verified successfully. Your order is now being processed by our verified merchants.
+              {isTokenLink
+                ? "Thẻ ngân hàng của bạn đã được liên kết thành công với TechHub. Bạn có thể sử dụng thanh toán 1-click cho các lần mua hàng tiếp theo."
+                : "Your VNPay transaction has been verified successfully. Your order is now being processed by our verified merchants."}
             </p>
           </>
         ) : (
@@ -133,7 +150,7 @@ function PaymentCallbackContent() {
               <XCircle className="w-10 h-10" />
             </div>
             <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
-              Payment Failed
+              {isTokenLink ? "Card Linking Failed" : "Payment Failed"}
             </h1>
             <p className="text-sm text-[#434656] leading-relaxed">
               {errorMessage || "The transaction could not be verified or was cancelled."}
@@ -147,15 +164,25 @@ function PaymentCallbackContent() {
               <span className="text-[#737688]">Transaction ID:</span>
               <span className="font-mono font-bold text-[#0b1c30]">{transactionNo}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-[#737688]">Amount:</span>
-              <span className="font-mono font-bold text-[#0045cc]">{formattedAmount}</span>
-            </div>
+            {!isTokenLink && (
+              <div className="flex justify-between">
+                <span className="text-[#737688]">Amount:</span>
+                <span className="font-mono font-bold text-[#0045cc]">{formattedAmount}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-[#737688]">Payment Method:</span>
-              <span className="font-semibold text-[#0b1c30]">VNPay QR / Banking</span>
+              <span className="font-semibold text-[#0b1c30]">
+                {isTokenLink ? "VNPAY Token (Liên kết thẻ)" : "VNPay QR / Banking"}
+              </span>
             </div>
-            {result?.orderNumbers && result.orderNumbers.length > 0 && (
+            {result?.bankCode && (
+              <div className="flex justify-between">
+                <span className="text-[#737688]">Bank:</span>
+                <span className="font-semibold text-[#0b1c30]">{result.bankCode}</span>
+              </div>
+            )}
+            {!isTokenLink && result?.orderNumbers && result.orderNumbers.length > 0 && (
               <div className="flex justify-between">
                 <span className="text-[#737688]">Orders:</span>
                 <span className="font-mono text-[#0b1c30]">{result.orderNumbers.join(", ")}</span>
@@ -166,29 +193,57 @@ function PaymentCallbackContent() {
 
         <div className="flex flex-col gap-2.5 w-full mt-2">
           {isLoading ? null : isSuccess ? (
-            <Link
-              href="/"
-              className="w-full py-3 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
-            >
-              <span>Back to Marketplace</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          ) : (
-            <>
+            isTokenLink ? (
               <Link
-                href="/account/orders"
+                href="/account/payment-methods"
                 className="w-full py-3 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
               >
-                <span>Go to My Orders (Pay Now)</span>
+                <span>Xem danh sách thẻ đã lưu</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
+            ) : (
               <Link
                 href="/"
-                className="w-full py-3 rounded-xl border border-[#c3c5d9]/40 hover:bg-[#eff4ff] text-[#0b1c30] text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
               >
                 <span>Back to Marketplace</span>
+                <ArrowRight className="w-4 h-4" />
               </Link>
-            </>
+            )
+          ) : (
+            isTokenLink ? (
+              <>
+                <Link
+                  href="/account/payment-methods"
+                  className="w-full py-3 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>Thử liên kết lại</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/"
+                  className="w-full py-3 rounded-xl border border-[#c3c5d9]/40 hover:bg-[#eff4ff] text-[#0b1c30] text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>Back to Marketplace</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/account/orders"
+                  className="w-full py-3 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>Go to My Orders (Pay Now)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/"
+                  className="w-full py-3 rounded-xl border border-[#c3c5d9]/40 hover:bg-[#eff4ff] text-[#0b1c30] text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>Back to Marketplace</span>
+                </Link>
+              </>
+            )
           )}
         </div>
       </div>

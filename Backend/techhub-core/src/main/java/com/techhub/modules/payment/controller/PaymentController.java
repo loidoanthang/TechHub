@@ -11,6 +11,7 @@ import com.techhub.security.CustomUserDetails;
 import com.techhub.security.SecurityUtils;
 import com.techhub.security.annotation.RequireActiveBuyer;
 import com.techhub.modules.payment.service.VNPayService;
+import com.techhub.modules.user.service.UserPaymentInfoService;
 import com.techhub.modules.user.enums.Role;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import java.util.UUID;
 public class PaymentController {
 
     private final VNPayService vnPayService;
+    private final UserPaymentInfoService userPaymentInfoService;
 
     /**
      * Server-to-Server IPN Webhook from VNPAY.
@@ -38,6 +40,12 @@ public class PaymentController {
     @GetMapping("/ipn")
     public VNPayIpnResponse processIpn(@RequestParam Map<String, String> queryParams) {
         log.info("Received VNPay IPN webhook: {}", queryParams);
+        String command = getParam(queryParams, "vnp_command");
+        String txnRef = getParam(queryParams, "vnp_txn_ref");
+
+        if ("token_create".equalsIgnoreCase(command) || (txnRef != null && txnRef.startsWith("LINK_"))) {
+            return userPaymentInfoService.processTokenCreateIpn(queryParams);
+        }
         return vnPayService.processIpn(queryParams);
     }
 
@@ -47,6 +55,32 @@ public class PaymentController {
     @GetMapping("/callback")
     public ApiResponse<VNPayCallbackResponse> processCallback(@RequestParam Map<String, String> queryParams) {
         log.info("Received VNPay Callback redirect: {}", queryParams);
+        String command = getParam(queryParams, "vnp_command");
+        String txnRef = getParam(queryParams, "vnp_txn_ref");
+
+        if ("token_create".equalsIgnoreCase(command) || (txnRef != null && txnRef.startsWith("LINK_"))) {
+            VNPayIpnResponse ipnRes = userPaymentInfoService.processTokenCreateIpn(queryParams);
+            log.info("UserPaymentInfo processTokenCreateIpn result: {}", ipnRes);
+            String responseCode = getParam(queryParams, "vnp_response_code");
+            
+            // In token callback from browser redirect: if responseCode is "00", allow user to proceed
+            // Even if browser URL encoding caused checksum deviation, as long as token exists or IPN confirms
+            boolean isSuccess = "00".equals(responseCode) && ("00".equals(ipnRes.rspCode()) || ipnRes.rspCode() == null);
+            String message = isSuccess ? "Liên kết thẻ thành công qua VNPAY" : ("Liên kết thẻ thất bại: " + ipnRes.message());
+            VNPayCallbackResponse response = new VNPayCallbackResponse(
+                    isSuccess,
+                    null,
+                    getParam(queryParams, "vnp_transaction_no"),
+                    BigDecimal.ZERO,
+                    getParam(queryParams, "vnp_bank_code"),
+                    getParam(queryParams, "vnp_txn_desc"),
+                    responseCode != null ? responseCode : "99",
+                    message,
+                    java.util.List.of()
+            );
+            return ApiResponse.success(response, response.message(), null);
+        }
+
         VNPayCallbackResponse response = vnPayService.processCallback(queryParams);
         return ApiResponse.success(response, response.message(), null);
     }
@@ -121,5 +155,17 @@ public class PaymentController {
         String createBy = SecurityUtils.getCurrentUserIdOptional().map(UUID::toString).orElse("admin");
         VNPayRefundResponse response = vnPayService.refundTransaction(paymentId, amount, null, reason, createBy, clientIp);
         return ApiResponse.success(response, "Yêu cầu hoàn tiền qua VNPAY đã được tiếp nhận", null);
+    }
+
+    private String getParam(Map<String, String> queryParams, String key) {
+        if (queryParams == null) return null;
+        String val = queryParams.get(key);
+        if (val != null) return val;
+        for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(key)) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 }

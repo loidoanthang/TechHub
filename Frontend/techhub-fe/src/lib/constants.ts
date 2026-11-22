@@ -66,6 +66,10 @@ export const API_ENDPOINTS = {
   BUYER: {
     PAYMENT_METHODS: "/api/payment-methods",
     PAYMENT_STATUS: (id: string) => `/api/payments/${id}/status`,
+    PAYMENT_INFO: "/api/users/payment-info",
+    PAYMENT_INFO_LINK_INIT: "/api/users/payment-info/link-init",
+    PAYMENT_INFO_DEFAULT: (id: string) => `/api/users/payment-info/${id}/default`,
+    PAYMENT_INFO_DELETE: (id: string) => `/api/users/payment-info/${id}`,
     ORDERS: "/api/orders",
     ORDER_DETAIL: (id: string) => `/api/orders/${id}`,
     ORDER_COMPLETE: (id: string) => `/api/orders/${id}/complete`,
@@ -204,6 +208,7 @@ export const ROUTES = {
     ORDERS: "/account/orders",
     ORDER_DETAIL: (orderId: string) => `/account/orders/${orderId}`,
     ADDRESSES: "/account/addresses",
+    PAYMENT_METHODS: "/account/payment-methods",
     SECURITY: "/account/security",
     WISHLIST: "/account/wishlist",
     FOLLOWED_SHOPS: "/account/followed-shops",
