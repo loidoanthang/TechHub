@@ -82,6 +82,9 @@ class ReturnRequestServiceImplTest {
     @Mock
     private VNPayService vnPayService;
 
+    @Mock
+    private com.techhub.modules.notification.service.NotificationDispatcher notificationDispatcher;
+
     @InjectMocks
     private ReturnRequestServiceImpl returnRequestService;
 

@@ -10,6 +10,7 @@ import com.techhub.modules.order.dto.response.CheckoutPreviewResponse;
 import com.techhub.modules.order.dto.response.PlaceOrderResponse;
 import com.techhub.modules.order.service.impl.CheckoutServiceImpl;
 import com.techhub.modules.payment.service.VNPayService;
+import com.techhub.modules.notification.service.NotificationDispatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -103,6 +104,9 @@ class CheckoutServiceImplTest {
 
     @Mock
     private VNPayService vnPayService;
+
+    @Mock
+    private NotificationDispatcher notificationDispatcher;
 
     @InjectMocks
     private CheckoutServiceImpl checkoutService;

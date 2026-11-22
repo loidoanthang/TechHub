@@ -4,6 +4,8 @@ import com.techhub.common.VNPayUtils;
 import com.techhub.config.properties.VNPayProperties;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
+import com.techhub.modules.notification.enums.NotificationType;
+import com.techhub.modules.notification.service.NotificationDispatcher;
 import com.techhub.modules.order.entity.Order;
 import com.techhub.modules.order.enums.OrderStatus;
 import com.techhub.modules.order.repository.OrderRepository;
@@ -48,6 +50,7 @@ public class VNPayServiceImpl implements VNPayService {
     private final VoucherRedemptionRepository voucherRedemptionRepository;
     private final VoucherRepository voucherRepository;
     private final RestTemplate restTemplate;
+    private final NotificationDispatcher notificationDispatcher;
 
     @Override
     public String createPaymentUrl(Payment payment, String bankCode, String clientIp) {
@@ -299,6 +302,30 @@ public class VNPayServiceImpl implements VNPayService {
             for (Order o : orders) {
                 if (o.getStatus() == OrderStatus.PENDING_PAYMENT) {
                     o.setStatus(OrderStatus.PENDING_CONFIRMATION);
+
+                    // Notify Buyer
+                    if (payment.getUser() != null) {
+                        notificationDispatcher.dispatch(
+                                payment.getUser().getId(),
+                                NotificationType.ORDER,
+                                "Thanh toán đơn hàng thành công",
+                                "Thanh toán cho đơn hàng #" + o.getOrderNumber() + " đã được xác nhận thành công. Shop đang chuẩn bị hàng.",
+                                "ORDER",
+                                o.getId()
+                        );
+                    }
+
+                    // Notify Seller
+                    if (o.getShop() != null && o.getShop().getSeller() != null && o.getShop().getSeller().getUser() != null) {
+                        notificationDispatcher.dispatch(
+                                o.getShop().getSeller().getUser().getId(),
+                                NotificationType.ORDER,
+                                "Bạn có đơn hàng mới!",
+                                "Shop của bạn có đơn hàng mới #" + o.getOrderNumber() + " với giá trị " + o.getTotalAmount() + "đ. Vui lòng kiểm tra và xác nhận đơn.",
+                                "ORDER",
+                                o.getId()
+                        );
+                    }
                 }
             }
             orderRepository.saveAll(orders);

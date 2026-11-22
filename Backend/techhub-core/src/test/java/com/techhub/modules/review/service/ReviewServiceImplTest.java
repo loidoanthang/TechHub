@@ -66,6 +66,9 @@ class ReviewServiceImplTest {
     @Mock
     private ReviewHelpfulRepository reviewHelpfulRepository;
 
+    @Mock
+    private com.techhub.modules.notification.service.NotificationDispatcher notificationDispatcher;
+
     @InjectMocks
     private ReviewServiceImpl reviewService;
 

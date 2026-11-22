@@ -8,6 +8,8 @@ import com.techhub.modules.order.service.SellerOrderService;
 import com.techhub.modules.order.specification.OrderSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.techhub.modules.notification.enums.NotificationType;
+import com.techhub.modules.notification.service.NotificationDispatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -96,6 +98,7 @@ public class SellerOrderServiceImpl implements SellerOrderService {
     private final com.techhub.modules.payment.repository.RefundTransactionRepository refundTransactionRepository;
     private final com.techhub.modules.voucher.repository.VoucherRedemptionRepository voucherRedemptionRepository;
     private final com.techhub.modules.voucher.repository.VoucherRepository voucherRepository;
+    private final NotificationDispatcher notificationDispatcher;
 
     @Override
     @Transactional(readOnly = true)
@@ -262,6 +265,39 @@ public class SellerOrderServiceImpl implements SellerOrderService {
         orderRepository.save(order);
         log.info("Order {} status updated successfully from {} to {}", orderId, currentStatus, targetStatus);
 
+        // Auto-trigger Notification to Buyer
+        if (order.getUser() != null) {
+            String title;
+            String content;
+            switch (targetStatus) {
+                case CONFIRMED -> {
+                    title = "Đơn hàng đã được xác nhận";
+                    content = "Shop " + (shop.getName() != null ? shop.getName() : "") + " đã xác nhận đơn hàng #" + order.getOrderNumber() + " và đang chuẩn bị hàng.";
+                }
+                case PREPARING -> {
+                    title = "Đơn hàng đang chuẩn bị";
+                    content = "Shop đang đóng gói đơn hàng #" + order.getOrderNumber() + ".";
+                }
+                case WAITING_FOR_PICKUP -> {
+                    title = "Đơn hàng chờ vận chuyển";
+                    content = "Đơn hàng #" + order.getOrderNumber() + " đã chuẩn bị xong và đang chờ bàn giao cho đơn vị vận chuyển.";
+                }
+                case SHIPPING -> {
+                    title = "Đơn hàng đang trên đường giao";
+                    content = "Đơn hàng #" + order.getOrderNumber() + " đã được giao cho đơn vị vận chuyển và đang trên đường tới bạn.";
+                }
+                case DELIVERED -> {
+                    title = "Giao hàng thành công";
+                    content = "Đơn hàng #" + order.getOrderNumber() + " đã được giao thành công. Hãy kiểm tra sản phẩm và để lại đánh giá nhé!";
+                }
+                default -> {
+                    title = "Cập nhật trạng thái đơn hàng";
+                    content = "Đơn hàng #" + order.getOrderNumber() + " đã chuyển sang trạng thái " + targetStatus;
+                }
+            }
+            notificationDispatcher.dispatch(order.getUser().getId(), NotificationType.ORDER, title, content, "ORDER", order.getId());
+        }
+
         return buildSellerOrderDetailResponse(order, shop);
     }
 
@@ -321,6 +357,22 @@ public class SellerOrderServiceImpl implements SellerOrderService {
 
         orderRepository.save(order);
         log.info("Order {} successfully cancelled by seller {}", orderId, shop.getId());
+
+        // Auto-trigger Notification to Buyer
+        if (order.getUser() != null) {
+            String cancelReason = (request.reasonNote() != null && !request.reasonNote().isBlank())
+                    ? request.reasonNote().trim()
+                    : String.valueOf(request.reasonCode());
+            notificationDispatcher.dispatch(
+                    order.getUser().getId(),
+                    NotificationType.ORDER,
+                    "Đơn hàng đã bị hủy",
+                    "Đơn hàng #" + order.getOrderNumber() + " đã bị hủy bởi người bán. Lý do: " + cancelReason,
+                    "ORDER",
+                    order.getId()
+            );
+        }
+
         return buildSellerOrderDetailResponse(order, shop);
     }
 
@@ -367,12 +419,36 @@ public class SellerOrderServiceImpl implements SellerOrderService {
             processCancellationPayment(order, now);
             releaseOrderVouchers(order, now);
             orderRepository.save(order);
+
+            // Auto-trigger Notification to Buyer
+            if (order.getUser() != null) {
+                notificationDispatcher.dispatch(
+                        order.getUser().getId(),
+                        NotificationType.ORDER,
+                        "Yêu cầu hủy đơn đã được chấp thuận",
+                        "Người bán đã đồng ý yêu cầu hủy đơn hàng #" + order.getOrderNumber() + ".",
+                        "ORDER",
+                        order.getId()
+                );
+            }
         } else if (request.decision() == CancellationRequestStatus.REJECTED) {
             cr.setStatus(CancellationRequestStatus.REJECTED);
             cr.setSellerResponse(request.sellerResponse() != null && !request.sellerResponse().isBlank()
                     ? request.sellerResponse().trim() : "Từ chối hủy đơn");
             cr.setRespondedAt(now);
             cancellationRequestRepository.save(cr);
+
+            // Auto-trigger Notification to Buyer
+            if (order.getUser() != null) {
+                notificationDispatcher.dispatch(
+                        order.getUser().getId(),
+                        NotificationType.ORDER,
+                        "Yêu cầu hủy đơn bị từ chối",
+                        "Người bán đã từ chối yêu cầu hủy đơn hàng #" + order.getOrderNumber() + ". Lý do: " + cr.getSellerResponse(),
+                        "ORDER",
+                        order.getId()
+                );
+            }
         } else {
             throw new BusinessException(ErrorCode.INVALID_INPUT_DATA);
         }

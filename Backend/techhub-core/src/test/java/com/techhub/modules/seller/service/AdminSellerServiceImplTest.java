@@ -68,6 +68,9 @@ class AdminSellerServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private com.techhub.modules.notification.service.NotificationDispatcher notificationDispatcher;
+
     @InjectMocks
     private AdminSellerServiceImpl adminSellerService;
 

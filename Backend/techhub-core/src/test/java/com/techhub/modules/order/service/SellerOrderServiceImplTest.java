@@ -99,6 +99,9 @@ class SellerOrderServiceImplTest {
     @Mock
     private com.techhub.modules.voucher.repository.VoucherRepository voucherRepository;
 
+    @Mock
+    private com.techhub.modules.notification.service.NotificationDispatcher notificationDispatcher;
+
     @InjectMocks
     private SellerOrderServiceImpl sellerOrderService;
 

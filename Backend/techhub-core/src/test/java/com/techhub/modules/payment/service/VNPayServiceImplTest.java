@@ -61,6 +61,9 @@ class VNPayServiceImplTest {
     @Mock
     private RestTemplate restTemplate;
 
+    @Mock
+    private com.techhub.modules.notification.service.NotificationDispatcher notificationDispatcher;
+
     @InjectMocks
     private VNPayServiceImpl vnPayService;
 

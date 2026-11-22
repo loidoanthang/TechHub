@@ -21,6 +21,8 @@ import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.security.SecurityUtils;
 import com.techhub.modules.shop.service.AdminShopService;
 import com.techhub.modules.shop.specification.ShopSpecification;
+import com.techhub.modules.notification.enums.NotificationType;
+import com.techhub.modules.notification.service.NotificationDispatcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -57,6 +59,7 @@ public class AdminShopServiceImpl implements AdminShopService {
     private final AddressRepository addressRepository;
     private final ShippingOptionRepository shippingOptionRepository;
     private final OrderRepository orderRepository;
+    private final NotificationDispatcher notificationDispatcher;
 
     @Override
     public PageResponse<AdminShopResponse> getShops(
@@ -241,6 +244,26 @@ public class AdminShopServiceImpl implements AdminShopService {
 
         shop.setStatus(targetStatus);
         Shop savedShop = shopRepository.save(shop);
+
+        if (seller != null && seller.getUser() != null) {
+            String statusText = switch (targetStatus) {
+                case ACTIVE -> "kích hoạt";
+                case PAUSED -> "tạm ngưng hoạt động";
+                case SUSPENDED -> "tạm khóa";
+                case BANNED -> "cấm hoạt động vĩnh viễn";
+            };
+            String reasonText = (request.reason() != null && !request.reason().trim().isEmpty())
+                    ? " (Lý do: " + request.reason().trim() + ")"
+                    : "";
+            notificationDispatcher.dispatch(
+                    seller.getUser().getId(),
+                    NotificationType.SHOP,
+                    "Trạng thái Shop đã thay đổi",
+                    "Shop " + savedShop.getName() + " của bạn đã được " + statusText + " bởi Quản trị viên" + reasonText + ".",
+                    "SHOP",
+                    savedShop.getId()
+            );
+        }
 
         long productCount = productRepository.countByShopIdAndIsDeletedFalse(savedShop.getId());
 

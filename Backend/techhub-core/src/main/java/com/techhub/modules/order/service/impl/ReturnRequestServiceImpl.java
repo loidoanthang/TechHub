@@ -3,6 +3,8 @@ package com.techhub.modules.order.service.impl;
 import com.techhub.common.PageResponse;
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
+import com.techhub.modules.notification.enums.NotificationType;
+import com.techhub.modules.notification.service.NotificationDispatcher;
 import com.techhub.modules.order.dto.request.CreateReturnRequest;
 import com.techhub.modules.order.dto.request.ProcessReturnRequest;
 import com.techhub.modules.order.dto.response.ReturnRequestResponse;
@@ -63,6 +65,7 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
     private final PaymentRepository paymentRepository;
     private final SellerWalletTransactionRepository sellerWalletTransactionRepository;
     private final VNPayService vnPayService;
+    private final NotificationDispatcher notificationDispatcher;
 
     @Override
     @Transactional
@@ -126,6 +129,18 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
         order.setStatus(OrderStatus.RETURN_REQUESTED);
         order.setUpdatedAt(now);
         orderRepository.save(order);
+
+        // Auto-trigger Notification to Seller
+        if (order.getShop() != null && order.getShop().getSeller() != null && order.getShop().getSeller().getUser() != null) {
+            notificationDispatcher.dispatch(
+                    order.getShop().getSeller().getUser().getId(),
+                    NotificationType.ORDER,
+                    "Yêu cầu trả hàng / hoàn tiền mới",
+                    "Khách hàng yêu cầu trả hàng cho đơn #" + order.getOrderNumber() + ". Lý do: " + request.reason() + ". Vui lòng kiểm tra và xử lý.",
+                    "ORDER",
+                    order.getId()
+            );
+        }
 
         log.info("Return request {} created successfully for order {}", returnRequest.getId(), orderId);
         return mapToReturnRequestResponse(returnRequest);
@@ -252,6 +267,18 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
             // Record Refund Transaction
             processRefundTransaction(order, returnRequest, now);
 
+            // Auto-trigger Notification to Buyer
+            if (order.getUser() != null) {
+                notificationDispatcher.dispatch(
+                        order.getUser().getId(),
+                        NotificationType.ORDER,
+                        "Yêu cầu hoàn tiền được chấp thuận",
+                        "Yêu cầu trả hàng cho đơn #" + order.getOrderNumber() + " đã được chấp thuận. Số tiền " + order.getTotalAmount() + "đ sẽ được hoàn trả.",
+                        "ORDER",
+                        order.getId()
+                );
+            }
+
             log.info("Return request {} APPROVED for order {}. Order status: REFUNDED", returnRequestId, order.getId());
         } else if (request.decision() == ReturnRequestStatus.REJECTED) {
             returnRequest.setStatus(ReturnRequestStatus.REJECTED);
@@ -266,6 +293,18 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
             orderRepository.save(order);
 
             settleOrderToSellerWallet(order, now);
+
+            // Auto-trigger Notification to Buyer
+            if (order.getUser() != null) {
+                notificationDispatcher.dispatch(
+                        order.getUser().getId(),
+                        NotificationType.ORDER,
+                        "Yêu cầu hoàn tiền bị từ chối",
+                        "Yêu cầu trả hàng cho đơn #" + order.getOrderNumber() + " đã bị từ chối. Lý do: " + returnRequest.getSellerNote(),
+                        "ORDER",
+                        order.getId()
+                );
+            }
 
             log.info("Return request {} REJECTED for order {}. Order status: COMPLETED (Settled to seller)", returnRequestId, order.getId());
         } else {

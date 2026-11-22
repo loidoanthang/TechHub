@@ -19,6 +19,8 @@ import com.techhub.modules.seller.repository.SellerRepository;
 import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.modules.review.service.SellerReviewService;
 import com.techhub.modules.review.specification.ReviewSpecification;
+import com.techhub.modules.notification.enums.NotificationType;
+import com.techhub.modules.notification.service.NotificationDispatcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -44,6 +46,7 @@ public class SellerReviewServiceImpl implements SellerReviewService {
     private final ShopRepository shopRepository;
     private final ReviewRepository reviewRepository;
     private final ReviewHelpfulRepository reviewHelpfulRepository;
+    private final NotificationDispatcher notificationDispatcher;
 
     @Override
     @Transactional(readOnly = true)
@@ -195,6 +198,21 @@ public class SellerReviewServiceImpl implements SellerReviewService {
 
         review.setSellerResponse(trimmedResponse);
         review.setSellerResponseAt(now);
+
+        // Notify buyer that seller responded to their review
+        if (review.getUser() != null) {
+            String productName = (orderItem != null && orderItem.getProductNameSnapshot() != null)
+                    ? " cho sản phẩm " + orderItem.getProductNameSnapshot()
+                    : "";
+            notificationDispatcher.dispatch(
+                    review.getUser().getId(),
+                    NotificationType.REVIEW,
+                    "Shop đã phản hồi đánh giá của bạn",
+                    "Shop " + shop.getName() + " vừa phản hồi đánh giá của bạn" + productName + ".",
+                    "REVIEW",
+                    review.getId()
+            );
+        }
 
         // 8. Fetch helpful count
         long helpfulCount = reviewHelpfulRepository.countByReviewId(reviewId);

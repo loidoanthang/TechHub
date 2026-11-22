@@ -2,6 +2,8 @@ package com.techhub.modules.order.service.impl;
  
 import com.techhub.exception.BusinessException;
 import com.techhub.exception.ErrorCode;
+import com.techhub.modules.notification.enums.NotificationType;
+import com.techhub.modules.notification.service.NotificationDispatcher;
 import com.techhub.modules.order.dto.request.CheckoutPreviewRequest;
 import com.techhub.modules.order.dto.request.PlaceOrderRequest;
 import com.techhub.modules.shop.dto.request.ShopOrderRequest;
@@ -95,6 +97,7 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final VNPayService vnPayService;
+    private final NotificationDispatcher notificationDispatcher;
 
     @Override
     @Transactional(readOnly = true)
@@ -1546,6 +1549,33 @@ public class CheckoutServiceImpl implements CheckoutService {
                 o.setUpdatedAt(now);
             }
             orderRepository.saveAll(createdOrders);
+        }
+
+        // 19. Auto-trigger Notifications for confirmed orders (COD or VNPAY_TOKEN)
+        if (request.paymentMethod() == PaymentMethod.COD || request.paymentMethod() == PaymentMethod.VNPAY_TOKEN) {
+            for (Order o : createdOrders) {
+                // Notify Buyer
+                notificationDispatcher.dispatch(
+                        user.getId(),
+                        NotificationType.ORDER,
+                        "Đặt hàng thành công",
+                        "Đơn hàng #" + o.getOrderNumber() + " của bạn đã được tiếp nhận và đang chờ shop xác nhận.",
+                        "ORDER",
+                        o.getId()
+                );
+
+                // Notify Seller
+                if (o.getShop() != null && o.getShop().getSeller() != null && o.getShop().getSeller().getUser() != null) {
+                    notificationDispatcher.dispatch(
+                            o.getShop().getSeller().getUser().getId(),
+                            NotificationType.ORDER,
+                            "Bạn có đơn hàng mới!",
+                            "Shop có đơn hàng mới #" + o.getOrderNumber() + " với giá trị " + o.getTotalAmount() + "đ. Vui lòng kiểm tra và xác nhận đơn.",
+                            "ORDER",
+                            o.getId()
+                    );
+                }
+            }
         }
 
         return new PlaceOrderResponse(

@@ -64,6 +64,9 @@ class AdminShopServiceImplTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Mock
+    private com.techhub.modules.notification.service.NotificationDispatcher notificationDispatcher;
+
     @InjectMocks
     private AdminShopServiceImpl adminShopService;
 

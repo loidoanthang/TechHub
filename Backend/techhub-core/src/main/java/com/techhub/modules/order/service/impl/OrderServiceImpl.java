@@ -13,6 +13,8 @@ import com.techhub.modules.order.dto.response.ReorderItemDto;
 import com.techhub.modules.order.dto.response.ReorderResponse;
 import com.techhub.modules.order.dto.response.ReorderUnavailableItemDto;
 import com.techhub.modules.order.dto.request.CreateCancellationRequest;
+import com.techhub.modules.notification.enums.NotificationType;
+import com.techhub.modules.notification.service.NotificationDispatcher;
 import com.techhub.modules.order.dto.request.CancelOrderRequest;
 import com.techhub.modules.order.dto.response.CancellationRequestResponse;
 import com.techhub.modules.order.service.OrderService;
@@ -113,6 +115,7 @@ public class OrderServiceImpl implements OrderService {
     private final com.techhub.modules.payment.repository.RefundTransactionRepository refundTransactionRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
+    private final NotificationDispatcher notificationDispatcher;
 
     @Override
     @Transactional(readOnly = true)
@@ -393,6 +396,18 @@ public class OrderServiceImpl implements OrderService {
         cancellationRequest = cancellationRequestRepository.save(cancellationRequest);
         log.info("Cancellation request {} created successfully for order {}", cancellationRequest.getId(), orderId);
 
+        // Auto-trigger Notification to Seller
+        if (order.getShop() != null && order.getShop().getSeller() != null && order.getShop().getSeller().getUser() != null) {
+            notificationDispatcher.dispatch(
+                    order.getShop().getSeller().getUser().getId(),
+                    NotificationType.ORDER,
+                    "Yêu cầu hủy đơn hàng mới",
+                    "Khách hàng vừa gửi yêu cầu hủy đơn hàng #" + order.getOrderNumber() + ". Lý do: " + reason + ". Vui lòng kiểm tra và phản hồi.",
+                    "ORDER",
+                    order.getId()
+            );
+        }
+
         return mapToCancellationRequestResponse(cancellationRequest, order.getOrderNumber());
     }
 
@@ -435,6 +450,22 @@ public class OrderServiceImpl implements OrderService {
 
         orderRepository.save(order);
         log.info("Order {} successfully direct cancelled by buyer {}", orderId, userId);
+
+        // Auto-trigger Notification to Seller
+        if (order.getShop() != null && order.getShop().getSeller() != null && order.getShop().getSeller().getUser() != null) {
+            String reasonText = (request.reasonNote() != null && !request.reasonNote().isBlank())
+                    ? request.reasonNote().trim()
+                    : String.valueOf(request.reasonCode());
+            notificationDispatcher.dispatch(
+                    order.getShop().getSeller().getUser().getId(),
+                    NotificationType.ORDER,
+                    "Đơn hàng đã bị hủy",
+                    "Khách hàng đã hủy đơn hàng #" + order.getOrderNumber() + ". Lý do: " + reasonText,
+                    "ORDER",
+                    order.getId()
+            );
+        }
+
         return buildBuyerOrderDetailResponse(order);
     }
 

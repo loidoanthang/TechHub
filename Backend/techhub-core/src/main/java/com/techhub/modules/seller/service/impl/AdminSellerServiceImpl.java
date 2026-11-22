@@ -23,6 +23,8 @@ import com.techhub.modules.shop.repository.ShopRepository;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.modules.seller.service.AdminSellerService;
 import com.techhub.modules.seller.specification.SellerSpecification;
+import com.techhub.modules.notification.enums.NotificationType;
+import com.techhub.modules.notification.service.NotificationDispatcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -54,6 +56,7 @@ public class AdminSellerServiceImpl implements AdminSellerService {
     private final AddressRepository addressRepository;
     private final ShippingOptionRepository shippingOptionRepository;
     private final UserRepository userRepository;
+    private final NotificationDispatcher notificationDispatcher;
 
 
     @Override
@@ -262,6 +265,15 @@ public class AdminSellerServiceImpl implements AdminSellerService {
 
             user.getRoles().add(Role.SELLER);
             shop.setStatus(ShopStatus.ACTIVE);
+
+            notificationDispatcher.dispatch(
+                    user.getId(),
+                    NotificationType.SHOP,
+                    "Chúc mừng! Hồ sơ Người Bán đã được phê duyệt",
+                    "Hồ sơ đăng ký Người Bán của bạn đã được phê duyệt thành công. Bạn có thể bắt đầu mở Shop và đăng bán sản phẩm.",
+                    "SHOP",
+                    shop.getId()
+            );
         } else if (request.status() == SellerVerificationStatus.REJECTED) {
             if (request.rejectionReason() == null || request.rejectionReason().trim().isEmpty()) {
                 throw new BusinessException(ErrorCode.REJECTION_REASON_REQUIRED);
@@ -269,6 +281,15 @@ public class AdminSellerServiceImpl implements AdminSellerService {
             seller.setVerificationStatus(SellerVerificationStatus.REJECTED);
             seller.setRejectionReason(request.rejectionReason().trim());
             shop.setStatus(ShopStatus.SUSPENDED);
+
+            notificationDispatcher.dispatch(
+                    user.getId(),
+                    NotificationType.SHOP,
+                    "Hồ sơ Người Bán chưa được phê duyệt",
+                    "Hồ sơ đăng ký Người Bán của bạn chưa được duyệt. Lý do: " + request.rejectionReason().trim(),
+                    "SHOP",
+                    seller.getId()
+            );
         }
 
         sellerRepository.save(seller);

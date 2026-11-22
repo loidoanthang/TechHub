@@ -34,6 +34,8 @@ import com.techhub.modules.review.repository.ReviewRepository;
 import com.techhub.modules.user.entity.User;
 import com.techhub.modules.user.repository.UserRepository;
 import com.techhub.modules.review.service.ReviewService;
+import com.techhub.modules.notification.enums.NotificationType;
+import com.techhub.modules.notification.service.NotificationDispatcher;
 
 @Slf4j
 @Service
@@ -45,6 +47,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewMediaRepository reviewMediaRepository;
     private final ReviewHelpfulRepository reviewHelpfulRepository;
+    private final NotificationDispatcher notificationDispatcher;
 
     private static final int MAX_MEDIA_FILES = 5;
 
@@ -128,6 +131,17 @@ public class ReviewServiceImpl implements ReviewService {
 
         log.info("Review created successfully: reviewId={}, orderItemId={}, userId={}",
                 savedReview.getId(), request.orderItemId(), userId);
+
+        if (order.getShop() != null && order.getShop().getSeller() != null && order.getShop().getSeller().getUser() != null) {
+            notificationDispatcher.dispatch(
+                    order.getShop().getSeller().getUser().getId(),
+                    NotificationType.REVIEW,
+                    "Đánh giá sản phẩm mới",
+                    "Sản phẩm " + orderItem.getProductNameSnapshot() + " vừa nhận được đánh giá " + request.rating() + " sao từ khách hàng.",
+                    "REVIEW",
+                    savedReview.getId()
+            );
+        }
 
         long helpfulCount = 0;
         return ReviewResponse.from(savedReview, helpfulCount);

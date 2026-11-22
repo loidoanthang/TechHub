@@ -105,6 +105,9 @@ class OrderServiceImplTest {
     @Mock
     private com.techhub.modules.cart.repository.CartItemRepository cartItemRepository;
 
+    @Mock
+    private com.techhub.modules.notification.service.NotificationDispatcher notificationDispatcher;
+
     @InjectMocks
     private OrderServiceImpl orderService;
 
