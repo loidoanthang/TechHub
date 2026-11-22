@@ -14,12 +14,22 @@ export const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 15000,
+  timeout: 10000, // 10s default global timeout
 });
 
-// Request Interceptor: Attach Bearer Token
+// Request Interceptor: Attach Bearer Token & Immediate Offline Rejection
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // Fail-fast if browser is completely offline
+    if (typeof window !== "undefined" && typeof window.navigator !== "undefined" && !window.navigator.onLine) {
+      const offlineError = new AxiosError(
+        "Mất kết nối mạng. Vui lòng kiểm tra lại đường truyền của bạn!",
+        "ERR_NETWORK",
+        config
+      );
+      return Promise.reject(offlineError);
+    }
+
     const token = getAccessToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -151,6 +161,13 @@ apiClient.interceptors.response.use(
         }
         return Promise.reject(refreshErr);
       }
+    }
+
+    // Normalize timeout and offline errors for user friendly feedback
+    if (error.code === "ECONNABORTED" || error.message?.toLowerCase().includes("timeout")) {
+      error.message = "Yêu cầu đã hết thời gian chờ (timeout). Vui lòng thử lại!";
+    } else if (error.code === "ERR_NETWORK" || !error.response) {
+      error.message = "Mất kết nối mạng hoặc không thể kết nối tới máy chủ. Vui lòng kiểm tra lại đường truyền!";
     }
 
     return Promise.reject(error);

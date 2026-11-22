@@ -34,7 +34,6 @@ public class CheckoutController {
     }
 
     @PostMapping("/place-order")
-    @PreAuthorize("hasRole('BUYER')")
     @RequireActiveBuyer
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<PlaceOrderResponse> placeOrder(

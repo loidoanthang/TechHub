@@ -99,4 +99,14 @@ export const orderApi = {
       ENDPOINTS.BUYER.RETURN_REQUEST_CANCEL(requestId)
     );
   },
+
+  retryVNPayPaymentByOrder: (
+    orderId: string,
+    bankCode?: string
+  ): Promise<ApiResponse<{ paymentUrl: string }>> => {
+    return apiClient.post(
+      ENDPOINTS.PAYMENT.VNPAY_RETRY_ORDER(orderId),
+      bankCode ? { bankCode } : {}
+    );
+  },
 };

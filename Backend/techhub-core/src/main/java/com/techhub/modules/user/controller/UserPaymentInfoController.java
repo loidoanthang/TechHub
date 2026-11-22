@@ -31,7 +31,6 @@ public class UserPaymentInfoController {
      * Khởi tạo yêu cầu liên kết thẻ VNPAY Token (nhận link chuyển hướng sang VNPAY để nhập thẻ & OTP).
      */
     @PostMapping("/link-init")
-    @PreAuthorize("hasRole('BUYER')")
     @RequireActiveBuyer
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<VNPayTokenLinkResponse> initiateTokenLink(HttpServletRequest request) {
@@ -64,7 +63,6 @@ public class UserPaymentInfoController {
      * Đặt một thẻ làm phương thức thanh toán mặc định.
      */
     @PatchMapping("/{id}/default")
-    @PreAuthorize("hasRole('BUYER')")
     @RequireActiveBuyer
     public ApiResponse<PaymentInfoResponse> setDefaultPaymentInfo(@PathVariable UUID id) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();
@@ -76,7 +74,6 @@ public class UserPaymentInfoController {
      * Hủy liên kết thẻ.
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('BUYER')")
     @RequireActiveBuyer
     public ApiResponse<Void> deletePaymentInfo(@PathVariable UUID id) {
         UUID currentUserId = SecurityUtils.getCurrentUserId();

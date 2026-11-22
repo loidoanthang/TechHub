@@ -79,6 +79,9 @@ export const API_ENDPOINTS = {
   PAYMENT: {
     VNPAY_CALLBACK: "/api/payment/vnpay/callback",
     VNPAY_RETRY: (paymentId: string) => `/api/payment/vnpay/retry/${paymentId}`,
+    VNPAY_RETRY_ORDER: (orderId: string) => `/api/payment/vnpay/retry-order/${orderId}`,
+    VNPAY_QUERY: (paymentId: string) => `/api/payment/vnpay/query/${paymentId}`,
+    VNPAY_REFUND: (paymentId: string) => `/api/payment/vnpay/refund/${paymentId}`,
   },
   SELLER: {
     REGISTER: "/api/seller/register",

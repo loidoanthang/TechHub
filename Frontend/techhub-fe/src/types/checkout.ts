@@ -63,6 +63,7 @@ export interface CheckoutPreviewResponse {
 export interface PlaceOrderRequest {
   addressId: string;
   paymentMethod: PaymentMethod;
+  paymentInfoId?: string | null;
   bankCode?: string | null;
   selectedCartItemIds: string[];
   shopOrders: ShopOrderRequest[];
@@ -120,4 +121,19 @@ export interface VNPayCallbackResponse {
   amount: number;
   responseCode: string;
   message: string;
+}
+
+export interface VNPayQueryDrResponse {
+  vnpResponseId?: string;
+  vnpCommand?: string;
+  vnpResponseCode?: string;
+  vnpMessage?: string;
+  vnpTxnRef?: string;
+  vnpAmount?: number;
+  vnpOrderInfo?: string;
+  vnpBankCode?: string;
+  vnpPayDate?: string;
+  vnpTransactionNo?: string;
+  vnpTransactionType?: string;
+  vnpTransactionStatus?: string;
 }

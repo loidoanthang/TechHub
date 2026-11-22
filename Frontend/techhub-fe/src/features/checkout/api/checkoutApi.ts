@@ -9,6 +9,7 @@ import type {
   PaymentMethodResponse,
   BuyerPaymentStatusResponse,
   VNPayCallbackResponse,
+  VNPayQueryDrResponse,
 } from "@/types/checkout";
 
 export const checkoutApi = {
@@ -50,5 +51,21 @@ export const checkoutApi = {
       API_ENDPOINTS.PAYMENT.VNPAY_RETRY(paymentId),
       bankCode ? { bankCode } : {}
     );
+  },
+
+  retryVNPayPaymentByOrder: (
+    orderId: string,
+    bankCode?: string
+  ): Promise<ApiResponse<{ paymentUrl: string }>> => {
+    return apiClient.post(
+      API_ENDPOINTS.PAYMENT.VNPAY_RETRY_ORDER(orderId),
+      bankCode ? { bankCode } : {}
+    );
+  },
+
+  queryVNPayTransaction: (
+    paymentId: string
+  ): Promise<ApiResponse<VNPayQueryDrResponse>> => {
+    return apiClient.post(API_ENDPOINTS.PAYMENT.VNPAY_QUERY(paymentId));
   },
 };

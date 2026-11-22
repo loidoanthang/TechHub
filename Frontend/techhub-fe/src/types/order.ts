@@ -61,6 +61,7 @@ export interface BuyerOrderResponse {
   statusDescription: string;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  paymentId?: string | null;
   totalProductAmount: number;
   shippingFee: number;
   shopDiscountAmount: number;
@@ -97,6 +98,7 @@ export interface BuyerOrderDetailResponse {
   paymentMethodName: string;
   paymentStatus: PaymentStatus;
   paymentStatusDescription: string;
+  paymentId?: string | null;
   createdAt: string;
   deliveredAt?: string | null;
   completedAt?: string | null;

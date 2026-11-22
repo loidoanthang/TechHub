@@ -174,13 +174,21 @@ function PaymentCallbackContent() {
               <ArrowRight className="w-4 h-4" />
             </Link>
           ) : (
-            <Link
-              href="/checkout"
-              className="w-full py-3 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
-            >
-              <span>Return to Checkout</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+            <>
+              <Link
+                href="/account/orders"
+                className="w-full py-3 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+              >
+                <span>Go to My Orders (Pay Now)</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/"
+                className="w-full py-3 rounded-xl border border-[#c3c5d9]/40 hover:bg-[#eff4ff] text-[#0b1c30] text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+              >
+                <span>Back to Marketplace</span>
+              </Link>
+            </>
           )}
         </div>
       </div>

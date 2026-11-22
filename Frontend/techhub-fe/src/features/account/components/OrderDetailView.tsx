@@ -20,7 +20,7 @@ import {
   AlertCircle,
   Star,
 } from "lucide-react";
-import { useBuyerOrderDetailQuery, useCompleteOrderMutation, useReturnRequestQuery } from "@/features/orders/hooks/useOrderQueries";
+import { useBuyerOrderDetailQuery, useCompleteOrderMutation, useReturnRequestQuery, useRetryOrderPaymentMutation } from "@/features/orders/hooks/useOrderQueries";
 import type { OrderStatus } from "@/types/enums";
 import type { BuyerOrderItemResponse } from "@/types/order";
 import { CancelOrderModal } from "./CancelOrderModal";
@@ -38,6 +38,8 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
   const { data: order, isLoading, error, refetch } = useBuyerOrderDetailQuery(orderId);
   const { data: returnRequest } = useReturnRequestQuery(orderId);
   const completeOrderMutation = useCompleteOrderMutation();
+  const retryOrderPaymentMutation = useRetryOrderPaymentMutation();
+  const [isRetryingPayment, setIsRetryingPayment] = useState(false);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -65,6 +67,24 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
       refetch();
     } catch {
       showToast("Failed to confirm receipt.");
+    }
+  };
+
+  const handleRetryPayment = async () => {
+    if (!order) return;
+    try {
+      setIsRetryingPayment(true);
+      const res = await retryOrderPaymentMutation.mutateAsync({ orderId: order.orderId });
+      if (res.data?.paymentUrl) {
+        window.location.href = res.data.paymentUrl;
+      } else {
+        showToast("Không tìm thấy đường dẫn thanh toán. Vui lòng thử lại.");
+      }
+    } catch (err: unknown) {
+      const errObj = err as { response?: { data?: { message?: string } }; message?: string };
+      showToast(errObj?.response?.data?.message || errObj?.message || "Không thể tạo liên kết thanh toán lại.");
+    } finally {
+      setIsRetryingPayment(false);
     }
   };
 
@@ -463,12 +483,19 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
         {/* Order Actions */}
         <div className="p-4 bg-white border-t border-[#eff4ff] flex items-center justify-end gap-3 flex-wrap">
           {isPendingPayment && (
-            <Link
-              href={`/checkout?orderId=${order.orderId}`}
-              className="px-5 py-2.5 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold shadow-sm"
+            <button
+              type="button"
+              onClick={handleRetryPayment}
+              disabled={isRetryingPayment}
+              className="px-5 py-2.5 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
             >
-              Pay Now
-            </Link>
+              {isRetryingPayment ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <CreditCard className="w-3.5 h-3.5" />
+              )}
+              <span>{isRetryingPayment ? "Đang kết nối..." : "Pay Now"}</span>
+            </button>
           )}
 
           {isDelivered && (

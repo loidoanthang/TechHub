@@ -17,7 +17,7 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import { useBuyerOrdersQuery, useCompleteOrderMutation, useReturnRequestStatusesQuery } from "@/features/orders/hooks/useOrderQueries";
+import { useBuyerOrdersQuery, useCompleteOrderMutation, useReturnRequestStatusesQuery, useRetryOrderPaymentMutation } from "@/features/orders/hooks/useOrderQueries";
 import type { OrderStatus } from "@/types/enums";
 import type { BuyerOrderResponse, BuyerOrderItemResponse } from "@/types/order";
 import { CancelOrderModal } from "./CancelOrderModal";
@@ -53,6 +53,8 @@ export function OrdersListView() {
   const { data: returnStatuses } = useReturnRequestStatusesQuery(completedOrderIds);
 
   const completeOrderMutation = useCompleteOrderMutation();
+  const retryOrderPaymentMutation = useRetryOrderPaymentMutation();
+  const [retryingOrderId, setRetryingOrderId] = useState<string | null>(null);
 
   // Modals state
   const [cancelTargetOrder, setCancelTargetOrder] = useState<BuyerOrderResponse | null>(null);
@@ -82,6 +84,23 @@ export function OrdersListView() {
       refetch();
     } catch {
       showToast("Failed to confirm receipt. Please try again.");
+    }
+  };
+
+  const handleRetryPayment = async (orderId: string) => {
+    try {
+      setRetryingOrderId(orderId);
+      const res = await retryOrderPaymentMutation.mutateAsync({ orderId });
+      if (res.data?.paymentUrl) {
+        window.location.href = res.data.paymentUrl;
+      } else {
+        showToast("Không tìm thấy đường dẫn thanh toán. Vui lòng thử lại.");
+      }
+    } catch (err: unknown) {
+      const errObj = err as { response?: { data?: { message?: string } }; message?: string };
+      showToast(errObj?.response?.data?.message || errObj?.message || "Không thể tạo liên kết thanh toán lại.");
+    } finally {
+      setRetryingOrderId(null);
     }
   };
 
@@ -323,13 +342,19 @@ export function OrdersListView() {
 
                       {/* Pending payment: pay now */}
                       {isPendingPayment && (
-                        <Link
-                          href={`/checkout?orderId=${order.orderId}`}
-                          className="px-4 py-2 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5"
+                        <button
+                          type="button"
+                          onClick={() => handleRetryPayment(order.orderId)}
+                          disabled={retryingOrderId === order.orderId}
+                          className="px-4 py-2 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                         >
-                          <CreditCard className="w-3.5 h-3.5" />
-                          <span>Pay Now</span>
-                        </Link>
+                          {retryingOrderId === order.orderId ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <CreditCard className="w-3.5 h-3.5" />
+                          )}
+                          <span>{retryingOrderId === order.orderId ? "Connecting..." : "Pay Now"}</span>
+                        </button>
                       )}
 
                       {/* Delivered: Confirm Receipt */}

@@ -12,6 +12,11 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
             staleTime: 60 * 1000,
             retry: 1,
             refetchOnWindowFocus: false,
+            networkMode: "always",
+          },
+          mutations: {
+            retry: false, // Do not silently retry mutations on network/offline errors
+            networkMode: "always", // Execute mutation handler immediately so catch/finally can unfreeze UI
           },
         },
       })

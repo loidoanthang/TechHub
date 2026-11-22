@@ -141,3 +141,15 @@ export function useCancelReturnRequestMutation() {
     },
   });
 }
+
+export function useRetryOrderPaymentMutation() {
+  return useMutation({
+    mutationFn: ({
+      orderId,
+      bankCode,
+    }: {
+      orderId: string;
+      bankCode?: string;
+    }) => orderApi.retryVNPayPaymentByOrder(orderId, bankCode),
+  });
+}

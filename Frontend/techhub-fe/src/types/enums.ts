@@ -51,7 +51,7 @@ export const ORDER_STATUSES = [
 ] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
-export const PAYMENT_METHODS = ["COD", "VNPAY"] as const;
+export const PAYMENT_METHODS = ["COD", "VNPAY", "VNPAY_TOKEN"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export const PAYMENT_STATUSES = ["PENDING", "COMPLETED", "FAILED", "EXPIRED", "REFUNDED"] as const;
