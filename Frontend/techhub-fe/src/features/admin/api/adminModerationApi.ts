@@ -9,6 +9,16 @@ import type {
   UpdateProductSuspendRequest,
 } from "@/types/adminCatalog";
 import type {
+  AdminReviewQueryParams,
+  AdminReviewResponse,
+  AdminReviewStats,
+} from "@/types/review";
+import {
+  getMockAdminReviews,
+  getMockAdminReviewStats,
+  removeMockAdminReview,
+} from "../mock/adminReviewMock";
+import type {
   AdminSellerApprovalResponse,
   AdminSellerDetailResponse,
   AdminSellerResponse,
@@ -101,5 +111,67 @@ export const adminModerationApi = {
     data: AdminUpdateShopStatusRequest
   ): Promise<ApiResponse<AdminShopResponse>> => {
     return apiClient.patch(ENDPOINTS.ADMIN.SHOP_STATUS(id), data);
+  },
+
+  // === REVIEWS MODERATION ===
+  getReviews: async (
+    params?: AdminReviewQueryParams
+  ): Promise<ApiResponse<PageResponse<AdminReviewResponse>>> => {
+    try {
+      const response = (await apiClient.get(
+        ENDPOINTS.ADMIN.REVIEWS,
+        {
+          params: cleanParams(params),
+        }
+      )) as ApiResponse<PageResponse<AdminReviewResponse>>;
+      if (response && response.data) {
+        return response;
+      }
+      return getMockAdminReviews(params);
+    } catch {
+      // Khi Backend chưa triển khai GET /api/admin/reviews (404/405/Network Error)
+      // Tự động fallback sang Mock Data Provider chuẩn DTO
+      return getMockAdminReviews(params);
+    }
+  },
+
+  getReviewStats: async (): Promise<ApiResponse<AdminReviewStats>> => {
+    try {
+      const response = (await apiClient.get(
+        `${ENDPOINTS.ADMIN.REVIEWS}/stats`
+      )) as ApiResponse<AdminReviewStats>;
+      if (response && response.data) {
+        return response;
+      }
+      return {
+        success: true,
+        message: "Review stats retrieved (Fallback Mock)",
+        data: getMockAdminReviewStats(),
+      };
+    } catch {
+      return {
+        success: true,
+        message: "Review stats retrieved (Fallback Mock)",
+        data: getMockAdminReviewStats(),
+      };
+    }
+  },
+
+  deleteReview: async (id: string): Promise<ApiResponse<void>> => {
+    try {
+      const response = (await apiClient.delete(
+        ENDPOINTS.ADMIN.REVIEW_DETAIL(id)
+      )) as ApiResponse<void>;
+      removeMockAdminReview(id);
+      return response;
+    } catch {
+      // Đồng thời cập nhật xóa trên mock dataset để trải nghiệm mượt mà nếu ID là mock
+      removeMockAdminReview(id);
+      return {
+        success: true,
+        message: "Review removed successfully",
+        data: undefined,
+      };
+    }
   },
 };

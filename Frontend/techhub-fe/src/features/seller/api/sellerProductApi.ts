@@ -75,8 +75,20 @@ export const sellerProductApi = {
     }
   ): Promise<ApiResponse<unknown>> => {
     return apiClient.put(
-      `${ENDPOINTS.SELLER.PRODUCT_VARIANTS(productId)}/${variantId}`,
+      ENDPOINTS.SELLER.PRODUCT_VARIANT_DETAIL(productId, variantId),
       data
+    );
+  },
+
+  /**
+   * Xóa một biến thể (SKU variant) của sản phẩm
+   */
+  deleteVariant: (
+    productId: string,
+    variantId: string
+  ): Promise<ApiResponse<void>> => {
+    return apiClient.delete(
+      ENDPOINTS.SELLER.PRODUCT_VARIANT_DETAIL(productId, variantId)
     );
   },
 

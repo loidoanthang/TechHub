@@ -78,3 +78,17 @@ export interface Product {
   tags?: string[];
   inStock?: boolean;
 }
+
+export interface RecentlyViewedResponse {
+  id: string;
+  productId: string;
+  productName: string;
+  slug: string;
+  coverImageUrl: string;
+  minPrice: number;
+  shopName?: string | null;
+  inStock: boolean;
+  isShopPaused: boolean;
+  viewedAt: string;
+}
+

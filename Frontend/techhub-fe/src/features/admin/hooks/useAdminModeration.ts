@@ -5,6 +5,8 @@ import {
   keepPreviousData,
 } from "@tanstack/react-query";
 import { adminModerationApi } from "../api/adminModerationApi";
+import { toast } from "@/lib/toast";
+import { getApiErrorMessage } from "@/lib/api/error";
 import type {
   AdminProductsQueryParams,
   UpdateProductApprovalRequest,
@@ -16,6 +18,7 @@ import type {
   AdminUpdateShopStatusRequest,
   SellerApprovalRequest,
 } from "@/types/admin";
+import type { AdminReviewQueryParams } from "@/types/review";
 
 export const ADMIN_MODERATION_KEYS = {
   products: (params?: AdminProductsQueryParams) =>
@@ -26,6 +29,8 @@ export const ADMIN_MODERATION_KEYS = {
   sellerDetail: (id: string) => ["admin", "sellers", "detail", id] as const,
   shops: (params?: AdminShopsQueryParams) => ["admin", "shops", params] as const,
   shopDetail: (id: string) => ["admin", "shops", "detail", id] as const,
+  reviews: (params?: AdminReviewQueryParams) => ["admin", "reviews", params] as const,
+  reviewStats: ["admin", "reviews", "stats"] as const,
 };
 
 export function useAdminProductsQuery(params?: AdminProductsQueryParams) {
@@ -173,6 +178,58 @@ export function useUpdateAdminShopStatusMutation() {
         queryKey: ADMIN_MODERATION_KEYS.shopDetail(variables.id),
       });
       qc.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+    },
+  });
+}
+
+/**
+ * Hook truy vấn danh sách đánh giá toàn sàn (Admin)
+ * Hỗ trợ tự động fallback Mock DTO khi Backend chưa mở GET /api/admin/reviews
+ */
+export function useAdminReviewsQuery(params?: AdminReviewQueryParams) {
+  return useQuery({
+    queryKey: ADMIN_MODERATION_KEYS.reviews(params),
+    queryFn: async () => {
+      const res = await adminModerationApi.getReviews(params);
+      return res.data;
+    },
+    placeholderData: keepPreviousData,
+  });
+}
+
+/**
+ * Hook truy vấn thống kê đánh giá toàn sàn (Admin)
+ */
+export function useAdminReviewStatsQuery() {
+  return useQuery({
+    queryKey: ADMIN_MODERATION_KEYS.reviewStats,
+    queryFn: async () => {
+      const res = await adminModerationApi.getReviewStats();
+      return res.data;
+    },
+  });
+}
+
+/**
+ * Hook xóa đánh giá vi phạm (Admin)
+ * Tùy chọn truyền productId để tự động invalidate cache đánh giá & rating summary của sản phẩm
+ */
+export function useDeleteReviewMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ reviewId }: { reviewId: string; productId?: string }) =>
+      adminModerationApi.deleteReview(reviewId),
+    onSuccess: (_res, variables) => {
+      toast.success("Đã xóa đánh giá vi phạm thành công");
+      qc.invalidateQueries({ queryKey: ["admin", "reviews"] });
+      if (variables.productId) {
+        qc.invalidateQueries({ queryKey: ["product-reviews", variables.productId] });
+        qc.invalidateQueries({ queryKey: ["product-rating-summary", variables.productId] });
+        qc.invalidateQueries({ queryKey: ["products"] });
+      }
+    },
+    onError: (err) => {
+      toast.error(getApiErrorMessage(err, "Không thể xóa đánh giá. Vui lòng thử lại."));
     },
   });
 }

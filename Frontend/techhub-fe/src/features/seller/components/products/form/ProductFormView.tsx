@@ -13,11 +13,13 @@ import {
   useUpdateProductMutation,
   useSellerProductDetailQuery,
   useSubmitProductApprovalMutation,
+  useDeleteProductVariantMutation,
 } from "@/features/seller/hooks/useSellerProducts";
 import { sellerProductApi } from "@/features/seller/api/sellerProductApi";
 import type { CategorySummaryResponse } from "@/types/category";
 import type {
   CreateProductRequest,
+  CreateProductVariantRequest,
   UpdateProductRequest,
   ProductDetailResponse,
 } from "@/types/sellerProduct";
@@ -32,6 +34,8 @@ import { ProductVariantsCard } from "./ProductVariantsCard";
 import { ProductFormFooterBar } from "./ProductFormFooterBar";
 import { ProductSubmittedModal } from "./ProductSubmittedModal";
 import { ProductApprovalWarningModal } from "./ProductApprovalWarningModal";
+import { VariantDeleteConfirmModal } from "./VariantDeleteConfirmModal";
+import { toast } from "@/lib/toast";
 import { ChevronRight, ArrowLeft, AlertCircle, Loader2, Info } from "lucide-react";
 
 interface ProductFormViewProps {
@@ -135,6 +139,7 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
   const createProductMutation = useCreateProductMutation();
   const updateProductMutation = useUpdateProductMutation();
   const submitApprovalMutation = useSubmitProductApprovalMutation();
+  const deleteVariantMutation = useDeleteProductVariantMutation();
 
   // Query product detail if in edit mode
   const { data: productDetail, isLoading: isLoadingDetail } = useSellerProductDetailQuery(productId);
@@ -176,6 +181,47 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
   const watchedDescription = watch("description");
   const watchedImages = watch("images");
   const watchedVariants = watch("variants");
+
+  // State for confirming deletion of an existing variant on server
+  const [variantToDelete, setVariantToDelete] = useState<{
+    index: number;
+    variant: CreateProductVariantRequest;
+  } | null>(null);
+
+  const handleRequestDeleteVariant = (
+    variantIndex: number,
+    variant: CreateProductVariantRequest
+  ) => {
+    const currentVariants = watchedVariants;
+    if (currentVariants.length <= 1) return;
+
+    // Case 1: Variant already persisted on backend -> open styled confirmation modal
+    if (variant.id && productId) {
+      setVariantToDelete({ index: variantIndex, variant });
+      return;
+    }
+
+    // Case 2: Draft variant locally added -> remove immediately
+    const nextVariants = currentVariants.filter((_, idx) => idx !== variantIndex);
+    setValue("variants", nextVariants, { shouldValidate: true, shouldDirty: true });
+  };
+
+  const handleConfirmDeleteServerVariant = async () => {
+    const targetVariantId = variantToDelete?.variant.id;
+    if (!variantToDelete || !productId || !targetVariantId) return;
+    const { index, variant } = variantToDelete;
+
+    try {
+      await deleteVariantMutation.mutateAsync({ productId, variantId: targetVariantId });
+      toast.success(`Đã xóa biến thể "${variant.variantName || variant.sku}" thành công`);
+      const nextVariants = watchedVariants.filter((_, idx) => idx !== index);
+      setValue("variants", nextVariants, { shouldValidate: true, shouldDirty: true });
+      setVariantToDelete(null);
+    } catch (err) {
+      console.error("Delete variant failed:", err);
+      toast.error("Không thể xóa biến thể trên máy chủ. Vui lòng thử lại.");
+    }
+  };
   const watchedAttributes = watch("attributes");
 
   // Pre-fill form when productDetail is loaded in edit mode
@@ -635,6 +681,8 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
           productName={watchedName}
           brandName={watchedBrandName}
           errors={formattedErrors}
+          onRequestDeleteVariant={handleRequestDeleteVariant}
+          isDeletingVariant={deleteVariantMutation.isPending}
         />
       </div>
 
@@ -666,6 +714,16 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
         }}
         onConfirm={handleConfirmApprovalWarning}
         isLoading={isSubmitting}
+      />
+
+      {/* Delete Server Variant Confirmation Modal */}
+      <VariantDeleteConfirmModal
+        isOpen={Boolean(variantToDelete)}
+        onClose={() => setVariantToDelete(null)}
+        onConfirm={handleConfirmDeleteServerVariant}
+        variantName={variantToDelete?.variant.variantName}
+        sku={variantToDelete?.variant.sku}
+        isLoading={deleteVariantMutation.isPending}
       />
     </div>
   );

@@ -20,6 +20,7 @@ public class RecentlyViewedResponse {
     private String slug;
     private String coverImageUrl;
     private BigDecimal minPrice;
+    private String shopName;
     private Boolean inStock;
     private Boolean isShopPaused;
     private LocalDateTime viewedAt;

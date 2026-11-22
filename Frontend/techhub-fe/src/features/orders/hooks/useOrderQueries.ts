@@ -153,3 +153,13 @@ export function useRetryOrderPaymentMutation() {
     }) => orderApi.retryVNPayPaymentByOrder(orderId, bankCode),
   });
 }
+export function useReorderMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (orderId: string) => orderApi.reorder(orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
+}
+

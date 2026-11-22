@@ -34,7 +34,11 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useChat } from "@/features/chat";
 import { useToggleWishlist } from "@/features/account/api/wishlistApi";
 import { toast } from "@/lib/toast";
-import { useProductsQuery } from "@/features/products/hooks/useProductQueries";
+import {
+  useProductsQuery,
+  useSimilarProductsQuery,
+  useRecordProductViewMutation,
+} from "@/features/products/hooks/useProductQueries";
 import { mapProductSummaryToProduct } from "@/features/products/utils/productMapper";
 import {
   useProductRatingSummaryQuery,
@@ -112,19 +116,46 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
     itemInfo?: string;
   } | null>(null);
 
-  // Query real related products from catalog
+  const recordViewMutation = useRecordProductViewMutation();
+  const mutateRecordView = recordViewMutation.mutate;
+  const recordedViewProductIdRef = useRef<string | null>(null);
+
+  // Record product view only if user is logged in as a BUYER
+  useEffect(() => {
+    const isBuyer = Boolean(user?.roles?.includes("BUYER"));
+    const targetId = product.id;
+    if (isAuthenticated && isBuyer && targetId && recordedViewProductIdRef.current !== targetId) {
+      recordedViewProductIdRef.current = targetId;
+      mutateRecordView(targetId, {
+        onError: () => {
+          // If view recording fails (network/401/etc.), reset ref so it can retry on next visit
+          if (recordedViewProductIdRef.current === targetId) {
+            recordedViewProductIdRef.current = null;
+          }
+        },
+      });
+    }
+  }, [isAuthenticated, user?.roles, product.id, mutateRecordView]);
+
+  // Query similar products from backend
+  const { data: similarProductsData } = useSimilarProductsQuery(product.id);
+
+  // Query real related products from catalog (fallback)
   const { data: relatedPage } = useProductsQuery({
-    size: 4,
+    size: 6,
     sortBy: "createdAt",
   });
 
   const realRelatedProducts = useMemo(() => {
-    if (!relatedPage?.content) return [];
-    return relatedPage.content
+    const rawItems = (similarProductsData && similarProductsData.length > 0)
+      ? similarProductsData
+      : (relatedPage?.content || []);
+
+    return rawItems
       .filter((p) => p.id !== product.id)
-      .slice(0, 3)
+      .slice(0, 6)
       .map(mapProductSummaryToProduct);
-  }, [relatedPage, product.id]);
+  }, [similarProductsData, relatedPage, product.id]);
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {

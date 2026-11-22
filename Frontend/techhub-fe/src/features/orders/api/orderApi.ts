@@ -10,6 +10,7 @@ import type {
   CancellationRequestResponse,
   CreateReturnRequest,
   ReturnRequestResponse,
+  ReorderResponse,
 } from "@/types/order";
 
 export interface BuyerOrderQueryParams {
@@ -108,5 +109,9 @@ export const orderApi = {
       ENDPOINTS.PAYMENT.VNPAY_RETRY_ORDER(orderId),
       bankCode ? { bankCode } : {}
     );
+  },
+  
+  reorder: (orderId: string): Promise<ApiResponse<ReorderResponse>> => {
+    return apiClient.post(ENDPOINTS.BUYER.ORDER_REORDER(orderId));
   },
 };

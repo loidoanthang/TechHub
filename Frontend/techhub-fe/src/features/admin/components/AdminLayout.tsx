@@ -19,6 +19,7 @@ import {
   ArrowLeft,
   Loader2,
   ShieldAlert,
+  MessageSquareText,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ROUTES } from "@/lib/constants";
