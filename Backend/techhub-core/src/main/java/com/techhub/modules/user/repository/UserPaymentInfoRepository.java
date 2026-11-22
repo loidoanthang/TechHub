@@ -22,6 +22,8 @@ public interface UserPaymentInfoRepository extends JpaRepository<UserPaymentInfo
 
     Optional<UserPaymentInfo> findByVnpToken(String vnpToken);
 
+    Optional<UserPaymentInfo> findByUserIdAndBankCodeAndCardMask(UUID userId, String bankCode, String cardMask);
+
     @Modifying(clearAutomatically = true)
     @Query("UPDATE UserPaymentInfo upi SET upi.isDefault = false WHERE upi.user.id = :userId")
     int resetDefaultByUserId(@Param("userId") UUID userId);

@@ -23,7 +23,8 @@ import java.util.UUID;
         },
         indexes = {
                 @Index(name = "idx_user_payment_info_user_id", columnList = "user_id"),
-                @Index(name = "idx_user_payment_info_token", columnList = "vnp_token")
+                @Index(name = "idx_user_payment_info_token", columnList = "vnp_token"),
+                @Index(name = "idx_user_payment_info_card_unique", columnList = "user_id, bank_code, card_mask")
         }
 )
 public class UserPaymentInfo {

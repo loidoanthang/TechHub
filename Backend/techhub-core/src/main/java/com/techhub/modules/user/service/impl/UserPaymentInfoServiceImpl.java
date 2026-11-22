@@ -120,14 +120,52 @@ public class UserPaymentInfoServiceImpl implements UserPaymentInfoService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        Optional<UserPaymentInfo> existingOpt = userPaymentInfoRepository.findByVnpToken(token);
-        if (existingOpt.isPresent()) {
-            UserPaymentInfo existing = existingOpt.get();
+        // 1. Kiểm tra nếu chính xác token này đã tồn tại
+        Optional<UserPaymentInfo> existingByTokenOpt = userPaymentInfoRepository.findByVnpToken(token);
+        if (existingByTokenOpt.isPresent()) {
+            UserPaymentInfo existing = existingByTokenOpt.get();
             existing.setStatus(PaymentInfoStatus.ACTIVE);
             userPaymentInfoRepository.save(existing);
+            log.info("Token already exists, reactivated for userId={}: token={}", userId, token);
             return VNPayIpnResponse.success();
         }
 
+        // 2. Chống liên kết trùng thẻ: Kiểm tra xem user đã có thẻ cùng bankCode và cardMask hay chưa
+        String resolvedBankCode = bankCode != null ? bankCode : "VNPAY";
+        String resolvedCardMask = cardMask != null ? cardMask : "****";
+        String resolvedCardType = cardType != null ? cardType : "ATM";
+
+        Optional<UserPaymentInfo> existingCardOpt = userPaymentInfoRepository.findByUserIdAndBankCodeAndCardMask(
+                userId, resolvedBankCode, resolvedCardMask
+        );
+
+        if (existingCardOpt.isPresent()) {
+            UserPaymentInfo existingCard = existingCardOpt.get();
+            String oldToken = existingCard.getVnpToken();
+
+            // Cập nhật token mới và trạng thái ACTIVE (nếu trước đó bị REMOVED/INACTIVE)
+            existingCard.setVnpToken(token);
+            existingCard.setCardType(resolvedCardType);
+            existingCard.setStatus(PaymentInfoStatus.ACTIVE);
+            // Giữ nguyên cờ isDefault hiện tại
+            userPaymentInfoRepository.save(existingCard);
+            log.info("Updated existing card with new VNPAY token: cardId={}, userId={}, bankCode={}, cardMask={}",
+                    existingCard.getId(), userId, resolvedBankCode, resolvedCardMask);
+
+            // Thu hồi token cũ trên VNPAY nếu có
+            if (oldToken != null && !oldToken.isBlank() && !oldToken.equals(token)) {
+                try {
+                    vnPayService.removeToken(userId, oldToken, "127.0.0.1");
+                    log.info("Revoked old token on VNPAY: oldToken={}", oldToken);
+                } catch (Exception ex) {
+                    log.warn("Failed to revoke old token on VNPAY for userId={}: {}", userId, ex.getMessage());
+                }
+            }
+
+            return VNPayIpnResponse.success();
+        }
+
+        // 3. Thẻ hoàn toàn mới: Tạo mới bản ghi
         long activeCount = userPaymentInfoRepository.countByUserIdAndStatus(userId, PaymentInfoStatus.ACTIVE);
         boolean isDefault = (activeCount == 0);
 
@@ -135,9 +173,9 @@ public class UserPaymentInfoServiceImpl implements UserPaymentInfoService {
                 .user(user)
                 .paymentType(PaymentType.BANK_ACCOUNT)
                 .vnpToken(token)
-                .bankCode(bankCode != null ? bankCode : "VNPAY")
-                .cardMask(cardMask != null ? cardMask : "****")
-                .cardType(cardType != null ? cardType : "ATM")
+                .bankCode(resolvedBankCode)
+                .cardMask(resolvedCardMask)
+                .cardType(resolvedCardType)
                 .status(PaymentInfoStatus.ACTIVE)
                 .isDefault(isDefault)
                 .build();
