@@ -108,6 +108,9 @@ class CheckoutServiceImplTest {
     @Mock
     private NotificationDispatcher notificationDispatcher;
 
+    @Mock
+    private com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
+
     @InjectMocks
     private CheckoutServiceImpl checkoutService;
 
@@ -200,6 +203,8 @@ class CheckoutServiceImplTest {
         cartItemA.setProduct(productA);
         cartItemA.setProductVariant(variantA);
         cartItemA.setQuantity(1);
+
+        lenient().when(platformPolicyProvider.getPlatformCommissionRate()).thenReturn(BigDecimal.valueOf(0.05));
     }
 
     private void mockActiveUser() {

@@ -37,6 +37,9 @@ class AdminPolicyServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
+
     @InjectMocks
     private AdminPolicyServiceImpl adminPolicyService;
 

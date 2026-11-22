@@ -59,6 +59,7 @@ public class OrderEscrowScheduledTasks {
     private final ProductVariantRepository productVariantRepository;
     private final VoucherRedemptionRepository voucherRedemptionRepository;
     private final VoucherRepository voucherRepository;
+    private final com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
 
     /**
      * Job 1: Auto-complete DELIVERED orders past 72h inspection window.
@@ -67,8 +68,9 @@ public class OrderEscrowScheduledTasks {
     @Transactional
     @Scheduled(cron = "${app.scheduling.auto-complete-cron:0 */30 * * * *}")
     public void autoCompleteDeliveredOrders() {
-        LocalDateTime threshold = LocalDateTime.now().minusHours(72);
-        log.info("Running autoCompleteDeliveredOrders task for orders delivered before {}", threshold);
+        int completeHours = platformPolicyProvider.getOrderAutoCompleteHours();
+        LocalDateTime threshold = LocalDateTime.now().minusHours(completeHours);
+        log.info("Running autoCompleteDeliveredOrders task for orders delivered before {} ({}h window)", threshold, completeHours);
 
         List<Order> eligibleOrders = orderRepository.findByStatusAndDeliveredAtBefore(
                 OrderStatus.DELIVERED, threshold, PageRequest.of(0, 50)
@@ -168,8 +170,9 @@ public class OrderEscrowScheduledTasks {
     @Transactional
     @Scheduled(cron = "${app.scheduling.auto-refund-cron:0 */30 * * * *}")
     public void autoApproveReturnRequests() {
-        LocalDateTime threshold = LocalDateTime.now().minusHours(72);
-        log.info("Running autoApproveReturnRequests task for requests before {}", threshold);
+        int approveHours = platformPolicyProvider.getAutoApproveReturnHours();
+        LocalDateTime threshold = LocalDateTime.now().minusHours(approveHours);
+        log.info("Running autoApproveReturnRequests task for requests before {} ({}h window)", threshold, approveHours);
 
         List<ReturnRequest> pendingReturns = returnRequestRepository.findByStatusAndCreatedAtBefore(
                 ReturnRequestStatus.PENDING, threshold, PageRequest.of(0, 50)
@@ -192,8 +195,9 @@ public class OrderEscrowScheduledTasks {
             return;
         }
 
+        int approveHours = platformPolicyProvider.getAutoApproveReturnHours();
         rr.setStatus(ReturnRequestStatus.AUTO_APPROVED);
-        rr.setSellerNote("Hệ thống tự động chấp thuận hoàn tiền sau 72h Người bán không phản hồi");
+        rr.setSellerNote("Hệ thống tự động chấp thuận hoàn tiền sau " + approveHours + "h Người bán không phản hồi");
         rr.setRespondedAt(now);
         returnRequestRepository.save(rr);
 

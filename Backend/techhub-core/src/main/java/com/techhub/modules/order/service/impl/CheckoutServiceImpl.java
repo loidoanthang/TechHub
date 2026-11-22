@@ -75,6 +75,7 @@ import com.techhub.modules.voucher.repository.VoucherRedemptionRepository;
 import com.techhub.modules.voucher.repository.VoucherRepository;
 import com.techhub.modules.order.service.CheckoutService;
 import com.techhub.modules.payment.service.VNPayService;
+import com.techhub.modules.policy.service.PlatformPolicyProvider;
 
 @Slf4j
 @Service
@@ -98,6 +99,7 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final OrderItemRepository orderItemRepository;
     private final VNPayService vnPayService;
     private final NotificationDispatcher notificationDispatcher;
+    private final PlatformPolicyProvider platformPolicyProvider;
 
     @Override
     @Transactional(readOnly = true)
@@ -1246,6 +1248,8 @@ public class CheckoutServiceImpl implements CheckoutService {
             // Item-level Pro-Rata
             List<OrderItem> orderItems = new ArrayList<>();
             BigDecimal orderTotalCommission = BigDecimal.ZERO;
+            BigDecimal commissionRate = platformPolicyProvider.getPlatformCommissionRate();
+            BigDecimal commissionRateSnapshot = commissionRate.multiply(BigDecimal.valueOf(100)).setScale(2, RoundingMode.HALF_UP);
 
             if (totalProductDiscountForShop.compareTo(BigDecimal.ZERO) > 0 && shopSubtotal.compareTo(BigDecimal.ZERO) > 0) {
                 BigDecimal allocatedSum = BigDecimal.ZERO;
@@ -1279,7 +1283,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                     BigDecimal finalSubtotal = origSubtotal.subtract(itemDiscount).setScale(2, RoundingMode.HALF_UP);
                     BigDecimal unitPrice = finalSubtotal.divide(BigDecimal.valueOf(ci.getQuantity()), 2, RoundingMode.HALF_UP);
 
-                    BigDecimal commissionAmount = finalSubtotal.multiply(BigDecimal.valueOf(0.05)).setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal commissionAmount = finalSubtotal.multiply(commissionRate).setScale(2, RoundingMode.HALF_UP);
                     BigDecimal sellerEarnings = finalSubtotal.subtract(commissionAmount).setScale(2, RoundingMode.HALF_UP);
                     orderTotalCommission = orderTotalCommission.add(commissionAmount);
 
@@ -1299,7 +1303,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                             .itemDiscountAmount(itemDiscount)
                             .discountedUnitPrice(unitPrice)
                             .finalSubtotal(finalSubtotal)
-                            .commissionRateSnapshot(BigDecimal.valueOf(5.00).setScale(2, RoundingMode.HALF_UP))
+                            .commissionRateSnapshot(commissionRateSnapshot)
                             .commissionAmount(commissionAmount)
                             .sellerEarnings(sellerEarnings)
                             .build();
@@ -1310,7 +1314,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                 for (CartItem ci : shopItems) {
                     BigDecimal origPrice = ci.getProductVariant().getPrice().setScale(2, RoundingMode.HALF_UP);
                     BigDecimal origSubtotal = origPrice.multiply(BigDecimal.valueOf(ci.getQuantity())).setScale(2, RoundingMode.HALF_UP);
-                    BigDecimal commissionAmount = origSubtotal.multiply(BigDecimal.valueOf(0.05)).setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal commissionAmount = origSubtotal.multiply(commissionRate).setScale(2, RoundingMode.HALF_UP);
                     BigDecimal sellerEarnings = origSubtotal.subtract(commissionAmount).setScale(2, RoundingMode.HALF_UP);
                     orderTotalCommission = orderTotalCommission.add(commissionAmount);
 
@@ -1330,7 +1334,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                             .itemDiscountAmount(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP))
                             .discountedUnitPrice(origPrice)
                             .finalSubtotal(origSubtotal)
-                            .commissionRateSnapshot(BigDecimal.valueOf(5.00).setScale(2, RoundingMode.HALF_UP))
+                            .commissionRateSnapshot(commissionRateSnapshot)
                             .commissionAmount(commissionAmount)
                             .sellerEarnings(sellerEarnings)
                             .build();

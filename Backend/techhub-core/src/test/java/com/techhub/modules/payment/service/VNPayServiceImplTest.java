@@ -64,6 +64,9 @@ class VNPayServiceImplTest {
     @Mock
     private com.techhub.modules.notification.service.NotificationDispatcher notificationDispatcher;
 
+    @Mock
+    private com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
+
     @InjectMocks
     private VNPayServiceImpl vnPayService;
 
@@ -89,6 +92,8 @@ class VNPayServiceImplTest {
                 .status(PaymentStatus.PENDING)
                 .orders(new ArrayList<>())
                 .build();
+
+        lenient().when(platformPolicyProvider.getVNPayPaymentTimeoutMinutes()).thenReturn(15);
     }
 
     private void mockVNPayProperties() {

@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import com.techhub.modules.payment.service.PaymentService;
+import com.techhub.modules.policy.service.PlatformPolicyProvider;
 
 @Slf4j
 @Service
@@ -31,8 +32,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
-
-    private static final int PAYMENT_TTL_MINUTES = 15;
+    private final PlatformPolicyProvider platformPolicyProvider;
 
     @Override
     @Transactional(readOnly = true)
@@ -86,7 +86,8 @@ public class PaymentServiceImpl implements PaymentService {
         List<String> orderNumbers = orders.stream().map(Order::getOrderNumber).toList();
 
         LocalDateTime createdAt = payment.getCreatedAt() != null ? payment.getCreatedAt() : LocalDateTime.now();
-        LocalDateTime expiresAt = createdAt.plusMinutes(PAYMENT_TTL_MINUTES);
+        int timeoutMinutes = platformPolicyProvider.getVNPayPaymentTimeoutMinutes();
+        LocalDateTime expiresAt = createdAt.plusMinutes(timeoutMinutes);
         boolean isExpired = payment.getStatus() == PaymentStatus.PENDING
                 && LocalDateTime.now().isAfter(expiresAt);
 

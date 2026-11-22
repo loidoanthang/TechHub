@@ -83,6 +83,9 @@ class OrderEscrowScheduledTasksTest {
     @Mock
     private VoucherRepository voucherRepository;
 
+    @Mock
+    private com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
+
     @InjectMocks
     private OrderEscrowScheduledTasks escrowTasks;
 
@@ -109,6 +112,9 @@ class OrderEscrowScheduledTasksTest {
         order.setShop(shop);
         order.setTotalSellerEarnings(new BigDecimal("190000.00"));
         order.setTotalAmount(new BigDecimal("200000.00"));
+
+        lenient().when(platformPolicyProvider.getOrderAutoCompleteHours()).thenReturn(72);
+        lenient().when(platformPolicyProvider.getAutoApproveReturnHours()).thenReturn(72);
     }
 
     @Test

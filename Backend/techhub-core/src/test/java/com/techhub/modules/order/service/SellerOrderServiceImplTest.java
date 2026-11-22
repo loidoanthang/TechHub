@@ -102,6 +102,9 @@ class SellerOrderServiceImplTest {
     @Mock
     private com.techhub.modules.notification.service.NotificationDispatcher notificationDispatcher;
 
+    @Mock
+    private com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
+
     @InjectMocks
     private SellerOrderServiceImpl sellerOrderService;
 
@@ -139,6 +142,8 @@ class SellerOrderServiceImplTest {
         mockShop.setSeller(mockSeller);
         mockShop.setName("Apple Official Store");
         mockShop.setStatus(ShopStatus.ACTIVE);
+
+        lenient().when(platformPolicyProvider.getPlatformCommissionRate()).thenReturn(BigDecimal.valueOf(0.05));
     }
 
     private Order createMockOrder(UUID orderId, String orderNumber, OrderStatus status, BigDecimal productAmount, BigDecimal shippingFee, BigDecimal shopDiscount, BigDecimal platformDiscount) {

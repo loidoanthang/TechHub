@@ -41,6 +41,9 @@ class PaymentServiceImplTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Mock
+    private com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
+
     @InjectMocks
     private PaymentServiceImpl paymentService;
 
@@ -69,6 +72,8 @@ class PaymentServiceImplTest {
                 .amount(BigDecimal.valueOf(450000))
                 .createdAt(LocalDateTime.now().minusMinutes(2))
                 .build();
+
+        lenient().when(platformPolicyProvider.getVNPayPaymentTimeoutMinutes()).thenReturn(15);
     }
 
     @Test

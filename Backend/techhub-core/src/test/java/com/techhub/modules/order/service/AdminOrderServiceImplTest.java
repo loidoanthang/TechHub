@@ -87,6 +87,9 @@ class AdminOrderServiceImplTest {
     @Mock
     private VoucherRepository voucherRepository;
 
+    @Mock
+    private com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
+
     @InjectMocks
     private AdminOrderServiceImpl adminOrderService;
 
@@ -130,6 +133,8 @@ class AdminOrderServiceImplTest {
         mockBuyer.setLastName("Van A");
         mockBuyer.setEmail("nguyenvana@gmail.com");
         mockBuyer.setPhone("0987654321");
+
+        lenient().when(platformPolicyProvider.getPlatformCommissionRate()).thenReturn(BigDecimal.valueOf(0.05));
     }
 
     private Order createMockOrder(UUID orderId, String orderNumber, OrderStatus status, BigDecimal productAmount, BigDecimal shippingFee, BigDecimal shopDiscount, BigDecimal platformDiscount) {

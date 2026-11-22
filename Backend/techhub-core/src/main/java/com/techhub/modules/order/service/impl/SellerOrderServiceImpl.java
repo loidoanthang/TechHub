@@ -73,8 +73,6 @@ import com.techhub.modules.order.service.SellerOrderService;
 @RequiredArgsConstructor
 public class SellerOrderServiceImpl implements SellerOrderService {
 
-    private static final BigDecimal COMMISSION_RATE = new BigDecimal("0.05");
-
     private static final Map<String, Pattern> ADDRESS_FIELD_PATTERNS = Map.of(
             "id", Pattern.compile("\"id\"\\s*:\\s*\"((?:\\\\\"|[^\"])*)\""),
             "recipientName", Pattern.compile("\"recipientName\"\\s*:\\s*\"((?:\\\\\"|[^\"])*)\""),
@@ -99,6 +97,7 @@ public class SellerOrderServiceImpl implements SellerOrderService {
     private final com.techhub.modules.voucher.repository.VoucherRedemptionRepository voucherRedemptionRepository;
     private final com.techhub.modules.voucher.repository.VoucherRepository voucherRepository;
     private final NotificationDispatcher notificationDispatcher;
+    private final com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
 
     @Override
     @Transactional(readOnly = true)
@@ -657,7 +656,7 @@ public class SellerOrderServiceImpl implements SellerOrderService {
         BigDecimal totalSellerEarnings = order.getTotalSellerEarnings();
         if (totalCommission == null || totalSellerEarnings == null) {
             BigDecimal netProduct = totalProductAmount.subtract(shopDiscountAmount).max(BigDecimal.ZERO);
-            totalCommission = netProduct.multiply(COMMISSION_RATE).setScale(2, java.math.RoundingMode.HALF_UP);
+            totalCommission = netProduct.multiply(platformPolicyProvider.getPlatformCommissionRate()).setScale(2, java.math.RoundingMode.HALF_UP);
             totalSellerEarnings = netProduct.subtract(totalCommission).max(BigDecimal.ZERO);
         }
 

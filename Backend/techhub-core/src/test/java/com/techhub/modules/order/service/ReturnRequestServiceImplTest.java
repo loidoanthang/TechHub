@@ -85,6 +85,9 @@ class ReturnRequestServiceImplTest {
     @Mock
     private com.techhub.modules.notification.service.NotificationDispatcher notificationDispatcher;
 
+    @Mock
+    private com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
+
     @InjectMocks
     private ReturnRequestServiceImpl returnRequestService;
 
@@ -137,6 +140,8 @@ class ReturnRequestServiceImplTest {
         order.setDeliveredAt(LocalDateTime.now().minusHours(24)); // Within 72h window
         order.setCreatedAt(LocalDateTime.now().minusDays(3));
         order.setUpdatedAt(LocalDateTime.now().minusHours(24));
+
+        lenient().when(platformPolicyProvider.getReturnRequestWindowHours()).thenReturn(72);
     }
 
     @Test

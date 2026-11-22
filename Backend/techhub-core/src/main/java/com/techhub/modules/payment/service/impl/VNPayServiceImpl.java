@@ -51,6 +51,7 @@ public class VNPayServiceImpl implements VNPayService {
     private final VoucherRepository voucherRepository;
     private final RestTemplate restTemplate;
     private final NotificationDispatcher notificationDispatcher;
+    private final com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
 
     @Override
     public String createPaymentUrl(Payment payment, String bankCode, String clientIp) {
@@ -274,7 +275,8 @@ public class VNPayServiceImpl implements VNPayService {
         vnpParams.put("vnp_ReturnUrl", vnPayProperties.getReturnUrl());
         vnpParams.put("vnp_IpAddr", ipAddress);
         vnpParams.put("vnp_CreateDate", VNPayUtils.formatVNPayDate(now));
-        vnpParams.put("vnp_ExpireDate", VNPayUtils.formatVNPayDate(now.plusMinutes(15)));
+        int timeoutMinutes = platformPolicyProvider.getVNPayPaymentTimeoutMinutes();
+        vnpParams.put("vnp_ExpireDate", VNPayUtils.formatVNPayDate(now.plusMinutes(timeoutMinutes)));
 
         if (bankCode != null && !bankCode.isBlank()) {
             vnpParams.put("vnp_BankCode", bankCode.trim());

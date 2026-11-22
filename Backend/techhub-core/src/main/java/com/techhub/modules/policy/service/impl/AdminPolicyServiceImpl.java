@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import com.techhub.modules.policy.service.AdminPolicyService;
+import com.techhub.modules.policy.service.PlatformPolicyProvider;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class AdminPolicyServiceImpl implements AdminPolicyService {
 
     private final TransactionPolicyRepository transactionPolicyRepository;
     private final UserRepository userRepository;
+    private final PlatformPolicyProvider platformPolicyProvider;
 
     @Override
     @Transactional
@@ -98,6 +100,7 @@ public class AdminPolicyServiceImpl implements AdminPolicyService {
         policy.setUpdatedBy(adminUser);
 
         TransactionPolicy saved = transactionPolicyRepository.save(policy);
+        platformPolicyProvider.evictCache(trimmedKey);
         log.info("Policy {} successfully updated by admin {}", trimmedKey, adminId);
 
         return PlatformPolicyResponse.from(saved);

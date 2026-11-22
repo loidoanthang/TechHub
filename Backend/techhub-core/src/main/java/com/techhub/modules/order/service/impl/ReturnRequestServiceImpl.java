@@ -66,6 +66,7 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
     private final SellerWalletTransactionRepository sellerWalletTransactionRepository;
     private final VNPayService vnPayService;
     private final NotificationDispatcher notificationDispatcher;
+    private final com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
 
     @Override
     @Transactional
@@ -86,10 +87,11 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
             throw new BusinessException(ErrorCode.ORDER_NOT_ELIGIBLE_FOR_RETURN);
         }
 
-        // 2. Must be within 72h window from deliveredAt
+        // 2. Must be within return window from deliveredAt
         LocalDateTime now = LocalDateTime.now();
-        if (order.getDeliveredAt() == null || order.getDeliveredAt().plusHours(72).isBefore(now)) {
-            log.warn("72-hour return window expired for order {}", orderId);
+        int windowHours = platformPolicyProvider.getReturnRequestWindowHours();
+        if (order.getDeliveredAt() == null || order.getDeliveredAt().plusHours(windowHours).isBefore(now)) {
+            log.warn("{}-hour return window expired for order {}", windowHours, orderId);
             throw new BusinessException(ErrorCode.ORDER_NOT_ELIGIBLE_FOR_RETURN);
         }
 
@@ -174,13 +176,14 @@ public class ReturnRequestServiceImpl implements ReturnRequestService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
         if (order.getStatus() == OrderStatus.RETURN_REQUESTED) {
-            if (order.getDeliveredAt() != null && order.getDeliveredAt().plusHours(72).isBefore(now)) {
-                // 72h window already expired: transition directly to COMPLETED and settle
+            int windowHours = platformPolicyProvider.getReturnRequestWindowHours();
+            if (order.getDeliveredAt() != null && order.getDeliveredAt().plusHours(windowHours).isBefore(now)) {
+                // Window already expired: transition directly to COMPLETED and settle
                 order.setStatus(OrderStatus.COMPLETED);
                 order.setCompletedAt(now);
                 settleOrderToSellerWallet(order, now);
             } else {
-                // Still within 72h window: restore to DELIVERED
+                // Still within window: restore to DELIVERED
                 order.setStatus(OrderStatus.DELIVERED);
             }
             order.setUpdatedAt(now);

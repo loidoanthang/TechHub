@@ -74,8 +74,8 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final RefundTransactionRepository refundTransactionRepository;
     private final VoucherRedemptionRepository voucherRedemptionRepository;
     private final VoucherRepository voucherRepository;
+    private final com.techhub.modules.policy.service.PlatformPolicyProvider platformPolicyProvider;
 
-    private static final BigDecimal COMMISSION_RATE = BigDecimal.valueOf(0.05);
     private static final Set<String> SORT_BY_WHITELIST = Set.of(
             "createdAt", "totalAmount", "totalCommission", "totalSellerEarnings", "totalProductAmount", "orderNumber"
     );
@@ -203,7 +203,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         BigDecimal totalSellerEarnings = order.getTotalSellerEarnings();
         if (totalCommission == null || totalSellerEarnings == null) {
             BigDecimal netProduct = totalProductAmount.subtract(shopDiscountAmount).max(BigDecimal.ZERO);
-            totalCommission = netProduct.multiply(COMMISSION_RATE).setScale(2, RoundingMode.HALF_UP);
+            totalCommission = netProduct.multiply(platformPolicyProvider.getPlatformCommissionRate()).setScale(2, RoundingMode.HALF_UP);
             totalSellerEarnings = netProduct.subtract(totalCommission).max(BigDecimal.ZERO);
         }
 
@@ -469,7 +469,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         BigDecimal totalSellerEarnings = order.getTotalSellerEarnings();
         if (totalCommission == null || totalSellerEarnings == null) {
             BigDecimal netProduct = totalProductAmount.subtract(shopDiscountAmount).max(BigDecimal.ZERO);
-            totalCommission = netProduct.multiply(COMMISSION_RATE).setScale(2, RoundingMode.HALF_UP);
+            totalCommission = netProduct.multiply(platformPolicyProvider.getPlatformCommissionRate()).setScale(2, RoundingMode.HALF_UP);
             totalSellerEarnings = netProduct.subtract(totalCommission).max(BigDecimal.ZERO);
         }
 
