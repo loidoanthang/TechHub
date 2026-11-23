@@ -7,7 +7,7 @@ export default function AccountLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="w-full bg-[#f8f9ff] min-h-[calc(100vh-160px)] md:py-8 pb-8">
+    <div className="w-full bg-[#f8f9ff] min-h-[calc(100vh-160px)] pb-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12">
         {/* 2-Column Responsive Layout: Left Sidebar (w-56 matching Seller & Admin) + Right Workspace */}
         <div className="flex flex-col lg:flex-row gap-6 items-start">

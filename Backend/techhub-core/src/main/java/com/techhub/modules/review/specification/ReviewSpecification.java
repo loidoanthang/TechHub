@@ -17,6 +17,10 @@ public final class ReviewSpecification {
 
     private ReviewSpecification() {}
 
+    public static Specification<Review> hasReviewId(UUID reviewId) {
+        return (root, query, cb) -> reviewId == null ? null : cb.equal(root.get("id"), reviewId);
+    }
+
     public static Specification<Review> belongsToShop(UUID shopId) {
         return (root, query, cb) -> {
             if (shopId == null) return null;

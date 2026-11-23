@@ -97,11 +97,11 @@ class SellerReviewControllerTest {
                 Collections.emptyList(), 0, 10, 0, 0, true
         );
 
-        when(sellerReviewService.getShopReviews(eq(sellerUserId), any(), any(), any(), any(), any(), any(), any(), any(Pageable.class)))
+        when(sellerReviewService.getShopReviews(eq(sellerUserId), any(), any(), any(), any(), any(), any(), any(), any(), any(Pageable.class)))
                 .thenReturn(mockPageResponse);
 
         ApiResponse<PageResponse<SellerReviewResponse>> response = controller.getShopReviews(
-                5, false, true, null, null, null, null, 0, 10, "createdAt", "DESC"
+                null, 5, false, true, null, null, null, null, 0, 10, "createdAt", "DESC"
         );
 
         assertNotNull(response);
@@ -111,7 +111,7 @@ class SellerReviewControllerTest {
         assertEquals(0, response.getData().totalElements());
 
         verify(sellerReviewService, times(1)).getShopReviews(
-                eq(sellerUserId), eq(5), eq(false), eq(true), any(), any(), any(), any(), any(Pageable.class)
+                eq(sellerUserId), isNull(), eq(5), eq(false), eq(true), any(), any(), any(), any(), any(Pageable.class)
         );
     }
 

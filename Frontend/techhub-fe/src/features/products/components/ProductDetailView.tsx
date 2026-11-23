@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -50,6 +50,8 @@ import {
   useShopVouchersQuery,
   useShopProductsQuery,
 } from "@/features/shops";
+import { buyerReviewApi } from "@/features/account/api/buyerReviewApi";
+import type { ReviewDetailResponse } from "@/types/review";
 import { ROUTES } from "@/lib/constants";
 import { isBuyerSuspendedError, getApiErrorMessage } from "@/lib/api/error";
 import type { ProductDetailData, ProductVariant } from "@/types/productDetail";
@@ -105,6 +107,33 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
     });
   }, [ratingSummary, totalReviewsCount]);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const highlightReviewId = searchParams.get("highlightReviewId") || undefined;
+  const [highlightedReview, setHighlightedReview] = useState<ReviewDetailResponse | null>(null);
+
+  // Fetch highlighted review details if param exists
+  useEffect(() => {
+    if (!highlightReviewId) {
+      setHighlightedReview(null);
+      return;
+    }
+    let isCancelled = false;
+    buyerReviewApi
+      .getReviewById(highlightReviewId)
+      .then((res) => {
+        if (!isCancelled && res?.data) {
+          setHighlightedReview(res.data);
+        }
+      })
+      .catch((err) => {
+        console.warn("Could not load highlighted review:", err);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [highlightReviewId]);
+
   const { openCart, addToCart, isAddingToCart } = useCart();
   const { user, isAuthenticated } = useAuth();
   const { openChatWithSeller } = useChat();
@@ -1260,7 +1289,111 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                 </p>
               </div>
             ) : (
-              realReviews.map((rev) => (
+              <>
+                {/* Pinned Highlighted Review from Notification */}
+                {highlightedReview && (
+                  <div className="p-5 rounded-2xl bg-primary/5 flex flex-col gap-3.5 border-2 border-primary shadow-sm relative overflow-hidden animate-in fade-in duration-300">
+                    <div className="flex items-center justify-between pb-2.5 border-b border-primary/15">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 rounded-full bg-primary text-white text-[11px] font-bold tracking-wide flex items-center gap-1 shadow-2xs">
+                          <Check className="w-3 h-3" />
+                          Đánh giá của bạn & Phản hồi từ Shop
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        {new Date(highlightedReview.createdAt).toLocaleDateString("vi-VN")}
+                      </span>
+                    </div>
+
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <UserAvatar
+                          src={highlightedReview.reviewerAvatar || undefined}
+                          alt={highlightedReview.reviewerName}
+                          size={36}
+                        />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-xs text-slate-900">
+                              {highlightedReview.reviewerName} (Bạn)
+                            </span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200/60">
+                              Đã mua hàng
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-0.5 text-amber-400 mt-1">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-3.5 h-3.5 ${
+                                  i < highlightedReview.rating
+                                    ? "fill-current"
+                                    : "text-slate-200"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Variant Snapshot */}
+                    {highlightedReview.variantName && (
+                      <div className="text-[11px] text-slate-500">
+                        Phân loại hàng: <span className="text-slate-700 font-medium">{highlightedReview.variantName}</span>
+                      </div>
+                    )}
+
+                    {/* Comment */}
+                    {highlightedReview.comment && (
+                      <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                        {highlightedReview.comment}
+                      </p>
+                    )}
+
+                    {/* Media Attachments */}
+                    {highlightedReview.mediaList && highlightedReview.mediaList.length > 0 && (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {highlightedReview.mediaList.map((m) => (
+                          <div
+                            key={m.id || m.mediaUrl}
+                            className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200/80 bg-white shrink-0"
+                          >
+                            <Image
+                              src={m.mediaUrl}
+                              alt="Ảnh đánh giá"
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Shop Response */}
+                    {highlightedReview.sellerResponse && (
+                      <div className="p-3.5 rounded-xl bg-white border border-primary/20 text-xs shadow-2xs mt-1">
+                        <div className="flex items-center gap-1.5 font-bold text-primary mb-1">
+                          <Store className="w-3.5 h-3.5 shrink-0" />
+                          <span>Phản hồi của Người bán:</span>
+                          {highlightedReview.sellerResponseAt && (
+                            <span className="text-[10px] font-normal text-slate-400">
+                              • {new Date(highlightedReview.sellerResponseAt).toLocaleDateString("vi-VN")}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-slate-700 leading-relaxed pl-5 font-normal">
+                          {highlightedReview.sellerResponse}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {realReviews
+                  .filter((rev) => rev.id !== highlightReviewId)
+                  .map((rev) => (
                 <div
                   key={rev.id}
                   className="p-5 rounded-2xl bg-[#eff4ff]/40 flex flex-col gap-3 border border-slate-100 transition-colors"
@@ -1376,7 +1509,8 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                     </button>
                   </div>
                 </div>
-              ))
+              ))}
+            </>
             )}
           </div>
 

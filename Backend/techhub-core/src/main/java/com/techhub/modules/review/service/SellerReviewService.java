@@ -9,8 +9,23 @@ import java.util.UUID;
 
 public interface SellerReviewService {
 
+    default PageResponse<SellerReviewResponse> getShopReviews(
+            UUID userId,
+            Integer rating,
+            Boolean hasResponded,
+            Boolean hasMedia,
+            UUID productId,
+            String keyword,
+            LocalDate fromDate,
+            LocalDate toDate,
+            Pageable pageable
+    ) {
+        return getShopReviews(userId, null, rating, hasResponded, hasMedia, productId, keyword, fromDate, toDate, pageable);
+    }
+
     PageResponse<SellerReviewResponse> getShopReviews(
             UUID userId,
+            UUID reviewId,
             Integer rating,
             Boolean hasResponded,
             Boolean hasMedia,

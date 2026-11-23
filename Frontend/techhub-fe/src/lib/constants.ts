@@ -155,6 +155,7 @@ export const API_ENDPOINTS = {
     PRODUCT_REVIEWS: (productId: string) => `/api/products/${productId}/reviews`,
     PRODUCT_RATING_SUMMARY: (productId: string) => `/api/products/${productId}/rating-summary`,
     TOGGLE_HELPFUL: (reviewId: string) => `/api/reviews/${reviewId}/helpful`,
+    DETAIL: (id: string) => `/api/reviews/${id}`,
     BUYER_CREATE: "/api/reviews",
     BUYER_UPDATE: (id: string) => `/api/reviews/${id}`,
     SELLER_REVIEWS: "/api/seller/reviews",

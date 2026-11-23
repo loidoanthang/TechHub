@@ -16,9 +16,13 @@ export interface ReviewMediaRequest {
 export interface ProductReviewResponse {
   id: string;
   orderItemId: string;
+  productId?: string;
+  productSlug?: string;
+  productName?: string;
   rating: number;
   comment: string | null;
   variantName: string | null;
+  imageUrl?: string | null;
   reviewerName: string;
   reviewerAvatar: string | null;
   mediaList: ReviewMediaResponse[];
@@ -26,6 +30,25 @@ export interface ProductReviewResponse {
   sellerResponseAt: string | null;
   helpfulCount: number;
   hasVotedHelpful: boolean;
+  createdAt: string;
+}
+
+export interface ReviewDetailResponse {
+  id: string;
+  orderItemId?: string;
+  productId?: string;
+  productSlug?: string;
+  productName?: string;
+  variantName?: string | null;
+  imageUrl?: string | null;
+  rating: number;
+  comment: string | null;
+  mediaList: ReviewMediaResponse[];
+  reviewerName: string;
+  reviewerAvatar: string | null;
+  sellerResponse: string | null;
+  sellerResponseAt: string | null;
+  helpfulCount: number;
   createdAt: string;
 }
 
@@ -91,6 +114,7 @@ export interface ProductReviewQueryParams {
 }
 
 export interface SellerReviewQueryParams {
+  reviewId?: string;
   rating?: number;
   hasResponded?: boolean;
   hasMedia?: boolean;

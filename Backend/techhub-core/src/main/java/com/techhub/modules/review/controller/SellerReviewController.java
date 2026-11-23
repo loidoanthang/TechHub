@@ -32,6 +32,7 @@ public class SellerReviewController {
     @GetMapping
     @PreAuthorize("hasRole('SELLER')")
     public ApiResponse<PageResponse<SellerReviewResponse>> getShopReviews(
+            @RequestParam(required = false) UUID reviewId,
             @RequestParam(required = false) @Min(value = 1, message = "Rating must be at least 1") @Max(value = 5, message = "Rating must not exceed 5") Integer rating,
             @RequestParam(required = false) Boolean hasResponded,
             @RequestParam(required = false) Boolean hasMedia,
@@ -50,7 +51,7 @@ public class SellerReviewController {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortProperty));
 
         PageResponse<SellerReviewResponse> response = sellerReviewService.getShopReviews(
-                currentUserId, rating, hasResponded, hasMedia, productId, keyword, fromDate, toDate, pageable
+                currentUserId, reviewId, rating, hasResponded, hasMedia, productId, keyword, fromDate, toDate, pageable
         );
 
         return ApiResponse.success(response, "Shop reviews retrieved successfully", null);

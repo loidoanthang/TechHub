@@ -52,6 +52,7 @@ public class SellerReviewServiceImpl implements SellerReviewService {
     @Transactional(readOnly = true)
     public PageResponse<SellerReviewResponse> getShopReviews(
             UUID userId,
+            UUID reviewId,
             Integer rating,
             Boolean hasResponded,
             Boolean hasMedia,
@@ -61,8 +62,8 @@ public class SellerReviewServiceImpl implements SellerReviewService {
             LocalDate toDate,
             Pageable pageable
     ) {
-        log.info("Fetching shop reviews for seller userId={}, rating={}, hasResponded={}, page={}",
-                userId, rating, hasResponded, pageable.getPageNumber());
+        log.info("Fetching shop reviews for seller userId={}, reviewId={}, rating={}, hasResponded={}, page={}",
+                userId, reviewId, rating, hasResponded, pageable.getPageNumber());
 
         // 1. Validate Date Range
         if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
@@ -100,6 +101,7 @@ public class SellerReviewServiceImpl implements SellerReviewService {
         // 4. Build Dynamic Specification
         Specification<Review> spec = Specification.where(ReviewSpecification.belongsToShop(shop.getId()))
                 .and(ReviewSpecification.notDeleted())
+                .and(ReviewSpecification.hasReviewId(reviewId))
                 .and(ReviewSpecification.hasRating(rating))
                 .and(ReviewSpecification.hasResponded(hasResponded))
                 .and(ReviewSpecification.hasMedia(hasMedia))
@@ -209,7 +211,7 @@ public class SellerReviewServiceImpl implements SellerReviewService {
                     NotificationType.REVIEW,
                     "Shop đã phản hồi đánh giá của bạn",
                     "Shop " + shop.getName() + " vừa phản hồi đánh giá của bạn" + productName + ".",
-                    "REVIEW",
+                    "BUYER_REVIEW",
                     review.getId()
             );
         }

@@ -13,5 +13,7 @@ public interface ReviewService {
 
     ReviewResponse updateReview(UUID userId, UUID reviewId, UpdateReviewRequest request);
 
+    ReviewResponse getReviewById(UUID reviewId);
+
     HelpfulVoteResponse toggleHelpfulVote(UUID userId, UUID reviewId);
 }

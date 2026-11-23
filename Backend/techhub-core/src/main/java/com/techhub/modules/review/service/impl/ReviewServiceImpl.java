@@ -138,7 +138,7 @@ public class ReviewServiceImpl implements ReviewService {
                     NotificationType.REVIEW,
                     "Đánh giá sản phẩm mới",
                     "Sản phẩm " + orderItem.getProductNameSnapshot() + " vừa nhận được đánh giá " + request.rating() + " sao từ khách hàng.",
-                    "REVIEW",
+                    "SELLER_REVIEW",
                     savedReview.getId()
             );
         }
@@ -226,6 +226,23 @@ public class ReviewServiceImpl implements ReviewService {
 
         long helpfulCount = reviewHelpfulRepository.countByReviewId(reviewId);
         return ReviewResponse.from(savedReview, helpfulCount);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ReviewResponse getReviewById(UUID reviewId) {
+        log.info("Fetching review by id: reviewId={}", reviewId);
+
+        Review review = reviewRepository.findWithDetailsById(reviewId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
+
+        if (review.getDeletedAt() != null) {
+            log.warn("Attempt to fetch soft-deleted review: reviewId={}", reviewId);
+            throw new BusinessException(ErrorCode.REVIEW_NOT_FOUND);
+        }
+
+        long helpfulCount = reviewHelpfulRepository.countByReviewId(reviewId);
+        return ReviewResponse.from(review, helpfulCount);
     }
 
     @Override

@@ -13,6 +13,8 @@ export type NotificationReferenceType =
   | "ORDER"
   | "PRODUCT"
   | "REVIEW"
+  | "SELLER_REVIEW"
+  | "BUYER_REVIEW"
   | "SHOP"
   | "PROMOTION";
 

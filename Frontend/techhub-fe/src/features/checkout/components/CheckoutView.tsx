@@ -40,7 +40,7 @@ export function CheckoutView() {
 
   if (isPlaced) {
     return (
-      <div className="w-full bg-[#f8f9ff] min-h-[calc(100vh-160px)] py-16 flex items-center justify-center">
+      <div className="w-full bg-[#f8f9ff] min-h-[calc(100vh-160px)] flex items-center justify-center">
         <div className="max-w-md w-full mx-4 bg-white rounded-2xl shadow-lg border border-[#c3c5d9]/30 p-8 text-center flex flex-col items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
             <CheckCircle2 className="w-10 h-10" />
@@ -89,7 +89,7 @@ export function CheckoutView() {
   }
 
   return (
-    <div className="w-full bg-[#f8f9ff] min-h-[calc(100vh-160px)] py-8">
+    <div className="w-full bg-[#f8f9ff] min-h-[calc(100vh-160px)]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 flex flex-col gap-6">
         {/* Navigation Breadcrumb */}
         <div className="flex items-center text-xs text-[#737688] gap-1.5">

@@ -13,6 +13,7 @@ public record ReviewResponse(
         UUID id,
         UUID orderItemId,
         UUID productId,
+        String productSlug,
         String productName,
         String variantName,
         String imageUrl,
@@ -33,6 +34,7 @@ public record ReviewResponse(
         User user = review.getUser();
 
         UUID prodId = null;
+        String prodSlug = null;
         String prodName = null;
         String varName = null;
         String imgUrl = null;
@@ -43,6 +45,7 @@ public record ReviewResponse(
             imgUrl = orderItem.getImageUrlSnapshot();
             if (orderItem.getProductVariant() != null && orderItem.getProductVariant().getProduct() != null) {
                 prodId = orderItem.getProductVariant().getProduct().getId();
+                prodSlug = orderItem.getProductVariant().getProduct().getSlug();
             }
         }
 
@@ -57,6 +60,7 @@ public record ReviewResponse(
                 review.getId(),
                 orderItem != null ? orderItem.getId() : null,
                 prodId,
+                prodSlug,
                 prodName,
                 varName,
                 imgUrl,

@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import type { NotificationResponse, PortalContext } from "../types";
-import { resolveNotificationRoute } from "../utils/resolveNotificationRoute";
+import { resolveNotificationRouteAsync } from "../utils/resolveNotificationRoute";
 import {
   formatNotificationTime,
   getNotificationIcon,
@@ -28,24 +28,30 @@ export function NotificationItem({
   showDeleteButton = false,
 }: NotificationItemProps) {
   const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
   const isUnread = !notification.isRead;
 
   const { icon: IconComponent, bg, text, border } = getNotificationIcon(
     notification.type
   );
 
-  const handleClick = () => {
+  const handleClick = async () => {
+    if (isNavigating) return;
+
     // 1. Mark as read if unread
     if (isUnread) {
       onMarkAsRead(notification.id);
     }
 
-    // 2. Callback for dropdown close if needed
-    onItemClick?.();
-
-    // 3. Centralized route resolution based on portalContext
-    const targetRoute = resolveNotificationRoute(notification, portalContext);
-    router.push(targetRoute);
+    try {
+      setIsNavigating(true);
+      // 2. Centralized async route resolution
+      const targetRoute = await resolveNotificationRouteAsync(notification, portalContext);
+      onItemClick?.();
+      router.push(targetRoute);
+    } catch {
+      setIsNavigating(false);
+    }
   };
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -66,7 +72,11 @@ export function NotificationItem({
       <div
         className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${bg} ${text} ${border} border flex items-center justify-center shrink-0 mt-0.5 shadow-xs transition-transform group-hover:scale-105`}
       >
-        <IconComponent className="w-4 h-4 sm:w-5 sm:h-5" />
+        {isNavigating ? (
+          <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+        ) : (
+          <IconComponent className="w-4 h-4 sm:w-5 sm:h-5" />
+        )}
       </div>
 
       {/* Main Content */}

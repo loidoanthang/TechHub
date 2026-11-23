@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -24,6 +25,7 @@ import {
   useSellerReviewsQuery,
   useRespondToReviewMutation,
 } from "@/features/seller/api/sellerReviewApi";
+import { buyerReviewApi } from "@/features/account/api/buyerReviewApi";
 import type { SellerReviewResponse } from "@/types/review";
 import type { SellerResponseFormValues } from "@/features/seller/schemas/sellerReviewSchema";
 import { sellerResponseSchema } from "@/features/seller/schemas/sellerReviewSchema";
@@ -32,6 +34,13 @@ import { ProductThumbnail } from "@/components/shared";
 import { UserAvatar } from "@/components/shared";
 
 export function SellerReviewsView() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const targetReviewId = searchParams.get("reviewId") || undefined;
+  const hasAutoOpenedModalRef = useRef(false);
+
+  const [highlightedReview, setHighlightedReview] =
+    useState<SellerReviewResponse | null>(null);
   const [ratingFilter, setRatingFilter] = useState<number | "">("");
   const [hasRespondedFilter, setHasRespondedFilter] = useState<"" | "true" | "false">("");
   const [hasMediaFilter, setHasMediaFilter] = useState(false);
@@ -46,6 +55,51 @@ export function SellerReviewsView() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Fetch individual review detail if reviewId param exists (so it can be pinned at top without filtering out the rest of the reviews)
+  useEffect(() => {
+    if (!targetReviewId) {
+      setHighlightedReview(null);
+      return;
+    }
+
+    let isCancelled = false;
+    buyerReviewApi
+      .getReviewById(targetReviewId)
+      .then((res) => {
+        if (!isCancelled && res?.data) {
+          const detail = res.data;
+          const mapped: SellerReviewResponse = {
+            id: detail.id,
+            orderItemId: detail.orderItemId || "",
+            orderId: null,
+            orderNumber: null,
+            productId: detail.productId || null,
+            productName: detail.productName || null,
+            variantName: detail.variantName || null,
+            sku: null,
+            imageUrl: detail.imageUrl || null,
+            rating: detail.rating,
+            comment: detail.comment,
+            mediaList: detail.mediaList || [],
+            reviewerName: detail.reviewerName,
+            reviewerAvatar: detail.reviewerAvatar,
+            sellerResponse: detail.sellerResponse,
+            sellerResponseAt: detail.sellerResponseAt,
+            helpfulCount: detail.helpfulCount || 0,
+            createdAt: detail.createdAt,
+          };
+          setHighlightedReview(mapped);
+        }
+      })
+      .catch((err) => {
+        console.warn("Could not load highlighted review detail:", err);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [targetReviewId]);
+
   useEffect(() => {
     if (keyword === debouncedKeyword) return;
     const t = setTimeout(() => {
@@ -55,6 +109,7 @@ export function SellerReviewsView() {
     return () => clearTimeout(t);
   }, [keyword, debouncedKeyword]);
 
+  // Main reviews list query: DO NOT filter out other reviews when targetReviewId is present
   const { data, isLoading, isFetching, refetch } = useSellerReviewsQuery({
     rating: ratingFilter === "" ? undefined : ratingFilter,
     hasResponded:
@@ -93,6 +148,23 @@ export function SellerReviewsView() {
     setErrorMsg(null);
   };
 
+  // Auto-open respond modal when navigating from notification
+  useEffect(() => {
+    if (!targetReviewId || hasAutoOpenedModalRef.current) return;
+
+    // Check in fetched highlighted review or in regular list
+    const candidate =
+      (highlightedReview?.id === targetReviewId ? highlightedReview : null) ||
+      data?.data?.content?.find((r) => r.id === targetReviewId);
+
+    if (candidate) {
+      hasAutoOpenedModalRef.current = true;
+      if (!candidate.sellerResponse) {
+        handleOpenRespondModal(candidate);
+      }
+    }
+  }, [targetReviewId, highlightedReview, data]);
+
   const handleRespondSubmit = async (values: SellerResponseFormValues) => {
     if (!respondingReview) return;
     setErrorMsg(null);
@@ -104,6 +176,16 @@ export function SellerReviewsView() {
       });
 
       showToast(`Đã gửi phản hồi thành công cho khách hàng "${respondingReview.reviewerName}".`);
+      
+      // Update local state if highlightedReview was the one responded to
+      if (highlightedReview && highlightedReview.id === respondingReview.id) {
+        setHighlightedReview({
+          ...highlightedReview,
+          sellerResponse: values.response.trim(),
+          sellerResponseAt: new Date().toISOString(),
+        });
+      }
+
       setRespondingReview(null);
       reset();
       refetch();
@@ -115,9 +197,35 @@ export function SellerReviewsView() {
     }
   };
 
-  const reviews = data?.data?.content || [];
+  const clearTargetReviewId = () => {
+    router.replace("/seller/reviews", { scroll: false });
+    setHighlightedReview(null);
+  };
+
+  const baseReviews = data?.data?.content || [];
   const totalPages = data?.data?.totalPages || 1;
   const totalElements = data?.data?.totalElements || 0;
+
+  // Build combined review list: If target review exists, pin it at the top and deduplicate from the rest
+  const displayReviews = useMemo(() => {
+    if (!targetReviewId) return baseReviews;
+
+    // If highlightedReview is loaded, pin it
+    if (highlightedReview) {
+      const remaining = baseReviews.filter((r) => r.id !== targetReviewId);
+      return [highlightedReview, ...remaining];
+    }
+
+    // Otherwise if it's already in the baseReviews list, move it to the top
+    const matchedIndex = baseReviews.findIndex((r) => r.id === targetReviewId);
+    if (matchedIndex > -1) {
+      const matched = baseReviews[matchedIndex];
+      const remaining = baseReviews.filter((r) => r.id !== targetReviewId);
+      return [matched, ...remaining];
+    }
+
+    return baseReviews;
+  }, [targetReviewId, highlightedReview, baseReviews]);
 
   return (
     <div className="flex-1 w-full flex flex-col gap-4 max-w-[1440px] mx-auto">
@@ -176,10 +284,10 @@ export function SellerReviewsView() {
                     setRatingFilter(tab.val as number | "");
                     setPage(0);
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer min-h-[34px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap shrink-0 cursor-pointer min-h-[34px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                     isActive
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-600 hover:bg-slate-100"
+                      ? "bg-primary text-white shadow-xs font-extrabold"
+                      : "text-slate-600 hover:bg-primary/5 hover:text-primary"
                   }`}
                 >
                   {tab.label}
@@ -247,12 +355,28 @@ export function SellerReviewsView() {
       </div>
 
       {/* 3. Review List Cards */}
+      {targetReviewId && (
+        <div className="flex items-center justify-between p-3 px-4 rounded-xl bg-primary/5 border border-primary/20 text-xs">
+          <div className="flex items-center gap-2 text-primary font-medium">
+            <span className="font-bold">Đánh giá từ thông báo</span>
+          </div>
+          <button
+            type="button"
+            onClick={clearTargetReviewId}
+            className="text-xs font-semibold text-slate-600 hover:text-primary flex items-center gap-1 cursor-pointer transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+            <span>Bỏ ghim / Xem toàn bộ</span>
+          </button>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center flex flex-col items-center justify-center gap-2">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <span className="text-xs text-slate-500">Đang tải danh sách đánh giá...</span>
         </div>
-      ) : reviews.length === 0 ? (
+      ) : displayReviews.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center flex flex-col items-center justify-center gap-2">
           <MessageSquare className="w-10 h-10 text-slate-300 mb-1" />
           <h3 className="text-sm font-bold text-slate-800">
@@ -264,10 +388,16 @@ export function SellerReviewsView() {
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {reviews.map((rev) => (
+          {displayReviews.map((rev) => {
+            const isHighlighted = targetReviewId === rev.id;
+            return (
             <div
               key={rev.id}
-              className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-2xs flex flex-col gap-3 hover:border-slate-300 transition-colors"
+              className={`bg-white rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col gap-3 transition-all ${
+                isHighlighted
+                  ? "border-2 border-primary ring-4 ring-primary/10"
+                  : "border border-slate-200/80 hover:border-slate-300"
+              }`}
             >
               {/* Card Top: Customer Info & Order Details */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
@@ -394,7 +524,8 @@ export function SellerReviewsView() {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
 
           {/* 4. Bottom Pagination */}
           <Pagination
@@ -447,7 +578,7 @@ export function SellerReviewsView() {
               <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-900 text-xs flex items-start gap-2.5">
                 <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div className="leading-relaxed">
-                  <strong>Quy định phản hồi sàn (BR-20.25):</strong>
+                  <strong>Quy định phản hồi:</strong>
                   <p className="mt-0.5 text-amber-800">
                     Mỗi đánh giá bạn <strong>chỉ được gửi phản hồi 1 lần duy nhất</strong> và không thể sửa đổi sau khi gửi. Hãy kiểm tra kỹ nội dung trước khi bấm Gửi.
                   </p>

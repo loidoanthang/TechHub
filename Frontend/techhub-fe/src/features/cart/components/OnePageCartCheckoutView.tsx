@@ -357,7 +357,7 @@ export function OnePageCartCheckoutView() {
   }
 
   return (
-    <div className="w-full bg-[#f8f9ff] min-h-[calc(100vh-160px)] py-8">
+    <div className="w-full bg-[#f8f9ff] min-h-[calc(100vh-160px)]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 flex flex-col gap-6">
         {/* Navigation Breadcrumb */}
         <div className="flex flex-col gap-2">

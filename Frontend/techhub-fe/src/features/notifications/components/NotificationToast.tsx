@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { X, ArrowRight } from "lucide-react";
 import { useMarkAsReadMutation } from "../api";
 import { getNotificationIcon } from "../utils/notificationHelpers";
-import { resolveNotificationRoute } from "../utils/resolveNotificationRoute";
+import { resolveNotificationRouteAsync } from "../utils/resolveNotificationRoute";
 import { useNotificationContext } from "@/providers/NotificationProvider";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import type { PortalContext } from "../types";
@@ -36,7 +36,7 @@ export function NotificationToast() {
     activeToast.type
   );
 
-  const handleAction = () => {
+  const handleAction = async () => {
     if (!activeToast.isRead) {
       markAsReadMutation.mutate(activeToast.id);
     }
@@ -52,9 +52,13 @@ export function NotificationToast() {
       portalContext = "seller";
     }
 
-    const targetRoute = resolveNotificationRoute(activeToast, portalContext);
-    dismissToast();
-    router.push(targetRoute);
+    try {
+      const targetRoute = await resolveNotificationRouteAsync(activeToast, portalContext);
+      dismissToast();
+      router.push(targetRoute);
+    } catch {
+      dismissToast();
+    }
   };
 
   return (

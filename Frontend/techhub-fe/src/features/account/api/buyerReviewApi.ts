@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api/client";
 import { ENDPOINTS } from "@/lib/constants";
 import type { ApiResponse } from "@/types/api";
@@ -6,6 +6,7 @@ import type {
   CreateReviewRequest,
   UpdateReviewRequest,
   ProductReviewResponse,
+  ReviewDetailResponse,
 } from "@/types/review";
 
 export const buyerReviewApi = {
@@ -20,6 +21,12 @@ export const buyerReviewApi = {
     data: UpdateReviewRequest
   ): Promise<ApiResponse<ProductReviewResponse>> => {
     return apiClient.put(ENDPOINTS.REVIEWS.BUYER_UPDATE(id), data);
+  },
+
+  getReviewById: async (
+    id: string
+  ): Promise<ApiResponse<ReviewDetailResponse>> => {
+    return apiClient.get(ENDPOINTS.REVIEWS.DETAIL(id));
   },
 };
 

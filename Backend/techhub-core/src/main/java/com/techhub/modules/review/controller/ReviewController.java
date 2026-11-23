@@ -43,6 +43,12 @@ public class ReviewController {
         return ApiResponse.success(response, "Review updated successfully", null);
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse<ReviewResponse> getReviewById(@PathVariable UUID id) {
+        ReviewResponse response = reviewService.getReviewById(id);
+        return ApiResponse.success(response, "Review retrieved successfully", null);
+    }
+
     @PostMapping("/{id}/helpful")
     @RequireActiveBuyer
     public ApiResponse<HelpfulVoteResponse> toggleHelpfulVote(@PathVariable UUID id) {
