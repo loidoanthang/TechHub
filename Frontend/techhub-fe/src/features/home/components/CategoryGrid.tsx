@@ -2,32 +2,14 @@
 
 import Link from "next/link";
 import {
-  Laptop,
-  Keyboard,
-  Mouse,
-  Headphones,
-  Monitor,
-  Cpu,
-  Layers,
-  Volume2,
   ChevronLeft,
   ChevronRight,
+  ArrowUpRight,
   Loader2,
 } from "lucide-react";
 import { useRef } from "react";
 import { useCategoriesQuery } from "@/features/products/hooks/useProductQueries";
 import { MOCK_HOME_CATEGORIES } from "@/mocks";
-
-const ICON_MAP: Record<string, React.ElementType> = {
-  Laptop,
-  Keyboard,
-  Mouse,
-  Headphones,
-  Monitor,
-  Cpu,
-  Layers,
-  Volume2,
-};
 
 export function CategoryGrid() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -89,47 +71,67 @@ export function CategoryGrid() {
               <span>Loading categories...</span>
             </div>
           ) : hasServerData ? (
-            serverCategories.map((cat, idx) => {
-              const Icon = Object.values(ICON_MAP)[idx % Object.values(ICON_MAP).length] || Laptop;
+            serverCategories.map((cat) => {
               return (
                 <Link
                   key={cat.id}
                   href={`/search?categoryId=${cat.id}`}
-                  className="flex-shrink-0 w-48 bg-white rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group flex flex-col justify-between"
+                  className="group relative flex-shrink-0 w-44 sm:w-48 bg-white rounded-2xl p-5 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border border-slate-200/80 hover:border-primary/40 flex flex-col justify-between overflow-hidden"
                 >
-                  <div className="w-12 h-12 rounded-lg bg-[#dce9ff] flex items-center justify-center text-[#0045cc] mb-6 group-hover:bg-[#0045cc] group-hover:text-white transition-colors">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm text-[#0b1c30] mb-1 line-clamp-1">
-                      {cat.name}
-                    </h4>
-                    <span className="text-xs text-[#737688]">
-                      {cat.description || "Browse Gear"}
+                  {/* Subtle Brand Accent Bar - Only active on hover */}
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-blue-700 opacity-0 group-hover:opacity-100 group-hover:h-1 transition-all duration-200" />
+
+                  {/* Main Category Info */}
+                  <div className="pt-1">
+                    <span className="text-[10px] font-mono font-semibold tracking-wider text-slate-400 group-hover:text-primary transition-colors uppercase">
+                      Danh mục
                     </span>
+                    <h3 className="font-bold text-sm text-[#0b1c30] group-hover:text-primary transition-colors line-clamp-2 mt-1 leading-snug">
+                      {cat.name}
+                    </h3>
+                  </div>
+
+                  {/* Bottom Action Footer */}
+                  <div className="pt-3 mt-3 flex items-center justify-between border-t border-slate-100">
+                    <span className="text-[11px] font-medium text-slate-400 group-hover:text-primary transition-colors">
+                      Khám phá
+                    </span>
+                    <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-primary group-hover:text-white text-slate-400 flex items-center justify-center transition-colors">
+                      <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </div>
                   </div>
                 </Link>
               );
             })
           ) : (
             MOCK_HOME_CATEGORIES.map((cat, idx) => {
-              const Icon = ICON_MAP[cat.iconName] || Laptop;
               return (
                 <Link
                   key={idx}
                   href={`/search?category=${cat.slug}`}
-                  className="flex-shrink-0 w-48 bg-white rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group flex flex-col justify-between"
+                  className="group relative flex-shrink-0 w-44 sm:w-48 bg-white rounded-2xl p-5 shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border border-slate-200/80 hover:border-primary/40 flex flex-col justify-between overflow-hidden"
                 >
-                  <div className="w-12 h-12 rounded-lg bg-[#dce9ff] flex items-center justify-center text-[#0045cc] mb-6 group-hover:bg-[#0045cc] group-hover:text-white transition-colors">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-sm text-[#0b1c30] mb-1 line-clamp-1">
-                      {cat.name}
-                    </h4>
-                    <span className="text-xs text-[#737688]">
-                      {cat.count ? `${cat.count} Items` : "Enthusiast Choice"}
+                  {/* Subtle Brand Accent Bar - Only active on hover */}
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-blue-700 opacity-0 group-hover:opacity-100 group-hover:h-1 transition-all duration-200" />
+
+                  {/* Main Category Info */}
+                  <div className="pt-1">
+                    <span className="text-[10px] font-mono font-semibold tracking-wider text-slate-400 group-hover:text-primary transition-colors uppercase">
+                      Danh mục
                     </span>
+                    <h3 className="font-bold text-sm text-[#0b1c30] group-hover:text-primary transition-colors line-clamp-2 mt-1 leading-snug">
+                      {cat.name}
+                    </h3>
+                  </div>
+
+                  {/* Bottom Action Footer */}
+                  <div className="pt-3 mt-3 flex items-center justify-between border-t border-slate-100">
+                    <span className="text-[11px] font-medium text-slate-400 group-hover:text-primary transition-colors">
+                      Khám phá
+                    </span>
+                    <div className="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-primary group-hover:text-white text-slate-400 flex items-center justify-center transition-colors">
+                      <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </div>
                   </div>
                 </Link>
               );

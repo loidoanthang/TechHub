@@ -560,7 +560,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           {/* Visual Media Bench (5 cols) */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             {/* Main Canvas Frame */}
-            <div className="relative w-full aspect-[4/3] rounded-2xl bg-[#eff4ff] overflow-hidden flex items-center justify-center border border-slate-100">
+            <div className="relative w-full aspect-square rounded-2xl bg-slate-50/70 overflow-hidden flex items-center justify-center border border-slate-100">
               {productImages.length > 0 && (
                 <div className="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-medium font-mono">
                   Ảnh {selectedImg + 1} / {productImages.length}
@@ -592,7 +592,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                   <button
                     key={idx}
                     onClick={() => setSelectedImg(idx)}
-                    className={`relative aspect-[4/3] rounded-xl overflow-hidden bg-[#eff4ff] p-1 border-2 transition-all cursor-pointer ${
+                    className={`relative aspect-square rounded-xl overflow-hidden bg-slate-50/70 p-1 border-2 transition-all cursor-pointer ${
                       selectedImg === idx
                         ? "border-[#0045cc] shadow-sm"
                         : "border-transparent hover:border-slate-300"
@@ -951,21 +951,27 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
             <div className="grid grid-cols-3 gap-6 w-full lg:w-auto text-left lg:text-center text-xs border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-100">
               <div>
                 <p className="text-slate-400">Đánh giá Shop</p>
-                <p className="font-bold text-amber-500 text-sm mt-0.5 flex items-center justify-start lg:justify-center gap-1">
-                  <span>{product.merchant.rating.toFixed(1)}</span>
-                  <Star className="w-3.5 h-3.5 fill-current" />
-                </p>
+                {typeof product.merchant.rating === "number" ? (
+                  <p className="font-bold text-amber-500 text-sm mt-0.5 flex items-center justify-start lg:justify-center gap-1">
+                    <span>{product.merchant.rating.toFixed(1)}</span>
+                    <Star className="w-3.5 h-3.5 fill-current" />
+                  </p>
+                ) : (
+                  <p className="font-semibold text-slate-500 text-sm mt-0.5">
+                    Chưa có
+                  </p>
+                )}
               </div>
               <div>
                 <p className="text-slate-400">Phản hồi</p>
                 <p className="font-bold text-[#006b5b] text-sm mt-0.5">
-                  {product.merchant.positiveFeedback}
+                  {product.merchant.positiveFeedback || "Trong ngày"}
                 </p>
               </div>
               <div>
                 <p className="text-slate-400">Tổng sản phẩm</p>
                 <p className="font-bold text-[#0045cc] text-sm mt-0.5">
-                  {totalShopProducts} sản phẩm
+                  {totalShopProducts}
                 </p>
               </div>
             </div>

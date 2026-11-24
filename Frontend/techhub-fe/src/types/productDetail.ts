@@ -29,8 +29,8 @@ export interface MerchantInfo {
   avatarUrl?: string;
   avatarText: string;
   joinedText: string;
-  rating: number; // e.g. 4.9 (Average rating across shop reviews in DB)
-  positiveFeedback: string;
+  rating?: number | null; // e.g. 4.9 (Average rating across shop reviews in DB, or null if not yet available)
+  positiveFeedback?: string | null;
   totalProducts: number;
   verified: boolean;
   status?: "ACTIVE" | "PAUSED" | "SUSPENDED";

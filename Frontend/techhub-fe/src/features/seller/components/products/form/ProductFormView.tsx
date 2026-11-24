@@ -164,10 +164,10 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
       images: [],
       variants: [
         {
-          sku: "ROG-OLED-27-01",
+          sku: "",
           variantName: "Bản Tiêu Chuẩn",
-          price: 19990000,
-          stockQuantity: 15,
+          price: 0,
+          stockQuantity: 0,
         },
       ],
       attributes: {},

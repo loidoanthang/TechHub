@@ -123,12 +123,12 @@ export function NotificationDropdown({
   return (
     <div
       ref={dropdownRef}
-      className="fixed inset-x-2 top-28 sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 w-auto sm:w-[420px] max-w-[420px] bg-white rounded-2xl shadow-xl border border-slate-200/80 z-50 overflow-visible flex flex-col animate-in fade-in-0 zoom-in-95 duration-150"
+      className="fixed inset-x-2 top-28 sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 w-auto sm:w-[460px] max-w-[460px] bg-white rounded-2xl shadow-2xl border border-slate-200/90 z-[9999] overflow-visible flex flex-col animate-in fade-in-0 zoom-in-95 duration-150"
       style={{ maxHeight: "calc(100vh - 120px)" }}
     >
       {/* Top arrow caret pointing to Bell on Desktop */}
       <div
-        className="hidden sm:block absolute -top-1.5 right-3.5 w-3 h-3 bg-white border-t border-l border-slate-200/80 transform rotate-45 z-10"
+        className="hidden sm:block absolute -top-1.5 right-3.5 w-3 h-3 bg-white border-t border-l border-slate-200/90 transform rotate-45 z-10"
         aria-hidden="true"
       />
 
@@ -185,7 +185,7 @@ export function NotificationDropdown({
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all shrink-0 cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
                 isActive
                   ? "bg-primary text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
@@ -193,7 +193,7 @@ export function NotificationDropdown({
             >
               {tab.icon && (
                 <tab.icon
-                  className={`w-3 h-3 ${isActive ? "text-white" : "text-slate-400"}`}
+                  className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-white" : "text-slate-400"}`}
                 />
               )}
               <span>{tab.label}</span>

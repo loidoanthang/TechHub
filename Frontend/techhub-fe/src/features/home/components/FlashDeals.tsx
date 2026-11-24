@@ -47,7 +47,7 @@ export function FlashDeals() {
               </button>
 
               <div>
-                <div className="relative w-full aspect-square rounded-lg bg-[#eff4ff] overflow-hidden mb-3 p-4 flex items-center justify-center">
+                <div className="relative w-full aspect-square rounded-lg bg-slate-50/70 border border-slate-100 overflow-hidden mb-3 p-3 flex items-center justify-center">
                   <Image
                     src={deal.imageUrl}
                     alt={deal.title}

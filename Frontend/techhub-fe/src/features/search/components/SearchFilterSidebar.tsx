@@ -5,6 +5,7 @@ import {
   RotateCcw,
   SlidersHorizontal,
   Check,
+  X,
 } from "lucide-react";
 import { formatCurrencyVND, parseCurrencyVND } from "@/lib/utils";
 import { useCategoriesQuery } from "@/features/products/hooks/useProductQueries";
@@ -103,42 +104,122 @@ export function SearchFilterSidebar({
     });
   };
 
+  const hasActiveFilters = Boolean(
+    filters.categoryId ||
+      filters.selectedBrands.length > 0 ||
+      filters.minPrice ||
+      filters.maxPrice
+  );
+
+  const selectedCategoryName = serverCategories.find(
+    (c) => c.id === filters.categoryId
+  )?.name;
+
   return (
-    <aside className="w-full lg:w-72 flex-shrink-0 space-y-6">
-      {/* Header bar of Sidebar */}
-      <div className="bg-white rounded-xl p-4 border border-[#eff4ff] shadow-sm flex items-center justify-between">
-        <div className="flex items-center gap-2 text-slate-800 font-bold text-sm">
+    <aside className="w-full lg:w-72 flex-shrink-0 bg-white rounded-2xl border border-[#dce9ff] shadow-sm divide-y divide-[#eff4ff] overflow-hidden sticky top-[132px]">
+      {/* Sidebar Header */}
+      <div className="p-4 flex items-center justify-between bg-[#eff4ff]">
+        <div className="flex items-center gap-2 text-[#0b1c30] font-bold text-sm">
           <SlidersHorizontal className="w-4 h-4 text-[#0045cc]" />
-          <span>BỘ LỌC TÌM KIẾM</span>
+          <span>Bộ lọc tìm kiếm</span>
         </div>
-        <button
-          onClick={onReset}
-          className="text-xs font-semibold text-[#a90900] hover:underline flex items-center gap-1 cursor-pointer"
-        >
-          <RotateCcw className="w-3.5 h-3.5" />
-          <span>Đặt lại</span>
-        </button>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="text-xs font-semibold text-[#a90900] hover:underline transition-colors flex items-center gap-1 cursor-pointer"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Đặt lại</span>
+          </button>
+        )}
       </div>
 
+      {/* Active Filter Chips (Inside Sidebar) */}
+      {hasActiveFilters && (
+        <div className="p-3 bg-blue-50/40 space-y-2">
+          <span className="text-[10px] font-bold text-[#737688] uppercase tracking-wider block">
+            Đang áp dụng:
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {/* Category Chip */}
+            {filters.categoryId && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-white text-[#0045cc] border border-[#dce9ff] shadow-2xs">
+                <span className="truncate max-w-[140px]">{selectedCategoryName || "Danh mục"}</span>
+                <button
+                  type="button"
+                  onClick={() => handleCategorySelect("")}
+                  className="hover:text-[#a90900] cursor-pointer"
+                  aria-label="Bỏ chọn danh mục"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+
+            {/* Price Chip */}
+            {(filters.minPrice || filters.maxPrice) && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-white text-[#0045cc] border border-[#dce9ff] shadow-2xs">
+                <span>
+                  {filters.minPrice ? `${Number(filters.minPrice).toLocaleString("vi-VN")}₫` : "0₫"}
+                  {" - "}
+                  {filters.maxPrice ? `${Number(filters.maxPrice).toLocaleString("vi-VN")}₫` : "Max"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMinInput("0");
+                    setMaxInput("60000000");
+                    onFilterChange({ ...filters, minPrice: "", maxPrice: "" });
+                  }}
+                  className="hover:text-[#a90900] cursor-pointer"
+                  aria-label="Bỏ chọn giá"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+
+            {/* Brand Chips */}
+            {filters.selectedBrands.map((b) => (
+              <span
+                key={b}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-white text-[#0045cc] border border-[#dce9ff] shadow-2xs"
+              >
+                <span>{b}</span>
+                <button
+                  type="button"
+                  onClick={() => handleBrandToggle(b)}
+                  className="hover:text-[#a90900] cursor-pointer"
+                  aria-label={`Bỏ chọn hãng ${b}`}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 1. Category Filter */}
-      <div className="bg-white rounded-xl p-4 border border-[#eff4ff] shadow-sm space-y-3">
-        <h3 className="font-bold text-sm text-[#0b1c30]">
+      <div className="p-4 space-y-3">
+        <h3 className="font-bold text-xs text-[#0b1c30] uppercase tracking-wider">
           Danh mục sản phẩm
         </h3>
 
         {/* Categories List */}
-        <div className="space-y-1">
+        <div className="space-y-0.5 max-h-56 overflow-y-auto pr-1">
           <button
             type="button"
             onClick={() => handleCategorySelect("")}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer text-left ${
               !filters.categoryId
-                ? "bg-[#0045cc] text-white"
-                : "text-slate-700 hover:bg-[#eff4ff]"
+                ? "bg-[#0045cc] text-white font-semibold shadow-xs"
+                : "text-[#434656] hover:bg-[#eff4ff] hover:text-[#0b1c30]"
             }`}
           >
             <span>Tất cả danh mục</span>
-            {!filters.categoryId && <Check className="w-4 h-4" />}
+            {!filters.categoryId && <Check className="w-3.5 h-3.5" />}
           </button>
 
           {serverCategories.map((cat) => {
@@ -148,29 +229,31 @@ export function SearchFilterSidebar({
                 key={cat.id}
                 type="button"
                 onClick={() => handleCategorySelect(cat.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer text-left ${
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer text-left ${
                   isSelected
-                    ? "bg-[#0045cc] text-white"
-                    : "text-slate-700 hover:bg-[#eff4ff]"
+                    ? "bg-[#0045cc] text-white font-semibold shadow-xs"
+                    : "text-[#434656] hover:bg-[#eff4ff] hover:text-[#0b1c30]"
                 }`}
               >
                 <span className="truncate">{cat.name}</span>
-                {isSelected && <Check className="w-4 h-4 flex-shrink-0 ml-1" />}
+                {isSelected && <Check className="w-3.5 h-3.5 flex-shrink-0 ml-1" />}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* 2. Price Range Filter with 2 Núm kéo (Dual Range Slider) */}
-      <div className="bg-white rounded-xl p-4 border border-[#eff4ff] shadow-sm space-y-4">
-        <h3 className="font-bold text-sm text-[#0b1c30]">Khoảng giá (VNĐ)</h3>
+      {/* 2. Price Range Filter with Dual Range Slider */}
+      <div className="p-4 space-y-3">
+        <h3 className="font-bold text-xs text-[#0b1c30] uppercase tracking-wider">
+          Khoảng giá (VNĐ)
+        </h3>
 
         {/* Interactive Dual Slider with colored selected range */}
         <div className="relative h-6 flex items-center px-1 my-1">
           {/* Base track */}
-          <div className="relative w-full h-1.5 rounded-full bg-slate-200">
-            {/* Active Highlight Range (Xanh dương) */}
+          <div className="relative w-full h-1.5 rounded-full bg-[#dce9ff]">
+            {/* Active Highlight Range */}
             <div
               className="absolute top-0 bottom-0 rounded-full bg-[#0045cc]"
               style={{
@@ -215,10 +298,10 @@ export function SearchFilterSidebar({
                 setMinInput(num.toString());
               }}
               placeholder="Từ"
-              className="w-full pl-2 pr-2 py-1.5 bg-[#eff4ff] rounded-lg text-xs font-semibold text-slate-800 border border-slate-200 focus:outline-none"
+              className="w-full px-2.5 py-1.5 bg-[#eff4ff] rounded-lg text-xs font-semibold text-[#0b1c30] border border-[#dce9ff] focus:outline-none focus:border-[#0045cc]"
             />
           </div>
-          <span className="text-slate-400 text-xs">-</span>
+          <span className="text-[#737688] text-xs">-</span>
           <div className="relative flex-1">
             <input
               type="text"
@@ -229,29 +312,31 @@ export function SearchFilterSidebar({
                 setMaxInput(num.toString());
               }}
               placeholder="Đến"
-              className="w-full pl-2 pr-2 py-1.5 bg-[#eff4ff] rounded-lg text-xs font-semibold text-slate-800 border border-slate-200 focus:outline-none"
+              className="w-full px-2.5 py-1.5 bg-[#eff4ff] rounded-lg text-xs font-semibold text-[#0b1c30] border border-[#dce9ff] focus:outline-none focus:border-[#0045cc]"
             />
           </div>
         </div>
 
         <button
           onClick={handlePriceApply}
-          className="w-full py-2 bg-[#0045cc] hover:bg-[#0d5bff] text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+          className="w-full py-2 bg-[#0045cc] hover:bg-[#0d5bff] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-sm"
         >
           Áp dụng khoảng giá
         </button>
       </div>
 
       {/* 3. Brands Selection */}
-      <div className="bg-white rounded-xl p-4 border border-[#eff4ff] shadow-sm space-y-3">
-        <h3 className="font-bold text-sm text-[#0b1c30]">Thương hiệu</h3>
+      <div className="p-4 space-y-3">
+        <h3 className="font-bold text-xs text-[#0b1c30] uppercase tracking-wider">
+          Thương hiệu
+        </h3>
         <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
           {BRANDS_DATA.map((brand) => {
             const isChecked = filters.selectedBrands.includes(brand.id);
             return (
               <label
                 key={brand.id}
-                className="flex items-center justify-between text-xs font-medium text-slate-700 hover:text-[#0045cc] cursor-pointer"
+                className="flex items-center justify-between text-xs font-medium text-[#434656] hover:text-[#0045cc] cursor-pointer select-none"
               >
                 <div className="flex items-center gap-2">
                   <input
@@ -262,9 +347,6 @@ export function SearchFilterSidebar({
                   />
                   <span>{brand.name}</span>
                 </div>
-                <span className="text-[11px] text-slate-400 font-mono">
-                  ({brand.count})
-                </span>
               </label>
             );
           })}

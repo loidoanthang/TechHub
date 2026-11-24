@@ -23,9 +23,9 @@ export function ProductCard({ product }: ProductCardProps) {
   const productUrl = `/products/${product.slug}`;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-2.5 sm:p-4 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group relative border border-[#eff4ff]">
+    <div className="bg-white rounded-xl shadow-xs p-2.5 sm:p-4 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-200 group relative border border-slate-100 hover:border-slate-200">
       {/* Product Image viewport */}
-      <div className="relative w-full aspect-square rounded-lg bg-[#eff4ff] overflow-hidden mb-2 sm:mb-3 p-2 sm:p-4 flex items-center justify-center group/img">
+      <div className="relative w-full aspect-square rounded-lg bg-slate-50/60 overflow-hidden mb-2 sm:mb-3 flex items-center justify-center group/img border border-slate-100">
         <Link
           href={productUrl}
           className="absolute inset-0 flex items-center justify-center"
@@ -35,7 +35,7 @@ export function ProductCard({ product }: ProductCardProps) {
             alt={product.title}
             sizeClassName="w-full h-full"
             className="rounded-none border-0 bg-transparent"
-            imageClassName="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+            imageClassName="object-contain p-2.5 group-hover:scale-105 transition-transform duration-300"
           />
         </Link>
 

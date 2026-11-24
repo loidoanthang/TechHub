@@ -17,11 +17,11 @@ import {
   ArrowRight,
   RefreshCw,
 } from "lucide-react";
-import {
-  VIETNAMESE_BANKS,
-  SellerVerificationStatus,
-} from "@/mocks";
-import { VIETNAM_PROVINCES } from "@/mocks/address.mock";
+import { VIETNAMESE_BANKS } from "@/lib/constants/banks";
+import { VIETNAM_PROVINCES } from "@/lib/constants/address";
+import type { SellerVerificationStatus } from "@/types/enums";
+
+type UISellerStatus = SellerVerificationStatus | "NOT_REGISTERED";
 import { SellerHeader } from "./SellerHeader";
 import {
   useSellerVerificationStatusQuery,
@@ -38,7 +38,7 @@ export function SellerRegistrationView() {
 
   // Verification State: "NOT_REGISTERED" | "PENDING" | "APPROVED" | "REJECTED"
   const [verificationStatus, setVerificationStatus] =
-    useState<SellerVerificationStatus>("NOT_REGISTERED");
+    useState<UISellerStatus>("NOT_REGISTERED");
   const [rejectionReason, setRejectionReason] = useState<string | null>(null);
   const [sellerNameEdited, setSellerNameEdited] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -55,21 +55,20 @@ export function SellerRegistrationView() {
   } = useForm<SellerRegistrationFormValues>({
     resolver: zodResolver(sellerRegistrationSchema),
     defaultValues: {
-      shopName: "GearTech Flagship Store",
-      sellerName: "geartech-official",
-      description:
-        "Authorized distributor of high-performance PC components, GPUs, and custom mechanical keyboards.",
-      contactName: "Alex Morgan",
-      contactPhone: "(+84) 912 345 678",
-      province: "Ho Chi Minh City",
-      district: "District 1",
-      ward: "Ben Nghe Ward",
-      streetAddress: "123 Nguyen Hue Boulevard, Tech Tower, Floor 4",
+      shopName: "",
+      sellerName: "",
+      description: "",
+      contactName: "",
+      contactPhone: "",
+      province: "",
+      district: "",
+      ward: "",
+      streetAddress: "",
       shippingFee: 30000,
-      bankName: VIETNAMESE_BANKS[0].name,
-      bankAccountNumber: "0071001234567",
-      bankAccountHolder: "ALEX MORGAN",
-      agreeTerms: true,
+      bankName: "",
+      bankAccountNumber: "",
+      bankAccountHolder: "",
+      agreeTerms: false,
     },
     mode: "onTouched",
   });
@@ -103,20 +102,13 @@ export function SellerRegistrationView() {
 
   const handleProvinceChange = (prov: string) => {
     setValue("province", prov, { shouldValidate: true });
-    const pData = VIETNAM_PROVINCES.find((p) => p.name === prov);
-    if (pData && pData.districts.length > 0) {
-      const firstD = pData.districts[0];
-      setValue("district", firstD.name, { shouldValidate: true });
-      setValue("ward", firstD.wards[0] || "", { shouldValidate: true });
-    }
+    setValue("district", "", { shouldValidate: true });
+    setValue("ward", "", { shouldValidate: true });
   };
 
   const handleDistrictChange = (dist: string) => {
     setValue("district", dist, { shouldValidate: true });
-    const dData = currentProvinceData?.districts.find((d) => d.name === dist);
-    if (dData && dData.wards.length > 0) {
-      setValue("ward", dData.wards[0], { shouldValidate: true });
-    }
+    setValue("ward", "", { shouldValidate: true });
   };
 
   const handleShopNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,7 +154,7 @@ export function SellerRegistrationView() {
       setErrorMsg(
         errObj?.response?.data?.message ||
         errObj?.message ||
-        "Failed to register seller profile. Please verify your details."
+        "Đăng ký thông tin người bán thất bại. Vui lòng kiểm tra lại thông tin."
       );
     }
   };
@@ -189,24 +181,26 @@ export function SellerRegistrationView() {
 
                 <div className="max-w-md">
                   <span className="text-xs font-bold text-[#d97706] uppercase tracking-wider bg-[#fef3c7] px-3 py-1 rounded-full">
-                    Application Under Review
+                    Hồ sơ đang chờ duyệt
                   </span>
                   <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0b1c30] mt-3">
-                    Your Merchant Profile Is Being Verified
+                    Hồ Sơ Cửa Hàng Đang Được Xét Duyệt
                   </h1>
                   <p className="text-xs text-[#737688] mt-2 leading-relaxed">
-                    Thank you for applying to sell on TechHub Marketplace! Our compliance team is currently reviewing your shop identity (<strong>{currentShopName}</strong>) and banking records. Verification usually takes 24 business hours.
+                    Cảm ơn bạn đã đăng ký bán hàng trên TechHub! Đội ngũ kiểm duyệt đang xác minh thông tin gian hàng (<strong>{currentShopName}</strong>) và tài khoản ngân hàng. Quá trình xét duyệt thường diễn ra trong vòng 24 giờ làm việc.
                   </p>
                 </div>
 
                 <div className="w-full max-w-md p-4 rounded-2xl bg-[#eff4ff]/60 border border-[#eff4ff] text-left text-xs text-[#434656] space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-[#737688]">Shop Handle:</span>
+                    <span className="text-[#737688]">Định danh gian hàng:</span>
                     <span className="font-mono font-bold text-[#0045cc]">/shop/{currentSellerName}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[#737688]">Warehouse Hub:</span>
-                    <span className="font-medium text-[#0b1c30]">{selectedDistrict}, {selectedProvince}</span>
+                    <span className="text-[#737688]">Kho hàng xuất phát:</span>
+                    <span className="font-medium text-[#0b1c30]">
+                      {selectedDistrict ? `${selectedDistrict}, ` : ""}{selectedProvince || "Chưa cập nhật"}
+                    </span>
                   </div>
                 </div>
 
@@ -215,7 +209,7 @@ export function SellerRegistrationView() {
                     href="/"
                     className="px-6 py-2.5 rounded-xl bg-[#eff4ff] hover:bg-[#dce9ff] text-xs font-semibold text-[#0b1c30] transition-colors"
                   >
-                    Back to Marketplace
+                    Về trang chủ
                   </Link>
                 </div>
               </div>
@@ -230,13 +224,13 @@ export function SellerRegistrationView() {
 
                 <div className="max-w-md">
                   <span className="text-xs font-bold text-[#006b5b] uppercase tracking-wider bg-[#006b5b]/10 px-3 py-1 rounded-full">
-                    Shop Approved &amp; Active
+                    Gian hàng đã được kích hoạt
                   </span>
                   <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0b1c30] mt-3">
-                    Welcome to TechHub Seller Centre!
+                    Chào Mừng Đến Với TechHub Kênh Người Bán!
                   </h1>
                   <p className="text-xs text-[#737688] mt-2 leading-relaxed">
-                    Your shop <strong>{currentShopName}</strong> has been officially approved. You can now access your dashboard, upload electronic hardware components, and start fulfilling orders.
+                    Gian hàng <strong>{currentShopName}</strong> của bạn đã được phê duyệt chính thức. Bạn đã có thể truy cập trang quản trị, đăng bán linh kiện và xử lý đơn hàng.
                   </p>
                 </div>
 
@@ -244,7 +238,7 @@ export function SellerRegistrationView() {
                   href="/seller/dashboard"
                   className="mt-2 px-8 py-3 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-bold shadow-md transition-all flex items-center gap-2 active:scale-[0.99]"
                 >
-                  <span>Go to Seller Dashboard</span>
+                  <span>Truy cập Kênh Người Bán</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -259,19 +253,19 @@ export function SellerRegistrationView() {
 
                 <div className="max-w-md">
                   <span className="text-xs font-bold text-[#ba1a1a] uppercase tracking-wider bg-[#ba1a1a]/10 px-3 py-1 rounded-full">
-                    Application Needs Revision
+                    Hồ sơ cần cập nhật lại
                   </span>
                   <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0b1c30] mt-3">
-                    Verification Incomplete
+                    Xác Thực Chưa Hoàn Tất
                   </h1>
                   <p className="text-xs text-[#737688] mt-2 leading-relaxed">
-                    Our compliance team could not approve your application at this time.
+                    Hồ sơ đăng ký của bạn tạm thời chưa thể phê duyệt do một số thông tin chưa đạt yêu cầu.
                   </p>
                 </div>
 
                 {rejectionReason && (
                   <div className="w-full max-w-md p-4 rounded-2xl bg-[#ffdad6]/40 border border-[#ffdad6] text-left">
-                    <p className="text-xs font-bold text-[#ba1a1a] mb-1">Reason for Rejection:</p>
+                    <p className="text-xs font-bold text-[#ba1a1a] mb-1">Lý do từ chối:</p>
                     <p className="text-xs text-[#434656] leading-relaxed">{rejectionReason}</p>
                   </div>
                 )}
@@ -279,10 +273,10 @@ export function SellerRegistrationView() {
                 <button
                   type="button"
                   onClick={() => setVerificationStatus("NOT_REGISTERED")}
-                  className="px-6 py-2.5 rounded-xl bg-[#0045cc] text-white text-xs font-bold hover:bg-[#0d5bff] transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-xl bg-[#0045cc] text-white text-xs font-bold hover:bg-[#0d5bff] transition-all flex items-center gap-2 cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Update and Resubmit Application</span>
+                  <span>Cập nhật và nộp lại hồ sơ</span>
                 </button>
               </div>
             )}
@@ -291,15 +285,9 @@ export function SellerRegistrationView() {
             {verificationStatus === "NOT_REGISTERED" && (
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 animate-in fade-in duration-300">
                 <div className="space-y-2 text-center sm:text-left">
-                  <span className="text-xs font-bold text-[#0045cc] tracking-wider uppercase bg-[#0045cc]/10 px-3 py-1 rounded-full">
-                    Merchant Onboarding
-                  </span>
                   <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#0b1c30] tracking-tight">
-                    Register Your TechHub Store
+                    Đăng Ký Gian Hàng
                   </h1>
-                  <p className="text-xs text-[#737688]">
-                    Set up your storefront profile, warehouse dispatch facility, and escrow bank account in one streamlined registration.
-                  </p>
                 </div>
 
                 {errorMsg && (
@@ -310,17 +298,17 @@ export function SellerRegistrationView() {
                 )}
 
                 {/* 1. Shop Identity Section */}
-                <section className="bg-white rounded-3xl p-6 sm:p-8 border border-[#c3c5d9]/30 shadow-xs flex flex-col gap-5">
+                <section className="bg-white rounded-3xl p-4 sm:p-8 border border-[#c3c5d9]/30 shadow-xs flex flex-col gap-5">
                   <div className="flex items-center gap-3 border-b border-[#eff4ff] pb-4">
                     <div className="w-9 h-9 rounded-2xl bg-[#0045cc]/10 text-[#0045cc] flex items-center justify-center">
                       <Store className="w-4 h-4" />
                     </div>
                     <div>
                       <h2 className="font-heading text-base font-bold text-[#0b1c30]">
-                        1. Shop &amp; Identity Information
+                        1. Thông Tin Gian Hàng &amp; Định Danh
                       </h2>
                       <p className="text-xs text-[#737688]">
-                        Brand credentials that appear on your public store and product listings.
+                        Tên và thông tin nhận diện hiển thị trên trang cửa hàng và trang chi tiết sản phẩm.
                       </p>
                     </div>
                   </div>
@@ -329,13 +317,13 @@ export function SellerRegistrationView() {
                     {/* Shop Name */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-[#0b1c30]">
-                        Display Shop Name <span className="text-[#ba1a1a]">*</span>
+                        Tên gian hàng <span className="text-[#ba1a1a]">*</span>
                       </label>
                       <input
                         type="text"
                         {...register("shopName")}
                         onChange={handleShopNameChange}
-                        placeholder="e.g. GearTech Flagship Store"
+                        placeholder="Ví dụ: Linh Kiện Điện Tử TechZone"
                         className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] transition-all font-medium"
                       />
                       {errors.shopName?.message && (
@@ -347,14 +335,14 @@ export function SellerRegistrationView() {
                     <div className="flex flex-col gap-1.5">
                       <div className="flex items-center justify-between">
                         <label className="text-xs font-bold text-[#0b1c30]">
-                          Shop Handle (seller_name) <span className="text-[#ba1a1a]">*</span>
+                          Mã định danh (seller_name) <span className="text-[#ba1a1a]">*</span>
                         </label>
                         <span
                           className={`text-[10px] font-semibold ${
                             isSellerNameValid ? "text-[#006b5b]" : "text-[#ba1a1a]"
                           }`}
                         >
-                          {isSellerNameValid ? "Valid" : "Only a-z, 0-9, -"}
+                          {isSellerNameValid ? "Hợp lệ" : "Chỉ dùng a-z, 0-9, -"}
                         </span>
                       </div>
                       <input
@@ -364,14 +352,14 @@ export function SellerRegistrationView() {
                           setValue("sellerName", e.target.value.toLowerCase(), { shouldValidate: true });
                           setSellerNameEdited(true);
                         }}
-                        placeholder="e.g. geartech-official"
+                        placeholder="techzone-official"
                         className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] font-mono transition-all"
                       />
                       {errors.sellerName?.message && (
                         <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.sellerName.message}</p>
                       )}
                       <span className="text-[10px] text-[#737688]">
-                        Public URL: <strong className="text-[#0045cc] font-mono">techhub.vn/shop/{currentSellerName || "your-slug"}</strong>
+                        Đường dẫn: <strong className="text-[#0045cc] font-mono">techhub.vn/shop/{currentSellerName || "ma-cua-hang"}</strong>
                       </span>
                     </div>
                   </div>
@@ -379,12 +367,12 @@ export function SellerRegistrationView() {
                   {/* Shop Description */}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-[#0b1c30]">
-                      Shop Description <span className="text-[#ba1a1a]">*</span>
+                      Mô tả gian hàng <span className="text-[#ba1a1a]">*</span>
                     </label>
                     <textarea
                       rows={3}
                       {...register("description")}
-                      placeholder="Tell customers about your brand, specialty in electronics, and customer support standards..."
+                      placeholder="Giới thiệu về thương hiệu, thế mạnh linh kiện bán dẫn, chế độ bảo hành và chính sách chăm sóc khách hàng..."
                       className="w-full text-xs p-3.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] transition-all resize-none leading-relaxed"
                     />
                     {errors.description?.message && (
@@ -401,10 +389,10 @@ export function SellerRegistrationView() {
                     </div>
                     <div>
                       <h2 className="font-heading text-base font-bold text-[#0b1c30]">
-                        2. Warehouse Origin &amp; Logistics Hub
+                        2. Kho Hàng Xuất Phát &amp; Vận Chuyển
                       </h2>
                       <p className="text-xs text-[#737688]">
-                        Pickup location for logistics partners (GHN, ViettelPost) and return fulfillment.
+                        Địa điểm đối tác vận chuyển đến lấy kiện hàng và xử lý đơn hàng hoàn trả.
                       </p>
                     </div>
                   </div>
@@ -413,12 +401,12 @@ export function SellerRegistrationView() {
                     {/* Contact Person */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-[#0b1c30]">
-                        Warehouse Contact Name <span className="text-[#ba1a1a]">*</span>
+                        Người phụ trách kho <span className="text-[#ba1a1a]">*</span>
                       </label>
                       <input
                         type="text"
                         {...register("contactName")}
-                        placeholder="e.g. Alex Morgan"
+                        placeholder="Ví dụ: Nguyễn Văn A"
                         className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30]"
                       />
                       {errors.contactName?.message && (
@@ -429,12 +417,12 @@ export function SellerRegistrationView() {
                     {/* Contact Phone */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-[#0b1c30]">
-                        Warehouse Phone Number <span className="text-[#ba1a1a]">*</span>
+                        Số điện thoại liên hệ <span className="text-[#ba1a1a]">*</span>
                       </label>
                       <input
                         type="tel"
                         {...register("contactPhone")}
-                        placeholder="e.g. (+84) 912 345 678"
+                        placeholder="Ví dụ: 0912 345 678"
                         className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30]"
                       />
                       {errors.contactPhone?.message && (
@@ -446,12 +434,13 @@ export function SellerRegistrationView() {
                   {/* Province, District, Ward Cascading */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-[#0b1c30]">Province / City *</label>
+                      <label className="text-xs font-bold text-[#0b1c30]">Tỉnh / Thành phố *</label>
                       <select
                         value={selectedProvince}
                         onChange={(e) => handleProvinceChange(e.target.value)}
                         className="w-full text-xs px-3 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] cursor-pointer"
                       >
+                        <option value="">-- Chọn Tỉnh / TP --</option>
                         {VIETNAM_PROVINCES.map((p) => (
                           <option key={p.name} value={p.name}>
                             {p.name}
@@ -464,12 +453,14 @@ export function SellerRegistrationView() {
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-[#0b1c30]">District *</label>
+                      <label className="text-xs font-bold text-[#0b1c30]">Quận / Huyện *</label>
                       <select
                         value={selectedDistrict}
                         onChange={(e) => handleDistrictChange(e.target.value)}
-                        className="w-full text-xs px-3 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] cursor-pointer"
+                        disabled={!selectedProvince}
+                        className="w-full text-xs px-3 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
+                        <option value="">-- Chọn Quận / Huyện --</option>
                         {currentProvinceData?.districts.map((d) => (
                           <option key={d.name} value={d.name}>
                             {d.name}
@@ -482,11 +473,13 @@ export function SellerRegistrationView() {
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-[#0b1c30]">Ward *</label>
+                      <label className="text-xs font-bold text-[#0b1c30]">Phường / Xã *</label>
                       <select
                         {...register("ward")}
-                        className="w-full text-xs px-3 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] cursor-pointer"
+                        disabled={!selectedDistrict}
+                        className="w-full text-xs px-3 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
+                        <option value="">-- Chọn Phường / Xã --</option>
                         {currentDistrictData?.wards.map((w) => (
                           <option key={w} value={w}>
                             {w}
@@ -502,12 +495,12 @@ export function SellerRegistrationView() {
                   {/* Street Address */}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-[#0b1c30]">
-                      Street Address &amp; Warehouse Facility <span className="text-[#ba1a1a]">*</span>
+                      Địa chỉ cụ thể &amp; Số nhà <span className="text-[#ba1a1a]">*</span>
                     </label>
                     <input
                       type="text"
                       {...register("streetAddress")}
-                      placeholder="e.g. 123 Nguyen Hue Boulevard, Tech Tower, Floor 4"
+                      placeholder="Ví dụ: Số 123 Đường Nguyễn Huệ, Tòa nhà Tech Tower"
                       className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30]"
                     />
                     {errors.streetAddress?.message && (
@@ -517,9 +510,24 @@ export function SellerRegistrationView() {
 
                   {/* Flat Shipping Fee */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[#0b1c30]">
-                      Standard Logistics Flat Rate (VND) <span className="text-[#ba1a1a]">*</span>
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-[#0b1c30]">
+                        Phí vận chuyển mặc định (VNĐ) <span className="text-[#ba1a1a]">*</span>
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-[#737688]">Gợi ý nhanh:</span>
+                        {[0, 30000, 45000].map((fee) => (
+                          <button
+                            key={fee}
+                            type="button"
+                            onClick={() => setValue("shippingFee", fee, { shouldValidate: true })}
+                            className="text-[10px] px-2 py-0.5 rounded-md bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0045cc] font-medium transition-colors cursor-pointer"
+                          >
+                            {fee === 0 ? "Miễn phí" : `${(fee / 1000)}k`}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     <Controller
                       name="shippingFee"
                       control={control}
@@ -540,7 +548,7 @@ export function SellerRegistrationView() {
                       <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.shippingFee.message}</p>
                     )}
                     <span className="text-[10px] text-[#737688]">
-                      Default shipping rate applied per checkout order from this shop.
+                      Cước phí vận chuyển cố định áp dụng cho mỗi đơn hàng mua từ gian hàng của bạn.
                     </span>
                   </div>
                 </section>
@@ -553,10 +561,10 @@ export function SellerRegistrationView() {
                     </div>
                     <div>
                       <h2 className="font-heading text-base font-bold text-[#0b1c30]">
-                        3. Vietnamese Banking &amp; Payout Escrow
+                        3. Tài Khoản Ngân Hàng Nhận Quyết Toán
                       </h2>
                       <p className="text-xs text-[#737688]">
-                        Revenue from completed customer orders is disbursed automatically to this bank account.
+                        Doanh thu từ đơn hàng hoàn tất sẽ được hệ thống TechHub thanh toán tự động vào tài khoản này.
                       </p>
                     </div>
                   </div>
@@ -565,12 +573,13 @@ export function SellerRegistrationView() {
                     {/* Bank Selection */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-[#0b1c30]">
-                        Bank Institution <span className="text-[#ba1a1a]">*</span>
+                        Ngân hàng <span className="text-[#ba1a1a]">*</span>
                       </label>
                       <select
                         {...register("bankName")}
                         className="w-full text-xs px-3 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] cursor-pointer"
                       >
+                        <option value="">-- Chọn ngân hàng --</option>
                         {VIETNAMESE_BANKS.map((b) => (
                           <option key={b.code} value={b.name}>
                             {b.name} ({b.code})
@@ -585,12 +594,12 @@ export function SellerRegistrationView() {
                     {/* Account Number */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-[#0b1c30]">
-                        Bank Account Number <span className="text-[#ba1a1a]">*</span>
+                        Số tài khoản <span className="text-[#ba1a1a]">*</span>
                       </label>
                       <input
                         type="text"
                         {...register("bankAccountNumber")}
-                        placeholder="e.g. 0071001234567"
+                        placeholder="Ví dụ: 0071001234567"
                         className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] font-mono"
                       />
                       {errors.bankAccountNumber?.message && (
@@ -601,13 +610,13 @@ export function SellerRegistrationView() {
                     {/* Account Holder Name */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-[#0b1c30]">
-                        Account Holder Name (Uppercase) <span className="text-[#ba1a1a]">*</span>
+                        Chủ tài khoản (In hoa) <span className="text-[#ba1a1a]">*</span>
                       </label>
                       <input
                         type="text"
                         {...register("bankAccountHolder")}
-                        placeholder="e.g. ALEX MORGAN"
-                        className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] font-mono font-bold tracking-wider"
+                        placeholder="Ví dụ: NGUYEN VAN A"
+                        className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#eff4ff]/60 border border-[#c3c5d9]/40 focus:outline-none focus:border-[#0045cc] focus:bg-white text-[#0b1c30] font-mono font-bold tracking-wider uppercase"
                       />
                       {errors.bankAccountHolder?.message && (
                         <p className="text-[11px] text-[#ba1a1a] font-medium">{errors.bankAccountHolder.message}</p>
@@ -620,11 +629,11 @@ export function SellerRegistrationView() {
                     <input
                       type="checkbox"
                       {...register("agreeTerms")}
-                      className="mt-0.5 accent-[#0045cc] rounded"
+                      className="mt-0.5 accent-[#0045cc] rounded cursor-pointer"
                     />
                     <div className="flex flex-col gap-0.5">
                       <span className="text-xs text-[#434656] leading-relaxed">
-                        I certify that all provided details and merchant credentials are authentic. I agree to comply with <strong>TechHub Escrow Protection Regulations</strong>, hardware warranty mandates, and the 7-day customer dispute policy.
+                        Tôi cam kết mọi thông tin đăng ký gian hàng và tài khoản thanh toán là chính xác. Tôi đồng ý tuân thủ <strong>Quy chế Bảo vệ Đơn hàng TechHub</strong>, chính sách bảo hành linh kiện và cam kết xử lý khiếu nại trong 7 ngày.
                       </span>
                       {errors.agreeTerms?.message && (
                         <p className="text-[11px] text-[#ba1a1a] font-medium mt-1">{errors.agreeTerms.message}</p>
@@ -639,7 +648,7 @@ export function SellerRegistrationView() {
                     href="/"
                     className="text-xs font-semibold text-[#737688] hover:text-[#0b1c30] transition-colors"
                   >
-                    Cancel and Return to Marketplace
+                    Hủy và quay về trang chủ
                   </Link>
 
                   <button
@@ -650,12 +659,12 @@ export function SellerRegistrationView() {
                     {isSubmitting ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Submitting Application...</span>
+                        <span>Đang gửi hồ sơ...</span>
                       </>
                     ) : (
                       <>
                         <ShieldCheck className="w-4 h-4" />
-                        <span>Submit Seller Registration</span>
+                        <span>Nộp Hồ Sơ Đăng Ký Người Bán</span>
                       </>
                     )}
                   </button>
@@ -668,7 +677,7 @@ export function SellerRegistrationView() {
 
       <footer className="border-t border-[#c3c5d9]/30 bg-white py-6">
         <div className="max-w-6xl mx-auto px-4 text-center text-xs text-[#737688]">
-          © 2026 TechHub Electronics Marketplace • Merchant Verification &amp; Compliance Center
+          © 2026 Sàn Thương Mại Điện Tử Linh Kiện TechHub • Trung Tâm Tuân Thủ &amp; Xác Thực Người Bán
         </div>
       </footer>
     </div>

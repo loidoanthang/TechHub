@@ -195,190 +195,81 @@ export function SearchContent() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 w-full py-6 space-y-6">
-      {/* 1. Header Overview & Breadcrumb */}
-      <div className="bg-white rounded-2xl shadow-sm p-5 border border-[#eff4ff]">
+      {/* 1. Header Overview & Clean Breadcrumb */}
+      <div className="space-y-4">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-1.5 text-xs text-slate-500 mb-3">
+        <nav className="flex items-center gap-1.5 text-xs text-[#737688]">
           <Link href="/" className="hover:text-[#0045cc] transition-colors">
             Trang chủ
           </Link>
-          <span className="text-slate-300">/</span>
-          <span className="text-slate-800 font-semibold">Tìm kiếm sản phẩm</span>
+          <span className="text-[#c3c5d9]">/</span>
+          <span className="text-[#0b1c30] font-semibold">Tìm kiếm</span>
         </nav>
 
-        {/* Search Bar & Title Row */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-1">
+        {/* Title & Filter Bar Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-[#dce9ff]">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight font-[family-name:var(--font-heading)]">
               {keyword ? (
                 <>
-                  Kết quả tìm kiếm cho <span className="text-[#0045cc]">&quot;{keyword}&quot;</span>
+                  Kết quả cho <span className="text-[#0045cc]">&quot;{keyword}&quot;</span>
                 </>
               ) : selectedCategoryName ? (
                 <>
-                  Sản phẩm trong <span className="text-[#0045cc]">{selectedCategoryName}</span>
+                  Danh mục <span className="text-[#0045cc]">{selectedCategoryName}</span>
                 </>
               ) : (
                 "Tất cả sản phẩm công nghệ"
               )}
             </h1>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-[#434656] mt-1">
               {isLoading ? (
                 "Đang tải sản phẩm..."
               ) : (
                 <>
-                  Tìm thấy <strong>{totalElements}</strong> sản phẩm chính hãng
+                  Tìm thấy <strong className="text-[#0b1c30]">{totalElements}</strong> sản phẩm chính hãng
                 </>
               )}
             </p>
           </div>
 
-          {/* In-Page Quick Search Input */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="flex items-center gap-2 w-full lg:max-w-md"
-          >
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Tìm iPhone, MacBook, Sony, màn hình..."
-                className="w-full pl-9 pr-8 py-2 bg-[#eff4ff] rounded-xl text-xs sm:text-sm font-medium text-[#0b1c30] placeholder:text-[#737688] border border-[#dce9ff] focus:outline-none focus:ring-2 focus:ring-[#0045cc]/30"
-              />
-              {searchInput && (
-                <button
-                  type="button"
-                  onClick={handleClearKeyword}
-                  aria-label="Xóa từ khóa"
-                  className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className="px-4 py-2 bg-[#0045cc] hover:bg-[#0d5bff] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-sm flex-shrink-0"
-            >
-              Tìm kiếm
-            </button>
-
+          {/* Quick Sort Tabs & Mobile Filter Trigger */}
+          <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
             {/* Mobile Filter Toggle */}
             <button
               type="button"
               onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
-              className="lg:hidden flex items-center justify-center p-2 bg-[#eff4ff] text-[#0045cc] border border-[#dce9ff] rounded-xl text-xs font-bold cursor-pointer flex-shrink-0"
+              className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 bg-white text-[#434656] border border-[#dce9ff] rounded-xl text-xs font-semibold cursor-pointer shadow-2xs hover:bg-[#eff4ff]"
               aria-label="Mở bộ lọc"
             >
-              <SlidersHorizontal className="w-4 h-4" />
+              <SlidersHorizontal className="w-3.5 h-3.5 text-[#0045cc]" />
+              <span>Bộ lọc</span>
             </button>
-          </form>
-        </div>
 
-        {/* Controls & Active Filters Row */}
-        <div className="mt-4 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100">
-          {/* Active Filter Badges */}
-          <div className="flex flex-wrap items-center gap-2">
-            {hasActiveFilters && (
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                Đang lọc:
-              </span>
-            )}
-
-            {/* Keyword Badge */}
-            {keyword && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#eff4ff] text-[#0045cc] border border-[#dce9ff]">
-                <span>Từ khóa: &quot;{keyword}&quot;</span>
+            {/* Sort Tab Pills */}
+            <div className="inline-flex p-1 bg-white rounded-xl text-xs font-medium border border-[#dce9ff] shadow-2xs">
+              {[
+                { key: "newest", label: "Mới nhất" },
+                { key: "popular", label: "Bán chạy" },
+                { key: "price-asc", label: "Giá thấp" },
+                { key: "price-desc", label: "Giá cao" },
+              ].map((tab) => (
                 <button
-                  onClick={handleClearKeyword}
-                  className="hover:text-[#a90900] cursor-pointer"
-                  aria-label="Bỏ từ khóa"
+                  key={tab.key}
+                  type="button"
+                  onClick={() => {
+                    setSortBy(tab.key);
+                    setCurrentPage(0);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                    sortBy === tab.key
+                      ? "bg-[#0045cc] text-white font-bold shadow-xs"
+                      : "text-[#434656] hover:text-[#0045cc] hover:bg-[#eff4ff]"
+                  }`}
                 >
-                  <X className="w-3.5 h-3.5" />
+                  {tab.label}
                 </button>
-              </span>
-            )}
-
-            {/* Category Badge */}
-            {filters.categoryId && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#eff4ff] text-[#0045cc] border border-[#dce9ff]">
-                <span>Danh mục: {selectedCategoryName}</span>
-                <button
-                  onClick={removeCategory}
-                  className="hover:text-[#a90900] cursor-pointer"
-                  aria-label="Bỏ danh mục"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </span>
-            )}
-
-            {/* Brand Badges */}
-            {filters.selectedBrands.map((b) => (
-              <span
-                key={b}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#eff4ff] text-[#0045cc] border border-[#dce9ff]">
-                <span>Hãng: {b}</span>
-                <button
-                  onClick={() => removeBrand(b)}
-                  className="hover:text-[#a90900] cursor-pointer"
-                  aria-label="Remove brand filter"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </span>
-            ))}
-
-            {/* Price Badge */}
-            {(filters.minPrice || filters.maxPrice) && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#eff4ff] text-[#0045cc] border border-[#dce9ff]">
-                <span>
-                  Giá: {filters.minPrice ? `${Number(filters.minPrice).toLocaleString("vi-VN")}₫` : "0₫"}
-                  {" - "}
-                  {filters.maxPrice ? `${Number(filters.maxPrice).toLocaleString("vi-VN")}₫` : "Tối đa"}
-                </span>
-                <button
-                  onClick={removePrice}
-                  className="hover:text-[#a90900] cursor-pointer"
-                  aria-label="Remove price filter"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </span>
-            )}
-
-            {hasActiveFilters && (
-              <button
-                onClick={handleResetFilters}
-                className="text-xs font-bold text-[#a90900] hover:underline flex items-center gap-1 ml-1 cursor-pointer"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>Xóa tất cả bộ lọc</span>
-              </button>
-            )}
-          </div>
-
-          {/* Sort Dropdown */}
-          <div className="flex items-center gap-2 self-end sm:self-auto flex-shrink-0">
-            <span className="text-xs text-slate-500 font-medium">Sắp xếp:</span>
-            <div className="relative">
-              <select
-                value={sortBy}
-                onChange={(e) => {
-                  setSortBy(e.target.value);
-                  setCurrentPage(0);
-                }}
-                className="appearance-none bg-[#eff4ff] text-slate-700 text-xs font-semibold pl-3 pr-8 py-2 rounded-lg border border-[#dce9ff] focus:outline-none cursor-pointer"
-              >
-                <option value="newest">Mới nhất</option>
-                <option value="price-asc">Giá: Thấp đến cao</option>
-                <option value="price-desc">Giá: Cao đến thấp</option>
-                <option value="popular">Bán chạy nhất</option>
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-2.5 text-slate-500 pointer-events-none" />
+              ))}
             </div>
           </div>
         </div>
@@ -450,7 +341,7 @@ export function SearchContent() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-5">
               {serverProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

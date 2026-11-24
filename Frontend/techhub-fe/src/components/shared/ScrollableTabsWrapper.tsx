@@ -63,7 +63,7 @@ export function ScrollableTabsWrapper({
         <button
           type="button"
           onClick={() => scrollBy(-150)}
-          className="sm:hidden absolute left-0 top-1/2 -translate-y-1/2 z-20 p-1 flex items-center justify-center text-[#0045cc] animate-pulse cursor-pointer pointer-events-auto"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-20 p-1 flex items-center justify-center bg-white/90 backdrop-blur-xs rounded-full shadow-xs text-[#0045cc] animate-pulse cursor-pointer pointer-events-auto"
           aria-label="Cuộn sang trái"
         >
           <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
@@ -83,7 +83,7 @@ export function ScrollableTabsWrapper({
         <button
           type="button"
           onClick={() => scrollBy(150)}
-          className="sm:hidden absolute right-0 top-1/2 -translate-y-1/2 z-20 p-1 flex items-center justify-center text-[#0045cc] animate-pulse cursor-pointer pointer-events-auto"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-20 p-1 flex items-center justify-center bg-white/90 backdrop-blur-xs rounded-full shadow-xs text-[#0045cc] animate-pulse cursor-pointer pointer-events-auto"
           aria-label="Cuộn sang phải"
         >
           <ChevronRight className="w-4 h-4 stroke-[2.5]" />

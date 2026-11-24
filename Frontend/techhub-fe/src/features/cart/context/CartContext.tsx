@@ -18,8 +18,7 @@ import {
   useDeleteCartItemMutation,
 } from "../hooks/useCartQueries";
 import { useAuth } from "@/features/auth/hooks/useAuth";
-import type { CartItem } from "@/mocks";
-import type { CartResponse } from "@/types/cart";
+import type { CartItem, CartResponse } from "@/types/cart";
 
 export interface AddToCartPayload {
   variantId: string;

@@ -68,3 +68,20 @@ export interface CartPreviewResponse {
     shopFinalAmount: number;
   }>;
 }
+
+export interface CartItem {
+  id: string;
+  storeId?: string;
+  storeName?: string;
+  title: string;
+  specs: string;
+  price: number;
+  quantity: number;
+  imageUrl: string;
+  stockQuantity?: number;
+  isOutOfStock?: boolean;
+  isAvailable?: boolean;
+  unavailableReason?: string | null;
+  variantId?: string;
+  productId?: string;
+}

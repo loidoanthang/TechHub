@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { Package } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 
 export interface ProductThumbnailProps {
   src?: string | null;
@@ -27,7 +27,7 @@ export function ProductThumbnail({
   return (
     <div
       className={cn(
-        "relative rounded-xl overflow-hidden bg-slate-50 shrink-0 border border-slate-200/80 flex items-center justify-center",
+        "relative rounded-xl overflow-hidden bg-white shrink-0 border border-slate-200/80 flex items-center justify-center",
         sizeClassName,
         className
       )}
@@ -43,9 +43,13 @@ export function ProductThumbnail({
           unoptimized
         />
       ) : (
-        <div className="flex flex-col items-center justify-center gap-0.5 text-slate-400">
-          <Package className="w-4 h-4 text-slate-300" />
-          <span className="text-[9px] font-semibold tracking-tight text-slate-400">TechHub</span>
+        <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 p-3 text-slate-400 bg-slate-50/70 select-none">
+          <div className="w-8 h-8 rounded-lg bg-white border border-slate-200/60 shadow-2xs flex items-center justify-center text-slate-400">
+            <ImageIcon className="w-4 h-4 stroke-[1.75]" />
+          </div>
+          <span className="text-[10px] font-medium text-slate-500 text-center tracking-tight leading-tight">
+            Chưa có ảnh
+          </span>
         </div>
       )}
     </div>

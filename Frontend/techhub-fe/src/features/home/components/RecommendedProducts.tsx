@@ -19,7 +19,7 @@ export function RecommendedProducts() {
 
   return (
     <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 w-full pb-14 sm:pb-20">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-8 gap-3 sm:gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between my-6 sm:mb-8 gap-3 sm:gap-4">
         <div>
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#0b1c30] tracking-tight font-[family-name:var(--font-heading)]">
             Recommended for You
