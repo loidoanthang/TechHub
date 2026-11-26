@@ -62,7 +62,7 @@ export function ShopProfileView({ sellerName }: ShopProfileViewProps) {
   }
 
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-8 flex flex-col gap-8 w-full">
       {/* 1. Header Banner & Identity */}
       <ShopHeaderBanner shop={shop} productCount={productsData?.totalElements ?? 0} />
 
@@ -71,6 +71,6 @@ export function ShopProfileView({ sellerName }: ShopProfileViewProps) {
 
       {/* 3. Shop Products Grid & Filters */}
       <ShopProductsGrid shopId={shop.id} shopName={shop.name} />
-    </main>
+    </div>
   );
 }

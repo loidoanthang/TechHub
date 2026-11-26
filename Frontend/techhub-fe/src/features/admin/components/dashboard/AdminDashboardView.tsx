@@ -410,25 +410,25 @@ export function AdminDashboardView() {
 
               <div className="flex flex-col gap-2 text-xs pt-1">
                 <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                  <span className="text-slate-600">Shop đang hoạt động (ACTIVE)</span>
+                  <span className="text-slate-600">Shop đang hoạt động</span>
                   <span className="font-bold text-emerald-700 font-mono">
                     {metrics.growthMetrics.totalActiveShops}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                  <span className="text-slate-600">Shop đang tạm nghỉ (PAUSED)</span>
+                  <span className="text-slate-600">Shop đang tạm nghỉ</span>
                   <span className="font-bold text-amber-600 font-mono">
                     {metrics.growthMetrics.totalPausedShops}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-100">
-                  <span className="text-slate-600">Shop bị đình chỉ (SUSPENDED)</span>
+                  <span className="text-slate-600">Shop bị đình chỉ</span>
                   <span className="font-bold text-orange-600 font-mono">
                     {metrics.growthMetrics.totalSuspendedShops}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-slate-600">Shop bị cấm vĩnh viễn (BANNED)</span>
+                  <span className="text-slate-600">Shop bị cấm vĩnh viễn</span>
                   <span className="font-bold text-rose-600 font-mono">
                     {metrics.growthMetrics.totalBannedShops}
                   </span>

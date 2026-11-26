@@ -228,7 +228,7 @@ export function ShippingOptionsTab() {
                   className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 hover:bg-[#eff4ff] hover:text-[#0045cc] text-slate-700 transition-colors border border-slate-200"
                 >
                   <span>{preset.label}</span>
-                  <span className="text-[9px] text-slate-400 ml-1">({preset.desc})</span>
+                  <span className="text-[11px] text-slate-400 ml-1">({preset.desc})</span>
                 </button>
               ))}
             </div>

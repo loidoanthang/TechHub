@@ -30,6 +30,27 @@ const ORDER_STATUS_TABS: { id: "" | OrderStatus; label: string }[] = [
   { id: "CANCELLED", label: "Đã hủy" },
 ];
 
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  PENDING_PAYMENT: "Chờ thanh toán",
+  PENDING_CONFIRMATION: "Chờ xác nhận",
+  CONFIRMED: "Đã xác nhận",
+  PREPARING: "Đang chuẩn bị",
+  WAITING_FOR_PICKUP: "Chờ lấy hàng",
+  SHIPPING: "Đang giao",
+  DELIVERED: "Đã giao",
+  COMPLETED: "Hoàn thành",
+  RETURN_REQUESTED: "Khiếu nại/Trả hàng",
+  REFUNDED: "Đã hoàn tiền",
+  CANCELLED: "Đã hủy",
+};
+
+const PAYMENT_STATUS_LABELS: Record<string, string> = {
+  PAID: "Đã thanh toán",
+  PENDING: "Chờ thanh toán",
+  FAILED: "Thất bại",
+  REFUNDED: "Đã hoàn tiền",
+};
+
 export function AdminOrdersView() {
   const [statusFilter, setStatusFilter] = useState<"" | OrderStatus>("");
   const [keyword, setKeyword] = useState("");
@@ -94,8 +115,8 @@ export function AdminOrdersView() {
 
       {/* Filter Bar */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-2xs flex flex-col gap-3">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 pb-2 border-b border-slate-100">
-          <ScrollableTabsWrapper className="w-full sm:w-auto">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 pb-2 border-b border-slate-100">
+          <ScrollableTabsWrapper className="w-full min-w-0 lg:flex-1">
             <div
               role="tablist"
               aria-label="Lọc đơn hàng theo trạng thái"
@@ -131,7 +152,7 @@ export function AdminOrdersView() {
             totalPages={totalPages}
             onPageChange={setPage}
             isLoading={isFetching}
-            className="self-end sm:self-auto"
+            className="self-end lg:self-auto shrink-0"
           />
         </div>
 
@@ -226,13 +247,13 @@ export function AdminOrdersView() {
             <table className="w-full min-w-[860px] text-left text-xs border-collapse table-fixed">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
                 <tr>
-                  <th className="py-2.5 px-4 w-[18%]">Mã đơn / Ngày</th>
-                  <th className="py-2.5 px-3 w-[18%]">Gian hàng</th>
-                  <th className="py-2.5 px-3 w-[18%]">Người mua</th>
-                  <th className="py-2.5 px-3 w-[14%] text-right">Tổng thanh toán</th>
+                  <th className="py-2.5 px-4 w-[16%]">Mã đơn / Ngày</th>
+                  <th className="py-2.5 px-3 w-[17%]">Gian hàng</th>
+                  <th className="py-2.5 px-3 w-[17%]">Người mua</th>
+                  <th className="py-2.5 px-3 w-[13%] text-right">Tổng thanh toán</th>
                   <th className="py-2.5 px-3 w-[12%] text-right">Hoa hồng</th>
-                  <th className="py-2.5 px-2 w-[10%] text-center">Trạng thái</th>
-                  <th className="py-2.5 px-4 w-[10%] text-right">Chi tiết</th>
+                  <th className="py-2.5 px-2 w-[14%] text-center">Trạng thái</th>
+                  <th className="py-2.5 px-4 w-[11%] text-right">Chi tiết</th>
                 </tr>
               </thead>
               <tbody
@@ -263,7 +284,7 @@ export function AdminOrdersView() {
                         {o.buyer.buyerName}
                       </p>
                       <p className="text-[10px] text-slate-600 truncate">
-                        {o.paymentMethodName} • {o.paymentStatus}
+                        {o.paymentMethodName} • {PAYMENT_STATUS_LABELS[o.paymentStatus] || o.paymentStatus}
                       </p>
                     </td>
                     <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">
@@ -274,7 +295,7 @@ export function AdminOrdersView() {
                     </td>
                     <td className="py-2 px-2 text-center">
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                        className={`inline-block whitespace-nowrap px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
                           o.status === "COMPLETED"
                             ? "bg-emerald-100 text-emerald-700"
                             : o.status === "CANCELLED" || o.status === "REFUNDED"
@@ -282,14 +303,14 @@ export function AdminOrdersView() {
                             : "bg-blue-100 text-[#0045cc]"
                         }`}
                       >
-                        {o.status}
+                        {ORDER_STATUS_LABELS[o.status] || o.status}
                       </span>
                     </td>
                     <td className="py-2 px-4 text-right">
                       <button
                         type="button"
                         onClick={() => setSelectedOrderId(o.orderId)}
-                        className="px-2.5 py-1.5 rounded-xl bg-[#eff4ff] hover:bg-[#0045cc] text-[#0045cc] hover:text-white text-xs font-bold inline-flex items-center gap-1 transition-colors duration-150 cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl bg-[#eff4ff] hover:bg-[#0045cc] text-[#0045cc] hover:text-white text-xs font-bold inline-flex items-center gap-1 whitespace-nowrap transition-colors duration-150 cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>Xem</span>

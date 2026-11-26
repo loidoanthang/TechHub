@@ -2,8 +2,8 @@ import { OrdersListView } from "@/features/account/components/OrdersListView";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "My Purchases & Orders | TechHub Marketplace",
-  description: "Track your orders, view order history, and monitor component delivery milestones on TechHub.",
+  title: "Đơn mua của tôi | TechHub Marketplace",
+  description: "Theo dõi trạng thái đơn hàng, lịch sử mua sắm và chi tiết giao nhận trên TechHub.",
 };
 
 export default function OrdersPage() {

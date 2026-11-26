@@ -17,7 +17,13 @@ function getStatusBadge(status: string) {
     case "DELIVERED":
       return (
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-          Completed
+          Hoàn thành
+        </span>
+      );
+    case "CONFIRMED":
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+          Đã xác nhận
         </span>
       );
     case "SHIPPING":
@@ -25,20 +31,20 @@ function getStatusBadge(status: string) {
     case "PREPARING":
       return (
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-[#0045cc] border border-blue-200">
-          Processing
+          Đang xử lý
         </span>
       );
     case "PENDING_CONFIRMATION":
       return (
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-          Pending
+          Chờ xác nhận
         </span>
       );
     case "CANCELLED":
     case "REFUNDED":
       return (
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-red-50 text-red-600 border border-red-200">
-          Cancelled
+          Đã hủy
         </span>
       );
     default:

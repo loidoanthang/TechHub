@@ -3,6 +3,7 @@
 import React from "react";
 import type { CategorySummaryResponse } from "@/types/category";
 import { FolderTree, Sparkles, Tag, FileText } from "lucide-react";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 
 interface ProductBasicInfoCardProps {
   name: string;
@@ -134,23 +135,19 @@ export function ProductBasicInfoCard({
               Ngành hàng / Danh mục linh kiện <span className="text-rose-500">*</span>
             </label>
 
-            <div className="relative">
-              <select
-                value={categoryId}
-                onChange={(e) => onCategoryChange(e.target.value)}
-                className={`w-full h-10 pl-3.5 pr-8 rounded-xl bg-slate-50/60 border text-xs text-slate-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] appearance-none cursor-pointer transition-all ${
-                  errors.categoryId ? "border-rose-300 bg-rose-50/30" : "border-slate-200"
-                }`}
-              >
-                <option value="">-- Chọn danh mục linh kiện thiết bị --</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              <FolderTree className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
-            </div>
+            <SelectDropdown
+              value={categoryId}
+              onChange={onCategoryChange}
+              ariaLabel="Ngành hàng / Danh mục linh kiện"
+              leadingIcon={<FolderTree className="w-4 h-4 text-slate-400" />}
+              buttonClassName={`h-10 px-3.5 rounded-xl bg-slate-50/60 border text-xs text-slate-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] transition-all ${
+                errors.categoryId ? "border-rose-300 bg-rose-50/30" : "border-slate-200"
+              }`}
+              options={[
+                { value: "", label: "-- Chọn danh mục linh kiện thiết bị --" },
+                ...categories.map((c) => ({ value: c.id, label: c.name })),
+              ]}
+            />
 
             {errors.categoryId ? (
               <p className="text-[11px] text-rose-600 font-medium">{errors.categoryId}</p>

@@ -5,6 +5,20 @@ import { Eye, Store, User, CreditCard } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import type { AdminOrderResponse } from "@/types/admin";
 
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  PENDING_PAYMENT: "Chờ thanh toán",
+  PENDING_CONFIRMATION: "Chờ xác nhận",
+  CONFIRMED: "Đã xác nhận",
+  PREPARING: "Đang chuẩn bị",
+  WAITING_FOR_PICKUP: "Chờ lấy hàng",
+  SHIPPING: "Đang giao",
+  DELIVERED: "Đã giao",
+  COMPLETED: "Hoàn thành",
+  RETURN_REQUESTED: "Khiếu nại/Trả hàng",
+  REFUNDED: "Đã hoàn tiền",
+  CANCELLED: "Đã hủy",
+};
+
 interface AdminOrderMobileCardProps {
   order: AdminOrderResponse;
   onViewDetails: (orderId: string) => void;
@@ -68,7 +82,7 @@ export function AdminOrderMobileCard({
             order.status
           )}`}
         >
-          {order.status}
+          {ORDER_STATUS_LABELS[order.status] || order.status}
         </span>
       </div>
 

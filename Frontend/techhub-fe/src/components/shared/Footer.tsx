@@ -21,80 +21,80 @@ export function Footer() {
             </span>
           </div>
           <p className="text-sm text-[#434656] max-w-sm leading-relaxed">
-            The verified multi-vendor marketplace engineered for technical transparency, certified components, and enthusiast consumer electronics.
+            Sàn thương mại điện tử đa nhà bán chuyên sâu thiết bị công nghệ, linh kiện chính hãng và enthusiast gear.
           </p>
         </div>
 
         <div className="flex flex-col gap-2.5 text-xs">
           <h5 className="font-bold text-sm text-[#0b1c30] mb-1 font-[family-name:var(--font-heading)]">
-            Enthusiast Gear
+            Thiết bị công nghệ
           </h5>
           <Link href="/products?category=keyboards" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Custom Keyboards
+            Bàn phím cơ Custom
           </Link>
           <Link href="/products?category=displays" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            High-Refresh Displays
+            Màn hình tần số quét cao
           </Link>
           <Link href="/products?category=laptops" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Workstations & Laptops
+            Laptop &amp; Workstation
           </Link>
           <Link href="/products?category=audio" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Audiophile DACs
+            DAC &amp; Âm thanh Hi-Fi
           </Link>
           <Link href="/products?category=cooling" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Thermal Solutions
+            Giải pháp tản nhiệt
           </Link>
         </div>
 
         <div className="flex flex-col gap-2.5 text-xs">
           <h5 className="font-bold text-sm text-[#0b1c30] mb-1 font-[family-name:var(--font-heading)]">
-            Vendor Ecosystem
+            Hệ sinh thái Nhà bán
           </h5>
           <Link href="/seller/register" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Sell on TechHub
+            Bán hàng cùng TechHub
           </Link>
           <Link href="/seller/dashboard" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Merchant Dashboard
+            Kênh Người Bán
           </Link>
           <Link href="#" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Fulfillment by TechHub
+            Vận hành bởi TechHub
           </Link>
           <Link href="#" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Authenticity Verification
+            Kiểm định chính hãng
           </Link>
           <Link href="#" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Vendor Terms
+            Điều khoản Nhà bán
           </Link>
         </div>
 
         <div className="flex flex-col gap-2.5 text-xs">
           <h5 className="font-bold text-sm text-[#0b1c30] mb-1 font-[family-name:var(--font-heading)]">
-            Client Support
+            Hỗ trợ khách hàng
           </h5>
           <Link href="/account/orders" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Order Tracking
+            Theo dõi đơn hàng
           </Link>
           <Link href="#" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Buyer Protection Escrow
+            Bảo vệ người mua
           </Link>
           <Link href="#" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Returns & Hardware RMA
+            Đổi trả &amp; Bảo hành
           </Link>
           <Link href="#" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Dispute Resolution
+            Giải quyết khiếu nại
           </Link>
           <Link href="#" className="text-[#434656] hover:text-[#0b1c30] transition-colors">
-            Security & Compliance
+            Bảo mật &amp; Tuân thủ
           </Link>
         </div>
       </div>
 
       <div className="bg-[#e5eeff] py-4">
         <div className="max-w-6xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-[#434656]">
-          <span>© 2026 TechHub Global Marketplace Inc. All rights reserved.</span>
+          <span>© 2026 TechHub Marketplace. Bảo lưu mọi quyền.</span>
           <div className="flex items-center gap-6">
-            <Link href="#" className="hover:text-[#0b1c30] transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-[#0b1c30] transition-colors">Terms of Service</Link>
+            <Link href="#" className="hover:text-[#0b1c30] transition-colors">Chính sách bảo mật</Link>
+            <Link href="#" className="hover:text-[#0b1c30] transition-colors">Điều khoản sử dụng</Link>
           </div>
         </div>
       </div>

@@ -2,8 +2,8 @@ import { RegisterForm } from "@/features/auth/components/RegisterForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Create Account | TechHub Marketplace",
-  description: "Join TechHub to explore tech gear and exclusive enthusiast deals.",
+  title: "Đăng ký tài khoản | TechHub Marketplace",
+  description: "Tạo tài khoản TechHub để khám phá thiết bị công nghệ và nhận ưu đãi chính hãng.",
 };
 
 export default function RegisterPage() {

@@ -20,6 +20,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useAdminDialogA11y } from "../../hooks/useAdminDialogA11y";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import {
   useAdminVouchersQuery,
   useUpdatePlatformVoucherStatusMutation,
@@ -315,34 +316,40 @@ export function AdminFinanceView() {
           </div>
 
           {activeTab === "VOUCHERS" ? (
-            <select
+            <SelectDropdown
               value={voucherTypeFilter}
-              aria-label="Lọc theo loại voucher"
-              onChange={(e) => {
-                setVoucherTypeFilter(e.target.value as "" | VoucherType);
+              ariaLabel="Lọc theo loại voucher"
+              onChange={(val) => {
+                setVoucherTypeFilter(val as "" | VoucherType);
                 setPage(0);
               }}
-              className="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white sm:w-52"
-            >
-              <option value="PLATFORM">Voucher Toàn Sàn (PLATFORM)</option>
-              <option value="SHOP">Voucher của Shop (SHOP)</option>
-              <option value="">Tất cả Voucher</option>
-            </select>
+              className="w-full sm:w-52"
+              align="right"
+              buttonClassName="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary"
+              options={[
+                { value: "PLATFORM", label: "Voucher Toàn Sàn" },
+                { value: "SHOP", label: "Voucher của Shop" },
+                { value: "", label: "Tất cả Voucher" },
+              ]}
+            />
           ) : (
-            <select
+            <SelectDropdown
               value={payoutStatusFilter}
-              aria-label="Lọc theo trạng thái giải ngân"
-              onChange={(e) => {
-                setPayoutStatusFilter(e.target.value as "" | PayoutStatus);
+              ariaLabel="Lọc theo trạng thái giải ngân"
+              onChange={(val) => {
+                setPayoutStatusFilter(val as "" | PayoutStatus);
                 setPage(0);
               }}
-              className="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white sm:w-52"
-            >
-              <option value="PENDING">Chờ duyệt giải ngân (PENDING)</option>
-              <option value="COMPLETED">Đã giải ngân (COMPLETED)</option>
-              <option value="REJECTED">Đã từ chối (REJECTED)</option>
-              <option value="">Tất cả trạng thái</option>
-            </select>
+              className="w-full sm:w-52"
+              align="right"
+              buttonClassName="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary"
+              options={[
+                { value: "PENDING", label: "Chờ duyệt giải ngân (PENDING)" },
+                { value: "COMPLETED", label: "Đã giải ngân (COMPLETED)" },
+                { value: "REJECTED", label: "Đã từ chối (REJECTED)" },
+                { value: "", label: "Tất cả trạng thái" },
+              ]}
+            />
           )}
         </div>
       </div>

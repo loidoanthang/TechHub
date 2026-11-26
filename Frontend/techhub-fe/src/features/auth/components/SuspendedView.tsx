@@ -13,8 +13,8 @@ export function SuspendedView() {
 
   const info = {
     accountEmail: "support@techhub.market",
-    detectionFlag: "Security Policy Flag / Admin Lock",
-    status: "Suspended",
+    detectionFlag: "Vi phạm chính sách bảo mật / Khóa bởi Quản trị viên",
+    status: "Tạm khóa",
     supportEmail: "support@techhub.market",
     referenceCode: "TH-SECURITY",
   };
@@ -41,30 +41,30 @@ export function SuspendedView() {
 
         {/* Title */}
         <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight mb-2">
-          Account Suspended
+          Tài khoản bị tạm khóa
         </h1>
 
         {/* Description */}
         <p className="text-sm text-[#434656] max-w-[380px] mx-auto mb-6 leading-relaxed">
-          Your account has been temporarily locked or suspended due to security policy violations or administrative action. Please contact our support team for assistance.
+          Tài khoản của bạn đã bị tạm khóa do vi phạm chính sách bảo mật hoặc theo quyết định quản trị. Vui lòng liên hệ bộ phận hỗ trợ để được kiểm tra.
         </p>
 
         {/* Technical Status Strip */}
-        <div className="w-full bg-[#eff4ff]/70 rounded-xl p-4 mb-6 flex items-center justify-between text-left">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="w-full bg-[#eff4ff]/70 rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
+          <div className="flex items-start sm:items-center gap-3 min-w-0">
             <div className="w-8 h-8 rounded-lg bg-[#d3e4fe] flex items-center justify-center text-[#0045cc] shrink-0">
               <ShieldAlert className="w-4 h-4" />
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-bold uppercase tracking-wider text-[#737688]">
-                Detection Flag
+                Lý do ghi nhận
               </p>
-              <p className="text-sm font-semibold text-[#0b1c30] truncate">
+              <p className="text-sm font-semibold text-[#0b1c30] leading-snug">
                 {info.detectionFlag}
               </p>
             </div>
           </div>
-          <div className="text-right shrink-0">
+          <div className="self-start sm:self-center shrink-0">
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#ffdad4] text-[#a90900] text-[11px] font-bold uppercase tracking-wide">
               {info.status}
             </span>
@@ -74,11 +74,11 @@ export function SuspendedView() {
         {/* Action Buttons */}
         <div className="w-full flex flex-col gap-3">
           <a
-            href={`mailto:${info.supportEmail}?subject=Account%20Suspension%20Appeal%20-%20Ref%20${info.referenceCode}`}
+            href={`mailto:${info.supportEmail}?subject=Khieu%20nai%20tam%20khoa%20tai%20khoan%20-%20Ref%20${info.referenceCode}`}
             className="w-full h-11 px-5 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-semibold flex items-center justify-center gap-2 shadow-md shadow-[#0045cc]/20 transition-all active:scale-[0.98]"
           >
             <Headphones className="w-4 h-4" />
-            <span>Contact Support</span>
+            <span>Liên hệ hỗ trợ</span>
           </a>
 
           <Link
@@ -86,7 +86,7 @@ export function SuspendedView() {
             className="w-full h-10 rounded-xl bg-transparent hover:bg-[#eff4ff] text-[#434656] hover:text-[#0b1c30] text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to Login</span>
+            <span>Quay lại đăng nhập</span>
           </Link>
         </div>
       </div>

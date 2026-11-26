@@ -135,10 +135,10 @@ export function ResetPasswordForm() {
             <KeyRound className="w-6 h-6" />
           </div>
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
-            Reset password
+            Đặt lại mật khẩu
           </h1>
           <p className="text-sm text-[#434656] mt-1.5 max-w-[340px]">
-            Create a new strong password for your TechHub marketplace account.
+            Tạo mật khẩu mới đủ mạnh cho tài khoản TechHub của bạn.
           </p>
         </div>
 
@@ -179,12 +179,14 @@ export function ResetPasswordForm() {
                 htmlFor="otp-code"
                 className="text-xs font-semibold text-[#0b1c30]"
               >
-                6-Digit Verification Code (OTP)
+                Mã xác thực 6 chữ số (OTP)
               </label>
               <input
                 id="otp-code"
                 type="text"
                 maxLength={6}
+                aria-invalid={Boolean(errors.token)}
+                aria-describedby={errors.token ? "reset-otp-error" : undefined}
                 {...register("token")}
                 placeholder="123456"
                 className={`w-full h-11 px-4 tracking-widest font-mono text-center bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
@@ -194,7 +196,7 @@ export function ResetPasswordForm() {
                 }`}
               />
               {errors.token && (
-                <p className="text-xs text-rose-500 font-medium text-center">{errors.token.message}</p>
+                <p id="reset-otp-error" className="text-xs text-rose-500 font-medium text-center">{errors.token.message}</p>
               )}
             </div>
           )}
@@ -205,14 +207,16 @@ export function ResetPasswordForm() {
               htmlFor="new-password"
               className="text-xs font-semibold text-[#0b1c30]"
             >
-              New password
+              Mật khẩu mới
             </label>
             <div className="relative flex items-center">
               <input
                 id="new-password"
                 type={showPassword ? "text" : "password"}
+                aria-invalid={Boolean(errors.newPassword)}
+                aria-describedby={errors.newPassword ? "reset-password-error" : undefined}
                 {...register("newPassword")}
-                placeholder="Enter new password"
+                placeholder="Nhập mật khẩu mới"
                 className={`w-full h-11 pl-4 pr-11 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
                   errors.newPassword
                     ? "border border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
@@ -222,7 +226,7 @@ export function ResetPasswordForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label="Toggle password visibility"
+                aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                 className="absolute right-3.5 text-[#737688] hover:text-[#0b1c30] p-1 rounded-lg transition-colors cursor-pointer"
               >
                 {showPassword ? (
@@ -233,7 +237,7 @@ export function ResetPasswordForm() {
               </button>
             </div>
             {errors.newPassword && (
-              <p className="text-xs text-rose-500 font-medium">{errors.newPassword.message}</p>
+              <p id="reset-password-error" className="text-xs text-rose-500 font-medium">{errors.newPassword.message}</p>
             )}
           </div>
 
@@ -244,7 +248,7 @@ export function ResetPasswordForm() {
                 htmlFor="confirm-password"
                 className="text-xs font-semibold text-[#0b1c30]"
               >
-                Confirm new password
+                Xác nhận mật khẩu mới
               </label>
               {confirmPasswordVal.length > 0 && (
                 <span
@@ -252,7 +256,7 @@ export function ResetPasswordForm() {
                     isMatch ? "text-emerald-600" : "text-rose-500"
                   }`}
                 >
-                  {isMatch ? "Matches" : "Doesn't match"}
+                  {isMatch ? "Khớp mật khẩu" : "Chưa khớp"}
                 </span>
               )}
             </div>
@@ -260,8 +264,10 @@ export function ResetPasswordForm() {
               <input
                 id="confirm-password"
                 type={showConfirmPassword ? "text" : "password"}
+                aria-invalid={Boolean(errors.confirmPassword)}
+                aria-describedby={errors.confirmPassword ? "reset-confirm-error" : undefined}
                 {...register("confirmPassword")}
-                placeholder="Confirm new password"
+                placeholder="Nhập lại mật khẩu mới"
                 className={`w-full h-11 pl-4 pr-11 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
                   errors.confirmPassword
                     ? "border border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
@@ -271,7 +277,7 @@ export function ResetPasswordForm() {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                aria-label="Toggle password confirmation visibility"
+                aria-label={showConfirmPassword ? "Ẩn xác nhận mật khẩu" : "Hiện xác nhận mật khẩu"}
                 className="absolute right-3.5 text-[#737688] hover:text-[#0b1c30] p-1 rounded-lg transition-colors cursor-pointer"
               >
                 {showConfirmPassword ? (
@@ -282,14 +288,14 @@ export function ResetPasswordForm() {
               </button>
             </div>
             {errors.confirmPassword && (
-              <p className="text-xs text-rose-500 font-medium">{errors.confirmPassword.message}</p>
+              <p id="reset-confirm-error" className="text-xs text-rose-500 font-medium">{errors.confirmPassword.message}</p>
             )}
           </div>
 
           {/* Requirements Checklist */}
           <div className="bg-[#eff4ff]/60 rounded-xl p-3.5 flex flex-col gap-2 border border-slate-100">
             <p className="text-[11px] font-bold text-[#737688] uppercase tracking-wider">
-              Password Requirements
+              Yêu cầu mật khẩu
             </p>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div
@@ -298,7 +304,7 @@ export function ResetPasswordForm() {
                 }`}
               >
                 <Check className="w-3.5 h-3.5" />
-                <span>At least 8 chars</span>
+                <span>Tối thiểu 8 ký tự</span>
               </div>
               <div
                 className={`flex items-center gap-1.5 ${
@@ -306,7 +312,7 @@ export function ResetPasswordForm() {
                 }`}
               >
                 <Check className="w-3.5 h-3.5" />
-                <span>One uppercase</span>
+                <span>1 chữ in hoa</span>
               </div>
               <div
                 className={`flex items-center gap-1.5 ${
@@ -314,7 +320,7 @@ export function ResetPasswordForm() {
                 }`}
               >
                 <Check className="w-3.5 h-3.5" />
-                <span>One number</span>
+                <span>1 chữ số</span>
               </div>
               <div
                 className={`flex items-center gap-1.5 ${
@@ -322,7 +328,7 @@ export function ResetPasswordForm() {
                 }`}
               >
                 <Check className="w-3.5 h-3.5" />
-                <span>One symbol</span>
+                <span>1 ký tự đặc biệt</span>
               </div>
             </div>
           </div>
@@ -336,16 +342,16 @@ export function ResetPasswordForm() {
             {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Updating password...</span>
+                <span>Đang cập nhật mật khẩu...</span>
               </>
             ) : isSuccess ? (
               <>
                 <CheckCircle2 className="w-5 h-5 text-emerald-300" />
-                <span>Password Reset Complete!</span>
+                <span>Đặt lại mật khẩu thành công!</span>
               </>
             ) : (
               <>
-                <span>Reset password</span>
+                <span>Đặt lại mật khẩu</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -357,7 +363,7 @@ export function ResetPasswordForm() {
             href={ROUTES.LOGIN}
             className="text-xs font-semibold text-[#0045cc] hover:underline"
           >
-            Back to login
+            Quay lại đăng nhập
           </Link>
         </div>
       </div>

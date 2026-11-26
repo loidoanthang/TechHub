@@ -3,6 +3,7 @@
 import React from "react";
 import type { CategoryAttributeResponse } from "@/types/sellerProduct";
 import { Cpu, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 
 interface ProductCategorySpecsCardProps {
   categoryId: string;
@@ -108,20 +109,18 @@ export function ProductCategorySpecsCard({
 
                   {/* Render based on CategoryAttributeDataType */}
                   {attr.dataType === "SELECT" && attr.options && attr.options.length > 0 ? (
-                    <select
+                    <SelectDropdown
                       value={(currentValue as string) || ""}
-                      onChange={(e) => onChange(attr.name, e.target.value)}
-                      className={`w-full h-10 px-3 rounded-xl bg-slate-50/60 border text-xs text-slate-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] transition-all cursor-pointer ${
+                      onChange={(val) => onChange(attr.name, val)}
+                      ariaLabel={attr.name}
+                      buttonClassName={`h-10 px-3 rounded-xl bg-slate-50/60 border text-xs text-slate-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] transition-all ${
                         fieldError ? "border-rose-300 bg-rose-50/30" : "border-slate-200"
                       }`}
-                    >
-                      <option value="">-- Chọn {attr.name} --</option>
-                      {attr.options.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
+                      options={[
+                        { value: "", label: `-- Chọn ${attr.name} --` },
+                        ...attr.options.map((opt) => ({ value: opt, label: opt })),
+                      ]}
+                    />
                   ) : attr.dataType === "NUMBER" ? (
                     <input
                       type="number"

@@ -18,6 +18,7 @@ import { ProductModerationDrawer } from "./ProductModerationDrawer";
 import { AdminTablePagination } from "../shared/AdminTablePagination";
 import { AdminProductMobileCard } from "./AdminProductMobileCard";
 import { ScrollableTabsWrapper } from "@/components/shared/ScrollableTabsWrapper";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import { formatPrice, getThumbnailUrl } from "@/lib/utils";
 import type { ProductApprovalStatus } from "@/types/enums";
 
@@ -162,22 +163,24 @@ export function AdminProductsView() {
             />
           </div>
 
-          <select
+          <SelectDropdown
             value={categoryId}
-            aria-label="Lọc theo danh mục sản phẩm"
-            onChange={(e) => {
-              setCategoryId(e.target.value);
+            ariaLabel="Lọc theo danh mục sản phẩm"
+            onChange={(val) => {
+              setCategoryId(val);
               setPage(0);
             }}
-            className="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary sm:w-56"
-          >
-            <option value="">Tất cả Danh mục</option>
-            {(categoriesData?.content || []).map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+            className="w-full sm:w-56"
+            align="right"
+            buttonClassName="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary"
+            options={[
+              { value: "", label: "Tất cả Danh mục" },
+              ...(categoriesData?.content || []).map((cat) => ({
+                value: cat.id,
+                label: cat.name,
+              })),
+            ]}
+          />
         </div>
       </div>
 
@@ -329,7 +332,7 @@ export function AdminProductsView() {
                             : "Nháp"}
                         </span>
                         {p.isSuspended && (
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-600 text-white">
+                          <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-rose-600 text-white">
                             ĐÌNH CHỈ
                           </span>
                         )}
@@ -340,7 +343,7 @@ export function AdminProductsView() {
                       <button
                         type="button"
                         onClick={() => setSelectedProductId(p.id)}
-                        className="px-2.5 py-1.5 rounded-xl bg-[#eff4ff] hover:bg-[#0045cc] text-[#0045cc] hover:text-white text-xs font-bold transition-colors duration-150 inline-flex items-center gap-1 cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-xl bg-[#eff4ff] hover:bg-[#0045cc] text-[#0045cc] hover:text-white text-xs font-bold transition-colors duration-150 inline-flex items-center gap-1 whitespace-nowrap cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>Kiểm tra</span>

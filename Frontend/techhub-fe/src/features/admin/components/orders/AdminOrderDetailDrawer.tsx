@@ -26,6 +26,7 @@ import {
 } from "../../schemas/moderationSchema";
 import { formatPrice, getThumbnailUrl } from "@/lib/utils";
 import { ADMIN_CANCELLATION_REASONS } from "@/lib/constants";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 
 interface AdminOrderDetailDrawerProps {
   orderId: string | null;
@@ -57,6 +58,8 @@ export function AdminOrderDetailDrawer({
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<AdminCancelOrderFormValues>({
     resolver: zodResolver(adminCancelOrderSchema),
@@ -386,16 +389,22 @@ export function AdminOrderDetailDrawer({
                     <label className="text-xs font-bold text-rose-900">
                       Lý do Quản trị viên hủy đơn (Bắt buộc) *
                     </label>
-                    <select
-                      {...register("reasonCode")}
-                      className="w-full p-2.5 rounded-xl border border-rose-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-rose-500 font-medium"
-                    >
-                      {ADMIN_CANCELLATION_REASONS.map((reason) => (
-                        <option key={reason.code} value={reason.code}>
-                          {reason.label}
-                        </option>
-                      ))}
-                    </select>
+                    <SelectDropdown
+                      value={watch("reasonCode")}
+                      ariaLabel="Lý do Quản trị viên hủy đơn"
+                      onChange={(val) =>
+                        setValue(
+                          "reasonCode",
+                          val as AdminCancelOrderFormValues["reasonCode"],
+                          { shouldValidate: true }
+                        )
+                      }
+                      buttonClassName="h-10 px-3 rounded-xl border border-rose-300 bg-white text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-rose-500 font-medium"
+                      options={ADMIN_CANCELLATION_REASONS.map((reason) => ({
+                        value: reason.code,
+                        label: reason.label,
+                      }))}
+                    />
                     {errors.reasonCode && (
                       <p className="text-[11px] text-rose-600 font-medium">
                         {errors.reasonCode.message}

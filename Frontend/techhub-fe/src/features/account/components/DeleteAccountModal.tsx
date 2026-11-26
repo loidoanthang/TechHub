@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,7 @@ import {
 import { useDeleteAccountMutation } from "@/features/auth/api/useAuthMutations";
 import { clearTokens } from "@/lib/api/token";
 import { ROUTES } from "@/lib/constants";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import {
   deleteAccountSchema,
   type DeleteAccountFormData,
@@ -64,14 +65,23 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
     mode: "onTouched",
   });
 
-  if (!isOpen) return null;
-
   const handleClose = () => {
     reset();
     setServerError(null);
     setCustomReasonNote("");
     onClose();
   };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !deleteAccountMutation.isPending) handleClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  });
+
+  if (!isOpen) return null;
 
   const onSubmit = async (data: DeleteAccountFormData) => {
     setServerError(null);
@@ -140,6 +150,7 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
           </div>
           <button
             type="button"
+            aria-label="Đóng"
             onClick={handleClose}
             disabled={isPending}
             className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
@@ -178,18 +189,17 @@ export function DeleteAccountModal({ isOpen, onClose }: DeleteAccountModalProps)
             <label className="text-xs font-bold text-slate-700">
               Lý do bạn muốn rời bỏ TechHub? (Tùy chọn)
             </label>
-            <select
+            <SelectDropdown
               value={selectedReason}
-              onChange={(e) => setSelectedReason(e.target.value)}
+              onChange={setSelectedReason}
               disabled={isPending}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-colors"
-            >
-              {DELETE_REASONS.map((reason) => (
-                <option key={reason} value={reason}>
-                  {reason}
-                </option>
-              ))}
-            </select>
+              ariaLabel="Lý do muốn rời bỏ TechHub"
+              buttonClassName="h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-colors"
+              options={DELETE_REASONS.map((reason) => ({
+                value: reason,
+                label: reason,
+              }))}
+            />
           </div>
 
           {/* Optional Reason Details */}

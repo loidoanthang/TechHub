@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, X, RotateCcw, Plus } from "lucide-react";
 import { ROUTES } from "@/lib/constants";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import type { CategorySummaryResponse } from "@/types/category";
 import type { SellerProductSortBy, SortDirection } from "@/types/sellerProduct";
 
@@ -100,34 +101,38 @@ export function SellerProductsHeader({
 
         {/* Category filter dropdown */}
         <div className="w-full sm:w-48">
-          <select
+          <SelectDropdown
             value={selectedCategoryId || ""}
-            onChange={(e) => onCategoryChange(e.target.value || undefined)}
-            className="w-full h-10 px-3 bg-white text-xs font-medium text-slate-700 rounded-xl border border-slate-200 shadow-2xs focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 cursor-pointer"
-          >
-            <option value="">Tất cả danh mục</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+            onChange={(val) => onCategoryChange(val || undefined)}
+            ariaLabel="Lọc theo danh mục sản phẩm"
+            options={[
+              { value: "", label: "Tất cả danh mục" },
+              ...categories.map((cat) => ({ value: cat.id, label: cat.name })),
+            ]}
+          />
         </div>
 
         {/* Sort by dropdown */}
         <div className="w-full sm:w-52">
-          <select
+          <SelectDropdown
             value={currentSortVal}
-            onChange={handleSortSelect}
-            className="w-full h-10 px-3 bg-white text-xs font-medium text-slate-700 rounded-xl border border-slate-200 shadow-2xs focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 cursor-pointer"
-          >
-            <option value="createdAt:desc">Mới nhất (Ngày tạo)</option>
-            <option value="createdAt:asc">Cũ nhất (Ngày tạo)</option>
-            <option value="updatedAt:desc">Cập nhật gần nhất</option>
-            <option value="name:asc">Tên sản phẩm: A → Z</option>
-            <option value="name:desc">Tên sản phẩm: Z → A</option>
-            <option value="brandName:asc">Thương hiệu: A → Z</option>
-          </select>
+            onChange={(val) => {
+              const [sb, sd] = val.split(":") as [
+                SellerProductSortBy,
+                SortDirection,
+              ];
+              onSortChange(sb, sd);
+            }}
+            ariaLabel="Sắp xếp sản phẩm"
+            options={[
+              { value: "createdAt:desc", label: "Mới nhất (Ngày tạo)" },
+              { value: "createdAt:asc", label: "Cũ nhất (Ngày tạo)" },
+              { value: "updatedAt:desc", label: "Cập nhật gần nhất" },
+              { value: "name:asc", label: "Tên sản phẩm: A → Z" },
+              { value: "name:desc", label: "Tên sản phẩm: Z → A" },
+              { value: "brandName:asc", label: "Thương hiệu: A → Z" },
+            ]}
+          />
         </div>
 
         {/* Reset button */}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid } from "recharts";
 import {
   ChartContainer,
@@ -8,7 +8,6 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { MoreHorizontal } from "lucide-react";
 import type { DashboardPeriod } from "@/types/sellerDashboard";
 
 interface SalesDataPoint {
@@ -30,8 +29,8 @@ function generateTimelineData(
   totalRev = 0,
   totalOrd = 0
 ): SalesDataPoint[] {
-  const baseRev = totalRev > 0 ? totalRev : 50000000;
-  const baseOrd = totalOrd > 0 ? totalOrd : 120;
+  const baseRev = Math.max(0, totalRev);
+  const baseOrd = Math.max(0, totalOrd);
 
   switch (period) {
     case "TODAY": {
@@ -135,14 +134,6 @@ export function DashboardSalesOvertimeChart({
               Đơn hàng
             </span>
           </div>
-
-          <button
-            type="button"
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-            title="Tùy chọn hiển thị"
-          >
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
         </div>
       </div>
 
@@ -217,9 +208,9 @@ export function DashboardSalesOvertimeChart({
       </div>
 
       {/* Footer summary info */}
-      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-[#737688]">
+      <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#737688]">
         <span>Chỉ số tính trên các đơn thanh toán thành công</span>
-        <span className="font-semibold text-emerald-600">+12.4% so với chu kỳ trước</span>
+        <span className="text-[#434656] font-medium">Phân bổ theo kỳ đang chọn</span>
       </div>
     </div>
   );

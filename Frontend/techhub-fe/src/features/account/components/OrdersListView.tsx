@@ -32,14 +32,14 @@ import { CancelOrderModal } from "./CancelOrderModal";
 import { ReturnRefundModal } from "./ReturnRefundModal";
 
 const TABS: { label: string; status: OrderStatus | "ALL" }[] = [
-  { label: "All Orders", status: "ALL" },
-  { label: "To Pay", status: "PENDING_PAYMENT" },
-  { label: "To Confirm", status: "PENDING_CONFIRMATION" },
-  { label: "Processing", status: "CONFIRMED" },
-  { label: "Shipping", status: "SHIPPING" },
-  { label: "Delivered", status: "DELIVERED" },
-  { label: "Completed", status: "COMPLETED" },
-  { label: "Cancelled", status: "CANCELLED" },
+  { label: "Tất cả đơn", status: "ALL" },
+  { label: "Chờ thanh toán", status: "PENDING_PAYMENT" },
+  { label: "Chờ xác nhận", status: "PENDING_CONFIRMATION" },
+  { label: "Đang xử lý", status: "CONFIRMED" },
+  { label: "Đang giao", status: "SHIPPING" },
+  { label: "Đã giao", status: "DELIVERED" },
+  { label: "Hoàn thành", status: "COMPLETED" },
+  { label: "Đã hủy", status: "CANCELLED" },
 ];
 
 export function OrdersListView() {
@@ -117,10 +117,10 @@ export function OrdersListView() {
   const handleConfirmReceipt = async (orderId: string) => {
     try {
       await completeOrderMutation.mutateAsync(orderId);
-      showToast("Receipt confirmed! Escrow funds released to merchant.");
+      showToast("Đã xác nhận nhận hàng thành công!");
       refetch();
     } catch {
-      showToast("Failed to confirm receipt. Please try again.");
+      showToast("Không thể xác nhận nhận hàng. Vui lòng thử lại.");
     }
   };
 
@@ -144,22 +144,36 @@ export function OrdersListView() {
   const orders = pageData?.content || [];
 
   return (
-    <main className="w-full flex flex-col gap-6">
+    <div className="w-full flex flex-col gap-6">
       {/* Top Controls: Search Bar */}
       <form onSubmit={handleSearchSubmit} className="relative w-full">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search across all your orders by Order Number, Shop Name, or Item Name..."
-          className="w-full h-12 pl-11 pr-24 rounded-2xl bg-white border border-[#c3c5d9]/30 text-xs text-[#0b1c30] placeholder:text-[#737688] focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] transition-all shadow-sm"
+          placeholder="Tìm theo mã đơn hàng, tên Shop hoặc tên sản phẩm..."
+          aria-label="Tìm kiếm đơn hàng"
+          className="w-full h-12 pl-11 pr-28 rounded-2xl bg-white border border-[#c3c5d9]/30 text-xs text-[#0b1c30] placeholder:text-[#737688] focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] transition-all shadow-sm"
         />
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#737688]" />
+        {(searchQuery || debouncedKeyword) && (
+          <button
+            type="button"
+            aria-label="Xóa từ khóa tìm kiếm"
+            onClick={() => {
+              setSearchQuery("");
+              setDebouncedKeyword("");
+            }}
+            className="absolute right-24 top-1/2 -translate-y-1/2 p-1 rounded-full text-[#737688] hover:text-[#0b1c30] hover:bg-[#eff4ff] cursor-pointer"
+          >
+            <XCircle className="w-4 h-4" />
+          </button>
+        )}
         <button
           type="submit"
-          className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 rounded-xl bg-[#0045cc] text-white text-xs font-semibold hover:bg-[#0d5bff] transition-colors"
+          className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 rounded-xl bg-[#0045cc] text-white text-xs font-semibold hover:bg-[#0d5bff] transition-colors cursor-pointer"
         >
-          Search
+          Tìm
         </button>
       </form>
 
@@ -187,9 +201,18 @@ export function OrdersListView() {
       </ScrollableTabsWrapper>
 
       {error && (
-        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>Failed to fetch orders from server.</span>
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>Không thể tải danh sách đơn hàng từ máy chủ.</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="px-3 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-semibold transition-colors cursor-pointer"
+          >
+            Thử lại
+          </button>
         </div>
       )}
 
@@ -205,16 +228,16 @@ export function OrdersListView() {
               <Search className="w-7 h-7" />
             </div>
             <h3 className="font-heading font-bold text-base text-[#0b1c30]">
-              No Orders Found
+              Chưa có đơn hàng nào
             </h3>
             <p className="text-xs text-[#737688] max-w-sm">
-              We couldn&apos;t find any orders matching your criteria in this tab.
+              Không tìm thấy đơn hàng nào phù hợp trong mục này.
             </p>
             <Link
               href="/products"
               className="mt-2 px-5 py-2.5 rounded-xl bg-[#0045cc] text-white text-xs font-bold hover:bg-[#0d5bff] transition-colors"
             >
-              Explore Components
+              Khám phá sản phẩm
             </Link>
           </div>
         ) : (
@@ -344,7 +367,7 @@ export function OrdersListView() {
                             </span>
                           )}
                           <span className="text-[11px] text-[#737688]">
-                            Subtotal: {formatPrice(subtotal)}
+                            Tạm tính: {formatPrice(subtotal)}
                           </span>
                         </div>
                       </div>
@@ -354,15 +377,15 @@ export function OrdersListView() {
 
                 {/* Order Footer & Actions */}
                 <div className="bg-[#eff4ff]/20 p-5 border-t border-[#eff4ff] flex flex-col md:flex-row items-end md:items-center justify-between gap-4">
-                  <div className="flex items-center justify-end w-full md:w-auto gap-3 text-xs text-[#737688]">
-                    <span>Payment: <strong className="text-[#0b1c30] font-semibold">{order.paymentMethod}</strong></span>
+                  <div className="flex flex-wrap items-center justify-end w-full md:w-auto gap-2 sm:gap-3 text-xs text-[#737688]">
+                    <span>Thanh toán: <strong className="text-[#0b1c30] font-semibold">{order.paymentMethod}</strong></span>
                     <span>•</span>
-                    <span>Status: <strong className="text-[#0b1c30] font-semibold">{order.paymentStatus}</strong></span>
+                    <span>Trạng thái: <strong className="text-[#0b1c30] font-semibold">{order.paymentStatus}</strong></span>
                   </div>
 
                   <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3 w-full md:w-auto justify-end">
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-xs text-[#737688]">Order Total:</span>
+                      <span className="text-xs text-[#737688]">Tổng tiền:</span>
                       <span className="text-base font-bold text-[#0045cc]">
                         {formatPrice(order.totalAmount)}
                       </span>
@@ -374,7 +397,7 @@ export function OrdersListView() {
                         className="px-4 py-2 rounded-xl border border-[#c3c5d9]/40 hover:bg-[#eff4ff] text-[#0b1c30] text-xs font-semibold transition-colors flex items-center gap-1.5"
                       >
                         <Eye className="w-3.5 h-3.5 text-[#737688]" />
-                        <span>Details</span>
+                        <span>Chi tiết</span>
                       </Link>
 
                       {/* Pending payment: pay now */}
@@ -390,7 +413,7 @@ export function OrdersListView() {
                           ) : (
                             <CreditCard className="w-3.5 h-3.5" />
                           )}
-                          <span>{retryingOrderId === order.orderId ? "Connecting..." : "Pay Now"}</span>
+                          <span>{retryingOrderId === order.orderId ? "Đang kết nối..." : "Thanh toán ngay"}</span>
                         </button>
                       )}
 
@@ -404,7 +427,7 @@ export function OrdersListView() {
                             className="px-4 py-2 rounded-xl bg-[#006b5b] hover:bg-[#008b77] text-white text-xs font-semibold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                           >
                             <CheckCircle2 className="w-3.5 h-3.5" />
-                            <span>Confirm Receipt</span>
+                            <span>Đã nhận được hàng</span>
                           </button>
                           <button
                             type="button"
@@ -412,7 +435,7 @@ export function OrdersListView() {
                             className="px-4 py-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
-                            <span>Return / Refund</span>
+                            <span>Trả hàng / Hoàn tiền</span>
                           </button>
                         </>
                       )}
@@ -442,7 +465,7 @@ export function OrdersListView() {
                           className="px-4 py-2 rounded-xl border border-[#ba1a1a]/30 text-[#ba1a1a] hover:bg-[#ba1a1a]/10 text-xs font-semibold transition-colors cursor-pointer"
                         >
                           <XCircle className="w-3.5 h-3.5 inline mr-1" />
-                          {isPendingPayment ? "Cancel Order" : "Request Cancel"}
+                          {isPendingPayment ? "Hủy đơn" : "Yêu cầu hủy"}
                         </button>
                       )}
                     </div>
@@ -466,8 +489,8 @@ export function OrdersListView() {
           onSuccess={(isDirect) => {
             showToast(
               isDirect
-                ? "Order cancelled immediately."
-                : "Cancellation request submitted for merchant review."
+                ? "Đơn hàng đã được hủy."
+                : "Đã gửi yêu cầu hủy đơn tới cửa hàng."
             );
             refetch();
           }}
@@ -502,6 +525,6 @@ export function OrdersListView() {
         <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
         <span className="text-xs font-semibold">{toastMessage}</span>
       </div>
-    </main>
+    </div >
   );
 }

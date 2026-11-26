@@ -37,7 +37,7 @@ export function AuthCardWrapper({ children }: AuthLayoutProps) {
 
       {/* Minimal Footer */}
       <footer className="w-full py-6 text-center text-xs text-[#737688] z-10">
-        <p>© 2026 TechHub Marketplace. All rights reserved.</p>
+        <p>© 2026 TechHub Marketplace. Bảo lưu mọi quyền.</p>
       </footer>
     </div>
   );

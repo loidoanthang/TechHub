@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Clock, ArrowRight, ArrowLeft, RefreshCw, Loader2, CheckCircle2, AlertCircle, KeyRound } from "lucide-react";
 import {
   useVerifyEmailMutation,
@@ -11,7 +13,7 @@ import {
 } from "@/features/auth/api/useAuthMutations";
 import { getPendingAuth, setPendingAuth, clearPendingAuth } from "@/lib/api/token";
 import { ROUTES } from "@/lib/constants";
-import { otpSchema } from "@/features/auth/schemas/authSchemas";
+import { otpSchema, type OtpFormData } from "@/features/auth/schemas/authSchemas";
 import type { AxiosError } from "axios";
 import type { ApiResponse } from "@/types/api";
 
@@ -35,6 +37,15 @@ export function OtpVerificationForm() {
   const verifyMutation = useVerifyEmailMutation();
   const resendMutation = useResendVerificationMutation();
   const forgotMutation = useForgotPasswordMutation();
+
+  const {
+    handleSubmit: handleFormSubmit,
+    setValue,
+    formState: { errors: formErrors },
+  } = useForm<OtpFormData>({
+    resolver: zodResolver(otpSchema),
+    defaultValues: { token: "" },
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -81,6 +92,7 @@ export function OtpVerificationForm() {
       const newDigits = [...digits];
       newDigits[index] = "";
       setDigits(newDigits);
+      setValue("token", newDigits.join(""), { shouldValidate: false });
       return;
     }
 
@@ -88,6 +100,7 @@ export function OtpVerificationForm() {
     const newDigits = [...digits];
     newDigits[index] = lastChar;
     setDigits(newDigits);
+    setValue("token", newDigits.join(""), { shouldValidate: false });
 
     // Auto focus next input
     if (index < 5) {
@@ -117,6 +130,7 @@ export function OtpVerificationForm() {
       newDigits[i] = pasted[i];
     }
     setDigits(newDigits);
+    setValue("token", newDigits.join(""), { shouldValidate: false });
     const focusTarget = Math.min(pasted.length, 5);
     inputRefs.current[focusTarget]?.focus();
   };
@@ -137,6 +151,7 @@ export function OtpVerificationForm() {
       setTimeLeft(60);
       setCanResend(false);
       setDigits(["", "", "", "", "", ""]);
+      setValue("token", "");
       inputRefs.current[0]?.focus();
     } catch (err) {
       const axiosError = err as AxiosError<ApiResponse<unknown>>;
@@ -146,17 +161,11 @@ export function OtpVerificationForm() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: OtpFormData) => {
     setErrorMessage(null);
     setInfoMessage(null);
 
-    const code = digits.join("");
-    const validation = otpSchema.safeParse({ token: code });
-    if (!validation.success) {
-      setErrorMessage(validation.error.issues[0]?.message || "Mã OTP phải có đúng 6 chữ số.");
-      return;
-    }
+    const code = data.token;
 
     if (!email) {
       setErrorMessage("Không tìm thấy thông tin email. Vui lòng đăng nhập lại.");
@@ -213,7 +222,7 @@ export function OtpVerificationForm() {
 
   const maskedEmail = email
     ? email.replace(/(^.{2})(.*)(@.*$)/, "$1***$3")
-    : "your registered email";
+    : "email đã đăng ký";
 
   const isResending = resendMutation.isPending || forgotMutation.isPending;
   const isLoading = verifyMutation.isPending || isRedirecting;
@@ -232,12 +241,12 @@ export function OtpVerificationForm() {
             {isResetPassword ? <KeyRound className="w-6 h-6" /> : <CheckCircle2 className="w-6 h-6" />}
           </div>
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight mb-2">
-            {isResetPassword ? "Verify Reset Code" : "Verify Email"}
+            {isResetPassword ? "Xác thực mã đặt lại" : "Xác thực Email"}
           </h1>
-          <p className="text-sm text-[#434656] max-w-[280px] mx-auto">
+          <p className="text-sm text-[#434656] max-w-[290px] mx-auto">
             {isResetPassword
-              ? "Please enter the 6-digit verification code sent to your email to reset your password"
-              : "Please enter the 6-digit verification code sent to your email to activate account"}
+              ? "Nhập mã xác thực 6 chữ số đã gửi về email để đặt lại mật khẩu"
+              : "Nhập mã xác thực 6 chữ số đã gửi về email để kích hoạt tài khoản"}
           </p>
           <div className="mt-2 inline-flex items-center justify-center">
             <span className="font-mono text-xs font-semibold text-[#0b1c30] bg-[#eff4ff] px-2.5 py-1 rounded-md">
@@ -246,10 +255,10 @@ export function OtpVerificationForm() {
           </div>
         </div>
 
-        {errorMessage && (
+        {(errorMessage || formErrors.token?.message) && (
           <div className="w-full flex items-start gap-2.5 p-3.5 mb-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs leading-relaxed animate-in fade-in duration-200">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{errorMessage}</span>
+            <span>{errorMessage || formErrors.token?.message}</span>
           </div>
         )}
 
@@ -261,7 +270,7 @@ export function OtpVerificationForm() {
         )}
 
         {/* 6 Digit Input Grid */}
-        <form onSubmit={handleSubmit} className="w-full flex flex-col items-center">
+        <form onSubmit={handleFormSubmit(onSubmit)} className="w-full flex flex-col items-center">
           <div className="w-full grid grid-cols-6 gap-2 sm:gap-2.5 mb-6">
             {digits.map((digit, idx) => (
               <input
@@ -271,6 +280,8 @@ export function OtpVerificationForm() {
                 }}
                 type="text"
                 inputMode="numeric"
+                autoComplete={idx === 0 ? "one-time-code" : "off"}
+                aria-label={`Mã OTP chữ số thứ ${idx + 1}`}
                 maxLength={1}
                 value={digit}
                 onChange={(e) => handleChange(idx, e.target.value)}
@@ -289,7 +300,7 @@ export function OtpVerificationForm() {
           <div className="flex items-center justify-center gap-1.5 mb-6 text-sm text-[#434656]">
             <Clock className="w-4 h-4 text-[#737688]" />
             <span>
-              Resend code in{" "}
+              Gửi lại mã sau{" "}
               <span className="font-mono font-semibold text-[#0045cc]">
                 {mounted ? (timeLeft > 0 ? `${timeLeft}s` : "0s") : "60s"}
               </span>
@@ -305,16 +316,16 @@ export function OtpVerificationForm() {
             {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span>{isResetPassword ? "Verifying & Proceeding..." : "Verifying..."}</span>
+                <span>{isResetPassword ? "Đang xác thực..." : "Đang kích hoạt..."}</span>
               </>
             ) : isSuccess ? (
               <>
                 <CheckCircle2 className="w-5 h-5 text-emerald-300" />
-                <span>{isResetPassword ? "Code Verified!" : "Verified Successfully!"}</span>
+                <span>{isResetPassword ? "Xác thực thành công!" : "Kích hoạt thành công!"}</span>
               </>
             ) : (
               <>
-                <span>{isResetPassword ? "Continue to Reset Password" : "Verify Code"}</span>
+                <span>{isResetPassword ? "Tiếp tục đặt lại mật khẩu" : "Xác nhận mã"}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -322,7 +333,7 @@ export function OtpVerificationForm() {
 
           {/* Resend button */}
           <div className="mt-5 text-center text-sm text-[#434656]">
-            Didn&apos;t receive the code?{" "}
+            Chưa nhận được mã?{" "}
             <button
               type="button"
               onClick={handleResend}
@@ -335,12 +346,12 @@ export function OtpVerificationForm() {
             >
               {isResending ? (
                 <>
-                  <span>Sending...</span>
+                  <span>Đang gửi...</span>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 </>
               ) : (
                 <>
-                  <span>Resend</span>
+                  <span>Gửi lại</span>
                   <RefreshCw className="w-3.5 h-3.5" />
                 </>
               )}
@@ -354,7 +365,7 @@ export function OtpVerificationForm() {
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#434656] hover:text-[#0b1c30] transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to login</span>
+              <span>Quay lại đăng nhập</span>
             </Link>
           </div>
         </form>

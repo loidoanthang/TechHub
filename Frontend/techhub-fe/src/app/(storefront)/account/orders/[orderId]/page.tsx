@@ -11,8 +11,8 @@ export async function generateMetadata({
 }: OrderDetailPageProps): Promise<Metadata> {
   const { orderId } = await params;
   return {
-    title: `Order #${orderId} Details | TechHub Marketplace`,
-    description: `Tracking timeline, delivery destination, and payment ledger for order #${orderId}.`,
+    title: `Chi tiết đơn hàng #${orderId} | TechHub Marketplace`,
+    description: `Theo dõi tiến trình vận chuyển, địa chỉ nhận hàng và thanh toán cho đơn hàng #${orderId}.`,
   };
 }
 

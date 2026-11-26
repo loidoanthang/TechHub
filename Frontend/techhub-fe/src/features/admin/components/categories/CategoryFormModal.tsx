@@ -23,6 +23,7 @@ import {
 } from "../../hooks/useAdminOperations";
 import { useAdminDialogA11y } from "../../hooks/useAdminDialogA11y";
 import type { CategorySummaryResponse } from "@/types/adminCatalog";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 
 interface CategoryFormModalProps {
   isOpen: boolean;
@@ -343,16 +344,23 @@ export function CategoryFormModal({
                             )}
                           </div>
 
-                          <select
-                            {...createForm.register(
-                              `attributes.${index}.dataType`
-                            )}
-                            className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold"
-                          >
-                            <option value="TEXT">Văn bản (TEXT)</option>
-                            <option value="NUMBER">Số (NUMBER)</option>
-                            <option value="SELECT">Danh sách chọn (SELECT)</option>
-                          </select>
+                          <SelectDropdown
+                            value={createForm.watch(`attributes.${index}.dataType`)}
+                            ariaLabel={`Kiểu dữ liệu thuộc tính ${index + 1}`}
+                            onChange={(val) =>
+                              createForm.setValue(
+                                `attributes.${index}.dataType`,
+                                val as "TEXT" | "NUMBER" | "SELECT",
+                                { shouldValidate: true }
+                              )
+                            }
+                            buttonClassName="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:border-primary"
+                            options={[
+                              { value: "TEXT", label: "Văn bản (TEXT)" },
+                              { value: "NUMBER", label: "Số (NUMBER)" },
+                              { value: "SELECT", label: "Danh sách chọn (SELECT)" },
+                            ]}
+                          />
 
                           <input
                             type="text"

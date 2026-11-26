@@ -3,8 +3,8 @@ import { LoginForm } from "@/features/auth/components/LoginForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Log in | TechHub Marketplace",
-  description: "Log in to your TechHub account to explore tech gear and orders.",
+  title: "Đăng nhập | TechHub Marketplace",
+  description: "Đăng nhập tài khoản TechHub để mua sắm thiết bị công nghệ và theo dõi đơn hàng.",
 };
 
 export default function LoginPage() {

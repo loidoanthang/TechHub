@@ -324,7 +324,7 @@ export function ShopProfileTab() {
       {/* RIGHT PREVIEW COLUMN */}
       <div className="lg:col-span-5 flex flex-col gap-4">
         <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-          <span>Xem trước Gian hàng Thực tế (Live Preview)</span>
+          <span>Xem trước Gian hàng Thực tế</span>
         </div>
 
         {/* Live Shop Card */}

@@ -265,7 +265,7 @@ export function AddressesView() {
                 key={addr.id}
                 className={`bg-white rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden flex flex-col gap-4 border transition-all ${
                   addr.isDefault
-                    ? "border-l-4 border-l-[#0045cc] border-[#0045cc]/30 bg-gradient-to-r from-blue-50/20 via-white to-white"
+                    ? "border-[#0045cc]/40 ring-1 ring-[#0045cc]/15 bg-gradient-to-r from-[#eff4ff]/40 via-white to-white"
                     : "border-[#c3c5d9]/25 hover:border-[#0045cc]/30"
                 }`}
               >

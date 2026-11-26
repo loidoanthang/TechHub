@@ -3,8 +3,8 @@ import { ResetPasswordForm } from "@/features/auth/components/ResetPasswordForm"
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Reset Password | TechHub Marketplace",
-  description: "Set a new secure password for your TechHub marketplace account.",
+  title: "Đặt lại mật khẩu | TechHub Marketplace",
+  description: "Thiết lập mật khẩu mới an toàn cho tài khoản TechHub của bạn.",
 };
 
 export default function ResetPasswordPage() {

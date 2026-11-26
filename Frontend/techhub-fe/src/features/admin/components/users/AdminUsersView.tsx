@@ -18,6 +18,7 @@ import { useAdminUsersQuery } from "../../hooks/useAdminOperations";
 import { UserStatusModal } from "./UserStatusModal";
 import { AdminTablePagination } from "../shared/AdminTablePagination";
 import { AdminUserMobileCard } from "./AdminUserMobileCard";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import type { AdminUserResponse } from "@/types/admin";
 import type { UserStatus } from "@/types/enums";
 
@@ -102,34 +103,38 @@ export function AdminUsersView() {
           />
         </div>
 
-        <select
+        <SelectDropdown
           value={statusFilter}
-          aria-label="Lọc theo trạng thái tài khoản"
-          onChange={(e) => {
-            setStatusFilter(e.target.value as "" | UserStatus);
+          ariaLabel="Lọc theo trạng thái tài khoản"
+          onChange={(val) => {
+            setStatusFilter(val as "" | UserStatus);
             setPage(0);
           }}
-          className="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white sm:w-44"
-        >
-          <option value="">Tất cả Trạng thái</option>
-          <option value="ACTIVE">Hoạt động (ACTIVE)</option>
-          <option value="SUSPENDED">Tạm khóa (SUSPENDED)</option>
-          <option value="BANNED">Cấm vĩnh viễn (BANNED)</option>
-        </select>
+          className="w-full sm:w-44"
+          buttonClassName="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary"
+          options={[
+            { value: "", label: "Tất cả Trạng thái" },
+            { value: "ACTIVE", label: "Hoạt động (ACTIVE)" },
+            { value: "SUSPENDED", label: "Tạm khóa (SUSPENDED)" },
+            { value: "BANNED", label: "Cấm vĩnh viễn (BANNED)" },
+          ]}
+        />
 
-        <select
+        <SelectDropdown
           value={verifiedFilter}
-          aria-label="Lọc theo trạng thái xác thực email"
-          onChange={(e) => {
-            setVerifiedFilter(e.target.value as "" | "true" | "false");
+          ariaLabel="Lọc theo trạng thái xác thực email"
+          onChange={(val) => {
+            setVerifiedFilter(val as "" | "true" | "false");
             setPage(0);
           }}
-          className="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white sm:w-44"
-        >
-          <option value="">Tất cả Xác thực</option>
-          <option value="true">Đã xác thực Email</option>
-          <option value="false">Chưa xác thực Email</option>
-        </select>
+          className="w-full sm:w-44"
+          buttonClassName="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary"
+          options={[
+            { value: "", label: "Tất cả Xác thực" },
+            { value: "true", label: "Đã xác thực Email" },
+            { value: "false", label: "Chưa xác thực Email" },
+          ]}
+        />
 
         <AdminTablePagination
           variant="top-mini"
@@ -244,7 +249,11 @@ export function AdminUsersView() {
                               : "bg-rose-600 text-white"
                           }`}
                         >
-                          {u.status}
+                          {u.status === "ACTIVE"
+                            ? "Hoạt động"
+                            : u.status === "SUSPENDED"
+                            ? "Tạm khóa"
+                            : "Đã cấm"}
                         </span>
                       </td>
                       <td className="py-2 px-4 text-right">

@@ -64,7 +64,15 @@ export function AdminProductMobileCard({
                 product.isSuspended
               )}`}
             >
-              {product.isSuspended ? "Đình chỉ" : product.approvalStatus}
+              {product.isSuspended
+                ? "Đình chỉ"
+                : product.approvalStatus === "PENDING_APPROVAL"
+                ? "Chờ duyệt"
+                : product.approvalStatus === "APPROVED"
+                ? "Đã duyệt"
+                : product.approvalStatus === "REJECTED"
+                ? "Từ chối"
+                : "Nháp"}
             </span>
           </div>
 

@@ -35,7 +35,7 @@ export function RegisterForm() {
       phone: "",
       password: "",
       confirmPassword: "",
-      agreeTerms: true as unknown as undefined, // default untouched or false
+      agreeTerms: false as unknown as undefined,
     },
     mode: "onTouched",
   });
@@ -106,13 +106,13 @@ export function RegisterForm() {
       <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-[#dce9ff]/60 rounded-full blur-3xl pointer-events-none"></div>
 
       {/* Main Register Card */}
-      <div className="relative w-full bg-white rounded-2xl shadow-[0_12px_40px_-10px_rgba(11,28,48,0.08)] p-8 sm:p-10 flex flex-col gap-6">
+      <div className="relative w-full bg-white rounded-2xl shadow-[0_12px_40px_-10px_rgba(11,28,48,0.08)] p-6 sm:p-10 flex flex-col gap-6">
         <div className="flex flex-col items-center text-center gap-1.5">
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
-            Create new account
+            Tạo tài khoản mới
           </h1>
           <p className="text-sm text-[#434656] max-w-xs">
-            Join us to explore tech gear and exclusive enthusiast deals
+            Tham gia TechHub để khám phá thiết bị công nghệ và ưu đãi chính hãng
           </p>
         </div>
 
@@ -125,19 +125,21 @@ export function RegisterForm() {
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
           {/* First & Last Name Grid */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="first-name"
                 className="text-xs font-semibold text-[#0b1c30]"
               >
-                First name
+                Họ
               </label>
               <input
                 id="first-name"
                 type="text"
+                aria-invalid={Boolean(errors.firstName)}
+                aria-describedby={errors.firstName ? "reg-first-name-error" : undefined}
                 {...register("firstName")}
-                placeholder="Alex"
+                placeholder="Nguyễn"
                 className={`w-full h-11 px-4 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
                   errors.firstName
                     ? "border border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
@@ -145,7 +147,7 @@ export function RegisterForm() {
                 }`}
               />
               {errors.firstName && (
-                <p className="text-[11px] text-rose-500 font-medium">{errors.firstName.message}</p>
+                <p id="reg-first-name-error" className="text-[11px] text-rose-500 font-medium">{errors.firstName.message}</p>
               )}
             </div>
 
@@ -154,13 +156,15 @@ export function RegisterForm() {
                 htmlFor="last-name"
                 className="text-xs font-semibold text-[#0b1c30]"
               >
-                Last name
+                Tên
               </label>
               <input
                 id="last-name"
                 type="text"
+                aria-invalid={Boolean(errors.lastName)}
+                aria-describedby={errors.lastName ? "reg-last-name-error" : undefined}
                 {...register("lastName")}
-                placeholder="Morgan"
+                placeholder="Văn A"
                 className={`w-full h-11 px-4 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
                   errors.lastName
                     ? "border border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
@@ -168,7 +172,7 @@ export function RegisterForm() {
                 }`}
               />
               {errors.lastName && (
-                <p className="text-[11px] text-rose-500 font-medium">{errors.lastName.message}</p>
+                <p id="reg-last-name-error" className="text-[11px] text-rose-500 font-medium">{errors.lastName.message}</p>
               )}
             </div>
           </div>
@@ -179,13 +183,15 @@ export function RegisterForm() {
               htmlFor="email"
               className="text-xs font-semibold text-[#0b1c30]"
             >
-              Email address
+              Địa chỉ Email
             </label>
             <input
               id="email"
               type="email"
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? "reg-email-error" : undefined}
               {...register("email")}
-              placeholder="alex.morgan@example.com"
+              placeholder="ten@example.com"
               className={`w-full h-11 px-4 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
                 errors.email
                   ? "border border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
@@ -193,7 +199,7 @@ export function RegisterForm() {
               }`}
             />
             {errors.email && (
-              <p className="text-[11px] text-rose-500 font-medium">{errors.email.message}</p>
+              <p id="reg-email-error" className="text-[11px] text-rose-500 font-medium">{errors.email.message}</p>
             )}
           </div>
 
@@ -203,11 +209,13 @@ export function RegisterForm() {
               htmlFor="phone"
               className="text-xs font-semibold text-[#0b1c30]"
             >
-              Phone number (optional)
+              Số điện thoại (tùy chọn)
             </label>
             <input
               id="phone"
               type="tel"
+              aria-invalid={Boolean(errors.phone)}
+              aria-describedby={errors.phone ? "reg-phone-error" : undefined}
               {...register("phone")}
               placeholder="0987654321"
               className={`w-full h-11 px-4 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
@@ -217,7 +225,7 @@ export function RegisterForm() {
               }`}
             />
             {errors.phone && (
-              <p className="text-[11px] text-rose-500 font-medium">{errors.phone.message}</p>
+              <p id="reg-phone-error" className="text-[11px] text-rose-500 font-medium">{errors.phone.message}</p>
             )}
           </div>
 
@@ -227,14 +235,16 @@ export function RegisterForm() {
               htmlFor="password"
               className="text-xs font-semibold text-[#0b1c30]"
             >
-              Password
+              Mật khẩu
             </label>
             <div className="relative flex items-center">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={errors.password ? "reg-password-error" : undefined}
                 {...register("password")}
-                placeholder="At least 8 characters"
+                placeholder="Ít nhất 8 ký tự"
                 className={`w-full h-11 pl-4 pr-11 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
                   errors.password
                     ? "border border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
@@ -244,7 +254,7 @@ export function RegisterForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label="Toggle password visibility"
+                aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                 className="absolute right-3 text-[#737688] hover:text-[#0b1c30] p-1 rounded-lg transition-colors cursor-pointer"
               >
                 {showPassword ? (
@@ -255,7 +265,7 @@ export function RegisterForm() {
               </button>
             </div>
             {errors.password && (
-              <p className="text-[11px] text-rose-500 font-medium">{errors.password.message}</p>
+              <p id="reg-password-error" className="text-[11px] text-rose-500 font-medium">{errors.password.message}</p>
             )}
             {/* Strength meter indicator */}
             {passwordVal.length > 0 && (
@@ -291,7 +301,7 @@ export function RegisterForm() {
                 htmlFor="confirm-password"
                 className="text-xs font-semibold text-[#0b1c30]"
               >
-                Confirm password
+                Xác nhận mật khẩu
               </label>
               {confirmPasswordVal.length > 0 && (
                 <span
@@ -299,7 +309,7 @@ export function RegisterForm() {
                     passwordsMatch ? "text-emerald-600" : "text-rose-500"
                   }`}
                 >
-                  {passwordsMatch ? "Matches" : "Doesn't match"}
+                  {passwordsMatch ? "Khớp mật khẩu" : "Chưa khớp"}
                 </span>
               )}
             </div>
@@ -307,8 +317,10 @@ export function RegisterForm() {
               <input
                 id="confirm-password"
                 type={showConfirmPassword ? "text" : "password"}
+                aria-invalid={Boolean(errors.confirmPassword)}
+                aria-describedby={errors.confirmPassword ? "reg-confirm-password-error" : undefined}
                 {...register("confirmPassword")}
-                placeholder="Repeat your password"
+                placeholder="Nhập lại mật khẩu"
                 className={`w-full h-11 pl-4 pr-11 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
                   errors.confirmPassword
                     ? "border border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
@@ -318,7 +330,7 @@ export function RegisterForm() {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                aria-label="Toggle password confirmation visibility"
+                aria-label={showConfirmPassword ? "Ẩn xác nhận mật khẩu" : "Hiện xác nhận mật khẩu"}
                 className="absolute right-3 text-[#737688] hover:text-[#0b1c30] p-1 rounded-lg transition-colors cursor-pointer"
               >
                 {showConfirmPassword ? (
@@ -329,7 +341,7 @@ export function RegisterForm() {
               </button>
             </div>
             {errors.confirmPassword && (
-              <p className="text-[11px] text-rose-500 font-medium">{errors.confirmPassword.message}</p>
+              <p id="reg-confirm-password-error" className="text-[11px] text-rose-500 font-medium">{errors.confirmPassword.message}</p>
             )}
           </div>
 
@@ -339,6 +351,8 @@ export function RegisterForm() {
               <input
                 id="terms-check"
                 type="checkbox"
+                aria-invalid={Boolean(errors.agreeTerms)}
+                aria-describedby={errors.agreeTerms ? "reg-terms-error" : undefined}
                 {...register("agreeTerms")}
                 className="w-4 h-4 mt-0.5 rounded text-[#0d5bff] focus:ring-0 accent-[#0d5bff] cursor-pointer"
               />
@@ -346,19 +360,19 @@ export function RegisterForm() {
                 htmlFor="terms-check"
                 className="text-xs text-[#434656] cursor-pointer leading-relaxed"
               >
-                I agree to the{" "}
+                Tôi đồng ý với{" "}
                 <Link href="#" className="text-[#0045cc] font-semibold hover:underline">
-                  Terms of Service
+                  Điều khoản dịch vụ
                 </Link>{" "}
-                and acknowledge the{" "}
+                và{" "}
                 <Link href="#" className="text-[#0045cc] font-semibold hover:underline">
-                  Privacy Statement
+                  Chính sách bảo mật
                 </Link>
                 .
               </label>
             </div>
             {errors.agreeTerms && (
-              <p className="text-[11px] text-rose-500 font-medium ml-6">{errors.agreeTerms.message}</p>
+              <p id="reg-terms-error" className="text-[11px] text-rose-500 font-medium ml-6">{errors.agreeTerms.message}</p>
             )}
           </div>
 
@@ -370,16 +384,16 @@ export function RegisterForm() {
             {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Creating account...</span>
+                <span>Đang tạo tài khoản...</span>
               </>
             ) : isSuccess ? (
               <>
                 <CheckCircle2 className="w-5 h-5 text-emerald-300" />
-                <span>Account Created!</span>
+                <span>Tạo tài khoản thành công!</span>
               </>
             ) : (
               <>
-                <span>Create account</span>
+                <span>Tạo tài khoản</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -388,12 +402,12 @@ export function RegisterForm() {
 
         <div className="text-center pt-1">
           <p className="text-sm text-[#434656]">
-            Already have an account?{" "}
+            Đã có tài khoản?{" "}
             <Link
               href={ROUTES.LOGIN}
               className="text-sm font-semibold text-[#0045cc] hover:underline ml-1"
             >
-              Log in
+              Đăng nhập
             </Link>
           </p>
         </div>

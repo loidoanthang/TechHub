@@ -6,13 +6,13 @@ import { useRecentlyViewedProductsQuery } from "@/features/products/hooks/usePro
 import { mapRecentlyViewedToProduct } from "@/features/products/utils/productMapper";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { ROUTES } from "@/lib/constants";
-import { Clock, ShoppingBag, EyeOff, Sparkles } from "lucide-react";
+import { Clock, ShoppingBag, EyeOff, Sparkles, AlertCircle } from "lucide-react";
 
 export function RecentlyViewedView() {
   const { isAuthenticated, user, isLoading: isAuthLoading } = useAuth();
   const isBuyer = Boolean(user?.roles?.includes("BUYER"));
 
-  const { data: rawItems, isLoading: isQueryLoading } = useRecentlyViewedProductsQuery(
+  const { data: rawItems, isLoading: isQueryLoading, error, refetch } = useRecentlyViewedProductsQuery(
     isAuthenticated && isBuyer
   );
 
@@ -55,6 +55,23 @@ export function RecentlyViewedView() {
               <div className="h-8 bg-slate-100 rounded-lg w-full mt-2"></div>
             </div>
           ))}
+        </div>
+      ) : error ? (
+        <div className="bg-white rounded-2xl p-10 border border-slate-200 text-center flex flex-col items-center justify-center gap-3">
+          <AlertCircle className="w-10 h-10 text-rose-500" />
+          <h3 className="text-base font-bold text-[#0b1c30]">
+            Không thể tải sản phẩm đã xem
+          </h3>
+          <p className="text-xs text-[#737688] max-w-sm">
+            Đã xảy ra lỗi khi kết nối máy chủ. Vui lòng thử lại sau.
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="mt-1 px-4 py-2 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold transition-colors cursor-pointer"
+          >
+            Thử lại
+          </button>
         </div>
       ) : products.length === 0 ? (
         <div className="bg-white rounded-2xl p-10 sm:p-14 border border-[#c3c5d9]/25 shadow-sm text-center flex flex-col items-center justify-center gap-4">

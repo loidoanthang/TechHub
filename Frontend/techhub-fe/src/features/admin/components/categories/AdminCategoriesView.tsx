@@ -24,6 +24,7 @@ import { CategoryAttributesDrawer } from "./CategoryAttributesDrawer";
 import { AdminTablePagination } from "../shared/AdminTablePagination";
 import { AdminCategoryMobileCard } from "./AdminCategoryMobileCard";
 import { useAdminDialogA11y } from "../../hooks/useAdminDialogA11y";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import type { CategoryStatus } from "@/types/enums";
 import type { CategorySummaryResponse } from "@/types/adminCatalog";
 
@@ -185,19 +186,21 @@ export function AdminCategoriesView() {
             />
           </div>
 
-          <select
+          <SelectDropdown
             value={statusFilter}
-            aria-label="Lọc danh mục theo trạng thái"
-            onChange={(e) => {
-              setStatusFilter(e.target.value as CategoryStatus | "");
+            ariaLabel="Lọc danh mục theo trạng thái"
+            onChange={(val) => {
+              setStatusFilter(val as CategoryStatus | "");
               setPage(0);
             }}
-            className="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white sm:w-52"
-          >
-            <option value="">Tất cả trạng thái</option>
-            <option value="ACTIVE">Đang hoạt động (ACTIVE)</option>
-            <option value="INACTIVE">Ngừng hoạt động (INACTIVE)</option>
-          </select>
+            className="w-full sm:w-52"
+            buttonClassName="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary"
+            options={[
+              { value: "", label: "Tất cả trạng thái" },
+              { value: "ACTIVE", label: "Đang hoạt động (ACTIVE)" },
+              { value: "INACTIVE", label: "Ngừng hoạt động (INACTIVE)" },
+            ]}
+          />
         </div>
 
         <AdminTablePagination

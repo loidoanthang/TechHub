@@ -16,16 +16,16 @@ export function HeroBento() {
         >
           <div className="max-w-md z-10">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight leading-tight mb-2 sm:mb-3 font-[family-name:var(--font-heading)]">
-              Upgrade Your Tech<br className="hidden sm:inline" /> Game
+              Nâng tầm góc máy<br className="hidden sm:inline" /> công nghệ
             </h1>
             <p className="text-xs sm:text-sm text-[#dce9ff] leading-relaxed max-w-sm mb-5 sm:mb-8">
-              Gradually work your way up to more intense games as you level up your battle station.
+              Trang bị phần cứng hiệu năng cao, linh kiện chính hãng và gear chuẩn kỹ thuật cho mọi nhu cầu.
             </p>
             <Link
               href="/products"
               className="inline-flex items-center justify-center bg-white hover:bg-[#eff4ff] text-[#0b1c30] text-xs sm:text-sm font-bold px-5 sm:px-6 py-2 sm:py-2.5 rounded-lg shadow-sm transition-colors"
             >
-              Shop Now
+              Khám phá ngay
             </Link>
           </div>
         </div>
@@ -42,25 +42,25 @@ export function HeroBento() {
         >
           <div className="z-10">
             <span className="text-[11px] text-[#b6c4ff] font-bold uppercase tracking-wider block mb-2 font-mono">
-              PREMIUM ACOUSTICS
+              ÂM THANH CAO CẤP
             </span>
             <h2 className="text-xl font-bold text-white tracking-tight mb-2 font-[family-name:var(--font-heading)]">
-              Studio Sound
+              Âm thanh Studio
             </h2>
             <p className="text-xs text-[#dce9ff] leading-relaxed">
-              Planar magnetic precision drivers.
+              Driver từ phẳng độ chính xác cao.
             </p>
           </div>
 
           <div className="z-10 flex items-center justify-between pt-4">
             <div className="flex flex-col">
-              <span className="text-[10px] text-[#dce9ff] uppercase font-bold">Starts at</span>
-              <span className="text-xl font-bold text-white font-mono">$399</span>
+              <span className="text-[11px] text-[#dce9ff] uppercase font-bold">Giá từ</span>
+              <span className="text-lg font-bold text-white font-mono">9.990.000đ</span>
             </div>
             <Link
               href="/products?category=audio"
               className="w-10 h-10 rounded-full bg-white/20 hover:bg-[#0045cc] text-white flex items-center justify-center transition-colors backdrop-blur-md"
-              aria-label="View Studio Sound"
+              aria-label="Xem Âm thanh Studio"
             >
               →
             </Link>
@@ -80,18 +80,18 @@ export function HeroBento() {
             }}
           >
             <div className="z-10 max-w-[180px]">
-              <span className="text-[10px] text-[#57fbdb] font-bold uppercase tracking-wider block mb-1 font-mono">
-                BIO-TELEMETRY
+              <span className="text-[11px] text-[#57fbdb] font-bold uppercase tracking-wider block mb-1 font-mono">
+                THEO DÕI SỨC KHỎE
               </span>
               <h3 className="text-base font-bold text-white font-[family-name:var(--font-heading)]">
-                Smart Trackers
+                Đồng hồ &amp; Thiết bị đeo
               </h3>
             </div>
             <Link
               href="/products?category=wearables"
               className="z-10 text-xs font-semibold text-[#ebecff] hover:text-white flex items-center gap-1"
             >
-              Discover gear →
+              Khám phá ngay →
             </Link>
           </div>
 
@@ -106,18 +106,18 @@ export function HeroBento() {
             }}
           >
             <div className="z-10 max-w-[180px]">
-              <span className="text-[10px] text-[#ffdad4] font-bold uppercase tracking-wider block mb-1 font-mono">
-                TACTILE HARDWARE
+              <span className="text-[11px] text-[#ffdad4] font-bold uppercase tracking-wider block mb-1 font-mono">
+                PHẦN CỨNG CƠ KHÍ
               </span>
               <h3 className="text-base font-bold text-white font-[family-name:var(--font-heading)]">
-                Custom Keyboards
+                Bàn phím cơ Custom
               </h3>
             </div>
             <Link
               href="/products?category=keyboards"
               className="z-10 text-xs font-semibold text-[#ebecff] hover:text-white flex items-center gap-1"
             >
-              Shop Hot-swap →
+              Mua Hot-swap →
             </Link>
           </div>
         </div>

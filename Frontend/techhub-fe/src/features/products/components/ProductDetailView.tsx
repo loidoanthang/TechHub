@@ -17,6 +17,7 @@ import {
   Building2,
   MessageCircle,
   ChevronRight,
+  ChevronDown,
   ThumbsUp,
   MessageSquare,
   AlertTriangle,
@@ -140,6 +141,26 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [isBuyNowPending, setIsBuyNowPending] = useState(false);
+  const [isReviewSortOpen, setIsReviewSortOpen] = useState(false);
+  const reviewSortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isReviewSortOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (reviewSortRef.current && !reviewSortRef.current.contains(e.target as Node)) {
+        setIsReviewSortOpen(false);
+      }
+    };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsReviewSortOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [isReviewSortOpen]);
   const [cartToast, setCartToast] = useState<{
     message: string;
     itemInfo?: string;
@@ -502,19 +523,19 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
     <div className="w-full pb-20 space-y-8">
       {/* 1. Breadcrumbs */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-12 pt-4">
-        <nav className="flex items-center gap-1.5 text-xs text-slate-500">
-          <Link href="/" className="hover:text-[#0045cc] transition-colors">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-500 min-w-0">
+          <Link href="/" className="hover:text-[#0045cc] transition-colors whitespace-nowrap shrink-0">
             Trang chủ
           </Link>
-          <ChevronRight className="w-3 h-3 text-slate-300" />
+          <ChevronRight className="w-3 h-3 text-slate-300 shrink-0" />
           <Link
             href={`/products?category=${product.categorySlug}`}
-            className="hover:text-[#0045cc] transition-colors"
+            className="hover:text-[#0045cc] transition-colors whitespace-nowrap shrink-0"
           >
             {product.categoryName}
           </Link>
-          <ChevronRight className="w-3 h-3 text-slate-300" />
-          <span className="text-slate-800 font-semibold truncate max-w-sm">
+          <ChevronRight className="hidden sm:inline w-3 h-3 text-slate-300 shrink-0" />
+          <span className="hidden sm:inline text-slate-800 font-semibold truncate max-w-md">
             {product.title}
           </span>
         </nav>
@@ -677,7 +698,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
               </h1>
 
               {/* Rating & Stats */}
-              <div className="flex items-center gap-4 mt-3 pb-4 border-b border-slate-100 text-xs">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-3 pb-4 border-b border-slate-100 text-xs">
                 <div className="flex items-center gap-1 text-amber-500 font-bold">
                   <Star className="w-4 h-4 fill-current" />
                   <span>{avgRating.toFixed(1)}</span>
@@ -707,7 +728,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
               </div>
 
               {/* Price Box */}
-              <div className="mt-4 p-4 rounded-2xl bg-[#eff4ff] flex items-baseline justify-between border border-[#dce9ff]">
+              <div className="mt-4 p-4 rounded-2xl bg-[#eff4ff] flex flex-wrap items-baseline justify-between gap-2 border border-[#dce9ff]">
                 <div className="flex items-baseline gap-3">
                   <span className="text-2xl sm:text-3xl font-bold text-[#0045cc] font-mono tracking-tight">
                     {new Intl.NumberFormat("vi-VN", {
@@ -784,35 +805,35 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
               </div>
 
               {/* Quantity & Stock Indicator */}
-              <div className="mt-6 flex items-center gap-6">
-                <span className="text-xs font-bold text-[#0b1c30] uppercase tracking-wider">
+              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2.5 sm:gap-6">
+                <span className="text-xs font-bold text-[#0b1c30] uppercase tracking-wider whitespace-nowrap">
                   Số lượng:
                 </span>
-                <div className="flex items-center bg-[#eff4ff] rounded-lg p-1 border border-slate-200">
-                  <button
-                    disabled={isOutOfStock || isShopPaused || quantity <= 1}
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="w-7 h-7 flex items-center justify-center rounded text-slate-600 hover:bg-white transition-colors disabled:opacity-40 cursor-pointer"
-                    aria-label="Giảm số lượng"
-                  >
-                    <Minus className="w-3.5 h-3.5" />
-                  </button>
-                  <span className="w-8 text-center text-xs font-bold font-mono text-[#0b1c30]">
-                    {isOutOfStock ? 0 : quantity}
-                  </span>
-                  <button
-                    disabled={isOutOfStock || isShopPaused || quantity >= (activeVariant?.stock || 0)}
-                    onClick={() => setQuantity((q) => Math.min(activeVariant?.stock || 1, q + 1))}
-                    className="w-7 h-7 flex items-center justify-center rounded text-slate-600 hover:bg-white transition-colors disabled:opacity-40 cursor-pointer"
-                    aria-label="Tăng số lượng"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                  <div className="flex items-center bg-[#eff4ff] rounded-lg p-1 border border-slate-200 shrink-0">
+                    <button
+                      disabled={isOutOfStock || isShopPaused || quantity <= 1}
+                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                      className="w-7 h-7 flex items-center justify-center rounded text-slate-600 hover:bg-white transition-colors disabled:opacity-40 cursor-pointer"
+                      aria-label="Giảm số lượng"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="w-8 text-center text-xs font-bold font-mono text-[#0b1c30]">
+                      {isOutOfStock ? 0 : quantity}
+                    </span>
+                    <button
+                      disabled={isOutOfStock || isShopPaused || quantity >= (activeVariant?.stock || 0)}
+                      onClick={() => setQuantity((q) => Math.min(activeVariant?.stock || 1, q + 1))}
+                      className="w-7 h-7 flex items-center justify-center rounded text-slate-600 hover:bg-white transition-colors disabled:opacity-40 cursor-pointer"
+                      aria-label="Tăng số lượng"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
 
-                <div className="flex items-center gap-2">
                   <span
-                    className={`text-xs font-mono font-semibold ${
+                    className={`text-xs font-mono font-semibold whitespace-nowrap ${
                       isOutOfStock ? "text-[#ba1a1a]" : "text-slate-500"
                     }`}
                   >
@@ -1221,8 +1242,8 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                 }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
                   selectedStarFilter === null && !onlyMediaFilter
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    ? "bg-[#0045cc] text-white shadow-xs"
+                    : "bg-[#eff4ff] text-[#434656] hover:bg-[#dce9ff] hover:text-[#0b1c30]"
                 }`}
               >
                 Tất cả ({totalReviewsCount})
@@ -1237,8 +1258,8 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                   }}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
                     selectedStarFilter === s
-                      ? "bg-primary text-white"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      ? "bg-[#0045cc] text-white shadow-xs"
+                      : "bg-[#eff4ff] text-[#434656] hover:bg-[#dce9ff] hover:text-[#0b1c30]"
                   }`}
                 >
                   {s} Sao ({ratingSummary?.ratingCounts?.[s] ?? 0})
@@ -1252,8 +1273,8 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                 }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
                   onlyMediaFilter
-                    ? "bg-primary text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    ? "bg-[#0045cc] text-white shadow-xs"
+                    : "bg-[#eff4ff] text-[#434656] hover:bg-[#dce9ff] hover:text-[#0b1c30]"
                 }`}
               >
                 <ImageIcon className="w-3.5 h-3.5" />
@@ -1261,19 +1282,58 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
               </button>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-              <span className="text-[11px] text-slate-400">Sắp xếp:</span>
-              <select
-                value={reviewSortBy}
-                onChange={(e) => {
-                  setReviewSortBy(e.target.value as "createdAt" | "rating");
-                  setReviewPage(0);
-                }}
-                className="h-8 px-2.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary"
+            <div className="relative flex items-center gap-2 shrink-0 self-end sm:self-auto" ref={reviewSortRef}>
+              <span className="text-xs text-[#737688]">Sắp xếp:</span>
+              <button
+                type="button"
+                aria-label="Sắp xếp đánh giá"
+                aria-expanded={isReviewSortOpen}
+                onClick={() => setIsReviewSortOpen((prev) => !prev)}
+                className="px-3 py-1.5 rounded-xl border border-[#dce9ff] bg-white hover:bg-[#eff4ff] text-xs font-semibold text-[#0b1c30] flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
               >
-                <option value="createdAt">Mới nhất</option>
-                <option value="rating">Đánh giá cao nhất</option>
-              </select>
+                <span>{reviewSortBy === "createdAt" ? "Mới nhất" : "Đánh giá cao nhất"}</span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-[#737688] transition-transform duration-150 ${
+                    isReviewSortOpen ? "rotate-180 text-[#0045cc]" : ""
+                  }`}
+                />
+              </button>
+
+              {isReviewSortOpen && (
+                <div
+                  role="listbox"
+                  aria-label="Tùy chọn sắp xếp đánh giá"
+                  className="absolute right-0 top-full mt-1.5 w-44 bg-white rounded-xl border border-[#dce9ff] shadow-[0_12px_30px_-8px_rgba(11,28,48,0.14)] py-1.5 z-30 animate-in fade-in zoom-in-95 duration-150"
+                >
+                  {[
+                    { value: "createdAt" as const, label: "Mới nhất" },
+                    { value: "rating" as const, label: "Đánh giá cao nhất" },
+                  ].map((opt) => {
+                    const isActive = reviewSortBy === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        role="option"
+                        aria-selected={isActive}
+                        onClick={() => {
+                          setReviewSortBy(opt.value);
+                          setReviewPage(0);
+                          setIsReviewSortOpen(false);
+                        }}
+                        className={`w-full px-3.5 py-2 text-left text-xs flex items-center justify-between gap-2 transition-colors cursor-pointer ${
+                          isActive
+                            ? "bg-[#eff4ff] text-[#0045cc] font-bold"
+                            : "text-[#434656] hover:bg-[#f8f9ff] hover:text-[#0b1c30] font-medium"
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {isActive && <Check className="w-3.5 h-3.5 text-[#0045cc] shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
@@ -1281,16 +1341,16 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           <div className="space-y-4 pt-6">
             {isReviewsLoading ? (
               <div className="p-8 text-center flex flex-col items-center justify-center gap-2">
-                <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                <span className="text-xs text-slate-400">Đang tải đánh giá...</span>
+                <Loader2 className="w-6 h-6 animate-spin text-[#0045cc]" />
+                <span className="text-xs text-[#737688]">Đang tải đánh giá...</span>
               </div>
             ) : realReviews.length === 0 ? (
-              <div className="p-8 text-center bg-slate-50/70 rounded-2xl border border-dashed border-slate-200 my-2">
-                <MessageSquare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-slate-700">
+              <div className="p-8 text-center bg-[#f8f9ff] rounded-2xl border border-dashed border-[#c3c5d9]/60 my-2">
+                <MessageSquare className="w-8 h-8 text-[#737688]/60 mx-auto mb-2" />
+                <p className="text-sm font-semibold text-[#0b1c30]">
                   Chưa có đánh giá nào phù hợp với bộ lọc
                 </p>
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs text-[#737688] mt-1">
                   Hãy thử chọn số sao khác hoặc bấm &ldquo;Tất cả&rdquo; để xem toàn bộ nhận xét.
                 </p>
               </div>
@@ -1541,6 +1601,11 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           <div
             role="dialog"
             aria-modal="true"
+            aria-label="Xem ảnh phóng to"
+            tabIndex={-1}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setPreviewMediaUrl(null);
+            }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-in fade-in"
             onClick={() => setPreviewMediaUrl(null)}
           >
@@ -1550,6 +1615,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
             >
               <button
                 type="button"
+                aria-label="Đóng ảnh phóng to"
                 onClick={() => setPreviewMediaUrl(null)}
                 className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center transition-colors cursor-pointer"
               >
@@ -1644,12 +1710,20 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           <span className="text-[10px] font-semibold mt-0.5">Chat</span>
         </button>
 
-        <a
-          href={`techhub://product/${product.id}`}
-          className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#0045cc] to-[#0d5bff] text-white font-bold text-xs text-center shadow-md active:scale-[0.99] flex items-center justify-center gap-1.5"
+        <button
+          type="button"
+          disabled={isOutOfStock || isShopPaused || isAddingToCart || isBuyNowPending}
+          onClick={handleBuyNow}
+          className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#0045cc] to-[#0d5bff] text-white font-bold text-xs text-center shadow-md active:scale-[0.99] flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
-          <span>📲 Mua trên App TechHub</span>
-        </a>
+          {isBuyNowPending ? (
+            <Loader2 className="w-4 h-4 animate-spin text-white" />
+          ) : (
+            <span>
+              {isShopPaused ? "Tạm nghỉ" : isOutOfStock ? "Hết hàng" : "Mua ngay"}
+            </span>
+          )}
+        </button>
 
         <button
           disabled={isOutOfStock || isShopPaused || isAddingToCart}

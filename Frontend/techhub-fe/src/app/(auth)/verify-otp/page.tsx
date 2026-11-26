@@ -3,8 +3,8 @@ import { OtpVerificationForm } from "@/features/auth/components/OtpVerificationF
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Verify OTP | TechHub Marketplace",
-  description: "Verify your email address to secure your TechHub account.",
+  title: "Xác thực OTP | TechHub Marketplace",
+  description: "Xác thực email để kích hoạt và bảo mật tài khoản TechHub.",
 };
 
 export default function VerifyOtpPage() {

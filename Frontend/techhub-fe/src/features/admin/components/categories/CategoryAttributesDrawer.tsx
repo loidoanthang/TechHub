@@ -24,6 +24,7 @@ import {
   type CategoryAttributeFormValues,
 } from "../../schemas/categorySchema";
 import type { CategoryAttributeResponse } from "@/types/adminCatalog";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 
 interface CategoryAttributesDrawerProps {
   categoryId: string | null;
@@ -54,6 +55,7 @@ export function CategoryAttributesDrawer({
     register,
     handleSubmit,
     watch,
+    setValue,
     reset,
     formState: { errors },
   } = useForm<CategoryAttributeFormValues>({
@@ -277,14 +279,23 @@ export function CategoryAttributesDrawer({
                       )}
                     </div>
 
-                    <select
-                      {...register("dataType")}
-                      className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold"
-                    >
-                      <option value="TEXT">TEXT (Văn bản)</option>
-                      <option value="NUMBER">NUMBER (Số)</option>
-                      <option value="SELECT">SELECT (Danh sách chọn)</option>
-                    </select>
+                    <SelectDropdown
+                      value={watch("dataType")}
+                      ariaLabel="Kiểu dữ liệu thuộc tính"
+                      onChange={(val) =>
+                        setValue(
+                          "dataType",
+                          val as CategoryAttributeFormValues["dataType"],
+                          { shouldValidate: true }
+                        )
+                      }
+                      buttonClassName="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:border-primary"
+                      options={[
+                        { value: "TEXT", label: "TEXT (Văn bản)" },
+                        { value: "NUMBER", label: "NUMBER (Số)" },
+                        { value: "SELECT", label: "SELECT (Danh sách chọn)" },
+                      ]}
+                    />
                   </div>
 
                   {watchedType === "SELECT" && (

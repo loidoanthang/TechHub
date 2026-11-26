@@ -50,7 +50,11 @@ export function AdminUserMobileCard({
             user.status
           )}`}
         >
-          {user.status}
+          {user.status === "ACTIVE"
+            ? "Hoạt động"
+            : user.status === "SUSPENDED"
+            ? "Tạm khóa"
+            : "Đã cấm"}
         </span>
       </div>
 

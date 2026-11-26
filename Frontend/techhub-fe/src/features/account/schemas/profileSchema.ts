@@ -7,19 +7,19 @@ export const profileSchema = z.object({
   firstName: z
     .string()
     .trim()
-    .min(1, "First name is required")
-    .max(100, "First name cannot exceed 100 characters"),
+    .min(1, "Vui lòng nhập họ")
+    .max(100, "Họ không được vượt quá 100 ký tự"),
 
   lastName: z
     .string()
     .trim()
-    .min(1, "Last name is required")
-    .max(100, "Last name cannot exceed 100 characters"),
+    .min(1, "Vui lòng nhập tên")
+    .max(100, "Tên không được vượt quá 100 ký tự"),
 
   phone: z
     .string()
     .trim()
-    .min(1, "Phone number is required")
+    .min(1, "Vui lòng nhập số điện thoại")
     .refine(
       (val) => {
         const cleaned = val.replace(/[\s\-\(\)\.]/g, "");
@@ -27,13 +27,13 @@ export const profileSchema = z.object({
       },
       {
         message:
-          "Invalid Vietnamese phone number (e.g. 0912345678 or +84912345678)",
+          "Số điện thoại Việt Nam không hợp lệ (VD: 0912345678 hoặc +84912345678)",
       }
     ),
 
   avatarUrl: z
     .string()
-    .max(500, "Avatar URL is too long")
+    .max(500, "URL ảnh đại diện quá dài")
     .nullable()
     .optional(),
 });

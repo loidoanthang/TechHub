@@ -125,7 +125,7 @@ export function AccountSidebar() {
             {profile?.emailVerified && (
               <div
                 className="absolute -bottom-1 -right-1 bg-[#0045cc] text-white w-4 h-4 rounded-full flex items-center justify-center shadow-sm"
-                title="Identity Verified"
+                title="Đã xác thực danh tính"
               >
                 <BadgeCheck className="w-2.5 h-2.5" />
               </div>
@@ -136,19 +136,19 @@ export function AccountSidebar() {
               {fullName}
             </h3>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-[10px] font-bold text-[#006b5b] bg-[#eff4ff] px-1.5 py-0.5 rounded-full">
-                {profile?.roles?.[0] || "BUYER"}
+              <span className="text-[11px] font-bold text-[#006b5b] bg-[#eff4ff] px-1.5 py-0.5 rounded-full">
+                {profile?.roles?.[0] === "SELLER" ? "Người bán" : profile?.roles?.[0] === "ADMIN" ? "Quản trị" : "Người mua"}
               </span>
-              <span className="text-[10px] text-[#737688] font-mono">
-                {profile?.status || "ACTIVE"}
+              <span className="text-[11px] text-[#737688] font-mono">
+                {profile?.status === "ACTIVE" || !profile?.status ? "Hoạt động" : profile.status}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation Stack Bento Card */}
-      <nav className="bg-white rounded-2xl p-2.5 shadow-sm border border-[#c3c5d9]/25 flex flex-col gap-1">
+      {/* Navigation Stack Bento Card (horizontal scroll on mobile, vertical stack on lg+) */}
+      <nav aria-label="Điều hướng tài khoản" className="bg-white rounded-2xl p-2 sm:p-2.5 shadow-sm border border-[#c3c5d9]/25 flex flex-row lg:flex-col gap-1.5 lg:gap-1 overflow-x-auto no-scrollbar">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -156,27 +156,27 @@ export function AccountSidebar() {
             <Link
               key={item.label}
               href={item.href}
-              className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-150 text-xs font-semibold ${
+              className={`flex items-center justify-between px-3 py-2 lg:py-2.5 rounded-xl transition-all duration-150 text-xs font-semibold whitespace-nowrap shrink-0 lg:shrink ${
                 isActive
                   ? "bg-[#0045cc] text-white shadow-sm shadow-[#0045cc]/20"
                   : "text-[#0b1c30] hover:bg-[#eff4ff] hover:text-[#0045cc]"
               }`}
             >
-              <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex items-center gap-2 lg:gap-2.5 min-w-0">
                 <Icon
                   className={`w-4 h-4 shrink-0 ${
                     isActive ? "text-white" : "text-[#737688]"
                   }`}
                 />
-                <span className="truncate">{item.label}</span>
+                <span className="lg:truncate">{item.label}</span>
               </div>
-              <div className="flex items-center gap-1.5 shrink-0 ml-1">
+              <div className="flex items-center gap-1.5 shrink-0 ml-1.5">
                 {item.hasDot && !isActive && (
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 )}
                 {item.badge !== null && item.badge !== undefined && (
                   <span
-                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold ${
                       isActive
                         ? "bg-white text-[#0045cc]"
                         : item.hasAlertBadge
@@ -193,7 +193,7 @@ export function AccountSidebar() {
         })}
 
         {/* Sign Out Action */}
-        <div className="pt-2 mt-1 border-t border-[#eff4ff]">
+        <div className="hidden lg:block pt-2 mt-1 border-t border-[#eff4ff]">
           <button
             onClick={() => logout()}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"

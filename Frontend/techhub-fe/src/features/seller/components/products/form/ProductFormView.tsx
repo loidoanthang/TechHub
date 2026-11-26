@@ -439,29 +439,21 @@ export function ProductFormView({ productId }: ProductFormViewProps = {}) {
         // Cập nhật các biến thể SKU (kể cả kịch bản A hay B)
         for (const v of cleanVariants) {
           if (v.id) {
-            try {
-              await sellerProductApi.updateVariant(productId, v.id, {
-                sku: v.sku,
-                variantName: v.variantName,
-                price: v.price,
-                stockQuantity: v.stockQuantity,
-                imageUrl: v.imageUrl,
-              });
-            } catch (vErr) {
-              console.error("Update variant error:", vErr);
-            }
+            await sellerProductApi.updateVariant(productId, v.id, {
+              sku: v.sku,
+              variantName: v.variantName,
+              price: v.price,
+              stockQuantity: v.stockQuantity,
+              imageUrl: v.imageUrl,
+            });
           } else {
-            try {
-              await sellerProductApi.addVariant(productId, {
-                sku: v.sku,
-                variantName: v.variantName,
-                price: v.price,
-                stockQuantity: v.stockQuantity,
-                imageUrl: v.imageUrl,
-              });
-            } catch (vErr) {
-              console.error("Add variant error:", vErr);
-            }
+            await sellerProductApi.addVariant(productId, {
+              sku: v.sku,
+              variantName: v.variantName,
+              price: v.price,
+              stockQuantity: v.stockQuantity,
+              imageUrl: v.imageUrl,
+            });
           }
         }
 

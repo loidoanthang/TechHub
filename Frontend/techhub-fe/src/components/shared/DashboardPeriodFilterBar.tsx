@@ -85,7 +85,7 @@ export function DashboardPeriodFilterBar({
       className={`relative flex items-center justify-between sm:justify-start gap-2 max-w-full ${className}`}
     >
       {/* Pills Container with horizontal scroll on mobile */}
-      <div className="bg-white border border-slate-200 rounded-xl p-1 flex items-center gap-1 overflow-x-auto no-scrollbar shadow-2xs max-w-full shrink-0">
+      <div className="bg-white border border-slate-200 rounded-xl p-1 flex items-center gap-1 overflow-x-auto no-scrollbar shadow-2xs min-w-0 flex-1 sm:flex-initial">
         {PERIOD_OPTIONS.map((opt) => {
           const isSelected = period === opt.id;
           return (

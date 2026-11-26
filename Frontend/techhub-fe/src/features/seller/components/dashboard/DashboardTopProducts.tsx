@@ -108,9 +108,9 @@ export function DashboardTopProducts({
                     <div className="flex flex-col items-end">
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                        Available
+                        Khả dụng
                       </span>
-                      <span className="text-[10px] text-slate-400">In Stock</span>
+                      <span className="text-[10px] text-slate-400">Còn hàng</span>
                     </div>
                   )}
                 </div>

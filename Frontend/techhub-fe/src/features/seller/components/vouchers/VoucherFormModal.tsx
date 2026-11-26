@@ -204,7 +204,16 @@ export function VoucherFormModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={isEditMode ? "Chỉnh Sửa Mã Giảm Giá" : "Tạo Mã Giảm Giá Mới"}
+      tabIndex={-1}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
+      className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+    >
       <div className="bg-white rounded-3xl w-full max-w-4xl relative border border-slate-200 shadow-2xl overflow-hidden my-auto animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="px-6 py-4.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -225,6 +234,7 @@ export function VoucherFormModal({
           </div>
           <button
             type="button"
+            aria-label="Đóng"
             onClick={onClose}
             className="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-colors"
           >

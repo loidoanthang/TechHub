@@ -238,18 +238,18 @@ export function ShopHeaderBanner({ shop, productCount = 0 }: ShopHeaderBannerPro
           </div>
 
           {/* Right: Bento Metrics / Stats Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:flex lg:flex-wrap items-center gap-2.5 sm:gap-3 text-xs pt-2 lg:pt-4 border-t lg:border-t-0 border-slate-100">
+          <div className="flex flex-wrap items-stretch gap-2.5 sm:gap-3 text-xs pt-2 lg:pt-4 border-t lg:border-t-0 border-slate-100">
             {warehouseLocation && (
               <div
-                className="flex items-center gap-2.5 bg-[#f8faff] hover:bg-[#eff4ff] px-3.5 py-2 rounded-xl border border-[#c3c5d9]/30 transition-colors"
+                className="flex items-center gap-2.5 bg-[#f8faff] hover:bg-[#eff4ff] px-3.5 py-2 rounded-xl border border-[#c3c5d9]/30 transition-colors max-w-full"
                 title={warehouseLocation}
               >
                 <div className="w-8 h-8 rounded-lg bg-[#0045cc]/10 flex items-center justify-center shrink-0">
                   <MapPin className="w-4 h-4 text-[#0045cc]" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[10px] text-[#737688] font-medium leading-none">Kho hàng</span>
-                  <span className="text-xs font-semibold text-[#0b1c30] truncate max-w-[130px] sm:max-w-[160px] mt-1">
+                  <span className="text-[11px] text-[#737688] font-medium leading-none">Kho hàng</span>
+                  <span className="text-xs font-semibold text-[#0b1c30] truncate max-w-[200px] sm:max-w-[180px] mt-1">
                     {warehouseLocation}
                   </span>
                 </div>

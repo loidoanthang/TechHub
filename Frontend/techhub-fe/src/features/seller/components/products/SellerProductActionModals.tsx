@@ -21,7 +21,16 @@ export function SubmitApprovalModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Gửi Duyệt Sản Phẩm"
+      tabIndex={-1}
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && !isLoading) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200"
+    >
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
         <div className="p-5 flex items-start gap-4">
           <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#0045cc] flex items-center justify-center shrink-0">
@@ -39,6 +48,8 @@ export function SubmitApprovalModal({
             </div>
           </div>
           <button
+            type="button"
+            aria-label="Đóng"
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 p-1"
           >
@@ -97,7 +108,16 @@ export function DeleteProductModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Gửi Duyệt Sản Phẩm"
+      tabIndex={-1}
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && !isLoading) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200"
+    >
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
         <div className="p-5 flex items-start gap-4">
           <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
@@ -115,6 +135,8 @@ export function DeleteProductModal({
             </div>
           </div>
           <button
+            type="button"
+            aria-label="Đóng"
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 p-1"
           >

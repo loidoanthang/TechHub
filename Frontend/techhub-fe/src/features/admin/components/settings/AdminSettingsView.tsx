@@ -24,6 +24,7 @@ import {
 import { useAdminDialogA11y } from "../../hooks/useAdminDialogA11y";
 import { AdminPolicyMobileCard } from "./AdminPolicyMobileCard";
 import { ScrollableTabsWrapper } from "@/components/shared/ScrollableTabsWrapper";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import {
   policyUpdateSchema,
   broadcastSchema,
@@ -330,34 +331,46 @@ export function AdminSettingsView() {
                   <label className="text-xs font-bold text-slate-700">
                     Đối tượng nhận *
                   </label>
-                  <select
-                    {...broadcastForm.register("targetAudience")}
-                    className="h-10 px-3 rounded-xl border border-slate-200 text-xs font-semibold bg-white"
-                  >
-                    <option value="ALL_USERS">
-                      Tất cả Người dùng (ALL_USERS)
-                    </option>
-                    <option value="ALL_BUYERS">
-                      Tất cả Người mua (ALL_BUYERS)
-                    </option>
-                    <option value="ALL_SELLERS">
-                      Tất cả Người bán (ALL_SELLERS)
-                    </option>
-                  </select>
+                  <SelectDropdown
+                    value={broadcastForm.watch("targetAudience")}
+                    ariaLabel="Đối tượng nhận"
+                    onChange={(val) =>
+                      broadcastForm.setValue(
+                        "targetAudience",
+                        val as BroadcastFormValues["targetAudience"],
+                        { shouldValidate: true }
+                      )
+                    }
+                    buttonClassName="h-10 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:border-primary"
+                    options={[
+                      { value: "ALL_USERS", label: "Tất cả Người dùng (ALL_USERS)" },
+                      { value: "ALL_BUYERS", label: "Tất cả Người mua (ALL_BUYERS)" },
+                      { value: "ALL_SELLERS", label: "Tất cả Người bán (ALL_SELLERS)" },
+                    ]}
+                  />
                 </div>
 
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-bold text-slate-700">
                     Phân loại thông báo *
                   </label>
-                  <select
-                    {...broadcastForm.register("type")}
-                    className="h-10 px-3 rounded-xl border border-slate-200 text-xs font-semibold bg-white"
-                  >
-                    <option value="PROMOTION">Khuyến mãi (PROMOTION)</option>
-                    <option value="SYSTEM">Hệ thống (SYSTEM)</option>
-                    <option value="SHOP">Gian hàng (SHOP)</option>
-                  </select>
+                  <SelectDropdown
+                    value={broadcastForm.watch("type")}
+                    ariaLabel="Phân loại thông báo"
+                    onChange={(val) =>
+                      broadcastForm.setValue(
+                        "type",
+                        val as BroadcastFormValues["type"],
+                        { shouldValidate: true }
+                      )
+                    }
+                    buttonClassName="h-10 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 bg-white focus:outline-none focus:border-primary"
+                    options={[
+                      { value: "PROMOTION", label: "Khuyến mãi (PROMOTION)" },
+                      { value: "SYSTEM", label: "Hệ thống (SYSTEM)" },
+                      { value: "SHOP", label: "Gian hàng (SHOP)" },
+                    ]}
+                  />
                 </div>
               </div>
 

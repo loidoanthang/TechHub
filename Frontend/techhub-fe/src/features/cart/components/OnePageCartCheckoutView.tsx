@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ProductThumbnail } from "@/components/shared";
 import {
   Store,
@@ -44,7 +45,8 @@ const isUuid = (val: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 
 export function OnePageCartCheckoutView() {
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
   const isBuyerSuspended = user?.status === "SUSPENDED";
   const { items, updateQuantity, removeItem, totalCount, refetchCart } = useCart();
   const { data: addresses = [], isLoading: isLoadingAddresses } = useAddressesQuery();
@@ -93,10 +95,14 @@ export function OnePageCartCheckoutView() {
     }
   }, [addresses, selectedAddressId]);
 
-  // Auto select all items on initial cart load
+  // Auto select all available items on initial cart load
   useEffect(() => {
     if (!hasInitializedSelection && items.length > 0) {
-      setSelectedIds(items.map((item) => item.id));
+      setSelectedIds(
+        items
+          .filter((item) => !item.isOutOfStock && item.isAvailable !== false)
+          .map((item) => item.id)
+      );
       setHasInitializedSelection(true);
     }
   }, [items, hasInitializedSelection]);
@@ -105,13 +111,17 @@ export function OnePageCartCheckoutView() {
     return new Intl.NumberFormat("vi-VN").format(val) + "₫";
   };
 
-  const isAllSelected = items.length > 0 && selectedIds.length === items.length;
+  const selectableItems = items.filter(
+    (item) => !item.isOutOfStock && item.isAvailable !== false
+  );
+  const isAllSelected =
+    selectableItems.length > 0 && selectedIds.length === selectableItems.length;
 
   const toggleSelectAll = () => {
     if (isAllSelected) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(items.map((i) => i.id));
+      setSelectedIds(selectableItems.map((i) => i.id));
     }
   };
 
@@ -222,6 +232,11 @@ export function OnePageCartCheckoutView() {
     if (selectedItems.length === 0) return;
     setSubmitError(null);
 
+    if (!isAuthenticated) {
+      router.push(`${ROUTES.LOGIN}?returnUrl=/cart`);
+      return;
+    }
+
     if (isBuyerSuspended) {
       setSubmitError("Tài khoản của bạn đang bị tạm ngưng đặc quyền mua sắm. Bạn không thể đặt đơn mới vào lúc này.");
       return;
@@ -234,6 +249,11 @@ export function OnePageCartCheckoutView() {
 
     if (addresses.length === 0) {
       setSubmitError("Bạn chưa có địa chỉ nhận hàng. Vui lòng thêm địa chỉ nhận hàng trước.");
+      return;
+    }
+
+    if (validCartItemIds.length === 0) {
+      setSubmitError("Giỏ hàng chưa được đồng bộ với hệ thống. Vui lòng tải lại trang và thử lại.");
       return;
     }
 
@@ -257,31 +277,24 @@ export function OnePageCartCheckoutView() {
       }));
 
       // Call Backend Checkout API
-      if (validCartItemIds.length > 0 && selectedAddressId) {
-        const res = await checkoutApi.placeOrder({
-          addressId: selectedAddressId,
-          paymentMethod: mappedPaymentMethod,
-          paymentInfoId: mappedPaymentMethod === "VNPAY_TOKEN" ? selectedCardId : null,
-          selectedCartItemIds: validCartItemIds,
-          shopOrders,
-          platformVoucherId: selectedVoucher && !isShippingVoucher ? selectedVoucher.id : null,
-          platformShippingVoucherId: selectedVoucher && isShippingVoucher ? selectedVoucher.id : null,
-        });
+      const res = await checkoutApi.placeOrder({
+        addressId: selectedAddressId,
+        paymentMethod: mappedPaymentMethod,
+        paymentInfoId: mappedPaymentMethod === "VNPAY_TOKEN" ? selectedCardId : null,
+        selectedCartItemIds: validCartItemIds,
+        shopOrders,
+        platformVoucherId: selectedVoucher && !isShippingVoucher ? selectedVoucher.id : null,
+        platformShippingVoucherId: selectedVoucher && isShippingVoucher ? selectedVoucher.id : null,
+      });
 
-        // VNPay Payment redirect
-        if (mappedPaymentMethod === "VNPAY" && res.data.paymentUrl) {
-          window.location.href = res.data.paymentUrl;
-          return;
-        }
-
-        // 1-Click Token Pay or COD success -> Open Confirmation Modal
-        setConfirmedOrder(res.data);
-        setIsPlaced(true);
-        refetchCart();
+      // VNPay Payment redirect
+      if (mappedPaymentMethod === "VNPAY" && res.data.paymentUrl) {
+        window.location.href = res.data.paymentUrl;
         return;
       }
 
-      // Fallback for mock items during development
+      // 1-Click Token Pay or COD success -> Open Confirmation Modal
+      setConfirmedOrder(res.data);
       setIsPlaced(true);
       refetchCart();
     } catch (err: unknown) {
@@ -500,74 +513,94 @@ export function OnePageCartCheckoutView() {
 
                     {/* Store Items List */}
                     <div className="divide-y divide-[#c3c5d9]/20">
-                      {storeItems.map((item) => (
-                        <div
-                          key={item.id}
-                          className="p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4"
-                        >
-                          <div className="flex items-center gap-3">
-                            <input
-                              type="checkbox"
-                              checked={selectedIds.includes(item.id)}
-                              onChange={() => toggleSelectItem(item.id)}
-                              className="w-4 h-4 rounded text-[#0d5bff] accent-[#0d5bff] cursor-pointer flex-shrink-0"
-                            />
-                            <ProductThumbnail
-                              src={item.imageUrl}
-                              alt={item.title}
-                              sizeClassName="w-20 h-20"
-                            />
-                          </div>
+                      {storeItems.map((item) => {
+                        const isUnavailable = Boolean(item.isOutOfStock || item.isAvailable === false);
+                        const isMaxStock =
+                          item.stockQuantity !== undefined && item.quantity >= item.stockQuantity;
 
-                          <div className="flex-1 min-w-0 flex flex-col gap-1">
-                            <h3 className="text-sm font-bold text-[#0b1c30] line-clamp-2 leading-snug hover:text-[#0045cc] transition-colors cursor-pointer">
-                              {item.title}
-                            </h3>
-                            <div className="text-xs text-[#737688]">
-                              Phân loại:{" "}
-                              <span className="text-[#434656] font-medium">
-                                {item.specs}
-                              </span>
+                        return (
+                          <div
+                            key={item.id}
+                            className={`p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 ${
+                              isUnavailable ? "bg-slate-50/70 opacity-80" : ""
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="checkbox"
+                                checked={selectedIds.includes(item.id)}
+                                disabled={isUnavailable}
+                                onChange={() => toggleSelectItem(item.id)}
+                                aria-label={`Chọn ${item.title}`}
+                                className="w-4 h-4 rounded text-[#0d5bff] accent-[#0d5bff] cursor-pointer flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                              />
+                              <ProductThumbnail
+                                src={item.imageUrl}
+                                alt={item.title}
+                                sizeClassName="w-20 h-20"
+                              />
                             </div>
-                            <div className="mt-1.5 text-[#0045cc] font-bold text-base">
-                              {formatPrice(item.price)}
-                            </div>
-                          </div>
 
-                          <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto mt-2 sm:mt-0 flex-shrink-0">
-                            {/* Quantity Controls */}
-                            <div className="flex items-center border border-[#c3c5d9]/40 rounded-lg overflow-hidden bg-white">
+                            <div className="flex-1 min-w-0 flex flex-col gap-1">
+                              <h3 className="text-sm font-bold text-[#0b1c30] line-clamp-2 leading-snug hover:text-[#0045cc] transition-colors cursor-pointer">
+                                {item.title}
+                              </h3>
+                              <div className="text-xs text-[#737688]">
+                                Phân loại:{" "}
+                                <span className="text-[#434656] font-medium">
+                                  {item.specs}
+                                </span>
+                              </div>
+                              {isUnavailable && (
+                                <span className="inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-[#ba1a1a] text-xs font-semibold border border-red-200 mt-0.5">
+                                  {item.unavailableReason || "Sản phẩm tạm hết hàng"}
+                                </span>
+                              )}
+                              <div className="mt-1.5 text-[#0045cc] font-bold text-base">
+                                {formatPrice(item.price)}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto mt-2 sm:mt-0 flex-shrink-0">
+                              {/* Quantity Controls */}
+                              <div className="flex items-center border border-[#c3c5d9]/40 rounded-lg overflow-hidden bg-white">
+                                <button
+                                  type="button"
+                                  disabled={isUnavailable || item.quantity <= 1}
+                                  onClick={() => updateQuantity(item.id, -1)}
+                                  aria-label={`Giảm số lượng ${item.title}`}
+                                  className="w-8 h-8 flex items-center justify-center text-[#737688] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                  <Minus className="w-3.5 h-3.5" />
+                                </button>
+                                <span className="w-8 text-center text-xs font-bold text-[#0b1c30]">
+                                  {item.quantity}
+                                </span>
+                                <button
+                                  type="button"
+                                  disabled={isUnavailable || isMaxStock}
+                                  onClick={() => updateQuantity(item.id, 1)}
+                                  aria-label={`Tăng số lượng ${item.title}`}
+                                  className="w-8 h-8 flex items-center justify-center text-[#737688] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+
+                              {/* Delete Item */}
                               <button
                                 type="button"
-                                onClick={() => updateQuantity(item.id, -1)}
-                                className="w-8 h-8 flex items-center justify-center text-[#737688] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors cursor-pointer"
+                                onClick={() => removeItem(item.id)}
+                                className="text-[#737688] hover:text-[#ba1a1a] transition-colors p-1.5 rounded-lg hover:bg-[#eff4ff] cursor-pointer"
+                                title="Xóa sản phẩm"
+                                aria-label={`Xóa ${item.title}`}
                               >
-                                <Minus className="w-3.5 h-3.5" />
-                              </button>
-                              <span className="w-8 text-center text-xs font-bold text-[#0b1c30]">
-                                {item.quantity}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => updateQuantity(item.id, 1)}
-                                className="w-8 h-8 flex items-center justify-center text-[#737688] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors cursor-pointer"
-                              >
-                                <Plus className="w-3.5 h-3.5" />
+                                <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
-
-                            {/* Delete Item */}
-                            <button
-                              type="button"
-                              onClick={() => removeItem(item.id)}
-                              className="text-[#737688] hover:text-[#ba1a1a] transition-colors p-1.5 rounded-lg hover:bg-[#eff4ff] cursor-pointer"
-                              title="Xóa sản phẩm"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -820,7 +853,7 @@ export function OnePageCartCheckoutView() {
                                     </span>
                                   </div>
                                   {card.isDefault && (
-                                    <span className="text-[9px] font-bold text-[#0045cc] bg-[#eff4ff] px-1.5 py-0.5 rounded shrink-0">
+                                    <span className="text-[11px] font-bold text-[#0045cc] bg-[#eff4ff] px-1.5 py-0.5 rounded shrink-0">
                                       Mặc định
                                     </span>
                                   )}

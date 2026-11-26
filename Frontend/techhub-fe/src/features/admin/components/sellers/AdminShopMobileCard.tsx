@@ -48,7 +48,13 @@ export function AdminShopMobileCard({
             shop.status
           )}`}
         >
-          {shop.status}
+          {shop.status === "ACTIVE"
+            ? "Hoạt động"
+            : shop.status === "PAUSED"
+            ? "Tạm nghỉ"
+            : shop.status === "SUSPENDED"
+            ? "Đình chỉ"
+            : "Đã cấm"}
         </span>
       </div>
 

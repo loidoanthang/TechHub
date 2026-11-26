@@ -14,6 +14,7 @@ import { formatPrice } from "@/lib/utils";
 import type { SellerOrderResponse } from "@/types/sellerOrders";
 import type { OrderStatus, CancellationReasonCode } from "@/types/enums";
 import { SELLER_CANCELLATION_REASONS } from "@/lib/constants";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 
 // Helper hook for Accessible Dialogs (Escape key + body scroll lock)
 function useModalAccessibility(isOpen: boolean, onClose: () => void) {
@@ -284,18 +285,17 @@ export function CancelOrderModal({
             <label htmlFor="cancel-order-reason-select" className="text-xs font-bold text-on-surface">
               Lý do hủy đơn <span className="text-red-600">*</span>
             </label>
-            <select
+            <SelectDropdown
               id="cancel-order-reason-select"
               value={reasonCode}
-              onChange={(e) => setReasonCode(e.target.value as CancellationReasonCode)}
-              className="w-full text-xs p-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-primary text-on-surface font-medium cursor-pointer"
-            >
-              {SELLER_CANCELLATION_REASONS.map((opt) => (
-                <option key={opt.code} value={opt.code}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setReasonCode(val as CancellationReasonCode)}
+              ariaLabel="Lý do hủy đơn"
+              buttonClassName="h-10 px-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:border-primary text-xs text-on-surface font-medium"
+              options={SELLER_CANCELLATION_REASONS.map((opt) => ({
+                value: opt.code,
+                label: opt.label,
+              }))}
+            />
           </div>
 
           <div className="flex flex-col gap-1.5">
@@ -597,7 +597,7 @@ export function PrintShippingLabelModal({
                 <span className="text-[10px] font-extrabold text-primary block leading-tight">
                   TEM CHỐNG SỐC &amp; NIÊM PHONG
                 </span>
-                <span className="text-[9px] text-slate-600">Đồng kiểm khi nhận kiện</span>
+                <span className="text-[11px] text-slate-600">Đồng kiểm khi nhận kiện</span>
               </div>
             </div>
           </div>

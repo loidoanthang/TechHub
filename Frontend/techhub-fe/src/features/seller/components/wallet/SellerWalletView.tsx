@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import {
   Wallet,
   RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import { BankWarningBanner } from "./BankWarningBanner";
 import { WalletMetricsBento } from "./WalletMetricsBento";
@@ -46,6 +47,7 @@ export function SellerWalletView() {
   const {
     data: metrics,
     isLoading: isMetricsLoading,
+    error: metricsError,
     refetch: refetchMetrics,
   } = useSellerDashboardMetricsQuery();
 
@@ -71,6 +73,7 @@ export function SellerWalletView() {
   const {
     data: txResponse,
     isLoading: isTxLoading,
+    error: txError,
     refetch: refetchTx,
     isFetching: isTxFetching,
   } = useSellerWalletTransactionsQuery(queryParams);
@@ -158,6 +161,22 @@ export function SellerWalletView() {
       {/* 2. Bank Warning Banner */}
       {!isProfileLoading && (
         <BankWarningBanner isBankIncomplete={isBankIncomplete} />
+      )}
+
+      {(metricsError || txError) && (
+        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>Không thể tải dữ liệu ví hoặc lịch sử giao dịch.</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleRefresh}
+            className="px-3 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-900 font-semibold transition-colors cursor-pointer"
+          >
+            Thử lại
+          </button>
+        </div>
       )}
 
       {/* 3. Bento KPI Cards (Chứa CTA Rút tiền chính) */}

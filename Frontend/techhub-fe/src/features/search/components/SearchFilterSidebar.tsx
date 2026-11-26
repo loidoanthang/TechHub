@@ -94,13 +94,10 @@ export function SearchFilterSidebar({
   };
 
   const handleBrandToggle = (brandId: string) => {
-    const list = filters.selectedBrands;
-    const next = list.includes(brandId)
-      ? list.filter((b) => b !== brandId)
-      : [...list, brandId];
+    const isSelected = filters.selectedBrands.includes(brandId);
     onFilterChange({
       ...filters,
-      selectedBrands: next,
+      selectedBrands: isSelected ? [] : [brandId],
     });
   };
 

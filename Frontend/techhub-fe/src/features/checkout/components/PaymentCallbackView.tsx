@@ -124,10 +124,10 @@ function PaymentCallbackContent() {
               <Loader2 className="w-8 h-8 animate-spin" />
             </div>
             <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
-              {isTokenLink ? "Verifying Card Linking..." : "Verifying Payment..."}
+              {isTokenLink ? "Đang xác thực liên kết thẻ..." : "Đang xác thực thanh toán..."}
             </h1>
             <p className="text-sm text-[#434656] leading-relaxed">
-              Please wait while we verify your transaction status and digital checksum with VNPay secure servers.
+              Vui lòng chờ trong khi hệ thống kiểm tra trạng thái giao dịch và chữ ký bảo mật với cổng VNPay.
             </p>
           </>
         ) : isSuccess ? (
@@ -136,12 +136,12 @@ function PaymentCallbackContent() {
               <CheckCircle2 className="w-10 h-10" />
             </div>
             <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
-              {isTokenLink ? "Card Linked Successfully!" : "Payment Successful!"}
+              {isTokenLink ? "Liên kết thẻ thành công!" : "Thanh toán thành công!"}
             </h1>
             <p className="text-sm text-[#434656] leading-relaxed">
               {isTokenLink
                 ? "Thẻ ngân hàng của bạn đã được liên kết thành công với TechHub. Bạn có thể sử dụng thanh toán 1-click cho các lần mua hàng tiếp theo."
-                : "Your VNPay transaction has been verified successfully. Your order is now being processed by our verified merchants."}
+                : "Giao dịch VNPay của bạn đã được xác nhận. Đơn hàng đang được nhà bán xử lý."}
             </p>
           </>
         ) : (
@@ -150,42 +150,42 @@ function PaymentCallbackContent() {
               <XCircle className="w-10 h-10" />
             </div>
             <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
-              {isTokenLink ? "Card Linking Failed" : "Payment Failed"}
+              {isTokenLink ? "Liên kết thẻ thất bại" : "Thanh toán thất bại"}
             </h1>
             <p className="text-sm text-[#434656] leading-relaxed">
-              {errorMessage || "The transaction could not be verified or was cancelled."}
+              {errorMessage || "Không thể xác thực giao dịch hoặc giao dịch đã bị hủy."}
             </p>
           </>
         )}
 
         {!isLoading && (
           <div className="w-full bg-[#eff4ff] rounded-xl p-4 text-xs flex flex-col gap-2 my-2 text-left">
-            <div className="flex justify-between">
-              <span className="text-[#737688]">Transaction ID:</span>
-              <span className="font-mono font-bold text-[#0b1c30]">{transactionNo}</span>
+            <div className="flex justify-between gap-2">
+              <span className="text-[#737688] shrink-0">Mã giao dịch:</span>
+              <span className="font-mono font-bold text-[#0b1c30] text-right break-all">{transactionNo}</span>
             </div>
             {!isTokenLink && (
-              <div className="flex justify-between">
-                <span className="text-[#737688]">Amount:</span>
-                <span className="font-mono font-bold text-[#0045cc]">{formattedAmount}</span>
+              <div className="flex justify-between gap-2">
+                <span className="text-[#737688] shrink-0">Số tiền:</span>
+                <span className="font-mono font-bold text-[#0045cc] text-right">{formattedAmount}</span>
               </div>
             )}
-            <div className="flex justify-between">
-              <span className="text-[#737688]">Payment Method:</span>
-              <span className="font-semibold text-[#0b1c30]">
-                {isTokenLink ? "VNPAY Token (Liên kết thẻ)" : "VNPay QR / Banking"}
+            <div className="flex justify-between gap-2">
+              <span className="text-[#737688] shrink-0">Phương thức:</span>
+              <span className="font-semibold text-[#0b1c30] text-right">
+                {isTokenLink ? "VNPAY Token (Liên kết thẻ)" : "VNPay QR / Ngân hàng"}
               </span>
             </div>
             {result?.bankCode && (
-              <div className="flex justify-between">
-                <span className="text-[#737688]">Bank:</span>
-                <span className="font-semibold text-[#0b1c30]">{result.bankCode}</span>
+              <div className="flex justify-between gap-2">
+                <span className="text-[#737688] shrink-0">Ngân hàng:</span>
+                <span className="font-semibold text-[#0b1c30] text-right">{result.bankCode}</span>
               </div>
             )}
             {!isTokenLink && result?.orderNumbers && result.orderNumbers.length > 0 && (
-              <div className="flex justify-between">
-                <span className="text-[#737688]">Orders:</span>
-                <span className="font-mono text-[#0b1c30]">{result.orderNumbers.join(", ")}</span>
+              <div className="flex justify-between gap-2">
+                <span className="text-[#737688] shrink-0">Mã đơn hàng:</span>
+                <span className="font-mono text-[#0b1c30] text-right break-all">{result.orderNumbers.join(", ")}</span>
               </div>
             )}
           </div>
@@ -206,7 +206,7 @@ function PaymentCallbackContent() {
                 href="/"
                 className="w-full py-3 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
               >
-                <span>Back to Marketplace</span>
+                <span>Về trang chủ</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             )
@@ -224,7 +224,7 @@ function PaymentCallbackContent() {
                   href="/"
                   className="w-full py-3 rounded-xl border border-[#c3c5d9]/40 hover:bg-[#eff4ff] text-[#0b1c30] text-sm font-semibold transition-colors flex items-center justify-center gap-2"
                 >
-                  <span>Back to Marketplace</span>
+                  <span>Về trang chủ</span>
                 </Link>
               </>
             ) : (
@@ -233,14 +233,14 @@ function PaymentCallbackContent() {
                   href="/account/orders"
                   className="w-full py-3 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
                 >
-                  <span>Go to My Orders (Pay Now)</span>
+                  <span>Xem đơn hàng (Thanh toán lại)</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
                   href="/"
                   className="w-full py-3 rounded-xl border border-[#c3c5d9]/40 hover:bg-[#eff4ff] text-[#0b1c30] text-sm font-semibold transition-colors flex items-center justify-center gap-2"
                 >
-                  <span>Back to Marketplace</span>
+                  <span>Về trang chủ</span>
                 </Link>
               </>
             )

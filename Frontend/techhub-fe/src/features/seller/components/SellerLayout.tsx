@@ -321,7 +321,8 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-1.5 sm:p-2 rounded-xl text-[#434656] hover:bg-[#eff4ff] transition-colors"
-              aria-label="Toggle menu"
+              aria-label="Mở hoặc đóng menu"
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -475,10 +476,20 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
 
         {/* MOBILE SIDEBAR DRAWER */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu Kênh Người Bán"
+            tabIndex={-1}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setMobileMenuOpen(false);
+            }}
+            className="fixed inset-0 z-50 lg:hidden"
+          >
             <div
               className="fixed inset-0 bg-black/40"
               onClick={() => setMobileMenuOpen(false)}
+              aria-hidden="true"
             />
             <div className="fixed inset-y-0 left-0 w-72 bg-white p-5 flex flex-col gap-5 z-50 overflow-y-auto">
               <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-4">
@@ -487,6 +498,7 @@ export function SellerLayout({ children }: { children: React.ReactNode }) {
                 </span>
                 <button
                   type="button"
+                  aria-label="Đóng menu"
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-1 rounded-lg text-[#737688] hover:bg-[#eff4ff]"
                 >

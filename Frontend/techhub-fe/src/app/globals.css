@@ -120,6 +120,14 @@ body {
   padding: 0;
 }
 
+.font-heading {
+  font-family: var(--font-heading), system-ui, sans-serif;
+}
+
+select {
+  line-height: normal;
+}
+
 /* Custom Double Range Slider styling */
 .range-slider-thumb {
   -webkit-appearance: none;

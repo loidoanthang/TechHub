@@ -23,6 +23,7 @@ import { AdminTablePagination } from "../shared/AdminTablePagination";
 import { AdminSellerMobileCard } from "./AdminSellerMobileCard";
 import { AdminShopMobileCard } from "./AdminShopMobileCard";
 import { ScrollableTabsWrapper } from "@/components/shared/ScrollableTabsWrapper";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import { formatPrice } from "@/lib/utils";
 import type { SellerVerificationStatus, ShopStatus } from "@/types/enums";
 
@@ -195,38 +196,42 @@ export function AdminSellersView() {
           </div>
 
           {mainTab === "APPLICATIONS" ? (
-            <select
+            <SelectDropdown
               value={sellerStatusFilter}
-              aria-label="Lọc hồ sơ theo trạng thái duyệt"
-              onChange={(e) => {
-                setSellerStatusFilter(
-                  e.target.value as SellerVerificationStatus | ""
-                );
+              ariaLabel="Lọc hồ sơ theo trạng thái duyệt"
+              onChange={(val) => {
+                setSellerStatusFilter(val as SellerVerificationStatus | "");
                 setPage(0);
               }}
-              className="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white sm:w-52"
-            >
-              <option value="">Tất cả trạng thái duyệt</option>
-              <option value="PENDING">Chờ duyệt (PENDING)</option>
-              <option value="APPROVED">Đã duyệt (APPROVED)</option>
-              <option value="REJECTED">Từ chối (REJECTED)</option>
-            </select>
+              className="w-full sm:w-52"
+              align="right"
+              buttonClassName="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary"
+              options={[
+                { value: "", label: "Tất cả trạng thái duyệt" },
+                { value: "PENDING", label: "Chờ duyệt (PENDING)" },
+                { value: "APPROVED", label: "Đã duyệt (APPROVED)" },
+                { value: "REJECTED", label: "Từ chối (REJECTED)" },
+              ]}
+            />
           ) : (
-            <select
+            <SelectDropdown
               value={shopStatusFilter}
-              aria-label="Lọc gian hàng theo trạng thái"
-              onChange={(e) => {
-                setShopStatusFilter(e.target.value as ShopStatus | "");
+              ariaLabel="Lọc gian hàng theo trạng thái"
+              onChange={(val) => {
+                setShopStatusFilter(val as ShopStatus | "");
                 setPage(0);
               }}
-              className="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white sm:w-52"
-            >
-              <option value="">Tất cả trạng thái Shop</option>
-              <option value="ACTIVE">Đang hoạt động (ACTIVE)</option>
-              <option value="PAUSED">Tạm nghỉ (PAUSED)</option>
-              <option value="SUSPENDED">Đình chỉ (SUSPENDED)</option>
-              <option value="BANNED">Cấm vĩnh viễn (BANNED)</option>
-            </select>
+              className="w-full sm:w-52"
+              align="right"
+              buttonClassName="h-10 px-3.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary"
+              options={[
+                { value: "", label: "Tất cả trạng thái Shop" },
+                { value: "ACTIVE", label: "Đang hoạt động (ACTIVE)" },
+                { value: "PAUSED", label: "Tạm nghỉ (PAUSED)" },
+                { value: "SUSPENDED", label: "Đình chỉ (SUSPENDED)" },
+                { value: "BANNED", label: "Cấm vĩnh viễn (BANNED)" },
+              ]}
+            />
           )}
         </div>
       </div>

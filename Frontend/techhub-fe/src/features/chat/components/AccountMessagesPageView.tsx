@@ -49,10 +49,11 @@ export function AccountMessagesPageView() {
     { enabled: true, activeConversationId: activeId, currentUserId }
   );
 
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const activeConversation = conversations.find((c) => c.id === activeId);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6">
+    <div className="w-full">
       <h1 className="mb-4 font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
         Tin nhắn
       </h1>
@@ -128,19 +129,38 @@ export function AccountMessagesPageView() {
                     </span>
                   ) : null}
                 </button>
-                <button
-                  type="button"
-                  aria-label="Xóa hội thoại"
-                  disabled={deleteMutation.isPending}
-                  onClick={() => {
-                    if (window.confirm("Xóa hội thoại này?")) {
-                      deleteMutation.mutate(c.id);
-                    }
-                  }}
-                  className="mr-2 shrink-0 rounded-full p-1.5 text-slate-300 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
-                >
-                  ✕
-                </button>
+                {confirmDeleteId === c.id ? (
+                  <div className="mr-2 flex items-center gap-1 shrink-0">
+                    <button
+                      type="button"
+                      disabled={deleteMutation.isPending}
+                      onClick={() => {
+                        deleteMutation.mutate(c.id);
+                        setConfirmDeleteId(null);
+                      }}
+                      className="px-2 py-1 rounded-lg bg-[#ba1a1a] text-white text-[11px] font-semibold cursor-pointer"
+                    >
+                      Xóa
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDeleteId(null)}
+                      className="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-semibold cursor-pointer"
+                    >
+                      Hủy
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    aria-label="Xóa hội thoại"
+                    disabled={deleteMutation.isPending}
+                    onClick={() => setConfirmDeleteId(c.id)}
+                    className="mr-2 shrink-0 rounded-full p-1.5 text-slate-400 opacity-100 lg:opacity-0 transition hover:bg-red-50 hover:text-red-500 lg:group-hover:opacity-100 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
             ))}
           </div>

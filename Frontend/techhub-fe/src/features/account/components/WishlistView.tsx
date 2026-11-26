@@ -29,7 +29,7 @@ export function WishlistView() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const pageSize = 12;
 
-  const { data, isLoading, error } = useWishlistQuery(page, pageSize);
+  const { data, isLoading, error, refetch } = useWishlistQuery(page, pageSize);
   const removeMutation = useRemoveFromWishlistMutation();
 
   const items = data?.content || [];
@@ -53,7 +53,7 @@ export function WishlistView() {
               Danh sách Yêu thích
             </h1>
             <span
-              className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
+              className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors whitespace-nowrap shrink-0 ${
                 totalElements >= MAX_WISHLIST_LIMIT
                   ? "bg-rose-50 text-rose-700 border-rose-200"
                   : "bg-blue-50 text-[#0045cc] border-blue-200"
@@ -111,6 +111,13 @@ export function WishlistView() {
           <p className="text-xs text-slate-500 max-w-sm">
             Đã có lỗi xảy ra khi kết nối máy chủ. Vui lòng kiểm tra lại kết nối mạng của bạn.
           </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="mt-1 px-4 py-2 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold transition-colors cursor-pointer"
+          >
+            Thử lại
+          </button>
         </div>
       ) : items.length === 0 ? (
         /* Empty State */

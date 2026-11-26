@@ -3,6 +3,7 @@
 import React from "react";
 import { Search, Filter, Percent, Truck } from "lucide-react";
 import { ScrollableTabsWrapper } from "@/components/shared/ScrollableTabsWrapper";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import type {
   VoucherStatus,
   DiscountType,
@@ -95,36 +96,39 @@ export function SellerVoucherTabs({
         </div>
 
         {/* Dropdowns */}
-        <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
           {/* Discount Type Dropdown */}
-          <select
+          <SelectDropdown
             value={discountType || ""}
-            onChange={(e) =>
-              onDiscountTypeChange(
-                e.target.value ? (e.target.value as DiscountType) : undefined
-              )
+            onChange={(val) =>
+              onDiscountTypeChange(val ? (val as DiscountType) : undefined)
             }
-            className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] transition-colors cursor-pointer"
-          >
-            <option value="">Tất cả hình thức</option>
-            <option value="PERCENTAGE">Giảm theo %</option>
-            <option value="FIXED_AMOUNT">Giảm tiền mặt (VNĐ)</option>
-          </select>
+            ariaLabel="Lọc theo hình thức giảm giá"
+            className="w-full sm:w-44"
+            buttonClassName="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] transition-colors"
+            options={[
+              { value: "", label: "Tất cả hình thức" },
+              { value: "PERCENTAGE", label: "Giảm theo %" },
+              { value: "FIXED_AMOUNT", label: "Giảm tiền mặt (VNĐ)" },
+            ]}
+          />
 
           {/* Applies To Dropdown */}
-          <select
+          <SelectDropdown
             value={appliesTo || ""}
-            onChange={(e) =>
-              onAppliesToChange(
-                e.target.value ? (e.target.value as VoucherAppliesTo) : undefined
-              )
+            onChange={(val) =>
+              onAppliesToChange(val ? (val as VoucherAppliesTo) : undefined)
             }
-            className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] transition-colors cursor-pointer"
-          >
-            <option value="">Tất cả phạm vi</option>
-            <option value="PRODUCT">Toàn bộ sản phẩm</option>
-            <option value="SHIPPING_FEE">Phí vận chuyển</option>
-          </select>
+            ariaLabel="Lọc theo phạm vi áp dụng"
+            className="w-full sm:w-44"
+            align="right"
+            buttonClassName="h-9 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0045cc]/20 focus:border-[#0045cc] transition-colors"
+            options={[
+              { value: "", label: "Tất cả phạm vi" },
+              { value: "PRODUCT", label: "Toàn bộ sản phẩm" },
+              { value: "SHIPPING_FEE", label: "Phí vận chuyển" },
+            ]}
+          />
         </div>
       </div>
     </div>

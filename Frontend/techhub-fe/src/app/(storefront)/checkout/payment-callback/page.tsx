@@ -2,8 +2,8 @@ import { PaymentCallbackView } from "@/features/checkout/components/PaymentCallb
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Payment Result | TechHub Marketplace",
-  description: "VNPay payment gateway transaction authorization result.",
+  title: "Kết quả thanh toán | TechHub Marketplace",
+  description: "Kết quả xác thực giao dịch qua cổng thanh toán VNPay.",
 };
 
 export default function PaymentCallbackPage() {

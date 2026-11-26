@@ -101,10 +101,10 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
     if (!order) return;
     try {
       await completeOrderMutation.mutateAsync(order.orderId);
-      showToast("Receipt confirmed! Escrow funds released to merchant.");
+      showToast("Đã xác nhận nhận hàng thành công!");
       refetch();
     } catch {
-      showToast("Failed to confirm receipt.");
+      showToast("Không thể xác nhận nhận hàng.");
     }
   };
 
@@ -138,15 +138,15 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
     return (
       <div className="w-full bg-white rounded-2xl p-8 border border-[#c3c5d9]/25 text-center flex flex-col items-center gap-4">
         <AlertCircle className="w-10 h-10 text-amber-500" />
-        <h2 className="text-lg font-bold text-[#0b1c30]">Order Not Found</h2>
+        <h2 className="text-lg font-bold text-[#0b1c30]">Không tìm thấy đơn hàng</h2>
         <p className="text-xs text-[#737688]">
-          We could not load details for order #{orderId}. It may not exist or belongs to another user.
+          Không thể tải thông tin cho đơn hàng #{orderId}. Đơn hàng có thể không tồn tại hoặc không thuộc tài khoản của bạn.
         </p>
         <Link
           href="/account/orders"
           className="px-5 py-2.5 rounded-xl bg-[#0045cc] text-white text-xs font-semibold"
         >
-          Back to My Orders
+          Quay lại Đơn mua của tôi
         </Link>
       </div>
     );
@@ -163,23 +163,24 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
   const normalizedTimeline = buildNormalizedTimeline(order.timeline, order.status);
 
   return (
-    <main className="w-full flex flex-col gap-6">
+    <div className="w-full flex flex-col gap-6">
       {/* Back Button & Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#eff4ff]">
-        <div className="flex items-center gap-3">
+        <div className="flex items-start sm:items-center gap-3 min-w-0">
           <Link
             href="/account/orders"
-            className="p-2 rounded-xl bg-white border border-[#c3c5d9]/30 text-[#434656] hover:bg-[#eff4ff] hover:text-[#0045cc] transition-colors"
+            aria-label="Quay lại danh sách đơn hàng"
+            className="p-2 rounded-xl bg-white border border-[#c3c5d9]/30 text-[#434656] hover:bg-[#eff4ff] hover:text-[#0045cc] transition-colors shrink-0"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
-                Order Details #{order.orderNumber}
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight break-all">
+                Chi tiết đơn #{order.orderNumber}
               </h1>
               <span
-                className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase ${
+                className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase shrink-0 ${
                   order.status === "COMPLETED"
                     ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                     : order.status === "SHIPPING" || order.status === "DELIVERED"
@@ -197,7 +198,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
               </span>
             </div>
             <p className="text-xs text-[#737688] font-mono mt-0.5">
-              Placed on {new Date(order.createdAt).toLocaleString("vi-VN")}
+              Đặt lúc {new Date(order.createdAt).toLocaleString("vi-VN")}
             </p>
           </div>
         </div>
@@ -277,7 +278,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
         <div className="bg-white rounded-2xl p-6 border border-[#c3c5d9]/25 shadow-sm">
           <h2 className="text-xs font-bold text-[#0b1c30] uppercase tracking-wider mb-6 flex items-center gap-2">
             <Truck className="w-4 h-4 text-[#0045cc]" />
-            Order Timeline &amp; Delivery Progress
+            Tiến trình đơn hàng &amp; Giao nhận
           </h2>
 
           {/* DESKTOP & TABLET VIEW: Connected Continuous Stepper */}
@@ -355,7 +356,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
         <div className="bg-white rounded-2xl p-6 border border-[#c3c5d9]/25 shadow-sm flex flex-col gap-3">
           <div className="flex items-center gap-2 text-xs font-bold text-[#0b1c30] uppercase tracking-wider">
             <MapPin className="w-4 h-4 text-[#0045cc]" />
-            Delivery Destination
+            Địa chỉ nhận hàng
           </div>
           <div className="flex flex-col gap-1 text-xs">
             <span className="font-bold text-[#0b1c30] text-sm">
@@ -376,15 +377,15 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
         <div className="bg-white rounded-2xl p-6 border border-[#c3c5d9]/25 shadow-sm flex flex-col gap-3">
           <div className="flex items-center gap-2 text-xs font-bold text-[#0b1c30] uppercase tracking-wider">
             <CreditCard className="w-4 h-4 text-[#0045cc]" />
-            Payment Information
+            Thông tin thanh toán
           </div>
           <div className="flex flex-col gap-2 text-xs">
-            <div className="flex justify-between">
-              <span className="text-[#737688]">Method:</span>
+            <div className="flex justify-between gap-2">
+              <span className="text-[#737688]">Phương thức:</span>
               <strong className="text-[#0b1c30]">{order.paymentMethod}</strong>
             </div>
-            <div className="flex justify-between">
-              <span className="text-[#737688]">Status:</span>
+            <div className="flex justify-between gap-2">
+              <span className="text-[#737688]">Trạng thái:</span>
               <strong
                 className={
                   order.paymentStatus === "COMPLETED"
@@ -394,11 +395,19 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
                     : "text-amber-600"
                 }
               >
-                {order.paymentStatus}
+                {({
+                  COMPLETED: "Đã thanh toán",
+                  PENDING: "Chờ thanh toán",
+                  FAILED: "Thất bại",
+                  EXPIRED: "Đã hết hạn",
+                  REFUNDED: "Đã hoàn tiền",
+                  PAID: "Đã thanh toán",
+                  CANCELLED: "Đã hủy",
+                } as Record<string, string>)[order.paymentStatus] || order.paymentStatus}
               </strong>
             </div>
-            <div className="pt-2 border-t border-[#eff4ff] flex justify-between items-baseline">
-              <span className="text-xs text-[#737688]">Total Paid / Due:</span>
+            <div className="pt-2 border-t border-[#eff4ff] flex justify-between items-baseline gap-2">
+              <span className="text-xs text-[#737688]">Tổng thanh toán:</span>
               <span className="text-base font-bold text-[#0045cc]">
                 {formatPrice(order.totalAmount)}
               </span>
@@ -410,7 +419,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
       {/* Items List */}
       <div className="bg-white rounded-2xl border border-[#c3c5d9]/25 shadow-sm overflow-hidden flex flex-col">
         <div className="p-4 bg-[#eff4ff]/60 border-b border-[#eff4ff] text-xs font-bold text-[#0b1c30]">
-          Ordered Components ({order.items.length})
+          Sản phẩm đã đặt ({order.items.length})
         </div>
 
         <div className="divide-y divide-[#eff4ff]">
@@ -474,14 +483,21 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
                   </div>
                   {(order.status === "DELIVERED" ||
                     order.status === "COMPLETED") && (
-                    <button
-                      type="button"
-                      onClick={() => setSelectedReviewItem(item)}
-                      className="px-3 py-1.5 rounded-xl border border-[#0045cc]/30 text-[#0045cc] hover:bg-[#0045cc]/5 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
-                    >
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      <span>{item.hasReviewed ? "Sửa đánh giá" : "Đánh giá sản phẩm"}</span>
-                    </button>
+                    item.hasReviewed ? (
+                      <span className="px-3 py-1.5 rounded-xl bg-[#eff4ff] text-[#006b5b] text-xs font-semibold inline-flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Đã đánh giá</span>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedReviewItem(item)}
+                        className="px-3 py-1.5 rounded-xl border border-[#0045cc]/30 text-[#0045cc] hover:bg-[#0045cc]/5 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                      >
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        <span>Đánh giá sản phẩm</span>
+                      </button>
+                    )
                   )}
                 </div>
               </div>
@@ -491,28 +507,28 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
 
         {/* Pricing Breakdown */}
         <div className="p-5 bg-[#eff4ff]/20 border-t border-[#eff4ff] flex flex-col gap-2 text-xs">
-          <div className="flex justify-between text-[#737688]">
-            <span>Products Subtotal:</span>
+          <div className="flex justify-between gap-2 text-[#737688]">
+            <span>Tổng tiền hàng:</span>
             <span>{formatPrice(order.totalProductAmount)}</span>
           </div>
-          <div className="flex justify-between text-[#737688]">
-            <span>Shipping Fee:</span>
+          <div className="flex justify-between gap-2 text-[#737688]">
+            <span>Phí vận chuyển:</span>
             <span>{formatPrice(order.shippingFee)}</span>
           </div>
           {order.shopDiscountAmount > 0 && (
-            <div className="flex justify-between text-emerald-600">
-              <span>Shop Voucher Discount:</span>
+            <div className="flex justify-between gap-2 text-emerald-600">
+              <span>Voucher của Shop:</span>
               <span>-{formatPrice(order.shopDiscountAmount)}</span>
             </div>
           )}
           {order.platformDiscountAmount > 0 && (
-            <div className="flex justify-between text-emerald-600">
-              <span>Platform Voucher Discount:</span>
+            <div className="flex justify-between gap-2 text-emerald-600">
+              <span>Voucher TechHub:</span>
               <span>-{formatPrice(order.platformDiscountAmount)}</span>
             </div>
           )}
-          <div className="pt-2 border-t border-[#eff4ff] flex justify-between items-baseline text-sm font-bold text-[#0b1c30]">
-            <span>Total Payable:</span>
+          <div className="pt-2 border-t border-[#eff4ff] flex justify-between items-baseline gap-2 text-sm font-bold text-[#0b1c30]">
+            <span>Tổng thanh toán:</span>
             <span className="text-base text-[#0045cc]">
               {formatPrice(order.totalAmount)}
             </span>
@@ -533,7 +549,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
               ) : (
                 <CreditCard className="w-3.5 h-3.5" />
               )}
-              <span>{isRetryingPayment ? "Đang kết nối..." : "Pay Now"}</span>
+              <span>{isRetryingPayment ? "Đang kết nối..." : "Thanh toán ngay"}</span>
             </button>
           )}
 
@@ -546,7 +562,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
                 className="px-5 py-2.5 rounded-xl bg-[#006b5b] hover:bg-[#008b77] text-white text-xs font-semibold shadow-sm flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Confirm Receipt</span>
+                <span>Đã nhận được hàng</span>
               </button>
               <button
                 type="button"
@@ -554,7 +570,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
                 className="px-5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>Return / Refund</span>
+                <span>Trả hàng / Hoàn tiền</span>
               </button>
             </>
           )}
@@ -582,7 +598,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
               onClick={() => setIsCancelModalOpen(true)}
               className="px-5 py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold cursor-pointer"
             >
-              {isPendingPayment ? "Cancel Order" : "Request Cancellation"}
+              {isPendingPayment ? "Hủy đơn hàng" : "Yêu cầu hủy đơn"}
             </button>
           )}
         </div>
@@ -600,8 +616,8 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
           onSuccess={(isDirect) => {
             showToast(
               isDirect
-                ? "Order cancelled immediately."
-                : "Cancellation request submitted for merchant review."
+                ? "Đơn hàng đã được hủy."
+                : "Đã gửi yêu cầu hủy đơn tới cửa hàng."
             );
             refetch();
           }}
@@ -619,7 +635,7 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
           isOpen={isReturnModalOpen}
           onClose={() => setIsReturnModalOpen(false)}
           onSuccess={() => {
-            showToast("Return & Refund request submitted successfully.");
+            showToast("Đã gửi yêu cầu trả hàng & hoàn tiền thành công.");
             refetch();
           }}
         />
@@ -649,6 +665,6 @@ export function OrderDetailView({ orderId }: OrderDetailViewProps) {
         <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
         <span className="text-xs font-semibold">{toastMessage}</span>
       </div>
-    </main>
+    </div>
   );
 }

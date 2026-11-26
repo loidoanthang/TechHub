@@ -18,6 +18,7 @@ import {
   useDeleteNotificationMutation,
 } from "../api";
 import { Pagination } from "@/components/shared/Pagination";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import { toast } from "@/lib/toast";
 import { NOTIFICATION_CATEGORIES } from "../utils/notificationHelpers";
 import type { NotificationType, PortalContext } from "../types";
@@ -181,21 +182,20 @@ export function NotificationsPageView({
           <div className="flex items-center gap-2">
             <Filter className="w-3.5 h-3.5 text-slate-500" />
             <span className="font-semibold text-slate-700">Trạng thái:</span>
-            <div className="relative inline-block">
-              <select
-                value={readFilter}
-                onChange={(e) =>
-                  handleSelectReadFilter(e.target.value as "ALL" | "UNREAD" | "READ")
-                }
-                aria-label="Lọc theo trạng thái đọc"
-                className="appearance-none bg-white border border-slate-200 text-xs font-semibold text-slate-800 rounded-lg pl-3 pr-7 py-1 hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer shadow-2xs"
-              >
-                <option value="ALL">Tất cả</option>
-                <option value="UNREAD">Chưa đọc</option>
-                <option value="READ">Đã đọc</option>
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
+            <SelectDropdown
+              value={readFilter}
+              onChange={(val) =>
+                handleSelectReadFilter(val as "ALL" | "UNREAD" | "READ")
+              }
+              ariaLabel="Lọc theo trạng thái đọc"
+              className="w-32"
+              buttonClassName="h-8 bg-white border border-slate-200 text-xs font-semibold text-slate-800 rounded-lg px-3 hover:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-2xs"
+              options={[
+                { value: "ALL", label: "Tất cả" },
+                { value: "UNREAD", label: "Chưa đọc" },
+                { value: "READ", label: "Đã đọc" },
+              ]}
+            />
           </div>
 
           <span className="text-[11px] font-medium hidden sm:inline">

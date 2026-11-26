@@ -244,7 +244,12 @@ export function PaymentMethodsView() {
 
       {/* Delete Confirmation Modal */}
       {cardToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Xác nhận hủy liên kết thẻ"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4"
+        >
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-[#c3c5d9]/30 flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />

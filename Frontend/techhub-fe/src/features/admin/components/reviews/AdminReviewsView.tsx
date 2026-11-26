@@ -26,6 +26,7 @@ import { AdminTablePagination } from "../shared/AdminTablePagination";
 import { AdminReviewMobileCard } from "./AdminReviewMobileCard";
 import { ReviewDetailDrawer } from "./ReviewDetailDrawer";
 import { ReviewDeleteConfirmModal } from "./ReviewDeleteConfirmModal";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import type { AdminReviewResponse } from "@/types/review";
 import { formatDate } from "@/lib/utils";
 
@@ -193,22 +194,23 @@ export function AdminReviewsView() {
 
           {/* Rating filter dropdown */}
           <div className="w-full sm:w-44">
-            <select
+            <SelectDropdown
               value={selectedRating !== null ? String(selectedRating) : ""}
-              onChange={(e) => {
-                const val = e.target.value;
+              ariaLabel="Lọc theo số sao đánh giá"
+              onChange={(val) => {
                 setSelectedRating(val ? Number(val) : null);
                 setPage(0);
               }}
-              className="w-full text-xs sm:text-sm px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            >
-              <option value="">Tất cả số sao</option>
-              <option value="5">5 sao (Tuyệt vời)</option>
-              <option value="4">4 sao (Hài lòng)</option>
-              <option value="3">3 sao (Bình thường)</option>
-              <option value="2">2 sao (Không tốt)</option>
-              <option value="1">1 sao (Rất tệ)</option>
-            </select>
+              buttonClassName="h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              options={[
+                { value: "", label: "Tất cả số sao" },
+                { value: "5", label: "5 sao (Tuyệt vời)" },
+                { value: "4", label: "4 sao (Hài lòng)" },
+                { value: "3", label: "3 sao (Bình thường)" },
+                { value: "2", label: "2 sao (Không tốt)" },
+                { value: "1", label: "1 sao (Rất tệ)" },
+              ]}
+            />
           </div>
 
           {/* Reset Filters button */}

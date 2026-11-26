@@ -135,7 +135,16 @@ export function WithdrawalModal({
     : "";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Yêu cầu Rút tiền Doanh thu"
+      tabIndex={-1}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200"
+    >
       <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-6 border-b border-slate-100 flex items-center justify-between">
@@ -154,6 +163,7 @@ export function WithdrawalModal({
           </div>
           <button
             type="button"
+            aria-label="Đóng"
             onClick={onClose}
             className="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
           >

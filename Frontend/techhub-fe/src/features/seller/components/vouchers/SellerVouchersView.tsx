@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { AlertCircle } from "lucide-react";
+import { useSellerShopQuery } from "../../hooks/useSellerQueries";
+import { toast } from "@/lib/toast";
 import {
   useSellerVouchersQuery,
   useUpdateVoucherStatusMutation,
@@ -58,7 +61,8 @@ export function SellerVouchersView() {
     };
   }, [debouncedKeyword, status, discountType, appliesTo, page]);
 
-  const { data: pageData, isLoading } = useSellerVouchersQuery(queryParams);
+  const { data: pageData, isLoading, error, refetch } = useSellerVouchersQuery(queryParams);
+  const { data: sellerShop } = useSellerShopQuery();
   const vouchers = pageData?.content || [];
   const totalElements = pageData?.totalElements || 0;
   const totalPages = pageData?.totalPages || 0;
@@ -114,6 +118,7 @@ export function SellerVouchersView() {
       });
     } catch (err) {
       console.error("Toggle voucher status error:", err);
+      toast.error("Không thể cập nhật trạng thái mã giảm giá.");
     } finally {
       setUpdatingVoucherId(null);
     }
@@ -133,6 +138,7 @@ export function SellerVouchersView() {
       setDeletingVoucher(null);
     } catch (err) {
       console.error("Delete voucher error:", err);
+      toast.error("Không thể xóa mã giảm giá. Vui lòng thử lại.");
     } finally {
       setIsDeleting(false);
     }
@@ -165,6 +171,23 @@ export function SellerVouchersView() {
         statusCounts={statusCounts}
       />
 
+      {/* Error Banner */}
+      {error && (
+        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>Không thể tải danh sách voucher từ máy chủ.</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="px-3 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-900 font-semibold transition-colors cursor-pointer"
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
+
       {/* 3. Vouchers Data Table */}
       <SellerVouchersTable
         vouchers={vouchers}
@@ -189,7 +212,7 @@ export function SellerVouchersView() {
           setEditingVoucher(null);
         }}
         initialData={editingVoucher}
-        shopName="TechHub Flagship Store"
+        shopName={sellerShop?.name || "Cửa hàng của bạn"}
       />
 
       {/* 5. Voucher Delete Confirmation Modal */}

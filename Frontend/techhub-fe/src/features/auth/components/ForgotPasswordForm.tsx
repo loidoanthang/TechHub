@@ -68,10 +68,10 @@ export function ForgotPasswordForm() {
           <>
             <div className="text-center w-full mb-8">
               <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight mb-2">
-                Forgot password
+                Quên mật khẩu
               </h1>
               <p className="text-sm text-[#434656] leading-relaxed">
-                Enter your registered email address and we&apos;ll send you an OTP verification code.
+                Nhập email đã đăng ký, hệ thống sẽ gửi mã xác thực OTP để đặt lại mật khẩu.
               </p>
             </div>
 
@@ -88,13 +88,15 @@ export function ForgotPasswordForm() {
                   htmlFor="recovery-email"
                   className="text-xs font-semibold text-[#0b1c30]"
                 >
-                  Email address
+                  Địa chỉ Email
                 </label>
                 <input
                   id="recovery-email"
                   type="email"
+                  aria-invalid={Boolean(errors.email)}
+                  aria-describedby={errors.email ? "forgot-email-error" : undefined}
                   {...register("email")}
-                  placeholder="alex.m@techhub.com"
+                  placeholder="ten@example.com"
                   className={`w-full h-11 px-4 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
                     errors.email
                       ? "border border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
@@ -102,7 +104,7 @@ export function ForgotPasswordForm() {
                   }`}
                 />
                 {errors.email && (
-                  <p className="text-xs text-rose-500 font-medium">{errors.email.message}</p>
+                  <p id="forgot-email-error" className="text-xs text-rose-500 font-medium">{errors.email.message}</p>
                 )}
               </div>
 
@@ -114,11 +116,11 @@ export function ForgotPasswordForm() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Sending code...</span>
+                    <span>Đang gửi mã...</span>
                   </>
                 ) : (
                   <>
-                    <span>Send Code</span>
+                    <span>Gửi mã xác thực</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -131,26 +133,25 @@ export function ForgotPasswordForm() {
               <MailCheck className="w-7 h-7" />
             </div>
             <h2 className="font-heading text-xl font-bold text-[#0b1c30] mb-1">
-              Code Dispatched
+              Đã gửi mã xác thực
             </h2>
             <p className="text-sm text-[#434656] mb-6">
-              Check your inbox at{" "}
-              <span className="font-semibold text-[#0b1c30]">{sentEmail}</span> for a
-              6-digit one-time authorization code.
+              Vui lòng kiểm tra hộp thư tại{" "}
+              <span className="font-semibold text-[#0b1c30]">{sentEmail}</span> để nhận mã OTP 6 chữ số.
             </p>
             <div className="flex flex-col gap-3 w-full">
               <Link
                 href={ROUTES.VERIFY_OTP}
                 className="w-full h-11 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-sm font-semibold flex items-center justify-center transition-colors"
               >
-                Enter Verification Code
+                Nhập mã xác thực
               </Link>
               <button
                 type="button"
                 onClick={() => setIsSent(false)}
                 className="text-xs text-[#737688] hover:text-[#0b1c30] transition-colors cursor-pointer"
               >
-                Try with different email
+                Thử với email khác
               </button>
             </div>
           </div>
@@ -162,7 +163,7 @@ export function ForgotPasswordForm() {
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#434656] hover:text-[#0b1c30] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to login</span>
+            <span>Quay lại đăng nhập</span>
           </Link>
         </div>
       </div>

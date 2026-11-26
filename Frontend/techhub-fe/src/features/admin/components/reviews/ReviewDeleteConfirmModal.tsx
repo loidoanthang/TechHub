@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { AlertTriangle, Loader2, ShieldAlert, X } from "lucide-react";
 import type { AdminReviewResponse } from "@/types/review";
 import { useDeleteReviewMutation } from "../../hooks/useAdminModeration";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 
 interface ReviewDeleteConfirmModalProps {
   isOpen: boolean;
@@ -124,18 +125,14 @@ export function ReviewDeleteConfirmModal({
             <label className="text-xs font-semibold text-slate-700">
               Lý do gỡ bỏ đánh giá <span className="text-rose-500">*</span>
             </label>
-            <select
+            <SelectDropdown
               value={selectedReason}
-              onChange={(e) => setSelectedReason(e.target.value)}
+              onChange={setSelectedReason}
               disabled={isPending}
-              className="w-full text-sm px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
-            >
-              {VIOLATION_REASONS.map((r) => (
-                <option key={r.value} value={r.value}>
-                  {r.label}
-                </option>
-              ))}
-            </select>
+              ariaLabel="Lý do gỡ bỏ đánh giá"
+              buttonClassName="h-10 px-3.5 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+              options={VIOLATION_REASONS}
+            />
           </div>
 
           {/* Admin Note */}

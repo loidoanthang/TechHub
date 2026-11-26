@@ -144,7 +144,7 @@ export function Header() {
             <Link
               href={isAuthenticated ? ROUTES.ACCOUNT.WISHLIST : ROUTES.LOGIN}
               className="relative p-2 rounded-lg hover:bg-[#dce9ff] transition-colors text-[#434656] hover:text-[#0b1c30] min-w-[36px] min-h-[36px] flex items-center justify-center"
-              aria-label="Wishlist"
+              aria-label="Danh sách yêu thích"
               title="Danh sách yêu thích"
             >
               <Heart className="w-5 h-5" />
@@ -159,7 +159,7 @@ export function Header() {
               type="button"
               onClick={toggleCart}
               className="relative p-2 rounded-lg hover:bg-[#dce9ff] transition-colors text-[#434656] hover:text-[#0b1c30] min-w-[36px] min-h-[36px] flex items-center justify-center"
-              aria-label="Cart"
+              aria-label="Giỏ hàng"
             >
               <ShoppingBag className="w-5 h-5" />
               {totalCount > 0 && (
@@ -178,7 +178,8 @@ export function Header() {
                   type="button"
                   onClick={() => setMobileDropdownOpen((prev) => !prev)}
                   className="flex items-center cursor-pointer p-0.5 rounded-full hover:ring-2 hover:ring-[#0045cc]/30 transition-all"
-                  aria-label="User profile"
+                  aria-label="Tài khoản"
+                  aria-expanded={mobileDropdownOpen}
                 >
                   <UserAvatar
                     src={user.avatarUrl}
@@ -270,9 +271,9 @@ export function Header() {
             ) : (
               <Link
                 href={ROUTES.LOGIN}
-                className="ml-1 px-2.5 py-1 text-xs font-bold text-white bg-[#0045cc] rounded-lg"
+                className="ml-1 px-2.5 py-1.5 text-xs font-bold text-white bg-[#0045cc] rounded-lg whitespace-nowrap shrink-0"
               >
-                Login
+                Đăng nhập
               </Link>
             )}
           </div>
@@ -293,7 +294,7 @@ export function Header() {
             <button
               type="submit"
               className="flex items-center justify-center bg-[#0045cc] hover:bg-[#0d5bff] text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg transition-colors shadow-sm cursor-pointer"
-              aria-label="Search"
+              aria-label="Tìm kiếm"
             >
               <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
@@ -309,7 +310,7 @@ export function Header() {
             <Link
               href={isAuthenticated ? ROUTES.ACCOUNT.WISHLIST : ROUTES.LOGIN}
               className="relative p-2 rounded-lg hover:bg-[#dce9ff] transition-colors text-[#434656] hover:text-[#0b1c30]"
-              aria-label="Wishlist"
+              aria-label="Danh sách yêu thích"
               title="Danh sách yêu thích"
             >
               <Heart className="w-5 h-5" />
@@ -324,7 +325,7 @@ export function Header() {
               type="button"
               onClick={toggleCart}
               className="relative p-2 rounded-lg hover:bg-[#dce9ff] transition-colors text-[#434656] hover:text-[#0b1c30]"
-              aria-label="Cart"
+              aria-label="Giỏ hàng"
             >
               <ShoppingBag className="w-5 h-5" />
               {totalCount > 0 && (
@@ -345,6 +346,8 @@ export function Header() {
                   type="button"
                   onClick={() => setDropdownOpen((prev) => !prev)}
                   className="flex items-center gap-2 cursor-pointer p-1 rounded-xl hover:bg-[#eff4ff] transition-colors"
+                  aria-label="Tài khoản"
+                  aria-expanded={dropdownOpen}
                 >
                   <UserAvatar
                     src={user.avatarUrl}
@@ -375,7 +378,7 @@ export function Header() {
                       className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#434656] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors"
                     >
                       <UserIcon className="w-4 h-4 text-[#737688]" />
-                      <span>Profile & Settings</span>
+                      <span>Thông tin tài khoản</span>
                     </Link>
 
                     <Link
@@ -384,7 +387,7 @@ export function Header() {
                       className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#434656] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors"
                     >
                       <Package className="w-4 h-4 text-[#737688]" />
-                      <span>My Orders</span>
+                      <span>Đơn mua của tôi</span>
                     </Link>
 
                     <Link
@@ -393,7 +396,7 @@ export function Header() {
                       className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#434656] hover:text-[#0b1c30] hover:bg-[#eff4ff] transition-colors"
                     >
                       <MapPin className="w-4 h-4 text-[#737688]" />
-                      <span>Saved Addresses</span>
+                      <span>Sổ địa chỉ</span>
                     </Link>
 
                     <Link
@@ -402,7 +405,7 @@ export function Header() {
                       className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#0045cc] font-medium hover:bg-[#eff4ff] transition-colors border-t border-slate-50"
                     >
                       <Store className="w-4 h-4" />
-                      <span>{isSeller ? "Seller Portal" : "Become a Seller"}</span>
+                      <span>{isSeller ? "Kênh Người Bán" : "Trở thành Người Bán"}</span>
                     </Link>
 
                     {isAdmin && (
@@ -412,7 +415,7 @@ export function Header() {
                         className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#0b1c30] font-bold hover:bg-[#eff4ff] transition-colors border-t border-slate-50"
                       >
                         <ShieldCheck className="w-4 h-4 text-[#0045cc]" />
-                        <span>Cổng Quản trị (Admin Portal)</span>
+                        <span>Cổng Quản trị (Admin)</span>
                       </Link>
                     )}
 
@@ -425,7 +428,7 @@ export function Header() {
                       className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-red-600 hover:bg-red-50 transition-colors border-t border-slate-100 text-left cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" />
-                      <span>Sign Out</span>
+                      <span>Đăng xuất</span>
                     </button>
                   </div>
                 )}
@@ -436,13 +439,13 @@ export function Header() {
                   href={ROUTES.LOGIN}
                   className="px-3.5 py-2 text-xs font-semibold text-[#0b1c30] hover:text-[#0045cc] rounded-lg hover:bg-[#eff4ff] transition-colors"
                 >
-                  Log In
+                  Đăng nhập
                 </Link>
                 <Link
                   href={ROUTES.REGISTER}
                   className="px-4 py-2 text-xs font-semibold text-white bg-[#0045cc] hover:bg-[#0d5bff] rounded-lg shadow-sm transition-colors"
                 >
-                  Sign Up
+                  Đăng ký
                 </Link>
               </div>
             )}

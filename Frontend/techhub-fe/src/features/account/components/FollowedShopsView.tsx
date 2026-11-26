@@ -28,7 +28,7 @@ export function FollowedShopsView() {
   const [page, setPage] = useState(0);
   const pageSize = 8;
 
-  const { data, isLoading, error } = useFollowedShopsQuery(page, pageSize);
+  const { data, isLoading, error, refetch } = useFollowedShopsQuery(page, pageSize);
   const unfollowMutation = useUnfollowShopMutation();
 
   const shops = data?.content || [];
@@ -92,6 +92,13 @@ export function FollowedShopsView() {
           <p className="text-xs text-slate-500 max-w-sm">
             Đã có lỗi xảy ra khi kết nối máy chủ. Vui lòng kiểm tra lại kết nối mạng của bạn.
           </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="mt-1 px-4 py-2 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold transition-colors cursor-pointer"
+          >
+            Thử lại
+          </button>
         </div>
       ) : shops.length === 0 ? (
         /* Empty State */

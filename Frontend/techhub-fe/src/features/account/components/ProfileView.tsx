@@ -100,11 +100,11 @@ export function ProfileView() {
         avatarUrl: res.data.avatarUrl || null,
       });
 
-      showToast("Profile credentials saved successfully.");
+      showToast("Đã lưu thông tin hồ sơ thành công.");
     } catch (err: unknown) {
       if (err instanceof AxiosError && err.response) {
         const errorData = err.response.data as { message?: string } | undefined;
-        const msg = errorData?.message || "Failed to update profile.";
+        const msg = errorData?.message || "Cập nhật hồ sơ thất bại.";
         if (
           err.response.status === 409 ||
           msg.toLowerCase().includes("phone")
@@ -113,7 +113,7 @@ export function ProfileView() {
         }
         showToast(msg);
       } else {
-        showToast("Network error. Please try again.");
+        showToast("Lỗi kết nối mạng. Vui lòng thử lại.");
       }
     }
   };
@@ -127,24 +127,24 @@ export function ProfileView() {
   }
 
   return (
-    <main className="w-full h-full flex flex-col gap-6">
+    <div className="w-full h-full flex flex-col gap-6">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-[#c3c5d9]/25 flex flex-col gap-6 flex-1 h-full"
+        className="bg-white rounded-2xl p-4 sm:p-8 shadow-sm border border-[#c3c5d9]/25 flex flex-col gap-6 flex-1 h-full"
       >
         <div className="flex flex-col gap-1 border-b border-[#eff4ff] pb-4">
           <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
-            Personal Profile &amp; Contact Credentials
+            Hồ sơ cá nhân &amp; Thông tin liên hệ
           </h1>
           <p className="text-xs text-[#737688]">
-            Manage your personal profile details, verified phone, and primary email credentials.
+            Quản lý thông tin cá nhân, số điện thoại xác thực và email tài khoản.
           </p>
         </div>
 
         {error && (
           <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>Could not load server profile. Displaying local cache.</span>
+            <span>Không thể tải hồ sơ từ máy chủ. Đang hiển thị dữ liệu lưu tạm.</span>
           </div>
         )}
 
@@ -156,12 +156,12 @@ export function ProfileView() {
                   htmlFor="first-name"
                   className="text-xs font-semibold text-[#0b1c30]"
                 >
-                  First Name
+                  Họ
                 </label>
                 <input
                   id="first-name"
                   type="text"
-                  placeholder="First name"
+                  placeholder="Nguyễn"
                   aria-invalid={!!errors.firstName}
                   aria-describedby={
                     errors.firstName ? "first-name-error" : undefined
@@ -189,12 +189,12 @@ export function ProfileView() {
                   htmlFor="last-name"
                   className="text-xs font-semibold text-[#0b1c30]"
                 >
-                  Last Name
+                  Tên
                 </label>
                 <input
                   id="last-name"
                   type="text"
-                  placeholder="Last name"
+                  placeholder="Văn A"
                   aria-invalid={!!errors.lastName}
                   aria-describedby={
                     errors.lastName ? "last-name-error" : undefined
@@ -223,12 +223,12 @@ export function ProfileView() {
                 htmlFor="phone-number"
                 className="text-xs font-semibold text-[#0b1c30]"
               >
-                Phone Number
+                Số điện thoại
               </label>
               <input
                 id="phone-number"
                 type="tel"
-                placeholder="(+84) 000 000 000"
+                placeholder="0912345678"
                 aria-invalid={!!errors.phone}
                 aria-describedby={errors.phone ? "phone-error" : undefined}
                 {...register("phone")}
@@ -255,12 +255,12 @@ export function ProfileView() {
                   htmlFor="email-address"
                   className="text-xs font-semibold text-[#0b1c30]"
                 >
-                  Registered Email
+                  Email đã đăng ký
                 </label>
                 {profile?.emailVerified && (
                   <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5" />
-                    Verified
+                    Đã xác thực
                   </span>
                 )}
               </div>
@@ -283,7 +283,7 @@ export function ProfileView() {
                 disabled={!isDirty || updateProfileMutation.isPending}
                 className="px-5 py-2.5 rounded-xl bg-[#eff4ff] hover:bg-[#dce9ff] disabled:opacity-40 disabled:cursor-not-allowed text-[#0b1c30] text-xs font-semibold transition-colors cursor-pointer"
               >
-                Cancel
+                Hủy thay đổi
               </button>
               <button
                 type="submit"
@@ -297,17 +297,17 @@ export function ProfileView() {
                 {isAvatarUploading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Uploading image...</span>
+                    <span>Đang tải ảnh...</span>
                   </>
                 ) : updateProfileMutation.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Saving...</span>
+                    <span>Đang lưu...</span>
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    <span>Save Changes</span>
+                    <span>Lưu thay đổi</span>
                   </>
                 )}
               </button>
@@ -334,8 +334,8 @@ export function ProfileView() {
             </div>
 
             <div className="text-[11px] text-[#737688] leading-relaxed flex flex-col gap-0.5">
-              <span>File size: maximum 2 MB</span>
-              <span>File extension: .JPEG, .PNG, .WEBP</span>
+              <span>Dung lượng tối đa: 2 MB</span>
+              <span>Định dạng hỗ trợ: .JPEG, .PNG, .WEBP</span>
             </div>
           </div>
         </div>
@@ -350,10 +350,10 @@ export function ProfileView() {
       >
         <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
         <div className="flex flex-col text-left">
-          <span className="text-xs font-bold">Profile Update</span>
+          <span className="text-xs font-bold">Cập nhật hồ sơ</span>
           <span className="text-[11px] text-neutral-300">{toastMessage}</span>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

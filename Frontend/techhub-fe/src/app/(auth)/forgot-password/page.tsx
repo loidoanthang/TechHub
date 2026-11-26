@@ -2,8 +2,8 @@ import { ForgotPasswordForm } from "@/features/auth/components/ForgotPasswordFor
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Forgot Password | TechHub Marketplace",
-  description: "Reset your TechHub account password via email verification code.",
+  title: "Quên mật khẩu | TechHub Marketplace",
+  description: "Khôi phục mật khẩu tài khoản TechHub qua mã xác thực OTP.",
 };
 
 export default function ForgotPasswordPage() {

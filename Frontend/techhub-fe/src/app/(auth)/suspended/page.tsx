@@ -3,8 +3,8 @@ import { SuspendedView } from "@/features/auth/components/SuspendedView";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Account Suspended | TechHub Marketplace",
-  description: "Account security notification and support appeal.",
+  title: "Tài khoản bị tạm khóa | TechHub Marketplace",
+  description: "Thông báo bảo mật tài khoản và hướng dẫn liên hệ hỗ trợ.",
 };
 
 export default function SuspendedPage() {

@@ -54,11 +54,8 @@ export function DashboardStatsCards({ summary, isLoading }: DashboardStatsCardsP
           </h2>
         </div>
 
-        <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
-            +3.16%
-          </span>
-          <span className="text-slate-400">So với tháng trước</span>
+        <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+          <span>Tính trên các đơn thanh toán thành công</span>
         </div>
 
         {/* Subtle decorative glow */}

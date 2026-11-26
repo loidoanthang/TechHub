@@ -1,8 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { X, Tag, Check, AlertCircle, Loader2, Sparkles, Clock, HelpCircle, Truck } from "lucide-react";
 import type { CartPlatformVoucherResponse } from "@/types/voucher";
+
+const voucherCodeSchema = z.object({
+  code: z.string().trim().min(1, "Vui lòng nhập mã giảm giá"),
+});
+
+type VoucherCodeFormValues = z.infer<typeof voucherCodeSchema>;
 
 interface VoucherSelectModalProps {
   isOpen: boolean;
@@ -23,18 +32,40 @@ export function VoucherSelectModal({
   onApplyVoucher,
   orderAmount,
 }: VoucherSelectModalProps) {
-  const [inputCode, setInputCode] = useState("");
   const [tempSelectedId, setTempSelectedId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<VoucherCodeFormValues>({
+    resolver: zodResolver(voucherCodeSchema),
+    defaultValues: { code: "" },
+  });
+
+  const watchedCode = watch("code");
 
   // Đồng bộ voucher đang chọn vào state tạm của modal
   useEffect(() => {
     if (isOpen) {
       setTempSelectedId(selectedVoucher?.id || null);
-      setInputCode("");
+      reset({ code: "" });
       setErrorMessage(null);
     }
-  }, [isOpen, selectedVoucher]);
+  }, [isOpen, selectedVoucher, reset]);
+
+  // Đóng modal bằng phím Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -55,10 +86,9 @@ export function VoucherSelectModal({
     }
   };
 
-  const handleManualApply = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleManualApply = (values: VoucherCodeFormValues) => {
     setErrorMessage(null);
-    const code = inputCode.trim().toUpperCase();
+    const code = values.code.trim().toUpperCase();
     if (!code) return;
 
     const matched = vouchers.find(
@@ -81,7 +111,7 @@ export function VoucherSelectModal({
     }
 
     setTempSelectedId(matched.id);
-    setInputCode("");
+    reset({ code: "" });
   };
 
   const handleConfirm = () => {
@@ -132,22 +162,24 @@ export function VoucherSelectModal({
         </div>
 
         {/* Input Redeem Code */}
-        <form onSubmit={handleManualApply} className="flex gap-2">
+        <form onSubmit={handleSubmit(handleManualApply)} className="flex gap-2">
           <div className="relative flex-1">
             <input
               type="text"
-              value={inputCode}
-              onChange={(e) => {
-                setInputCode(e.target.value.toUpperCase());
-                if (errorMessage) setErrorMessage(null);
-              }}
+              aria-label="Nhập mã voucher"
+              aria-invalid={Boolean(errors.code || errorMessage)}
+              {...register("code", {
+                onChange: () => {
+                  if (errorMessage) setErrorMessage(null);
+                },
+              })}
               placeholder="Nhập mã voucher (VD: TECHHUB50)"
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-900 placeholder:font-sans placeholder:font-normal placeholder:text-slate-400 focus:outline-none focus:border-[#0045cc] focus:ring-2 focus:ring-[#0045cc]/15 uppercase tracking-wide"
             />
           </div>
           <button
             type="submit"
-            disabled={!inputCode.trim()}
+            disabled={!watchedCode?.trim()}
             className="px-4 py-2.5 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0"
           >
             Áp dụng
@@ -155,10 +187,10 @@ export function VoucherSelectModal({
         </form>
 
         {/* Error message */}
-        {errorMessage && (
+        {(errors.code?.message || errorMessage) && (
           <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 animate-in fade-in">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-            <span>{errorMessage}</span>
+            <span>{errors.code?.message || errorMessage}</span>
           </div>
         )}
 
@@ -197,7 +229,16 @@ export function VoucherSelectModal({
                     return (
                       <div
                         key={v.id}
+                        role="button"
+                        tabIndex={0}
+                        aria-pressed={isSelected}
                         onClick={() => setTempSelectedId(isSelected ? null : v.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setTempSelectedId(isSelected ? null : v.id);
+                          }
+                        }}
                         className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center gap-3 relative ${
                           isSelected
                             ? "border-[#0045cc] bg-[#eff4ff]/60 ring-2 ring-[#0045cc]/20 shadow-xs"

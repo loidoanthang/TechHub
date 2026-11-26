@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 export const instant = false
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard | TechHub Admin Portal",
+  title: "Tổng quan Hệ thống | Admin Portal TechHub",
   description: "Tổng quan doanh thu, GMV, hoa hồng và chỉ số kiểm duyệt toàn sàn TechHub.",
 };
 
@@ -16,7 +16,7 @@ export default function AdminDashboardPage() {
       fallback={
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
           <Loader2 className="w-8 h-8 text-[#0045cc] animate-spin" />
-          <p className="text-xs text-slate-500">Đang tải Dashboard...</p>
+          <p className="text-xs text-slate-500">Đang tải Tổng quan...</p>
         </div>
       }
     >

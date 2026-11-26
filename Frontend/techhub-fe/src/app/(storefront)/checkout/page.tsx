@@ -2,8 +2,8 @@ import { OnePageCartCheckoutView } from "@/features/cart/components/OnePageCartC
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Checkout & Cart | TechHub Marketplace",
-  description: "Review your cart items, select shipping and payment method, and complete your purchase in one seamless checkout.",
+  title: "Giỏ hàng & Thanh toán | TechHub Marketplace",
+  description: "Kiểm tra giỏ hàng, chọn địa chỉ giao hàng, phương thức thanh toán và hoàn tất đơn hàng trên TechHub.",
 };
 
 export default function CheckoutPage() {

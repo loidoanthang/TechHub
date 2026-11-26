@@ -2,6 +2,7 @@
 
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { SelectDropdown } from "./SelectDropdown";
 
 export interface PaginationProps {
   page: number; // 0-indexed
@@ -100,28 +101,30 @@ export function Pagination({
       </div>
 
       {/* Info & Page Size */}
-      <div className="flex items-center gap-3 flex-wrap justify-end order-1 sm:order-2 text-right">
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-between sm:justify-end order-1 sm:order-2 text-left sm:text-right">
         {onSizeChange && (
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] text-slate-400">Hiển thị:</span>
-            <select
-              value={size}
-              onChange={(e) => {
-                onSizeChange(Number(e.target.value));
+            <SelectDropdown
+              value={String(size)}
+              onChange={(val) => {
+                onSizeChange(Number(val));
                 onPageChange(0);
               }}
-              className="h-7 px-2 bg-white border border-slate-200 rounded-lg text-slate-700 text-xs font-semibold focus:outline-none focus:border-[#0045cc]"
-            >
-              {sizeOptions.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt} / trang
-                </option>
-              ))}
-            </select>
+              ariaLabel="Số mục mỗi trang"
+              className="w-28"
+              align="right"
+              placement="top"
+              buttonClassName="h-7 px-2 bg-white border border-slate-200 rounded-lg text-slate-700 text-xs font-semibold focus:outline-none focus:border-[#0045cc]"
+              options={sizeOptions.map((opt) => ({
+                value: String(opt),
+                label: `${opt} / trang`,
+              }))}
+            />
           </div>
         )}
 
-        {onSizeChange && <span className="text-slate-300">|</span>}
+        {onSizeChange && <span className="text-slate-300 hidden sm:inline">|</span>}
 
         <span>
           Hiển thị{" "}

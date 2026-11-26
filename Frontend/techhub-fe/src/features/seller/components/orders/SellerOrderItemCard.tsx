@@ -77,10 +77,10 @@ export const SellerOrderItemCard = memo(function SellerOrderItemCard({
       {/* 1. Header Bar: Order ID, Timestamp, Recipient info & Status */}
       <div className="px-4 sm:px-5 py-3 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
         {/* Mobile Top Row: Recipient + Time (Left) & Status Badge (Right) */}
-        <div className="flex sm:hidden items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 truncate">
+        <div className="flex sm:hidden flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 min-w-0">
             <span className="truncate">{order.buyerInfo?.recipientName || order.buyerInfo?.buyerName}</span>
-            <span className="text-slate-400 font-normal">•</span>
+            <span className="text-slate-400 font-normal shrink-0">•</span>
             <time dateTime={order.createdAt} className="text-slate-500 font-normal text-[11px] shrink-0">
               {new Date(order.createdAt).toLocaleDateString("vi-VN", {
                 day: "2-digit",

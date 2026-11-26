@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, SlidersHorizontal, PackageX, Loader2 } from "lucide-react";
+import { Search, PackageX, Loader2, AlertCircle } from "lucide-react";
 import { ProductCard } from "@/components/shared";
 import { useShopProductsQuery } from "../hooks/useShopQueries";
 import { mapProductSummaryToProduct } from "@/features/products/utils/productMapper";
@@ -16,7 +16,7 @@ export function ShopProductsGrid({ shopId, shopName }: ShopProductsGridProps) {
   const [submittedKeyword, setSubmittedKeyword] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "price_asc" | "price_desc">("newest");
 
-  const { data: pageData, isLoading, error } = useShopProductsQuery(
+  const { data: pageData, isLoading, error, refetch } = useShopProductsQuery(
     shopId,
     shopName,
     {
@@ -55,7 +55,7 @@ export function ShopProductsGrid({ shopId, shopName }: ShopProductsGridProps) {
         </form>
 
         {/* Sort Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-semibold text-[#737688] hidden md:inline">
             Sắp xếp theo:
           </span>
@@ -103,6 +103,25 @@ export function ShopProductsGrid({ shopId, shopName }: ShopProductsGridProps) {
         <div className="w-full h-80 flex flex-col items-center justify-center gap-3 bg-white rounded-2xl border border-[#c3c5d9]/25">
           <Loader2 className="w-8 h-8 animate-spin text-[#0045cc]" />
           <span className="text-xs text-[#737688]">Đang tải danh sách sản phẩm của Shop...</span>
+        </div>
+      ) : error ? (
+        <div className="w-full bg-white rounded-2xl p-12 text-center border border-red-100 flex flex-col items-center justify-center gap-3">
+          <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center text-[#ba1a1a]">
+            <AlertCircle className="w-7 h-7" />
+          </div>
+          <h3 className="font-heading font-bold text-base text-[#0b1c30]">
+            Không thể tải danh sách sản phẩm
+          </h3>
+          <p className="text-xs text-[#737688] max-w-sm">
+            Đã xảy ra lỗi khi kết nối máy chủ. Vui lòng thử lại sau.
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="mt-2 px-4 py-2 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold transition-colors cursor-pointer"
+          >
+            Thử lại
+          </button>
         </div>
       ) : products.length === 0 ? (
         <div className="w-full bg-white rounded-2xl p-12 text-center border border-[#c3c5d9]/25 flex flex-col items-center justify-center gap-3">

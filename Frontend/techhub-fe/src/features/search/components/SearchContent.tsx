@@ -247,7 +247,7 @@ export function SearchContent() {
             </button>
 
             {/* Sort Tab Pills */}
-            <div className="inline-flex p-1 bg-white rounded-xl text-xs font-medium border border-[#dce9ff] shadow-2xs">
+            <div className="flex flex-wrap sm:inline-flex p-1 bg-white rounded-xl text-xs font-medium border border-[#dce9ff] shadow-2xs max-w-full">
               {[
                 { key: "newest", label: "Mới nhất" },
                 { key: "popular", label: "Bán chạy" },
@@ -350,7 +350,7 @@ export function SearchContent() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="pt-8 flex items-center justify-center gap-2">
+            <div className="pt-8 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
               <button
                 disabled={currentPage === 0}
                 onClick={() => {
@@ -362,22 +362,45 @@ export function SearchContent() {
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i).map((pageIdx) => (
-                <button
-                  key={pageIdx}
-                  onClick={() => {
-                    setCurrentPage(pageIdx);
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }}
-                  className={`w-9 h-9 rounded-lg text-xs font-bold shadow-sm flex items-center justify-center cursor-pointer transition-colors ${
-                    currentPage === pageIdx
-                      ? "bg-[#0045cc] text-white"
-                      : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  {pageIdx + 1}
-                </button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i)
+                .filter(
+                  (pageIdx) =>
+                    pageIdx === 0 ||
+                    pageIdx === totalPages - 1 ||
+                    Math.abs(pageIdx - currentPage) <= 1
+                )
+                .reduce<(number | "ellipsis")[]>((acc, pageIdx, idx, arr) => {
+                  if (idx > 0 && pageIdx - arr[idx - 1] > 1) {
+                    acc.push("ellipsis");
+                  }
+                  acc.push(pageIdx);
+                  return acc;
+                }, [])
+                .map((item, idx) =>
+                  item === "ellipsis" ? (
+                    <span
+                      key={`ellipsis-${idx}`}
+                      className="w-7 h-9 flex items-center justify-center text-xs text-slate-400 select-none"
+                    >
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={item}
+                      onClick={() => {
+                        setCurrentPage(item);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className={`w-9 h-9 rounded-lg text-xs font-bold shadow-sm flex items-center justify-center cursor-pointer transition-colors ${
+                        currentPage === item
+                          ? "bg-[#0045cc] text-white"
+                          : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      {item + 1}
+                    </button>
+                  )
+                )}
               <button
                 disabled={currentPage >= totalPages - 1}
                 onClick={() => {

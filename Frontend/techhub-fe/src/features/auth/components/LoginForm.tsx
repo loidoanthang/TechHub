@@ -134,13 +134,13 @@ export function LoginForm() {
       <div className="absolute w-[440px] h-[440px] rounded-full bg-[#dce9ff]/40 blur-3xl pointer-events-none -bottom-20 -right-16"></div>
 
       {/* Main Login Card */}
-      <div className="relative w-full bg-white rounded-2xl shadow-[0_12px_40px_-10px_rgba(11,28,48,0.08)] p-8 sm:p-10 flex flex-col gap-6">
+      <div className="relative w-full bg-white rounded-2xl shadow-[0_12px_40px_-10px_rgba(11,28,48,0.08)] p-6 sm:p-10 flex flex-col gap-6">
         <div className="flex flex-col items-center text-center gap-1.5">
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0b1c30] tracking-tight">
-            Log in to your account
+            Đăng nhập tài khoản
           </h1>
           <p className="text-sm text-[#434656]">
-            Please enter your email and password
+            Nhập email và mật khẩu để tiếp tục mua sắm trên TechHub
           </p>
         </div>
 
@@ -176,13 +176,15 @@ export function LoginForm() {
               htmlFor="email"
               className="text-xs font-semibold text-[#0b1c30]"
             >
-              Email address
+              Địa chỉ Email
             </label>
             <input
               id="email"
               type="email"
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? "login-email-error" : undefined}
               {...register("email")}
-              placeholder="name@example.com"
+              placeholder="ten@example.com"
               className={`w-full h-12 px-4 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
                 errors.email
                   ? "border border-rose-400 bg-rose-50/30 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
@@ -190,7 +192,7 @@ export function LoginForm() {
               }`}
             />
             {errors.email && (
-              <p className="text-xs text-rose-500 font-medium">{errors.email.message}</p>
+              <p id="login-email-error" className="text-xs text-rose-500 font-medium">{errors.email.message}</p>
             )}
           </div>
 
@@ -200,12 +202,14 @@ export function LoginForm() {
               htmlFor="password"
               className="text-xs font-semibold text-[#0b1c30]"
             >
-              Password
+              Mật khẩu
             </label>
             <div className="relative flex items-center">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={errors.password ? "login-password-error" : undefined}
                 {...register("password")}
                 placeholder="••••••••••••"
                 className={`w-full h-12 pl-4 pr-11 bg-[#eff4ff]/60 text-[#0b1c30] text-sm rounded-xl outline-none transition-all placeholder:text-[#737688]/60 ${
@@ -217,7 +221,7 @@ export function LoginForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label="Toggle password visibility"
+                aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                 className="absolute right-3 text-[#737688] hover:text-[#0b1c30] p-1 rounded-lg transition-colors cursor-pointer"
               >
                 {showPassword ? (
@@ -228,7 +232,7 @@ export function LoginForm() {
               </button>
             </div>
             {errors.password && (
-              <p className="text-xs text-rose-500 font-medium">{errors.password.message}</p>
+              <p id="login-password-error" className="text-xs text-rose-500 font-medium">{errors.password.message}</p>
             )}
           </div>
 
@@ -240,13 +244,13 @@ export function LoginForm() {
                 {...register("rememberMe")}
                 className="w-4 h-4 rounded text-[#0d5bff] focus:ring-0 accent-[#0d5bff] cursor-pointer"
               />
-              <span className="text-xs text-[#434656]">Remember me</span>
+              <span className="text-xs text-[#434656]">Ghi nhớ đăng nhập</span>
             </label>
             <Link
               href={ROUTES.FORGOT_PASSWORD}
               className="text-xs font-semibold text-[#0045cc] hover:underline"
             >
-              Forgot password?
+              Quên mật khẩu?
             </Link>
           </div>
 
@@ -259,16 +263,16 @@ export function LoginForm() {
             {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Authenticating...</span>
+                <span>Đang xác thực...</span>
               </>
             ) : isRedirecting ? (
               <>
                 <CheckCircle2 className="w-5 h-5 text-emerald-300" />
-                <span>Authenticated</span>
+                <span>Đăng nhập thành công</span>
               </>
             ) : (
               <>
-                <span>Log in</span>
+                <span>Đăng nhập</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -278,7 +282,7 @@ export function LoginForm() {
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-[#e5eeff]"></div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#737688]">
-            Or log in with
+            Hoặc đăng nhập với
           </span>
           <div className="flex-1 h-px bg-[#e5eeff]"></div>
         </div>
@@ -311,12 +315,12 @@ export function LoginForm() {
 
         <div className="text-center pt-1">
           <p className="text-sm text-[#434656]">
-            Don&apos;t have an account?{" "}
+            Chưa có tài khoản?{" "}
             <Link
               href={ROUTES.REGISTER}
               className="text-sm font-semibold text-[#0045cc] hover:underline ml-1"
             >
-              Sign up now
+              Đăng ký ngay
             </Link>
           </p>
         </div>

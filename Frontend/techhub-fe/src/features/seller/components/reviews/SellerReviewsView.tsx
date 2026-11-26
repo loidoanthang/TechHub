@@ -21,6 +21,7 @@ import {
   Store,
   Calendar,
 } from "lucide-react";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import {
   useSellerReviewsQuery,
   useRespondToReviewMutation,
@@ -110,7 +111,7 @@ export function SellerReviewsView() {
   }, [keyword, debouncedKeyword]);
 
   // Main reviews list query: DO NOT filter out other reviews when targetReviewId is present
-  const { data, isLoading, isFetching, refetch } = useSellerReviewsQuery({
+  const { data, isLoading, isFetching, error, refetch } = useSellerReviewsQuery({
     rating: ratingFilter === "" ? undefined : ratingFilter,
     hasResponded:
       hasRespondedFilter === ""
@@ -322,18 +323,21 @@ export function SellerReviewsView() {
           </div>
 
           {/* Response Status Filter */}
-          <select
+          <SelectDropdown
             value={hasRespondedFilter}
-            onChange={(e) => {
-              setHasRespondedFilter(e.target.value as "" | "true" | "false");
+            onChange={(val) => {
+              setHasRespondedFilter(val as "" | "true" | "false");
               setPage(0);
             }}
-            className="h-9 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary"
-          >
-            <option value="">Tất cả trạng thái phản hồi</option>
-            <option value="false">Chưa phản hồi (Cần xử lý)</option>
-            <option value="true">Đã phản hồi</option>
-          </select>
+            ariaLabel="Lọc theo trạng thái phản hồi"
+            className="w-full sm:w-52 shrink-0"
+            buttonClassName="h-9 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:border-primary"
+            options={[
+              { value: "", label: "Tất cả trạng thái phản hồi" },
+              { value: "false", label: "Chưa phản hồi (Cần xử lý)" },
+              { value: "true", label: "Đã phản hồi" },
+            ]}
+          />
 
           {/* Has Media Toggle */}
           <button
@@ -375,6 +379,23 @@ export function SellerReviewsView() {
         <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center flex flex-col items-center justify-center gap-2">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <span className="text-xs text-slate-500">Đang tải danh sách đánh giá...</span>
+        </div>
+      ) : error ? (
+        <div className="bg-white rounded-2xl border border-rose-200 p-12 text-center flex flex-col items-center justify-center gap-3">
+          <AlertCircle className="w-10 h-10 text-rose-500" />
+          <h3 className="text-sm font-bold text-slate-800">
+            Không thể tải danh sách đánh giá
+          </h3>
+          <p className="text-xs text-slate-500 max-w-sm">
+            Đã xảy ra lỗi khi kết nối máy chủ. Vui lòng thử lại.
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="mt-1 px-4 py-2 rounded-xl bg-[#0045cc] hover:bg-[#0d5bff] text-white text-xs font-semibold transition-colors cursor-pointer"
+          >
+            Thử lại
+          </button>
         </div>
       ) : displayReviews.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200/80 p-12 text-center flex flex-col items-center justify-center gap-2">

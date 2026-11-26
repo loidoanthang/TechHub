@@ -54,7 +54,7 @@ export function SellerDashboardView() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="font-heading text-xl sm:text-2xl font-bold text-[#0b1c30] tracking-tight">
-            Chào mừng , {sellerDisplayName} !
+            Chào mừng, {sellerDisplayName}!
           </h1>
         </div>
 

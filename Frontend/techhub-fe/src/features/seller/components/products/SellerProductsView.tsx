@@ -75,7 +75,7 @@ export function SellerProductsView() {
   }, [keyword, selectedCategoryId, activeTab, sortBy, sortDir, page, size]);
 
   // 4. Data Fetching
-  const { data: pageData, isLoading, error } = useSellerProductsQuery(queryParams);
+  const { data: pageData, isLoading, error, refetch } = useSellerProductsQuery(queryParams);
   const { data: categories = [] } = useSellerCategoriesQuery();
 
   // 5. Mutations
@@ -185,6 +185,23 @@ export function SellerProductsView() {
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto w-full">
+      {/* API Error Banner */}
+      {error && (
+        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>Không thể tải danh sách sản phẩm từ máy chủ.</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="px-3 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-900 font-semibold transition-colors cursor-pointer"
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
+
       {/* Feedback Alert Toast/Banner */}
       {feedbackMsg && (
         <div

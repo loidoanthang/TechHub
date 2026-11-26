@@ -4,6 +4,7 @@ import React from "react";
 import { Package, ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
 import Link from "next/link";
 import { ROUTES } from "@/lib/constants";
+import { SelectDropdown } from "@/components/shared/SelectDropdown";
 import type { SellerProductSummaryResponse } from "@/types/sellerProduct";
 import { SellerProductRow } from "./SellerProductRow";
 import { SellerProductMobileCard } from "./SellerProductMobileCard";
@@ -127,15 +128,19 @@ export function SellerProductsTable({
           <span className="text-slate-300">|</span>
           <div className="flex items-center gap-1.5">
             <span className="text-[11px]">Hiển thị:</span>
-            <select
-              value={size}
-              onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="h-7 px-2 bg-white border border-slate-200 rounded-lg text-slate-700 text-xs focus:outline-none focus:ring-1 focus:ring-[#0045cc]"
-            >
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
+            <SelectDropdown
+              value={String(size)}
+              onChange={(val) => onPageSizeChange(Number(val))}
+              ariaLabel="Số sản phẩm mỗi trang"
+              className="w-18"
+              placement="top"
+              buttonClassName="h-7 px-2 bg-white border border-slate-200 rounded-lg text-slate-700 text-xs focus:outline-none focus:ring-1 focus:ring-[#0045cc]"
+              options={[
+                { value: "10", label: "10" },
+                { value: "20", label: "20" },
+                { value: "50", label: "50" },
+              ]}
+            />
           </div>
         </div>
 

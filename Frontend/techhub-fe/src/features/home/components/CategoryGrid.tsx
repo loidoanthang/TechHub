@@ -33,10 +33,10 @@ export function CategoryGrid() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-6 sm:mb-8 gap-4">
           <div>
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#0b1c30] tracking-tight font-[family-name:var(--font-heading)]">
-              Categories
+              Danh mục sản phẩm
             </h2>
             <p className="text-xs text-[#434656] mt-1">
-              Explore specialized hardware components by category
+              Khám phá thiết bị và linh kiện công nghệ theo từng danh mục
             </p>
           </div>
 
@@ -44,14 +44,14 @@ export function CategoryGrid() {
           <div className="hidden sm:flex items-center gap-2">
             <button
               onClick={() => scroll("left")}
-              aria-label="Previous Category"
+              aria-label="Danh mục trước"
               className="w-10 h-10 rounded-lg bg-white text-[#0b1c30] hover:bg-[#dce9ff] transition-colors flex items-center justify-center shadow-sm cursor-pointer"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={() => scroll("right")}
-              aria-label="Next Category"
+              aria-label="Danh mục tiếp theo"
               className="w-10 h-10 rounded-lg bg-white text-[#0b1c30] hover:bg-[#dce9ff] transition-colors flex items-center justify-center shadow-sm cursor-pointer"
             >
               <ChevronRight className="w-5 h-5" />
@@ -68,7 +68,7 @@ export function CategoryGrid() {
           {isLoading && !hasServerData ? (
             <div className="w-full py-8 flex items-center justify-center gap-2 text-xs text-[#737688]">
               <Loader2 className="w-4 h-4 animate-spin text-[#0045cc]" />
-              <span>Loading categories...</span>
+              <span>Đang tải danh mục...</span>
             </div>
           ) : hasServerData ? (
             serverCategories.map((cat) => {

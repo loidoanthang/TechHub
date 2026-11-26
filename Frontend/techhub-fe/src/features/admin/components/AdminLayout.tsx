@@ -244,13 +244,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
       {/* 1. TOP HEADER (Sticky on native document scroll with isolated GPU layer) */}
       <header className="sticky top-0 z-30 w-full bg-white border-b border-slate-200 shadow-xs [transform:translateZ(0)]">
-        <div className="px-4 sm:px-6 h-[60px] flex items-center justify-between gap-4">
+        <div className="px-3 sm:px-6 h-[60px] flex items-center justify-between gap-2 sm:gap-4">
           {/* Left: Hamburger + Brand */}
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="lg:hidden min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shrink-0"
               aria-label="Mở menu quản trị"
               aria-expanded={mobileMenuOpen}
             >
@@ -263,23 +263,21 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
             <Link
               href={ROUTES.ADMIN.DASHBOARD}
-              className="flex items-center gap-2 min-w-0 group"
+              className="flex items-center gap-1.5 sm:gap-2 min-w-0 group"
             >
-              <span className="font-heading text-lg sm:text-xl font-extrabold tracking-tight text-on-surface">
+              <span className="font-heading text-base sm:text-xl font-extrabold tracking-tight text-on-surface whitespace-nowrap">
                 TECH<span className="text-primary">HUB</span>
               </span>
               <span className="h-4 w-px bg-outline-variant hidden sm:inline-block" />
-              <span className="text-[11px] font-extrabold text-primary uppercase tracking-wider bg-surface-container-low px-2 py-0.5 rounded-md border border-primary/20 flex items-center gap-1 shrink-0">
+              <span className="text-[11px] font-extrabold text-primary uppercase tracking-wider bg-surface-container-low px-1.5 sm:px-2 py-0.5 rounded-md border border-primary/20 flex items-center gap-1 shrink-0">
                 <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden xs:inline">
-                  Admin<span className="hidden sm:inline"> Portal</span>
-                </span>
+                <span className="hidden sm:inline">Admin Portal</span>
               </span>
             </Link>
           </div>
 
           {/* Right: Storefront link & Admin Profile */}
-          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <Link
               href={ROUTES.HOME}
               className="hidden lg:flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-on-surface transition-colors"
